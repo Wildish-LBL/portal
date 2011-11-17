@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wicket:extend xmlns:wicket="http://wicket.apache.org">
+
+	<div class="left">
+		<h3 class="leftDiv" id="ldi_1">
+			Research Object <img class="sh_button" src="theme1/l_open.gif">
+		</h3>
+		<div class="left_box">
+			<ul class="MetadataMenuComponent">
+				<li><a href="#" title="Description"> <img
+						src="theme1/desc.gif" alt="&gt;" class="bottom_icon"></a> <a
+					href="#" title="Description"> Description </a></li>
+				<li><a href="#" title="Information"> <img
+						src="theme1/info.gif" alt="&gt;" class="bottom_icon"></a> <a
+					href="#" title="Information"> Information </a></li>
+				<li><a href="#" title="Content" class="contentTriggerMenu"
+					id="contentTriggerIcon"> <img src="theme1/showcontent.gif"
+						alt="&gt;"></a> <a href="#" title="Content"
+					class="contentTriggerMenu" id="contentTriggerText"> Content </a></li>
+				<li><a href="#" title="Content(new window)"> <img
+						src="theme1/popicon.gif" alt="&gt;" class="bottom_icon"></a> <a
+					href="#" title="Content(new window)"> Content(new window) </a></li>
+				<li><a href="#" title="Download"> <img
+						src="theme1/download.gif" alt="&gt;" class="bottom_icon"></a> <a
+					href="#" title="Download"> Download </a></li>
+				<li><a href="#" title="Similar editions" target="_top"
+					rel="nofollow"> <img src="theme1/search-similar.gif" alt="&gt;"
+						class="bottom_icon"></a> <a href="#" title="Similar editions"
+					target="_top" rel="nofollow"> Similar editions </a></li>
+				<li id="defaultsLink"><a href="#"
+					title="Restoring content presentation defaults"
+					class="showContentHandlersList"> <img
+						src="theme1/content-settings.gif" alt="»"
+						style="vertical-align: middle;"></a> <a href="#"
+					title="Restoring content presentation defaults"
+					class="showContentHandlersList"> Content presentation </a></li>
+			</ul>
+
+			<div id="menuStatus"></div>
+
+		</div>
+		<h3 class="leftDiv" id="ldi_3">
+			Export metadata <img class="sh_button" src="theme1/l_open.gif">
+		</h3>
+		<div class="left_box">
+			<a
+				href="http://dlibra.psnc.pl/demo/dlibra/oai-pmh-repository.xml?verb=GetRecord&amp;metadataPrefix=oai_dc&amp;identifier=oai:dlibra.psnc.pl:684"
+				title="OAI-PMH"> <img alt="oai" src="theme1/oai-button.gif"
+				border="0"></a>&nbsp; <a
+				href="http://dlibra.psnc.pl/demo/dlibra/rdf.xml?type=e&amp;id=684">
+				<img src="theme1/rdf-button.gif" alt="rdf" border="0">
+			</a>&nbsp; <a
+				href="http://dlibra.psnc.pl/demo/dlibra/dlibra.ris?type=e&amp;id=684">
+				<img src="theme1/ris-button.gif" alt="ris" border="0">
+			</a>&nbsp; <a
+				href="http://dlibra.psnc.pl/demo/dlibra/dlibra.bib?type=e&amp;id=684">
+				<img src="theme1/bibtex-button.gif" alt="bibtex" border="0">
+			</a>
+
+		</div>
+		<h3 class="leftDiv" id="ldi_4">
+			Favourite positions <img class="sh_button" src="theme1/l_open.gif">
+		</h3>
+		<div class="left_box">
+			<div id="addToFaves">
+				<fieldset id="addToFavesFieldset">
+					<a title="Add to Favourites" href="#" onclick="showLoginInfo()">
+						<img src="theme1/notfave.png" alt="Add to Favourites" id="faveImg"><span
+						id="faveText">Add to Favourites</span>
+					</a>
+				</fieldset>
+			</div>
+
+			<div id="addBookmarkTag">
+				<div id="bTagsStatus"></div>
+				<div id="addBookmarkTagsFormDiv">
+					<form id="addBookmarkTagsForm" name="addBookmarkTagsForm"
+						action="http://dlibra.psnc.pl/demo/dlibra/publication?id=${id}&amp;action=AddBookmarkTagAction&amp;${paramName}=${id}"
+						method="post">
+						<fieldset id="tagsFieldset">
+							<span onclick="javascript:showLoginInfo()"> <img
+								src="theme1/tag2.gif" alt="" style="vertical-align: bottom;"></span>
+							<span onclick="javascript:showLoginInfo()"> Tagging </span>
+							<div id="tagsSubmitForm">
+								<input name="btags" id="btags" class="short textinput"
+									type="text"><input id="fakeSubmit" class="submit"
+									value="Submit" onclick="javascript:showLoginInfo()"
+									type="button">
+								<div id="justPrivateContainer">
+									<input checked="checked" name="justPrivate" id="justPrivate"
+										style="display: none;" type="checkbox"><span
+										id="justPrivateChecking" class="justPrivateChecked"
+										onclick="javascript:justPrivate()"> just private </span>
+								</div>
+								<img id="tagHelpIcon" src="theme1/help.png"
+									title="Tags have to be separated by comma. Unchecking the option 'just private' will send tags as proposition for keywords. The keywords can be used, by every user, to search for publications.">
+							</div>
+						</fieldset>
+					</form>
+				</div>
+				<div id="loginReminder">
+					Please <a href="#" onclick="quickLogin()">login</a> or <a href="#"
+						id="aRegister" onclick="quickRegister()">register</a> to use
+					additional features!
+				</div>
+			</div>
+		</div>
+		<h3 class="leftDiv" id="ldi_7">
+			Save this address <img class="sh_button" src="theme1/l_open.gif">
+		</h3>
+		<div class="left_box">
+			<div id="adc_Container">
+				<ul id="adc_list">
+					<li class="adc_listElement"><script type="text/javascript">
+						var AddToComponent = {
+
+							linkHref : "http://dlibra.psnc.pl/demo/publication/1159",
+
+							linkTitle : "Głos Mechanika"
+						}
+
+						function addToBookmarks() {
+							var bookmarkTitle = AddToComponent.linkTitle;
+							if (window.sidebar) {
+								window.sidebar.addPanel(bookmarkTitle,
+										AddToComponent.linkHref, "");
+							} else if (window.external) {
+								window.external.AddFavorite(
+										AddToComponent.linkHref, bookmarkTitle);
+							}
+						}
+					</script> Add to <a href="javascript:addToBookmarks()"> bookmarks </a></li>
+					<li><a name="a2a_dd" onmouseover="a2a_show_dropdown(this)"
+						onmouseout="a2a_onMouseOut_delay()"
+						href="http://www.addtoany.com/?linkname=encodeURIComponent%28G%C5%82os%20Mechanika%29&amp;linkurl=encodeURIComponent%28http://dlibra.psnc.pl/demo/publication/1159%29&amp;type=page">
+							<img src="theme1/bookmark.gif" title="bookmarks" alt="bookmarks"
+							height="16" width="91" border="0">
+					</a> <script type="text/javascript">
+						a2a_linkname = AddToComponent.linkTitle;
+
+						a2a_linkurl = AddToComponent.linkHref;
+					</script> <script type="text/javascript" src="theme1/addtoany-09102008.js"></script></li>
+				</ul>
+			</div>
+
+		</div>
+	</div>
+
+	<div class="right">
+
+		<div class="right_full">
+			<h3>Research Object</h3>
+		</div>
+	</div>
+
+</wicket:extend>

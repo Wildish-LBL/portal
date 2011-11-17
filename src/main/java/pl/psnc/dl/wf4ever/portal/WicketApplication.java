@@ -18,7 +18,7 @@ public class WicketApplication
 	@Override
 	public Class< ? extends WebPage> getHomePage()
 	{
-		return HomeMockupPage.class;
+		return HomePage.class;
 	}
 
 
@@ -31,6 +31,7 @@ public class WicketApplication
 		super.init();
 
 		mountPage("/wickethome", WicketHomePage.class);
-		mountPage("/mockup", HomeMockupPage.class);
+		mountPage("/home", HomePage.class);
+		mountPage("/ro", RoPage.class);
 	}
 }

@@ -1,0 +1,189 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"
+	xmlns:wicket="http://wicket.apache.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Content-Language" content="en" />
+<title>Research Object Digital Library - Main page</title>
+
+<meta name="author" content="Piotr Hołubowicz" />
+<meta name="Design"
+	content="PSNC, Poznan Supercomputer and Networking Center" />
+<meta name="Publisher"
+	content="PSNC, Poznan Supercomputer and Networking Center" />
+<meta name="Copyright"
+	content="Copyright (C) 2003 - 2008 PSNC, Poznan Supercomputer and Networking Center" />
+<meta http-equiv="Reply-to" content="dlibra.at.man.poznan.pl" />
+<meta name="Rating" content="general" />
+<meta name="MSSmartTagsPreventParsing" content="true" />
+<meta name="Robots" content="index, follow" />
+<meta http-equiv="Distribution" content="global" />
+<meta name="Revisit-after" content="3 days" />
+<meta http-equiv="Pragma" content="NoCache" />
+<meta name="Description" content="Exmaple dLibra Digital Library." />
+<meta name="Classification"
+	content="public, creator, digital library, book, sources,  education, science, project" />
+<meta name="Keywords"
+	content="dLibra, digital library, biblioteka cyfrowa, biblioteki cyfrowe, metadane, Dublin Core, publications, edition, book, short story, brochure, print, bookshop, platform system manage digital libraries, sources, wielkopolska biblioteka cyfrowa, naukowa, academic, Poznan, Poznan Foundation of scientific libraries, Poznan Supercomputer and Networking Center, dlibra, libra, publishing, editing, author, writer, poet, poem, history, lyric, prose, poetry, publication description, cultural inheritance, catalogue, education, monograph, manuals,  regional materials" />
+
+<!--[if IE]>
+  		  <link rel="stylesheet" href="http://dlibra.psnc.pl/demo/style/dlibra/theme1/dompopup.css" type="text/css" />
+		<![endif]-->
+
+<link rel="stylesheet" href="theme1/jquery-nyromodal-1.css"
+	type="text/css" media="screen" />
+<link rel="stylesheet" href="theme1/dlibra-nyromodal-1.css"
+	type="text/css" media="screen" />
+<link rel="stylesheet" href="theme1/simplesearch.css" type="text/css" />
+<link rel="stylesheet" href="theme1/common.css" type="text/css" />
+<link rel="stylesheet" href="theme1/simple-inv.css" type="text/css" />
+<link rel="stylesheet" href="theme1/jquery-autocomplete-1.css"
+	type="text/css" />
+<link rel="stylesheet" href="theme1/tag-cloud-4.css" type="text/css" />
+<link rel="stylesheet" href="theme1/jquery-ui-themeroller.css"
+	type="text/css" />
+<link rel="stylesheet" href="theme1/jquery-ui-1_002.css" type="text/css" />
+<link rel="stylesheet" href="theme1/jquery-tooltip-1.css"
+	type="text/css" />
+<link rel="stylesheet" href="theme1/dlibra_publication_upload.css"
+	type="text/css" />
+<link rel="stylesheet" href="theme1/jquery-ui-1.css" type="text/css" />
+
+<!--[if IE]>
+  		  <link rel="stylesheet" href="http://dlibra.psnc.pl/demo/style/common/js/tag-cloud/tag-cloud-ie-4.0.css" type="text/css" />
+		<![endif]-->
+
+<link rel="shortcut icon"
+	href="http://dlibra.psnc.pl/demo/style/dlibra/favicon.ico"
+	type="image/ico" />
+
+<script type="text/javascript">
+	var DLAppVars = {};
+	DLAppVars.loginLink = 'http://dlibra.psnc.pl:80/demo/dlibra/login';
+	var homePageUrl = 'http://dlibra.psnc.pl/demo/';
+	var homePageServletUrl = 'http://dlibra.psnc.pl/demo/dlibra';
+	var mainServletName = '/dlibra';
+	var userLanguage = 'en';
+	var userStyleVariant = 'theme1';
+	var currentLayout = 'simple-inv';
+	var pageId = 'main';
+</script>
+
+<script type="text/javascript" src="theme1/jquery-1.js"></script>
+<script type="text/javascript" src="theme1/ui_002.js"></script>
+<script type="text/javascript" src="theme1/ui_003.js"></script>
+<script type="text/javascript" src="theme1/ui.js"></script>
+<script type="text/javascript" src="theme1/jquery-block-ui-1.js"></script>
+<script type="text/javascript" src="theme1/jquery_002.js"></script>
+<script type="text/javascript" src="theme1/dlibra-nyromodal-1.js"></script>
+<script type="text/javascript" src="theme1/jquery-sizes-0.js"></script>
+<script type="text/javascript" src="theme1/simplesearch.js"></script>
+<script type="text/javascript" src="theme1/dlibra.js"></script>
+<script type="text/javascript" src="theme1/jquery-autocomplete-1.js"></script>
+<script type="text/javascript" src="theme1/jquery-ajax-queue-1.js"></script>
+<script type="text/javascript" src="theme1/jquery-bgiframe-2.js"></script>
+<script type="text/javascript" src="theme1/jquery-tooltip-1.js"></script>
+<script type="text/javascript" src="theme1/jquery-tooltip-dlibra-1.js"></script>
+<script type="text/javascript" src="theme1/jquery-treeview-1.js"></script>
+<script type="text/javascript" src="theme1/jquery-ui-1.js"></script>
+<!--[if lte IE 6]>
+	 	 <script type="text/javascript" src="http://dlibra.psnc.pl/demo/style/common/js/supersleight/supersleight-1.0.js"></script>
+		<![endif]-->
+
+<link rel="alternate"
+	title="Example Digital Library - 25 last publications"
+	href="http://dlibra.psnc.pl/demo/latest_en.rss"
+	type="application/rss+xml" />
+<link rel="alternate"
+	title="Example Digital Library - Planned publications"
+	href="http://dlibra.psnc.pl/demo/planned_en.rss"
+	type="application/rss+xml" />
+<link rel="alternate" title="Example Digital Library - News"
+	href="http://dlibra.psnc.pl/demo/news_en.rss"
+	type="application/rss+xml" />
+
+
+<link rel="search" type="application/opensearchdescription+xml"
+	href="http://dlibra.psnc.pl/demo/DL_en.xml" title="Search" />
+</head>
+<body>
+	<div id="account-menu" style="display: none">
+		<span></span>
+	</div>
+	<div id="mainBaner" class="mainBaner_en">
+		<div id="mainBanerIn">
+			<div id="mainBanerLanguages">
+				<span class="LanguagesComponent"> <a
+					href="http://dlibra.psnc.pl/demo/dlibra?action=ChangeLanguageAction&amp;language=pl"
+					title="polski"> <img src="theme1/pl.gif" alt="polski"
+						height="9px" /></a>&nbsp; <a
+					href="http://dlibra.psnc.pl/demo/dlibra?action=ChangeLanguageAction&amp;language=de"
+					title="Deutsch"> <img src="theme1/de.gif" alt="Deutsch"
+						height="9px" /></a>&nbsp; <a
+					href="http://dlibra.psnc.pl/demo/dlibra?action=ChangeLanguageAction&amp;language=sr"
+					title="Српски"> <img src="theme1/sr.gif" alt="Српски"
+						height="9px" /></a>&nbsp; <a
+					href="http://dlibra.psnc.pl/demo/dlibra?action=ChangeLanguageAction&amp;language=uk"
+					title="українська"> <img src="theme1/uk.gif" alt="українська"
+						height="9px" /></a>&nbsp; <a
+					href="http://dlibra.psnc.pl/demo/dlibra?action=ChangeLanguageAction&amp;language=en"
+					title="English"> <img src="theme1/en.gif" alt="English"
+						height="9px" /></a>&nbsp;
+				</span>
+
+			</div>
+			<a id="mainBanerCoin" href="http://dlibra.psnc.pl/demo"
+				title="Example Digital Library"> <img
+				src="theme1/wf4ever_logo.png" alt="" /></a>&nbsp;
+			<h1>
+				<a href="#" title="Research Object Digital Library"> Research
+					Object Digital Library </a>
+			</h1>
+		</div>
+	</div>
+	<div id="mainMenu">
+		<div id="listMainMenu">
+			<ul class="mainMenuListList">
+				<li class="mmlEmpty">&nbsp;</li>
+				<li class="mainMenuListItem"><a class="mainMenuOption" href="#"
+					accesskey="m"> MAIN PAGE </a></li>
+				<li class="mainMenuListItem"><a
+					class="mainMenuOption mainMenuOptionIn" href="#" accesskey="s">
+						MY RESEARCH OBJECTS </a></li>
+				<li class="mainMenuListItem"><a
+					class="mainMenuOption mainMenuOptionLast" href="#" accesskey="c">
+						CONTACT </a></li>
+				<li class="mmlEmpty mmlEmptyRight">&nbsp;</li>
+			</ul>
+			<ul class="authorizationLinksList">
+				<li id="authLoginLinkItem"><a
+					href="http://dlibra.psnc.pl/demo/dlibra/login" accesskey="l"
+					title="Login" id="loginLink" class="loginLink"> <span></span>
+						Sign in
+				</a></li>
+			</ul>
+
+		</div>
+	</div>
+	<div class="headerBackground"></div>
+	<div class="content">
+
+		<wicket:child />
+		
+		<div class="footer">
+			<div class="AddressComponent_div">
+				<div id="aditionalText" class="blankLinkArea">
+					This page has been developed within <a id="moreLinks" href="#">the
+						Wf4Ever project</a>
+
+				</div>
+				<div class="blankLinkArea">
+					This work has been cofunded by <a id="moreLink2" href="#"> the
+						EU 7th Framework Programme</a>&nbsp;
+				</div>
+				<div></div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
