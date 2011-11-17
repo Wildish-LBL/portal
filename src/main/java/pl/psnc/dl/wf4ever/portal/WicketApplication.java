@@ -1,5 +1,6 @@
 package pl.psnc.dl.wf4ever.portal;
 
+import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.protocol.http.WebApplication;
 
 /**
@@ -7,16 +8,19 @@ import org.apache.wicket.protocol.http.WebApplication;
  * 
  * @see pl.psnc.dl.wf4ever.portal.Start#main(String[])
  */
-public class WicketApplication extends WebApplication
-{    	
+public class WicketApplication
+	extends WebApplication
+{
+
 	/**
 	 * @see org.apache.wicket.Application#getHomePage()
 	 */
 	@Override
-	public Class<HomePage> getHomePage()
+	public Class< ? extends WebPage> getHomePage()
 	{
-		return HomePage.class;
+		return HomeMockupPage.class;
 	}
+
 
 	/**
 	 * @see org.apache.wicket.Application#init()
@@ -26,6 +30,7 @@ public class WicketApplication extends WebApplication
 	{
 		super.init();
 
-		// add your configuration here
+		mountPage("/wickethome", WicketHomePage.class);
+		mountPage("/mockup", HomeMockupPage.class);
 	}
 }
