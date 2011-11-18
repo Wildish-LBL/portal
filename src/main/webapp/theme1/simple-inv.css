@@ -337,7 +337,7 @@ td.session_count {
 	text-shadow: 1px 1px 1px #555;
 }
 
-.left_box div {
+.left_box > div {
 	margin: 0 0 10px 0;
 	color: #414141;
 	border: 1px solid #ddd;
