@@ -88,6 +88,11 @@ input.login {
 	padding: 4px;
 }
 
+.btn.login {
+	background-color: #626262;
+	background-image: -moz-linear-gradient(center top , #8d8c8c, #626262);
+}
+
 /* layout
    ------ */
 .content {
