@@ -30,6 +30,8 @@
   		  <link rel="stylesheet" href="http://dlibra.psnc.pl/demo/style/dlibra/theme1/dompopup.css" type="text/css" />
 		<![endif]-->
 
+<link rel="stylesheet"
+	href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css" />
 <link rel="stylesheet" href="theme1/jquery-nyromodal-1.css"
 	type="text/css" media="screen" />
 <link rel="stylesheet" href="theme1/dlibra-nyromodal-1.css"
@@ -57,17 +59,6 @@
 	href="http://dlibra.psnc.pl/demo/style/dlibra/favicon.ico"
 	type="image/ico" />
 
-<script type="text/javascript">
-	var DLAppVars = {};
-	DLAppVars.loginLink = 'http://dlibra.psnc.pl:80/demo/dlibra/login';
-	var homePageUrl = 'http://dlibra.psnc.pl/demo/';
-	var homePageServletUrl = 'http://dlibra.psnc.pl/demo/dlibra';
-	var mainServletName = '/dlibra';
-	var userLanguage = 'en';
-	var userStyleVariant = 'theme1';
-	var currentLayout = 'simple-inv';
-	var pageId = 'main';
-</script>
 
 <script type="text/javascript" src="theme1/jquery-1.js"></script>
 <script type="text/javascript" src="theme1/ui_002.js"></script>
@@ -89,27 +80,8 @@
 <!--[if lte IE 6]>
 	 	 <script type="text/javascript" src="http://dlibra.psnc.pl/demo/style/common/js/supersleight/supersleight-1.0.js"></script>
 		<![endif]-->
-
-<link rel="alternate"
-	title="Example Digital Library - 25 last publications"
-	href="http://dlibra.psnc.pl/demo/latest_en.rss"
-	type="application/rss+xml" />
-<link rel="alternate"
-	title="Example Digital Library - Planned publications"
-	href="http://dlibra.psnc.pl/demo/planned_en.rss"
-	type="application/rss+xml" />
-<link rel="alternate" title="Example Digital Library - News"
-	href="http://dlibra.psnc.pl/demo/news_en.rss"
-	type="application/rss+xml" />
-
-
-<link rel="search" type="application/opensearchdescription+xml"
-	href="http://dlibra.psnc.pl/demo/DL_en.xml" title="Search" />
 </head>
 <body>
-	<div id="account-menu" style="display: none">
-		<span></span>
-	</div>
 	<div id="mainBaner" class="mainBaner_en">
 		<div id="mainBanerIn">
 			<div id="mainBanerLanguages">
@@ -165,23 +137,16 @@
 
 		</div>
 	</div>
-	<div class="headerBackground"></div>
-	<div class="content">
+	<div class="container">
+		<div class="content">
+				<wicket:child />
 
-		<wicket:child />
-		
-		<div class="footer">
-			<div class="AddressComponent_div">
-				<div id="aditionalText" class="blankLinkArea">
-					This page has been developed within <a id="moreLinks" href="#">the
-						Wf4Ever project</a>
-
-				</div>
-				<div class="blankLinkArea">
-					This work has been cofunded by <a id="moreLink2" href="#"> the
+			<div class="row footer">
+				<div class="span16">
+					This page has been developed within <a href="#">the Wf4Ever
+						project</a><br /> This work has been cofunded by <a href="#"> the
 						EU 7th Framework Programme</a>&nbsp;
 				</div>
-				<div></div>
 			</div>
 		</div>
 	</div>
