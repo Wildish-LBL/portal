@@ -1,28 +1,18 @@
-$(function() {
-	$("#ro")
-	.jstree(
-			{
-				"types" : {
-					"types" : {
-						"file" : {
-							"icon" : {
-								"image" : "theme1/file.gif"
-							},
-							"select_node" : true,
-							"hover_node"   : true,
-							"close_node"  : true,
-							"create_node" : true,
-							"delete_node" : true
-						},
-						"default" : {
-							"valid_children" : [ "default" ]
-						}
-					}
-				}, 
-				"plugins" : [ "themes",
-				              "html_data",
-				              "types" ]
+$(document).ready(function() {
+  $(".treeview").treeview({
+    persist: "location",
+    animated: "fast",
+    collapsed: true,
+    unique: false
+  });
+});
 
-			}
-	)
+$(document).ready(function() {
+  $('#annValue').wysiwyg({
+    css: "http://twitter.github.com/bootstrap/assets/css/bootstrap-1.2.0.min.css"
+  });
+});
+
+$(document).ready(function() {
+	$(".tabs").tabs()
 });

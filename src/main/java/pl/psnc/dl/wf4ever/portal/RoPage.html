@@ -100,36 +100,12 @@
 				<div>
 					<div id="adc_Container">
 						<ul id="adc_list">
-							<li class="adc_listElement"><script type="text/javascript">
-								var AddToComponent = {
-
-									linkHref : "http://dlibra.psnc.pl/demo/publication/1159",
-
-									linkTitle : "Głos Mechanika"
-								}
-
-								function addToBookmarks() {
-									var bookmarkTitle = AddToComponent.linkTitle;
-									if (window.sidebar) {
-										window.sidebar.addPanel(bookmarkTitle,
-												AddToComponent.linkHref, "");
-									} else if (window.external) {
-										window.external.AddFavorite(
-												AddToComponent.linkHref,
-												bookmarkTitle);
-									}
-								}
-							</script> Add to <a href="javascript:addToBookmarks()"> bookmarks </a></li>
+							<li class="adc_listElement">Add to <a
+								href="javascript:addToBookmarks()"> bookmarks </a></li>
 							<li><a name="a2a_dd" onmouseover="a2a_show_dropdown(this)"
-								onmouseout="a2a_onMouseOut_delay()"
-								href="http://www.addtoany.com/?linkname=encodeURIComponent%28G%C5%82os%20Mechanika%29&amp;linkurl=encodeURIComponent%28http://dlibra.psnc.pl/demo/publication/1159%29&amp;type=page">
-									<img src="theme1/bookmark.gif" title="bookmarks"
-									alt="bookmarks" height="16" width="91" border="0">
-							</a> <script type="text/javascript">
-								a2a_linkname = AddToComponent.linkTitle;
-
-								a2a_linkurl = AddToComponent.linkHref;
-							</script> <script type="text/javascript" src="theme1/addtoany-09102008.js"></script></li>
+								onmouseout="a2a_onMouseOut_delay()" href="#"> <img
+									src="theme1/bookmark.gif" title="bookmarks" alt="bookmarks"
+									height="16" width="91" border="0"></a></li>
 						</ul>
 					</div>
 				</div>
@@ -138,113 +114,137 @@
 
 		<div class="span12">
 			<div class="row">
+				<!-- RO viewer -->
 				<div class="span12">
-					<h3>Research Object: Epigenius_experiment1</h3>
-					<!-- RO viewer -->
-					<div id="left-column" class="span6 column">
-						<section id="ro-viewer">
-							<div id="ro">
+					<section id="ro-viewer">
+						<h3>Research Object: Epigenius_experiment1</h3>
+						<ul id="ro-tree" class="treeview filetree">
+							<li class="open"><span href="#" class="folder">Datasets</span>
 								<ul>
-									<li><a href="#">Datasets</a>
-										<ul>
-											<li rel="file"><a href="#">HD_dataset1 (GEO series
-													datafile)</a></li>
-											<li rel="file"><a href="#">HD_dataset2 (GEO series
-													datafile)</a></li>
-										</ul></li>
-									<li><a href="#">Scripts</a>
-										<ul>
-											<li rel="file"><a href="#">Analyse_data (R script)</a></li>
-											<li rel="file"><a href="#">GOorKEGG_enrichment (R
-													script)</a></li>
-										</ul></li>
-									<li><a href="#">Web Services</a>
-										<ul>
-											<li rel="file"><a href="#">CpG_island_enrichment
-													(SOAP Service)</a></li>
-										</ul></li>
-									<li><a href="#">Workflows</a>
-										<ul>
-											<li rel="file"><a href="#">SigWin_detector_v2
-													(Taverna 2 workflow)</a></li>
-										</ul></li>
-									<li><a href="#">Docs</a>
-										<ul>
-											<li rel="file"><a href="#">Hodges2006 (PDF)</a></li>
-											<li rel="file"><a href="#">HDACi4b (PDF)</a></li>
-											<li rel="file"><a href="#">SigWin-detector (PDF)</a></li>
-											<li rel="file"><a href="#">Global test (PDF)</a></li>
-											<li rel="file"><a href="#">Paper_1 (PDF)</a></li>
-											<li rel="file"><a href="#">Paper_2 (PDF)</a></li>
-											<li rel="file"><a href="#">Paper_3 (PDF)</a></li>
-											<li rel="file"><a href="#">Paper_4 (PDF)</a></li>
-											<li rel="file"><a href="#">Paper_5 (PDF)</a></li>
-										</ul></li>
-								</ul>
-							</div>
-						</section>
-					</div>
+									<li class="selected"><span href="#" class="file">HD_dataset1
+											(GEO series datafile)</span></li>
+									<li><span href="#" class="file">HD_dataset2 (GEO
+											series datafile)</span></li>
+								</ul></li>
+							<li><span href="#" class="folder">Scripts</span>
+								<ul>
+									<li><span href="#" class="file">Analyse_data (R
+											script)</span></li>
+									<li><span href="#" class="file">GOorKEGG_enrichment
+											(R script)</span></li>
+								</ul></li>
+							<li><span href="#" class="folder">Web Services</span>
+								<ul>
+									<li><span href="#" class="file">CpG_island_enrichment
+											(SOAP Service)</span></li>
+								</ul></li>
+							<li><span href="#" class="folder">Workflows</span>
+								<ul>
+									<li><span href="#" class="file">SigWin_detector_v2
+											(Taverna 2 workflow)</span></li>
+								</ul></li>
+							<li><span href="#" class="folder">Docs</span>
+								<ul>
+									<li><span href="#" class="file">Hodges2006 (PDF)</span></li>
+									<li><span href="#" class="file">HDACi4b (PDF)</span></li>
+									<li><span href="#" class="file">SigWin-detector
+											(PDF)</span></li>
+									<li><span href="#" class="file">Global test (PDF)</span></li>
+									<li><span href="#" class="file">Paper_1 (PDF)</span></li>
+									<li><span href="#" class="file">Paper_2 (PDF)</span></li>
+									<li><span href="#" class="file">Paper_3 (PDF)</span></li>
+									<li><span href="#" class="file">Paper_4 (PDF)</span></li>
+									<li><span href="#" class="file">Paper_5 (PDF)</span></li>
+								</ul></li>
+						</ul>
+					</section>
+					<hr />
 				</div>
-				<div class="row">
-					<!-- Annotating box -->
-					<div id="right-column" class="span10 column">
-						<section id="annotating-box">
-							<div class="header">Annotating "HD_dataset1 (GEO series
-								datafile)"</div>
-
-							<div class="content">
-								<div class="annotations-list">
-									<ul>
-										<li><span class="attribute">Type</span> <span>GEO
-												series datafile</span></li>
-										<li><span class="attribute">Keywords</span> <span>human,
-												brain, datas...</span></li>
-										<li class="selected"><span class="attribute">Description</span>
-											<span>Human brain data...</span></li>
-										<li><span class="attribute">Role</span> <span>To
-												be used as input...</span></li>
-										<li><span class="attribute">Created At</span> <span>2011-09-06
-												11:00...</span></li>
-									</ul>
-								</div>
-								<div class="annotations-editor">
-									<form class="form-stacked">
-										<fieldset>
-											<div class="clearfix">
-												<label for="annAttribute">What kind of annotation is
-													this?</label>
-												<div class="input">
-													<select name="annAttribute" id="annAttribute">
-														<option>Type</option>
-														<option>Keywords</option>
-														<option selected="selected">Description</option>
-														<option>Data Format</option>
-														<option>Note</option>
-														<option>Created At</option>
-													</select>
-												</div>
-											</div>
-											<div class="clearfix">
-												<label for="annValue">Value for the annotation</label>
-												<div class="input">
-													<textarea class="large" id="annValue" name="annValue"
-														style="width: 90%; height: 18em;">
+				<div class="span12">
+					<div class="row">
+						<!-- Annotating box -->
+						<div class="span12">
+							<section id="annotating-box">
+								<h3>Annotating: HD_dataset1 (GEO series datafile)</h3>
+								<div class="row">
+									<div class="span5 annotations-list">
+										<table class="bordered-table zebra-striped">
+											<thead>
+												<tr>
+													<th>Existing attributes</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td><span class="label">Type</span> GEO series
+														datafile</td>
+												</tr>
+												<tr>
+													<td><span class="label">Keywords</span> human, brain,
+														datas...</td>
+												</tr>
+												<tr>
+													<td><span class="label">Description</span> Human brain
+														data...</td>
+												</tr>
+												<tr>
+													<td><span class="label">Role</span> To be used as
+														input...</td>
+												</tr>
+												<tr>
+													<td><span class="label">Created At</span> 2011-09-06
+														11:00...</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+									<div class="span7 annotations-editor">
+										<ul class="tabs" data-tabs="tabs">
+											<li><a href="#annotationView">View</a></li>
+											<li><a href="#annotationEdit">Edit</a></li>
+										</ul>
+										<div class="tab-content">
+											<div id="annotationView" class="tab-pane">foobar</div>
+											<div id="annotationEdit" class="tab-pane active">
+												<form class="form-stacked">
+													<fieldset>
+														<div class="clearfix">
+															<label for="annAttribute">What kind of annotation
+																is this?</label>
+															<div class="input">
+																<select name="annAttribute" id="annAttribute">
+																	<option>Type</option>
+																	<option>Keywords</option>
+																	<option selected="selected">Description</option>
+																	<option>Data Format</option>
+																	<option>Note</option>
+																	<option>Created At</option>
+																</select>
+															</div>
+														</div>
+														<div class="clearfix">
+															<label for="annValue">Value for the annotation</label>
+															<div class="input">
+																<textarea class="large" id="annValue" name="annValue"
+																	style="width: 90%; height: 18em;">
 Human brain dataset. 44 HD samples, 36 Controls age and sex matched. Brain areas:caudate nucleus, frontal cortex and cerebellum. Affymetrix platform.
 Rows correspond to probe ids and columns to samples.
                       </textarea>
-												</div>
+															</div>
+														</div>
+													</fieldset>
+													<div class="actions">
+														<button type="submit" class="btn primary">Save
+															Changes</button>
+														<button type="reset" class="btn">Cancel</button>
+													</div>
+												</form>
 											</div>
-										</fieldset>
-										<div class="actions">
-											<button type="submit" class="btn primary">Save
-												Changes</button>
-											<button type="reset" class="btn">Cancel</button>
 										</div>
-									</form>
+									</div>
 								</div>
-								<span class="clear">&nbsp;</span>
-							</div>
-						</section>
+							</section>
+						</div>
 					</div>
 				</div>
 			</div>
