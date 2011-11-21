@@ -19,7 +19,7 @@ body {
 a { /*	color: #0999b3;
 	background: inherit;
 	text-decoration: none;*/
-	
+	color: #617ca2;	
 }
 
 a:hover {
@@ -332,7 +332,7 @@ td.session_count {
 	margin: 0px 10px;
 }
 
-.left_box a {
+.simple_left_box a {
 	color: #617c47;
 }
 

@@ -55,9 +55,37 @@
 										</ul></li>
 								</ul></li>
 						</ul>
+						<form class="form-stacked">
+							<div class="actions">
+								<button class="btn success small" type="submit">Add folder</button>
+								<button class="btn success small" type="submit">Add resource</button>
+								<button class="btn danger small" type="submit">Delete
+									resource</button>
+							</div>
+						</form>
 					</div>
 					<div class="span7">
-						<p>Selected item info</p>
+						<h4>Item info</h4>
+						<p>
+							<strong>Resource URI:</strong> <a
+								href="http://example.com/ROs/foo/bar.txt">http://example.com/ROs/foo/bar.txt</a>
+						</p>
+						<p>
+							<strong>Download URI:</strong> <a
+								href="http://example.com/ROs/foo/bar.txt?content=true">http://example.com/ROs/foo/bar.txt?content=true</a>
+						</p>
+						<p>
+							<strong>Added by:</strong> John Doe
+						</p>
+						<p>
+							<strong>Added on:</strong> 2011-04-07
+						</p>
+						<p>
+							<strong>File size:</strong> 2.3 MB
+						</p>
+						<p>
+							<strong>Number of annotations:</strong> 5
+						</p>
 					</div>
 				</div>
 			</section>
@@ -67,11 +95,13 @@
 		<div class="span16">
 			<!-- Annotating box -->
 			<section id="annotating-box" class="left_box inspan16">
-				<h3>Annotating: HD_dataset1 (GEO series datafile) <img class="sh_button"
-						src="theme1/l_open.gif"></h3>
+				<h3>
+					Annotating: HD_dataset1 (GEO series datafile) <img
+						class="sh_button" src="theme1/l_open.gif">
+				</h3>
 				<div class="row">
-					<div class="span4 separated">
-						<table class="bordered-table zebra-striped">
+					<div class="span5 separated">
+						<table class="bordered-table zebra-striped" style="width: 95%">
 							<thead>
 								<tr>
 									<th>Existing attributes</th>
@@ -98,9 +128,27 @@
 								</tr>
 							</tbody>
 						</table>
+						<form class="form-stacked">
+							<div class="actions">
+								<button class="btn success small" type="submit">Add
+									annotation</button>
+								<button class="btn danger small" type="submit">Delete
+									annotation</button>
+							</div>
+						</form>
 					</div>
-					<div class="span4 separated">
-						<p>Info about the annotation</p>
+					<div class="span3 separated">
+						<h4>Annotation info</h4>
+						<p>
+							<strong>Annotation URI:</strong> <a
+								href="http://example.com/ROs/annotations/5352">http://example.com/ROs/annotations/5352</a>
+						</p>
+						<p>
+							<strong>Added by:</strong> Macy Gray
+						</p>
+						<p>
+							<strong>Added on:</strong> 2011-05-11
+						</p>
 					</div>
 					<div class="span7">
 						<ul class="tabs" data-tabs="tabs">
@@ -108,7 +156,12 @@
 							<li><a href="#annotationEdit">Edit</a></li>
 						</ul>
 						<div class="tab-content">
-							<div id="annotationView" class="tab-pane">foobar</div>
+							<div id="annotationView" class="tab-pane">
+								<p>Human brain dataset. 44 HD samples, 36 Controls age and
+									sex matched. Brain areas:caudate nucleus, frontal cortex and
+									cerebellum. Affymetrix platform. Rows correspond to probe ids
+									and columns to samples.</p>
+							</div>
 							<div id="annotationEdit" class="tab-pane active">
 								<form class="form-stacked">
 									<fieldset>
