@@ -314,12 +314,31 @@ td.session_count {
 /* left side
    --------- */
 .left_box {
+}
+
+.inspan4 {
 	width: 210px;
+}
+
+.left_box.inspan4 {
 	margin: 0px 5px;
+}
+
+.inspan16 {
+	width: 920px;
+}
+
+.left_box.inspan16 {
+	margin: 0px 10px;
 }
 
 .left_box a {
 	color: #617c47;
+}
+
+.simple_left_box {
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 .left_box li {
@@ -329,12 +348,22 @@ td.session_count {
 
 .left_box h3 {
 	clear: both;
-	background: transparent url('left-back.png') top;
 	color: #fff;
 	padding: 7px 0 7px 10px;
 	font: bold 1.1em Tahoma, Arial, Sans-Serif;
 	margin: 0px 0px 0px 0px;
 	text-shadow: 1px 1px 1px #555;
+	
+	background-color: #a6b1ae;
+    background-image: -moz-linear-gradient(center top , #bcc9ce, #a6b1ae);
+    background-repeat: repeat-x;
+    -moz-border-bottom-colors: none;
+    -moz-border-image: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    -moz-transition: all 0.1s linear 0s;
+    border-radius: 6px 6px 0px 0px;
 }
 
 .left_box > div {
@@ -342,10 +371,15 @@ td.session_count {
 	color: #414141;
 	border: 1px solid #ddd;
 	border-top: none;
-	padding: 12px 15px 12px 15px;
+	padding-top: 12px;
+	padding-bottom: 12px;
 	-moz-box-shadow: 1px 1px 15px #ddd;
 	-webkit-box-shadow: 1px 1px 15px #ddd;
 	box-shadow: 1px 1px 15px #ddd;
+}
+
+div.separated {
+	border-right: 1px dashed #BBBBBB;
 }
 
 /*
