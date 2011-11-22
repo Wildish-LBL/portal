@@ -5,7 +5,123 @@
 
 /* default styles
    -------------- */
-@import "simple-inv-2.css";
+.listLine {
+    height:1px;
+    border:0;
+    background-color:#ccc;
+    margin: 6px 0px;
+}
+
+.authorizationLinksList {
+	float:right;
+	margin-top:-4px;
+}
+
+#listMainMenu {
+	width:940px;
+	margin:0 auto;
+	color:#fff;
+	margin-top:10px;
+}
+
+.mmlEmpty {
+	float:left;
+	 
+	padding:12px;
+	margin-top:-9px;
+}
+
+.mmlEmptyRight {
+	border-right:0;
+	
+}
+
+.mainMenuListList {
+	margin-left:-39px;
+	font-weight:bold;
+	float:left;
+	list-style-type: none;
+}
+
+.mainMenuListItem {
+	float:left;
+	margin-top:3px;
+}
+
+.mainMenuOption {
+	float:left;
+	color:#fff !important;
+	padding:12px;
+	margin-top:-12px;
+}
+
+
+
+#mainBaner {
+	width:100%;
+	height:70px;
+	margin-top:0px;
+	font-size:1.3em;
+	background:#c7d9d4 url('../images/main-menu-back.png') repeat-x;
+	margin-bottom:0px;	
+}
+
+#mainBanerLeft {
+	background:url('../images/main-menu-back-left.png') no-repeat;
+	float:left;
+	height:90px;
+	width:150px;
+}
+
+#mainBanerCoin {
+	float:left;
+	margin-right:10px;
+	margin-top:8px;
+}
+
+#mainBanerLanguages {
+	float:right;	
+}
+
+#mainBanerIn {
+	width:940px;
+	margin:0 auto;
+}
+
+#mainBanerIn h1 {
+	float:left;
+	margin-top:12px;
+	*margin-top:-6px; /* IE7 hack */
+	font: 17pt verdana;
+	font-weight:800;
+	text-shadow:1px 1px 1px #000;
+}
+
+#mainBanerIn h1 a {
+	color:#858f8c;
+}
+
+a.mainMenuOption:hover {
+	border-top:2px solid #FF5F3F;
+	text-shadow:0px 0px 5px #fff;
+}
+
+#mainMenu {
+	background:url('../images/main-menu-back.png') 0px -70px repeat-x;
+	width:100%;
+	height:55px;
+	left:0px;
+	margin-bottom:10px;
+	overflow:hidden;
+}
+
+.sh_button {
+	float:right;
+	margin-right:5px;
+	/* IE 7 hack: invalid CSS */
+	*margin-top:-20px;
+}
+
 
 body {
 	padding: 0;
@@ -78,7 +194,7 @@ p {
 	/*	width: 960px;*/
 	padding: 0 0px;
 	padding-top: 8px;
-	background: #fff url(bottomback.gif) bottom repeat-x;
+	background: #fff url('../images/bottomback.gif') bottom repeat-x;
 	-moz-border-radius: 5px;
 	-webkit-border-radius: 5px;
 	border-radius: 5px;
@@ -113,7 +229,7 @@ p {
 }
 
 .simple_left_box li {
-	list-style-image: url("expanded.gif");
+	list-style-image: url("../images/expanded.gif");
 }
 
 .left_box h3 {
@@ -160,23 +276,23 @@ hr.separation {
 }
 
 .filetree a.folder {
-    background: url("folder.gif") no-repeat scroll 0 0 transparent;
+    background: url("../images/folder.gif") no-repeat scroll 0 0 transparent;
 }
 
 .filetree li.expandable a.folder {
-    background: url("folder-closed.gif") no-repeat scroll 0 0 transparent;
+    background: url("../images/folder-closed.gif") no-repeat scroll 0 0 transparent;
 }
 
 .filetree a.workflow {
-    background: url("workflow.png") no-repeat scroll 0 0 transparent;
+    background: url("../images/workflow.png") no-repeat scroll 0 0 transparent;
 }
 
 .filetree a.file {
-    background: url("file.png") no-repeat scroll 0 0 transparent;
+    background: url("../images/file.png") no-repeat scroll 0 0 transparent;
 }
 
 .filetree a.external {
-    background: url("external.png") no-repeat scroll 0 0 transparent;
+    background: url("../images/external.png") no-repeat scroll 0 0 transparent;
 }
 
 .filetree a.icon  { 
