@@ -6,12 +6,23 @@
 	<packaging>war</packaging>
 	<version>0.0.1-SNAPSHOT</version>
 	<!-- TODO project name  -->
-	<name>quickstart</name>
+	<name>Research Object Digital Library portal</name>
 	<description></description>
-	<!--
-		TODO <organization> <name>company name</name> <url>company url</url>
-		</organization>
-	-->
+	<organization>
+		<name>PSNC</name>
+		<url>http://dl.psnc.pl/</url>
+	</organization>
+	<developers>
+		<developer>
+			<id>piotrhol</id>
+			<name>Piotr Hołubowicz</name>
+			<email>piotrhol@man.poznan.pl</email>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<organization>PSNC</organization>
+		</developer>
+	</developers>
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -67,6 +78,7 @@
 		</dependency>
 	</dependencies>
 	<build>
+		<finalName>portal</finalName>
 		<resources>
 			<resource>
 				<filtering>false</filtering>
