@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wicket:extend xmlns:wicket="http://wicket.apache.org">
+	<script type="text/javascript" src="js/roPage.js"></script>
+
+	<div class="row">
+		<div class="span16">
+			<div class="inspan16">
+				<ul class="breadcrumb">
+					<li><a href="home">Home</a> <span class="divider">/</span></li>
+					<li><a href="#">My Research Objects</a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="span16">
+			<!-- Annotating box -->
+			<section id="annotating-box" class="left_box inspan16">
+				<h3>
+					My Research Objects <img class="sh_button" src="images/l_open.gif">
+				</h3>
+				<div class="row">
+					<div class="span15">
+						<form class="form-stacked">
+							<table class="bordered-table zebra-striped">
+								<thead>
+									<tr>
+										<th>&nbsp;</th>
+										<th>Title</th>
+										<th>Created</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr class="selected">
+										<td><input type="checkbox" checked="checked" /></td>
+										<td><a href="ro">Graphing and Citing Time Series Data
+										</a></td>
+										<td>2011-09-06 11:00</td>
+									</tr>
+									<tr>
+										<td><input type="checkbox" /></td>
+										<td><a href="#">Sample IMPACT hackathon workflow</a></td>
+										<td>2011-02-56 13:50</td>
+									</tr>
+									<tr class="selected">
+										<td><input type="checkbox" checked="checked" /></td>
+										<td><a href="#">Example of conditional invocation</a></td>
+										<td>2010-11-22 09:45</td>
+									</tr>
+									<tr>
+										<td><input type="checkbox" /></td>
+										<td><a href="#">Compare OCR result of original and BW
+												version of image</a></td>
+										<td>2011-06-28 13:07</td>
+									</tr>
+								</tbody>
+							</table>
+							<div class="actions">
+								<button class="btn success" type="submit">Create an RO</button>
+								<button class="btn danger" type="submit">Delete
+									selected ROs</button>
+							</div>
+							<div class="actions">
+								<button class="btn success" type="submit">Import an RO
+									from myExperiment</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</section>
+		</div>
+	</div>
+</wicket:extend>

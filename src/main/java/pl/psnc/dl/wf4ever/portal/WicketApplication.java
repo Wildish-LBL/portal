@@ -33,6 +33,7 @@ public class WicketApplication
 		mountPage("/wickethome", WicketHomePage.class);
 		mountPage("/welcome", MockupWelcomePage.class);
 		mountPage("/home", HomePage.class);
+		mountPage("/myros", MyRosPage.class);
 		mountPage("/ro", RoPage.class);
 	}
 }

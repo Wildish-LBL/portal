@@ -14,6 +14,7 @@ public class MockupWelcomePage
 	{
 		super(parameters);
 		add(new BookmarkablePageLink<Void>("home", HomePage.class));
+		add(new BookmarkablePageLink<Void>("myros", MyRosPage.class));
 		add(new BookmarkablePageLink<Void>("ro", RoPage.class));
 	}
 }
