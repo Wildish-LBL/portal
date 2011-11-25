@@ -4,6 +4,9 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import pl.psnc.dl.wf4ever.portal.pages.HomePage;
+import pl.psnc.dl.wf4ever.portal.pages.MyRosPage;
+
 public class TemplatePage
 	extends WebPage
 {
