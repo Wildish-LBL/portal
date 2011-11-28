@@ -19,7 +19,6 @@ import pl.psnc.dl.wf4ever.portal.pages.MyRosPage;
 import pl.psnc.dl.wf4ever.portal.pages.OAuthPage;
 import pl.psnc.dl.wf4ever.portal.pages.RoPage;
 import pl.psnc.dl.wf4ever.portal.services.DlibraApi;
-import pl.psnc.dl.wf4ever.portal.utils.MySession;
 
 /**
  * Application object for your web application. If you want to run this application without deploying, run the Start class.

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package pl.psnc.dl.wf4ever.myexpimport.model.myexp;
+package pl.psnc.dl.wf4ever.portal.myexpimport.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;

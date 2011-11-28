@@ -1,14 +1,13 @@
 /**
  * 
  */
-package pl.psnc.dl.wf4ever.myexpimport.wizard;
+package pl.psnc.dl.wf4ever.portal.myexpimport.wizard;
 
 import org.apache.wicket.extensions.wizard.dynamic.IDynamicWizardStep;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.Model;
 
-import pl.psnc.dl.wf4ever.myexpimport.model.ImportModel;
-import pl.psnc.dl.wf4ever.portal.utils.MySession;
+import pl.psnc.dl.wf4ever.portal.MySession;
 
 /**
  * @author Piotr Hołubowicz

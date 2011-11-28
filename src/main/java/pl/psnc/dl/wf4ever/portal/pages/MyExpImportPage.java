@@ -8,13 +8,13 @@ import org.apache.wicket.authroles.authorization.strategies.role.annotations.Aut
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.scribe.oauth.OAuthService;
 
-import pl.psnc.dl.wf4ever.myexpimport.model.ImportModel;
-import pl.psnc.dl.wf4ever.myexpimport.model.myexp.User;
-import pl.psnc.dl.wf4ever.myexpimport.wizard.ImportWizard;
+import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
+import pl.psnc.dl.wf4ever.portal.myexpimport.model.User;
+import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportModel;
+import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportWizard;
 import pl.psnc.dl.wf4ever.portal.services.MyExpApi;
 import pl.psnc.dl.wf4ever.portal.services.MyExpImportService;
-import pl.psnc.dl.wf4ever.portal.utils.MySession;
 
 /**
  * @author Piotr Hołubowicz

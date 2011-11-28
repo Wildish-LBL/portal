@@ -1,7 +1,7 @@
 /**
  * 
  */
-package pl.psnc.dl.wf4ever.myexpimport.wizard;
+package pl.psnc.dl.wf4ever.portal.myexpimport.wizard;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
@@ -13,11 +13,10 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.time.Duration;
 import org.scribe.model.Token;
 
-import pl.psnc.dl.wf4ever.myexpimport.model.ImportModel;
-import pl.psnc.dl.wf4ever.myexpimport.model.ImportModel.ImportStatus;
+import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
+import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportModel.ImportStatus;
 import pl.psnc.dl.wf4ever.portal.services.MyExpImportService;
-import pl.psnc.dl.wf4ever.portal.utils.MySession;
 
 /**
  * @author Piotr Hołubowicz

@@ -17,19 +17,19 @@ import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
 
-import pl.psnc.dl.wf4ever.myexpimport.model.ImportModel;
-import pl.psnc.dl.wf4ever.myexpimport.model.ImportModel.ImportStatus;
-import pl.psnc.dl.wf4ever.myexpimport.model.ImportModel.WorkspaceType;
-import pl.psnc.dl.wf4ever.myexpimport.model.ResearchObject;
-import pl.psnc.dl.wf4ever.myexpimport.model.myexp.InternalPackItem;
-import pl.psnc.dl.wf4ever.myexpimport.model.myexp.InternalPackItemHeader;
-import pl.psnc.dl.wf4ever.myexpimport.model.myexp.Pack;
-import pl.psnc.dl.wf4ever.myexpimport.model.myexp.PackHeader;
-import pl.psnc.dl.wf4ever.myexpimport.model.myexp.Resource;
-import pl.psnc.dl.wf4ever.myexpimport.model.myexp.ResourceHeader;
-import pl.psnc.dl.wf4ever.myexpimport.model.myexp.SimpleResource;
-import pl.psnc.dl.wf4ever.myexpimport.model.myexp.SimpleResourceHeader;
-import pl.psnc.dl.wf4ever.myexpimport.model.myexp.User;
+import pl.psnc.dl.wf4ever.portal.myexpimport.model.InternalPackItem;
+import pl.psnc.dl.wf4ever.portal.myexpimport.model.InternalPackItemHeader;
+import pl.psnc.dl.wf4ever.portal.myexpimport.model.Pack;
+import pl.psnc.dl.wf4ever.portal.myexpimport.model.PackHeader;
+import pl.psnc.dl.wf4ever.portal.myexpimport.model.Resource;
+import pl.psnc.dl.wf4ever.portal.myexpimport.model.ResourceHeader;
+import pl.psnc.dl.wf4ever.portal.myexpimport.model.SimpleResource;
+import pl.psnc.dl.wf4ever.portal.myexpimport.model.SimpleResourceHeader;
+import pl.psnc.dl.wf4ever.portal.myexpimport.model.User;
+import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportModel;
+import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ResearchObject;
+import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportModel.ImportStatus;
+import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportModel.WorkspaceType;
 
 /**
  * @author Piotr Hołubowicz

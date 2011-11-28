@@ -1,10 +1,9 @@
-package pl.psnc.dl.wf4ever.myexpimport.wizard;
+package pl.psnc.dl.wf4ever.portal.myexpimport.wizard;
 
 import org.apache.wicket.extensions.wizard.Wizard;
 import org.apache.wicket.extensions.wizard.dynamic.DynamicWizardModel;
 import org.apache.wicket.request.http.handler.RedirectRequestHandler;
 
-import pl.psnc.dl.wf4ever.myexpimport.model.ImportModel;
 import pl.psnc.dl.wf4ever.portal.pages.MyRosPage;
 
 public class ImportWizard

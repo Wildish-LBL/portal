@@ -1,7 +1,7 @@
 /**
  * 
  */
-package pl.psnc.dl.wf4ever.myexpimport.wizard;
+package pl.psnc.dl.wf4ever.portal.myexpimport.wizard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,8 +20,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.validation.validator.PatternValidator;
 
-import pl.psnc.dl.wf4ever.myexpimport.model.ImportModel;
-import pl.psnc.dl.wf4ever.myexpimport.model.ResearchObject;
 
 /**
  * @author Piotr Hołubowicz

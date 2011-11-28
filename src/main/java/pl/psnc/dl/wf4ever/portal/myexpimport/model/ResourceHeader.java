@@ -1,18 +1,18 @@
 /**
  * 
  */
-package pl.psnc.dl.wf4ever.myexpimport.model.myexp;
+package pl.psnc.dl.wf4ever.portal.myexpimport.model;
 
 import java.io.Serializable;
 
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlValue;
 
 /**
  * @author Piotr Hołubowicz
  *
  */
-public abstract class Resource
+public abstract class ResourceHeader
 	implements Serializable
 
 {
@@ -21,17 +21,15 @@ public abstract class Resource
 	 * 
 	 */
 	private static final long serialVersionUID = -9038815722609845400L;
-
+	
 	private String uri;
 
 	private String resource;
 
 	private String title;
 
-	private int id;
 
-
-	public Resource()
+	public ResourceHeader()
 	{
 
 	}
@@ -78,7 +76,7 @@ public abstract class Resource
 	/**
 	 * @return the title
 	 */
-	@XmlElement
+	@XmlValue
 	public String getTitle()
 	{
 		return title;
@@ -94,21 +92,8 @@ public abstract class Resource
 	}
 
 
-	/**
-	 * @return the id
-	 */
-	@XmlElement
-	public int getId()
-	{
-		return id;
-	}
+	public abstract String getResourceUrl();
+	
+	public abstract Class<? extends Resource> getResourceClass();
 
-
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(int id)
-	{
-		this.id = id;
-	}
 }

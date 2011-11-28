@@ -1,7 +1,7 @@
 /**
  * 
  */
-package pl.psnc.dl.wf4ever.myexpimport.wizard;
+package pl.psnc.dl.wf4ever.portal.myexpimport.wizard;
 
 import java.io.Serializable;
 import java.util.List;
@@ -23,7 +23,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.model.IModel;
 
-import pl.psnc.dl.wf4ever.myexpimport.model.myexp.ResourceHeader;
+import pl.psnc.dl.wf4ever.portal.myexpimport.model.ResourceHeader;
 
 /**
  * @author Piotr Hołubowicz

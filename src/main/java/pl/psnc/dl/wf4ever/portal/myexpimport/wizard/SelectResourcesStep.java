@@ -1,7 +1,7 @@
 /**
  * 
  */
-package pl.psnc.dl.wf4ever.myexpimport.wizard;
+package pl.psnc.dl.wf4ever.portal.myexpimport.wizard;
 
 import java.util.Arrays;
 
@@ -14,9 +14,7 @@ import org.apache.wicket.markup.html.form.RadioChoice;
 import org.apache.wicket.markup.html.form.validation.IFormValidator;
 import org.apache.wicket.model.PropertyModel;
 
-import pl.psnc.dl.wf4ever.myexpimport.model.ImportModel;
-import pl.psnc.dl.wf4ever.myexpimport.model.ResourceSelectionModel;
-import pl.psnc.dl.wf4ever.myexpimport.model.ResourceSelectionModel.ImportType;
+import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ResourceSelectionModel.ImportType;
 
 /**
  * @author Piotr Hołubowicz

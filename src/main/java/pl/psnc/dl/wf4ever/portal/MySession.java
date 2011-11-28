@@ -1,7 +1,7 @@
 /**
  * 
  */
-package pl.psnc.dl.wf4ever.portal.utils;
+package pl.psnc.dl.wf4ever.portal;
 
 import java.util.Properties;
 

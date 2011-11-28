@@ -12,9 +12,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
+import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.services.MyExpApi;
-import pl.psnc.dl.wf4ever.portal.utils.MySession;
 
 /**
  * @author Piotr Hołubowicz

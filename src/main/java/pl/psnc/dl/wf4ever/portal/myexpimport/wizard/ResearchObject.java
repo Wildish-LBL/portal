@@ -1,4 +1,4 @@
-package pl.psnc.dl.wf4ever.myexpimport.model;
+package pl.psnc.dl.wf4ever.portal.myexpimport.wizard;
 /**
  * 
  */
@@ -10,10 +10,10 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import pl.psnc.dl.wf4ever.myexpimport.model.myexp.FileHeader;
-import pl.psnc.dl.wf4ever.myexpimport.model.myexp.PackHeader;
-import pl.psnc.dl.wf4ever.myexpimport.model.myexp.ResourceHeader;
-import pl.psnc.dl.wf4ever.myexpimport.model.myexp.WorkflowHeader;
+import pl.psnc.dl.wf4ever.portal.myexpimport.model.FileHeader;
+import pl.psnc.dl.wf4ever.portal.myexpimport.model.PackHeader;
+import pl.psnc.dl.wf4ever.portal.myexpimport.model.ResourceHeader;
+import pl.psnc.dl.wf4ever.portal.myexpimport.model.WorkflowHeader;
 
 /**
  * @author Piotr Hołubowicz
