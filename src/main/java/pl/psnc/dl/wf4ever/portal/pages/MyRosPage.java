@@ -15,6 +15,6 @@ public class MyRosPage
 	public MyRosPage(final PageParameters parameters)
 	{
 		super(parameters);
-		add(new BookmarkablePageLink<Void>("myExpImport", MyExpImportPage.class));
+		add(new BookmarkablePageLink<Void>("myExpImport", MyExpAuthorizePage.class));
 	}
 }

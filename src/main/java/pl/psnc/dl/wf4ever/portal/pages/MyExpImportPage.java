@@ -3,7 +3,8 @@
  */
 package pl.psnc.dl.wf4ever.portal.pages;
 
-import org.apache.wicket.request.http.handler.RedirectRequestHandler;
+import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.scribe.oauth.OAuthService;
 
@@ -19,6 +20,7 @@ import pl.psnc.dl.wf4ever.portal.utils.MySession;
  * @author Piotr Hołubowicz
  *
  */
+@AuthorizeInstantiation("USER")
 public class MyExpImportPage
 	extends TemplatePage
 {
@@ -40,9 +42,7 @@ public class MyExpImportPage
 			add(new ImportWizard("wizard", model));
 		}
 		catch (Exception e) {
-			String page = urlFor(ErrorPage.class, null).toString() + "?message=" + e.getMessage();
-			getRequestCycle().scheduleRequestHandlerAfterCurrent(new RedirectRequestHandler(page));
-			return;
+			throw new RestartResponseException(ErrorPage.class, new PageParameters().add("message", e.getMessage()));
 		}
 	}
 

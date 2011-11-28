@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.markup.html.WebPage;
-import org.apache.wicket.request.http.handler.RedirectRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -66,9 +66,10 @@ public class OAuthPage
 				log.info("Successfully received myExperiment access token");
 			}
 		}
-		continueToOriginalDestination();
-		//		String nextUrl = session.getNextUrl() != null ? session.getNextUrl() : urlFor(HomePage.class, null).toString();
-		//		getRequestCycle().scheduleRequestHandlerAfterCurrent(new RedirectRequestHandler(nextUrl));
+		if (!continueToOriginalDestination()) {
+			log.warn("Could not find the original destination");
+			throw new RestartResponseException(getApplication().getHomePage());
+		}
 	}
 
 

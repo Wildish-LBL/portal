@@ -3,6 +3,9 @@
  */
 package pl.psnc.dl.wf4ever.portal.utils;
 
+import java.util.Properties;
+
+import org.apache.log4j.Logger;
 import org.apache.wicket.Session;
 import org.apache.wicket.authroles.authentication.AbstractAuthenticatedWebSession;
 import org.apache.wicket.authroles.authorization.strategies.role.Roles;
@@ -22,6 +25,8 @@ public class MySession
 	 */
 	private static final long serialVersionUID = -4113134277706549806L;
 
+	private static final Logger log = Logger.getLogger(MySession.class);
+
 	private Token dLibraAccessToken;
 
 	private Token myExpAccessToken;
@@ -36,6 +41,8 @@ public class MySession
 	public MySession(Request request)
 	{
 		super(request);
+		dLibraAccessToken = tryLoadDlibraTestToken();
+		myExpAccessToken = tryLoadMyExpTestToken();
 	}
 
 
@@ -146,6 +153,41 @@ public class MySession
 	public boolean isSignedIn()
 	{
 		return getdLibraAccessToken() != null;
+	}
+
+
+	private Token tryLoadDlibraTestToken()
+	{
+		Properties props = new Properties();
+		try {
+			props.load(getClass().getClassLoader().getResourceAsStream("testToken.properties"));
+			String token = props.getProperty("dLibraToken");
+			if (token != null) {
+				return new Token(token, null);
+			}
+		}
+		catch (Exception e) {
+			log.debug("Failed to load properties: " + e.getMessage());
+		}
+		return null;
+	}
+
+
+	private Token tryLoadMyExpTestToken()
+	{
+		Properties props = new Properties();
+		try {
+			props.load(getClass().getClassLoader().getResourceAsStream("testToken.properties"));
+			String token = props.getProperty("token");
+			String secret = props.getProperty("secret");
+			if (token != null && secret != null) {
+				return new Token(token, secret);
+			}
+		}
+		catch (Exception e) {
+			log.debug("Failed to load properties: " + e.getMessage());
+		}
+		return null;
 	}
 
 }
