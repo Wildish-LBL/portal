@@ -66,8 +66,9 @@ public class OAuthPage
 				log.info("Successfully received myExperiment access token");
 			}
 		}
-		String nextUrl = session.getNextUrl() != null ? session.getNextUrl() : urlFor(HomePage.class, null).toString();
-		getRequestCycle().scheduleRequestHandlerAfterCurrent(new RedirectRequestHandler(nextUrl));
+		continueToOriginalDestination();
+		//		String nextUrl = session.getNextUrl() != null ? session.getNextUrl() : urlFor(HomePage.class, null).toString();
+		//		getRequestCycle().scheduleRequestHandlerAfterCurrent(new RedirectRequestHandler(nextUrl));
 	}
 
 

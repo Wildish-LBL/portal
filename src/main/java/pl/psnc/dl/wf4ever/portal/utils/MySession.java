@@ -138,7 +138,7 @@ public class MySession
 	@Override
 	public Roles getRoles()
 	{
-		return new Roles();
+		return isSignedIn() ? new Roles(Roles.USER) : null;
 	}
 
 
