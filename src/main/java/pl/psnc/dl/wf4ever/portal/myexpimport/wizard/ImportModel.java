@@ -1,14 +1,15 @@
 package pl.psnc.dl.wf4ever.portal.myexpimport.wizard;
+
 /**
  * 
  */
 
-
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.extensions.wizard.dynamic.DynamicWizardModel;
+import org.apache.wicket.extensions.wizard.dynamic.IDynamicWizardStep;
 
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.FileHeader;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.PackHeader;
@@ -20,7 +21,7 @@ import pl.psnc.dl.wf4ever.portal.myexpimport.model.WorkflowHeader;
  *
  */
 public class ImportModel
-	implements Serializable
+	extends DynamicWizardModel
 {
 
 	public enum ImportStatus {
@@ -33,9 +34,9 @@ public class ImportModel
 
 	private static final long serialVersionUID = -6654329540413067819L;
 
-	private List<ResearchObject> researchObjects;
+	private final List<ResearchObject> researchObjects;
 
-	private User myExpUser;
+	private final User myExpUser;
 
 	private String message = "Import has not started";
 
@@ -51,10 +52,16 @@ public class ImportModel
 
 	private String newWorkspaceId;
 
+	//HACK this is copied from DynamicWizardModel because it is private not protected.
+	/**
+	 * Remember the first step for resetting the wizard.
+	 */
+	private IDynamicWizardStep startStep;
+
 
 	public ImportModel(User user)
 	{
-		super();
+		super(null);
 		this.myExpUser = user;
 		this.researchObjects = new ArrayList<ResearchObject>();
 	}
@@ -248,6 +255,25 @@ public class ImportModel
 	public void setWorkspaceType(WorkspaceType workspaceType)
 	{
 		this.workspaceType = workspaceType;
+	}
+
+
+	/**
+	 * @see org.apache.wicket.extensions.wizard.IWizardModel#reset()
+	 */
+	@Override
+	public void reset()
+	{
+		setActiveStep(startStep);
+	}
+
+
+	/**
+	 * @param startStep the startStep to set
+	 */
+	public void setStartStep(IDynamicWizardStep startStep)
+	{
+		this.startStep = startStep;
 	}
 
 }

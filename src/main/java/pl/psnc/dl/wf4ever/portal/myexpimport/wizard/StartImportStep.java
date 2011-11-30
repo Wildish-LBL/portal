@@ -22,13 +22,12 @@ public class StartImportStep
 
 	public StartImportStep(ImportModel model)
 	{
-		super(null, "Start", null, new Model<ImportModel>(model));
+		super(null, "Start", null);
 
 		add(new Label("userName", new Model<String>(model.getMyExpUser().getName())));
 		add(new Label("packsCnt", new Model<Integer>(model.getMyExpUser().getPacks().size())));
 		add(new Label("workflowsCnt", new Model<Integer>(model.getMyExpUser().getWorkflows().size())));
 		add(new Label("filesCnt", new Model<Integer>(model.getMyExpUser().getFiles().size())));
-
 	}
 
 

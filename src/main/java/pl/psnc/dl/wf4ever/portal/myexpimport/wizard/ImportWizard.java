@@ -1,9 +1,8 @@
 package pl.psnc.dl.wf4ever.portal.myexpimport.wizard;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.extensions.wizard.Wizard;
-import org.apache.wicket.extensions.wizard.dynamic.DynamicWizardModel;
-import org.apache.wicket.request.http.handler.RedirectRequestHandler;
 
 import pl.psnc.dl.wf4ever.portal.pages.MyRosPage;
 
@@ -14,21 +13,19 @@ public class ImportWizard
 	private static final long serialVersionUID = -8520850154339581229L;
 
 
-	@SuppressWarnings("serial")
-	public ImportWizard(String id, ImportModel model)
+	public ImportWizard(String id, ImportModel wizardModel)
 	{
 		super(id, false);
-		DynamicWizardModel wizardModel = new DynamicWizardModel(new StartImportStep(model)) {
-
-			@Override
-			public void finish()
-			{
-				String home = urlFor(MyRosPage.class, null).toString();
-				getRequestCycle().scheduleRequestHandlerAfterCurrent(new RedirectRequestHandler(home));
-			}
-		};
+		wizardModel.addListener(this);
 		wizardModel.setCancelVisible(false);
 		init(wizardModel);
+	}
+
+
+	@Override
+	public void onFinish()
+	{
+		throw new RestartResponseException(MyRosPage.class);
 	}
 
 

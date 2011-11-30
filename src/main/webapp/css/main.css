@@ -209,7 +209,10 @@ p {
 #wizardActions, #wizardHeader {
     padding-left: 250px;
 }
-  
+
+span .selectedStep {
+    text-decoration: bold;
+}  
 
 .inspan4 {
 	width: 205px;
