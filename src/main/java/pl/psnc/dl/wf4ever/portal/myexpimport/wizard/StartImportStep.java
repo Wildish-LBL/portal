@@ -14,7 +14,7 @@ import pl.psnc.dl.wf4ever.portal.MySession;
  *
  */
 public class StartImportStep
-	extends AbstractStep
+	extends AbstractImportStep
 {
 
 	private static final long serialVersionUID = 4637256013660809942L;
@@ -22,7 +22,7 @@ public class StartImportStep
 
 	public StartImportStep(ImportModel model)
 	{
-		super(null, "Start", model);
+		super(null, "Start", null, new Model<ImportModel>(model));
 
 		add(new Label("userName", new Model<String>(model.getMyExpUser().getName())));
 		add(new Label("packsCnt", new Model<Integer>(model.getMyExpUser().getPacks().size())));

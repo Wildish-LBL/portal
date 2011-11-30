@@ -1,5 +1,6 @@
 package pl.psnc.dl.wf4ever.portal.myexpimport.wizard;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.extensions.wizard.Wizard;
 import org.apache.wicket.extensions.wizard.dynamic.DynamicWizardModel;
 import org.apache.wicket.request.http.handler.RedirectRequestHandler;
@@ -28,6 +29,13 @@ public class ImportWizard
 		};
 		wizardModel.setCancelVisible(false);
 		init(wizardModel);
+	}
+
+
+	@Override
+	protected Component newButtonBar(String id)
+	{
+		return new ImportButtonBar(id, this);
 	}
 
 }

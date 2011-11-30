@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.wicket.ajax.AjaxEventBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.extensions.wizard.dynamic.DynamicWizardStep;
 import org.apache.wicket.extensions.wizard.dynamic.IDynamicWizardStep;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
@@ -29,17 +30,16 @@ import pl.psnc.dl.wf4ever.portal.services.DlibraService;
  *
  */
 public class ChooseWorkspaceStep
-	extends AbstractStep
+	extends DynamicWizardStep
 {
 
 	private static final long serialVersionUID = -3238571883021517707L;
 
 
 	@SuppressWarnings("serial")
-	public ChooseWorkspaceStep(IDynamicWizardStep previousStep,
-			ImportModel model, Token token)
+	public ChooseWorkspaceStep(IDynamicWizardStep previousStep, ImportModel model, Token token)
 	{
-		super(previousStep, "Choose workspace", model);
+		super(previousStep, "Choose workspace", null, new Model<ImportModel>(model));
 
 		List<String> workspaces = null;
 		try {
@@ -53,23 +53,20 @@ public class ChooseWorkspaceStep
 			model.setExistingWorkspaceId(workspaces.get(0));
 		}
 
-		Form<ImportModel> form = new Form<ImportModel>("form",
-				new CompoundPropertyModel<ImportModel>(model));
+		Form<ImportModel> form = new Form<ImportModel>("form", new CompoundPropertyModel<ImportModel>(model));
 		add(form);
 
-		final DropDownChoice<String> existingWorkspacesList = new DropDownChoice<String>(
-				"existingWorkspaceId", workspaces);
+		final DropDownChoice<String> existingWorkspacesList = new DropDownChoice<String>("existingWorkspaceId",
+				workspaces);
 		existingWorkspacesList.setOutputMarkupId(true);
-		final TextField<String> newWorkspaceInput = new RequiredTextField<String>(
-				"newWorkspaceId");
+		final TextField<String> newWorkspaceInput = new RequiredTextField<String>("newWorkspaceId");
 		newWorkspaceInput.setOutputMarkupId(true);
 		newWorkspaceInput.add(new PatternValidator("[\\w]+"));
 
-		RadioGroup<WorkspaceType> radioGroup = new RadioGroup<WorkspaceType>(
-				"radioGroup", new PropertyModel<WorkspaceType>(model,
-						"workspaceType"));
-		Radio<WorkspaceType> existingRadio = new Radio<WorkspaceType>(
-				"existing", new Model<WorkspaceType>(WorkspaceType.EXISTING));
+		RadioGroup<WorkspaceType> radioGroup = new RadioGroup<WorkspaceType>("radioGroup",
+				new PropertyModel<WorkspaceType>(model, "workspaceType"));
+		Radio<WorkspaceType> existingRadio = new Radio<WorkspaceType>("existing", new Model<WorkspaceType>(
+				WorkspaceType.EXISTING));
 		existingRadio.add(new AjaxEventBehavior("onclick") {
 
 			@Override
@@ -82,8 +79,7 @@ public class ChooseWorkspaceStep
 			}
 
 		});
-		Radio<WorkspaceType> newRadio = new Radio<WorkspaceType>("new",
-				new Model<WorkspaceType>(WorkspaceType.NEW));
+		Radio<WorkspaceType> newRadio = new Radio<WorkspaceType>("new", new Model<WorkspaceType>(WorkspaceType.NEW));
 		newRadio.add(new AjaxEventBehavior("onclick") {
 
 			@Override
@@ -128,8 +124,7 @@ public class ChooseWorkspaceStep
 	@Override
 	public IDynamicWizardStep next()
 	{
-		return new SelectResourcesStep(this,
-				(ImportModel) this.getDefaultModelObject());
+		return new SelectResourcesStep(this, (ImportModel) this.getDefaultModelObject());
 	}
 
 }

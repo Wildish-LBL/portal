@@ -176,11 +176,11 @@ h2 {
 	color: #000;
 	background: inherit;
 }
-
+/*
 p {
 	margin: 0 0 5px 0;
 }
-
+*/
 .btn.login {
 	background-color: #626262;
 	background-image: -moz-linear-gradient(center top , #8d8c8c, #626262);
@@ -206,11 +206,18 @@ p {
 }
 /* left side
    --------- */
-.left_box {
+#wizardActions, #wizardHeader {
+    padding-left: 250px;
 }
+  
 
 .inspan4 {
 	width: 205px;
+	margin-left: 10px;
+}
+
+.inspan12 {
+	width: 680px;
 	margin-left: 10px;
 }
 
@@ -228,7 +235,7 @@ p {
     padding-right: 15px;
 }
 
-.simple_left_box li {
+.simple_left_box ul li {
 	list-style-image: url("../images/expanded.gif");
 }
 

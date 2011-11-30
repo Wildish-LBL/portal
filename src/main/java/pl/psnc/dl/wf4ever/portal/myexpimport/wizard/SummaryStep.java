@@ -3,25 +3,24 @@
  */
 package pl.psnc.dl.wf4ever.portal.myexpimport.wizard;
 
+import org.apache.wicket.extensions.wizard.dynamic.DynamicWizardStep;
 import org.apache.wicket.extensions.wizard.dynamic.IDynamicWizardStep;
-
-
+import org.apache.wicket.model.Model;
 
 /**
  * @author Piotr Hołubowicz
  *
  */
 public class SummaryStep
-	extends AbstractStep
+	extends DynamicWizardStep
 {
 
 	private static final long serialVersionUID = -4003286657493791544L;
 
 
-	public SummaryStep(IDynamicWizardStep previousStep,
-			ImportModel model)
+	public SummaryStep(IDynamicWizardStep previousStep, ImportModel model)
 	{
-		super(previousStep, "Summary", model);
+		super(previousStep, "Summary", null, new Model<ImportModel>(model));
 	}
 
 

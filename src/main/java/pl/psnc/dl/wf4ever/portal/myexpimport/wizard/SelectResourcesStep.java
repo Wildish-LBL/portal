@@ -5,6 +5,7 @@ package pl.psnc.dl.wf4ever.portal.myexpimport.wizard;
 
 import java.util.Arrays;
 
+import org.apache.wicket.extensions.wizard.dynamic.DynamicWizardStep;
 import org.apache.wicket.extensions.wizard.dynamic.IDynamicWizardStep;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
@@ -12,6 +13,7 @@ import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.markup.html.form.RadioChoice;
 import org.apache.wicket.markup.html.form.validation.IFormValidator;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 
 import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ResourceSelectionModel.ImportType;
@@ -21,7 +23,7 @@ import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ResourceSelectionModel.Impor
  *
  */
 public class SelectResourcesStep
-	extends AbstractStep
+	extends DynamicWizardStep
 {
 
 	private static final long serialVersionUID = -7984392838783804920L;
@@ -30,17 +32,14 @@ public class SelectResourcesStep
 
 
 	@SuppressWarnings("serial")
-	public SelectResourcesStep(IDynamicWizardStep previousStep,
-			ImportModel model)
+	public SelectResourcesStep(IDynamicWizardStep previousStep, ImportModel model)
 	{
-		super(previousStep, "Select resources", model);
+		super(previousStep, "Select resources", null, new Model<ImportModel>(model));
 
 		selectionModel = new ResourceSelectionModel();
 
-		RadioChoice<ImportType> importType = new RadioChoice<ImportType>(
-				"importType", new PropertyModel<ImportType>(selectionModel,
-						"importType"), Arrays.asList(ImportType.values()),
-				new ImportTypeChoiceRenderer());
+		RadioChoice<ImportType> importType = new RadioChoice<ImportType>("importType", new PropertyModel<ImportType>(
+				selectionModel, "importType"), Arrays.asList(ImportType.values()), new ImportTypeChoiceRenderer());
 
 		add(importType);
 
@@ -50,8 +49,7 @@ public class SelectResourcesStep
 			add(createUnvisibileDiv("filesDiv"));
 		}
 		else {
-			filesDiv = new ResourceListPanel("filesDiv", "Files", model
-					.getMyExpUser().getFiles(),
+			filesDiv = new ResourceListPanel("filesDiv", "Files", model.getMyExpUser().getFiles(),
 					selectionModel.getSelectedFiles(), model.getImportedFiles());
 			add(filesDiv);
 		}
@@ -61,10 +59,8 @@ public class SelectResourcesStep
 			add(createUnvisibileDiv("workflowsDiv"));
 		}
 		else {
-			workflowsDiv = new ResourceListPanel("workflowsDiv", "Workflows",
-					model.getMyExpUser().getWorkflows(),
-					selectionModel.getSelectedWorkflows(),
-					model.getImportedWorkflows());
+			workflowsDiv = new ResourceListPanel("workflowsDiv", "Workflows", model.getMyExpUser().getWorkflows(),
+					selectionModel.getSelectedWorkflows(), model.getImportedWorkflows());
 			add(workflowsDiv);
 		}
 		final ResourceListPanel packsDiv;
@@ -73,8 +69,7 @@ public class SelectResourcesStep
 			add(createUnvisibileDiv("packsDiv"));
 		}
 		else {
-			packsDiv = new ResourceListPanel("packsDiv", "Packs", model
-					.getMyExpUser().getPacks(),
+			packsDiv = new ResourceListPanel("packsDiv", "Packs", model.getMyExpUser().getPacks(),
 					selectionModel.getSelectedPacks(), model.getImportedPacks());
 			add(packsDiv);
 		}
@@ -126,8 +121,8 @@ public class SelectResourcesStep
 	@Override
 	public IDynamicWizardStep next()
 	{
-		return new ConfirmRONamesStep(this,
-				(ImportModel) this.getDefaultModelObject(), selectionModel.createResearchObjects());
+		return new ConfirmRONamesStep(this, (ImportModel) this.getDefaultModelObject(),
+				selectionModel.createResearchObjects());
 	}
 
 

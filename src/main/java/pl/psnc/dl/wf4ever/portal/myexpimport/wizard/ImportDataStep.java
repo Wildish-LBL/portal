@@ -6,9 +6,11 @@ package pl.psnc.dl.wf4ever.portal.myexpimport.wizard;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.extensions.wizard.dynamic.DynamicWizardStep;
 import org.apache.wicket.extensions.wizard.dynamic.IDynamicWizardStep;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.time.Duration;
 import org.scribe.model.Token;
@@ -23,7 +25,7 @@ import pl.psnc.dl.wf4ever.portal.services.MyExpImportService;
  *
  */
 public class ImportDataStep
-	extends AbstractStep
+	extends DynamicWizardStep
 {
 
 	private static final long serialVersionUID = -2632389547400514998L;
@@ -34,7 +36,7 @@ public class ImportDataStep
 	@SuppressWarnings("serial")
 	public ImportDataStep(IDynamicWizardStep previousStep, final ImportModel model)
 	{
-		super(previousStep, "Import data", model);
+		super(previousStep, "Import data", null, new Model<ImportModel>(model));
 		setOutputMarkupId(true);
 		final TextArea<String> importStatus = new TextArea<String>("messages", new PropertyModel<String>(model,
 				"messages"));

@@ -42,7 +42,8 @@ public class MyExpImportPage
 			add(new ImportWizard("wizard", model));
 		}
 		catch (Exception e) {
-			throw new RestartResponseException(ErrorPage.class, new PageParameters().add("message", e.getMessage()));
+			throw new RestartResponseException(ErrorPage.class, new PageParameters().add("message",
+				e.getMessage() != null ? e.getMessage() : "Unknown error"));
 		}
 	}
 
