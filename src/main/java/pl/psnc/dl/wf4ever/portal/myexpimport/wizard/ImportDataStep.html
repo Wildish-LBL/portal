@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<wicket:panel xmlns:wicket="http://wicket.apache.org">
-	<div class="entry">
+<wicket:extend xmlns:wicket="http://wicket.apache.org">
+	<div class="inspan12">
 		<p>
 			Press <i>Start</i> to start copying the resources. The process should
 			take not longer then a few minutes, depending on the amount and size
@@ -16,7 +16,7 @@
 				readonly="readonly" style="white-space: nowrap;" wrap="off"></textarea>
 		</p>
 		<p>
-			<input type="button" wicket:id="go" value="Start" />
+			<input class="btn primary" type="button" wicket:id="go" value="Start" />
 		</p>
 	</div>
-</wicket:panel>
+</wicket:extend>

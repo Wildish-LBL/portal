@@ -6,11 +6,8 @@ package pl.psnc.dl.wf4ever.portal.myexpimport.wizard;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.extensions.wizard.dynamic.DynamicWizardStep;
-import org.apache.wicket.extensions.wizard.dynamic.IDynamicWizardStep;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.time.Duration;
 import org.scribe.model.Token;
@@ -25,7 +22,7 @@ import pl.psnc.dl.wf4ever.portal.services.MyExpImportService;
  *
  */
 public class ImportDataStep
-	extends DynamicWizardStep
+	extends AbstractImportStep
 {
 
 	private static final long serialVersionUID = -2632389547400514998L;
@@ -34,9 +31,9 @@ public class ImportDataStep
 
 
 	@SuppressWarnings("serial")
-	public ImportDataStep(IDynamicWizardStep previousStep, final ImportModel model)
+	public ImportDataStep(final ImportModel model)
 	{
-		super(previousStep, "Import data", null, new Model<ImportModel>(model));
+		super("Import data", null);
 		setOutputMarkupId(true);
 		final TextArea<String> importStatus = new TextArea<String>("messages", new PropertyModel<String>(model,
 				"messages"));
@@ -84,42 +81,6 @@ public class ImportDataStep
 				}
 			}
 		}).setEnabled(model.getStatus() == ImportStatus.NOT_STARTED).setOutputMarkupId(true);
-	}
-
-
-	/* (non-Javadoc)
-	 * @see org.apache.wicket.extensions.wizard.dynamic.IDynamicWizardStep#isLastStep()
-	 */
-	@Override
-	public boolean isLastStep()
-	{
-		return false;
-	}
-
-
-	/* (non-Javadoc)
-	 * @see org.apache.wicket.extensions.wizard.dynamic.IDynamicWizardStep#next()
-	 */
-	@Override
-	public IDynamicWizardStep next()
-	{
-		return new SummaryStep(this, (ImportModel) this.getDefaultModelObject());
-	}
-
-
-	@Override
-	public boolean isPreviousAvailable()
-	{
-		ImportModel model = (ImportModel) getDefaultModelObject();
-		return model.getStatus() == ImportStatus.NOT_STARTED;
-	}
-
-
-	@Override
-	public boolean isNextAvailable()
-	{
-		ImportModel model = (ImportModel) getDefaultModelObject();
-		return model.getStatus() == ImportStatus.FINISHED;
 	}
 
 }

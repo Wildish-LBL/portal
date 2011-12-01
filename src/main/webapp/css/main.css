@@ -186,6 +186,27 @@ p {
 	background-image: -moz-linear-gradient(center top , #8d8c8c, #626262);
 }
 
+/* wizard */
+#wizardActions, #wizardHeader {
+    padding-left: 250px;
+}
+
+.selectedStep {
+    border-bottom: solid 1px #FF5F3F;
+}  
+
+table.resourceList td.checkbox {
+    width: 20px;
+}
+
+table.resourceList td.title label {
+    float: none;
+}
+
+table.resourceList td.link {
+    width: 50px;
+}
+
 /* layout
    ------ */
 .content {
@@ -206,14 +227,6 @@ p {
 }
 /* left side
    --------- */
-#wizardActions, #wizardHeader {
-    padding-left: 250px;
-}
-
-span .selectedStep {
-    text-decoration: bold;
-}  
-
 .inspan4 {
 	width: 205px;
 	margin-left: 10px;

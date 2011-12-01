@@ -12,9 +12,7 @@ import org.scribe.oauth.OAuthService;
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.User;
-import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportModel;
 import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportWizard;
-import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.StartImportStep;
 import pl.psnc.dl.wf4ever.portal.services.MyExpApi;
 import pl.psnc.dl.wf4ever.portal.services.MyExpImportService;
 
@@ -42,9 +40,7 @@ public class MyExpImportPage
 
 		try {
 			User myExpUser = MyExpImportService.retrieveMyExpUser(MySession.get().getMyExpAccessToken(), service);
-			ImportModel model = new ImportModel(myExpUser);
-			model.setStartStep(new StartImportStep(model));
-			add(new ImportWizard("wizard", model));
+			add(new ImportWizard("wizard", myExpUser));
 		}
 		catch (Exception e) {
 			log.error(e);

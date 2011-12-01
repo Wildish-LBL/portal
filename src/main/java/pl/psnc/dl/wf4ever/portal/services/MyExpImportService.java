@@ -27,7 +27,6 @@ import pl.psnc.dl.wf4ever.portal.myexpimport.model.SimpleResource;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.SimpleResourceHeader;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.User;
 import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportModel;
-import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportModel.ImportStatus;
 import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportModel.WorkspaceType;
 
@@ -110,14 +109,15 @@ public class MyExpImportService
 				if (model.getWorkspaceType() == WorkspaceType.NEW) {
 					createWorkspace(model.getWorkspaceId());
 				}
-				for (ResearchObject ro : model.getResearchObjects()) {
-					try {
-						importRO(ro);
-					}
-					catch (Exception e) {
-						log.error("Error during import", e);
-						model.setMessage(e.getMessage());
-					}
+				try {
+					createRO(model.getRoName());
+					importSimpleResources(model.getSelectedFiles(), model.getRoName());
+					importSimpleResources(model.getSelectedWorkflows(), model.getRoName());
+					importPacks();
+				}
+				catch (Exception e) {
+					log.error("Error during import", e);
+					model.setMessage(e.getMessage());
 				}
 			}
 			catch (Exception e1) {
@@ -147,22 +147,6 @@ public class MyExpImportService
 
 		/**
 		 * @param model
-		 * @param dLibraUser
-		 * @param ro
-		 * @throws Exception 
-		 */
-		private void importRO(ResearchObject ro)
-			throws Exception
-		{
-			createRO(ro);
-			importSimpleResources(ro.getFiles(), ro.getName());
-			importSimpleResources(ro.getWorkflows(), ro.getName());
-			importPacks(ro);
-		}
-
-
-		/**
-		 * @param model
 		 * @param ro
 		 * @param myExpToken
 		 * @param dLibraUser
@@ -187,15 +171,15 @@ public class MyExpImportService
 		 * @throws JAXBException
 		 * @throws Exception
 		 */
-		private void importPacks(ResearchObject ro)
+		private void importPacks()
 			throws JAXBException, Exception
 		{
-			for (PackHeader packHeader : ro.getPacks()) {
+			for (PackHeader packHeader : model.getSelectedPacks()) {
 				Pack pack = (Pack) getResource(packHeader, Pack.class);
-				importResourceMetadata(pack, pack.getId() + ".rdf", ro.getName(), "");
+				importResourceMetadata(pack, pack.getId() + ".rdf", model.getRoName(), "");
 
 				for (InternalPackItemHeader packItemHeader : pack.getResources()) {
-					importInternalPackItem(ro, pack, packItemHeader);
+					importInternalPackItem(pack, packItemHeader);
 				}
 			}
 		}
@@ -211,12 +195,13 @@ public class MyExpImportService
 		 * @throws JAXBException
 		 * @throws Exception
 		 */
-		private void importInternalPackItem(ResearchObject ro, Pack pack, InternalPackItemHeader packItemHeader)
+		private void importInternalPackItem(Pack pack, InternalPackItemHeader packItemHeader)
 			throws JAXBException, Exception
 		{
 			InternalPackItem internalItem = (InternalPackItem) getResource(packItemHeader, InternalPackItem.class);
 			SimpleResourceHeader resourceHeader = internalItem.getItem();
-			importSimpleResource(resourceHeader, ro.getName(), pack.getId() + "/", resourceHeader.getResourceClass());
+			importSimpleResource(resourceHeader, model.getRoName(), pack.getId() + "/",
+				resourceHeader.getResourceClass());
 		}
 
 
@@ -274,11 +259,11 @@ public class MyExpImportService
 		 * @param dLibraUser
 		 * @throws Exception
 		 */
-		private void createRO(ResearchObject ro)
+		private void createRO(String id)
 			throws Exception
 		{
-			model.setMessage(String.format("Creating a Research Object \"%s\"", ro.getName()));
-			if (!DlibraService.createResearchObjectAndVersion(model.getWorkspaceId(), ro.getName(), dLibraToken,
+			model.setMessage(String.format("Creating a Research Object \"%s\"", id));
+			if (!DlibraService.createResearchObjectAndVersion(model.getWorkspaceId(), id, dLibraToken,
 				model.isMergeROs())) {
 				model.setMessage("Merged with an existing Research Object");
 			}

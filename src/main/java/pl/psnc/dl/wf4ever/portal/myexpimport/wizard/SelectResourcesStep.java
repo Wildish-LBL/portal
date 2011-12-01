@@ -3,74 +3,58 @@
  */
 package pl.psnc.dl.wf4ever.portal.myexpimport.wizard;
 
-import java.util.Arrays;
-
-import org.apache.wicket.extensions.wizard.dynamic.DynamicWizardStep;
-import org.apache.wicket.extensions.wizard.dynamic.IDynamicWizardStep;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponent;
-import org.apache.wicket.markup.html.form.IChoiceRenderer;
-import org.apache.wicket.markup.html.form.RadioChoice;
 import org.apache.wicket.markup.html.form.validation.IFormValidator;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.model.PropertyModel;
-
-import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ResourceSelectionModel.ImportType;
 
 /**
  * @author Piotr Hołubowicz
  *
  */
 public class SelectResourcesStep
-	extends DynamicWizardStep
+	extends AbstractImportStep
 {
 
 	private static final long serialVersionUID = -7984392838783804920L;
 
-	private ResourceSelectionModel selectionModel;
+	private final ImportModel model;
 
 
 	@SuppressWarnings("serial")
-	public SelectResourcesStep(IDynamicWizardStep previousStep, ImportModel model)
+	public SelectResourcesStep(ImportModel model)
 	{
-		super(previousStep, "Select resources", null, new Model<ImportModel>(model));
-
-		selectionModel = new ResourceSelectionModel();
-
-		RadioChoice<ImportType> importType = new RadioChoice<ImportType>("importType", new PropertyModel<ImportType>(
-				selectionModel, "importType"), Arrays.asList(ImportType.values()), new ImportTypeChoiceRenderer());
-
-		add(importType);
+		super("Select resources", null);
+		this.model = model;
 
 		final ResourceListPanel filesDiv;
 		if (model.getMyExpUser().getFiles().isEmpty()) {
 			filesDiv = null;
-			add(createUnvisibileDiv("filesDiv"));
+			add(createUnvisibleDiv("filesDiv"));
 		}
 		else {
 			filesDiv = new ResourceListPanel("filesDiv", "Files", model.getMyExpUser().getFiles(),
-					selectionModel.getSelectedFiles(), model.getImportedFiles());
+					model.getSelectedFiles());
 			add(filesDiv);
 		}
 		final ResourceListPanel workflowsDiv;
 		if (model.getMyExpUser().getWorkflows().isEmpty()) {
 			workflowsDiv = null;
-			add(createUnvisibileDiv("workflowsDiv"));
+			add(createUnvisibleDiv("workflowsDiv"));
 		}
 		else {
 			workflowsDiv = new ResourceListPanel("workflowsDiv", "Workflows", model.getMyExpUser().getWorkflows(),
-					selectionModel.getSelectedWorkflows(), model.getImportedWorkflows());
+					model.getSelectedWorkflows());
 			add(workflowsDiv);
 		}
 		final ResourceListPanel packsDiv;
 		if (model.getMyExpUser().getPacks().isEmpty()) {
 			packsDiv = null;
-			add(createUnvisibileDiv("packsDiv"));
+			add(createUnvisibleDiv("packsDiv"));
 		}
 		else {
 			packsDiv = new ResourceListPanel("packsDiv", "Packs", model.getMyExpUser().getPacks(),
-					selectionModel.getSelectedPacks(), model.getImportedPacks());
+					model.getSelectedPacks());
 			add(packsDiv);
 		}
 
@@ -85,7 +69,7 @@ public class SelectResourcesStep
 					workflowsDiv.commit();
 				if (packsDiv != null)
 					packsDiv.commit();
-				if (!selectionModel.isValid()) {
+				if (!SelectResourcesStep.this.model.isValid()) {
 					error("You must select at least one resource.");
 				}
 			}
@@ -103,7 +87,7 @@ public class SelectResourcesStep
 	/**
 	 * @return
 	 */
-	private WebMarkupContainer createUnvisibileDiv(String id)
+	private WebMarkupContainer createUnvisibleDiv(String id)
 	{
 		WebMarkupContainer div = new WebMarkupContainer(id);
 		div.setVisible(false);
@@ -112,52 +96,8 @@ public class SelectResourcesStep
 
 
 	@Override
-	public boolean isLastStep()
-	{
-		return false;
-	}
-
-
-	@Override
-	public IDynamicWizardStep next()
-	{
-		return new ConfirmRONamesStep(this, (ImportModel) this.getDefaultModelObject(),
-				selectionModel.createResearchObjects());
-	}
-
-
-	@Override
 	public boolean isComplete()
 	{
-		return selectionModel.isValid();
+		return model.isValid();
 	}
-
-	private class ImportTypeChoiceRenderer
-		implements IChoiceRenderer<ImportType>
-	{
-
-		private static final long serialVersionUID = 1558067857104879971L;
-
-
-		@Override
-		public Object getDisplayValue(ImportType type)
-		{
-			switch (type) {
-				case ALL_AS_ONE:
-					return "Import all selected resources as 1 Research Object";
-				case EACH_SEPARATELY:
-					return "Import each selected resource as a separate Research Object";
-			}
-			return null;
-		}
-
-
-		@Override
-		public String getIdValue(ImportType type, int idx)
-		{
-			return type.toString();
-		}
-
-	}
-
 }

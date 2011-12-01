@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <wicket:panel xmlns:wicket="http://wicket.apache.org">
-	<div>
-		<form wicket:id="form">
-			<span wicket:id="overview"></span>
-			<div id="wizardHeader"><h3 wicket:id="header"></h3></div>
-			<div wicket:id="view"></div>
-			<span wicket:id="feedback"></span> <span wicket:id="buttons"></span>
-		</form>
-	</div>
+	<form wicket:id="form">
+		<div class="row">
+			<div class="span16" wicket:id="overview"></div>
+		</div>
+		<div class="row">
+			<div class="span16" id="wizardHeader">
+				<h3 wicket:id="header"></h3>
+			</div>
+		</div>
+		<div class="row">
+			<div class="span4" wicket:id="toc"></div>
+			<div class="span12" wicket:id="view"></div>
+		</div>
+		<div wicket:id="feedback"></div>
+		<div wicket:id="buttons"></div>
+	</form>
 </wicket:panel>

@@ -3,11 +3,7 @@
  */
 package pl.psnc.dl.wf4ever.portal.myexpimport.wizard;
 
-import org.apache.wicket.extensions.wizard.dynamic.IDynamicWizardStep;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.model.Model;
-
-import pl.psnc.dl.wf4ever.portal.MySession;
 
 /**
  * @author Piotr Hołubowicz
@@ -20,29 +16,14 @@ public class StartImportStep
 	private static final long serialVersionUID = 4637256013660809942L;
 
 
-	public StartImportStep(ImportModel model)
+	public StartImportStep()
 	{
-		super(null, "Start", null);
+		super("Start", null);
 
-		add(new Label("userName", new Model<String>(model.getMyExpUser().getName())));
-		add(new Label("packsCnt", new Model<Integer>(model.getMyExpUser().getPacks().size())));
-		add(new Label("workflowsCnt", new Model<Integer>(model.getMyExpUser().getWorkflows().size())));
-		add(new Label("filesCnt", new Model<Integer>(model.getMyExpUser().getFiles().size())));
-	}
-
-
-	@Override
-	public boolean isLastStep()
-	{
-		return false;
-	}
-
-
-	@Override
-	public IDynamicWizardStep next()
-	{
-		return new ChooseWorkspaceStep(this, (ImportModel) this.getDefaultModelObject(), MySession.get()
-				.getdLibraAccessToken());
+		add(new Label("myExpUser.name"));
+		add(new Label("myExpUser.packs.size"));
+		add(new Label("myExpUser.workflows.size"));
+		add(new Label("myExpUser.files.size"));
 	}
 
 }

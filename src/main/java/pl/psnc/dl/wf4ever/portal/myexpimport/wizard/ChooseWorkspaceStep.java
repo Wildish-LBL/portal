@@ -8,8 +8,6 @@ import java.util.List;
 
 import org.apache.wicket.ajax.AjaxEventBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.extensions.wizard.dynamic.DynamicWizardStep;
-import org.apache.wicket.extensions.wizard.dynamic.IDynamicWizardStep;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.Radio;
@@ -22,6 +20,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.validation.validator.PatternValidator;
 import org.scribe.model.Token;
 
+import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportModel.WorkspaceType;
 import pl.psnc.dl.wf4ever.portal.services.DlibraService;
 
@@ -30,17 +29,18 @@ import pl.psnc.dl.wf4ever.portal.services.DlibraService;
  *
  */
 public class ChooseWorkspaceStep
-	extends DynamicWizardStep
+	extends AbstractImportStep
 {
 
 	private static final long serialVersionUID = -3238571883021517707L;
 
 
 	@SuppressWarnings("serial")
-	public ChooseWorkspaceStep(IDynamicWizardStep previousStep, ImportModel model, Token token)
+	public ChooseWorkspaceStep(ImportModel model)
 	{
-		super(previousStep, "Choose workspace", null, new Model<ImportModel>(model));
+		super("Choose workspace", null);
 
+		Token token = MySession.get().getdLibraAccessToken();
 		List<String> workspaces = null;
 		try {
 			workspaces = DlibraService.getWorkspaceList(token);
@@ -108,23 +108,6 @@ public class ChooseWorkspaceStep
 		radioGroup.add(newWorkspaceInput);
 
 		form.add(radioGroup);
-	}
-
-
-	/* (non-Javadoc)
-	 * @see org.apache.wicket.extensions.wizard.dynamic.IDynamicWizardStep#isLastStep()
-	 */
-	@Override
-	public boolean isLastStep()
-	{
-		return false;
-	}
-
-
-	@Override
-	public IDynamicWizardStep next()
-	{
-		return new SelectResourcesStep(this, (ImportModel) this.getDefaultModelObject());
 	}
 
 }

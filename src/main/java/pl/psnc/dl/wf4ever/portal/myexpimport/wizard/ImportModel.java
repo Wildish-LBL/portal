@@ -4,12 +4,11 @@ package pl.psnc.dl.wf4ever.portal.myexpimport.wizard;
  * 
  */
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.wicket.extensions.wizard.dynamic.DynamicWizardModel;
-import org.apache.wicket.extensions.wizard.dynamic.IDynamicWizardStep;
 
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.FileHeader;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.PackHeader;
@@ -21,11 +20,11 @@ import pl.psnc.dl.wf4ever.portal.myexpimport.model.WorkflowHeader;
  *
  */
 public class ImportModel
-	extends DynamicWizardModel
+	implements Serializable
 {
 
 	public enum ImportStatus {
-		NOT_STARTED, RUNNING, PAUSED, FINISHED
+		NOT_STARTED, RUNNING, FINISHED
 	}
 
 	public enum WorkspaceType {
@@ -33,8 +32,6 @@ public class ImportModel
 	}
 
 	private static final long serialVersionUID = -6654329540413067819L;
-
-	private final List<ResearchObject> researchObjects;
 
 	private final User myExpUser;
 
@@ -52,27 +49,40 @@ public class ImportModel
 
 	private String newWorkspaceId;
 
-	//HACK this is copied from DynamicWizardModel because it is private not protected.
-	/**
-	 * Remember the first step for resetting the wizard.
-	 */
-	private IDynamicWizardStep startStep;
+	private final List<FileHeader> selectedFiles;
+
+	private final List<WorkflowHeader> selectedWorkflows;
+
+	private final List<PackHeader> selectedPacks;
+
+	private String roName;
 
 
 	public ImportModel(User user)
 	{
-		super(null);
+		super();
 		this.myExpUser = user;
-		this.researchObjects = new ArrayList<ResearchObject>();
+		this.selectedFiles = new ArrayList<FileHeader>();
+		this.selectedWorkflows = new ArrayList<WorkflowHeader>();
+		this.selectedPacks = new ArrayList<PackHeader>();
 	}
 
 
-	/**
-	 * @return the researchObjects
-	 */
-	public List<ResearchObject> getResearchObjects()
+	public List<FileHeader> getSelectedFiles()
 	{
-		return researchObjects;
+		return selectedFiles;
+	}
+
+
+	public List<WorkflowHeader> getSelectedWorkflows()
+	{
+		return selectedWorkflows;
+	}
+
+
+	public List<PackHeader> getSelectedPacks()
+	{
+		return selectedPacks;
 	}
 
 
@@ -161,36 +171,6 @@ public class ImportModel
 	}
 
 
-	public List<FileHeader> getImportedFiles()
-	{
-		List<FileHeader> list = new ArrayList<FileHeader>();
-		for (ResearchObject ro : researchObjects) {
-			list.addAll(ro.getFiles());
-		}
-		return list;
-	}
-
-
-	public List<WorkflowHeader> getImportedWorkflows()
-	{
-		List<WorkflowHeader> list = new ArrayList<WorkflowHeader>();
-		for (ResearchObject ro : researchObjects) {
-			list.addAll(ro.getWorkflows());
-		}
-		return list;
-	}
-
-
-	public List<PackHeader> getImportedPacks()
-	{
-		List<PackHeader> list = new ArrayList<PackHeader>();
-		for (ResearchObject ro : researchObjects) {
-			list.addAll(ro.getPacks());
-		}
-		return list;
-	}
-
-
 	/**
 	 * @return the workspaceId
 	 */
@@ -258,22 +238,27 @@ public class ImportModel
 	}
 
 
-	/**
-	 * @see org.apache.wicket.extensions.wizard.IWizardModel#reset()
-	 */
-	@Override
-	public void reset()
+	public boolean isValid()
 	{
-		setActiveStep(startStep);
+		return !selectedFiles.isEmpty() || !selectedWorkflows.isEmpty() || !selectedPacks.isEmpty();
 	}
 
 
 	/**
-	 * @param startStep the startStep to set
+	 * @return the roName
 	 */
-	public void setStartStep(IDynamicWizardStep startStep)
+	public String getRoName()
 	{
-		this.startStep = startStep;
+		return roName;
+	}
+
+
+	/**
+	 * @param roName the roName to set
+	 */
+	public void setRoName(String roName)
+	{
+		this.roName = roName;
 	}
 
 }
