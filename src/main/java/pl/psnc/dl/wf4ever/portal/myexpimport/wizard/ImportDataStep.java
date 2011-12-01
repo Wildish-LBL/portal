@@ -52,8 +52,7 @@ public class ImportDataStep
 					stop();
 					importStatus.remove(this);
 					MySession.get().setImportDone(true);
-					getSession().info("Import complete.");
-					getRequestCycle().setResponsePage(getPage());
+					target.add(ImportDataStep.this.getParent().getParent());
 				}
 			}
 		};

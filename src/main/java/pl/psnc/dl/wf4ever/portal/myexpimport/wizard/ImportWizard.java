@@ -52,6 +52,7 @@ public class ImportWizard
 
 		init(wizardModel);
 		getForm().add(new TocPanel("toc", wizardModel));
+		setOutputMarkupId(true);
 	}
 
 

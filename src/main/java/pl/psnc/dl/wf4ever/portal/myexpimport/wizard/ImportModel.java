@@ -35,7 +35,7 @@ public class ImportModel
 
 	private final User myExpUser;
 
-	private String message = "Import has not started";
+	private String message = "Ready";
 
 	private List<String> messages = new ArrayList<String>();
 
