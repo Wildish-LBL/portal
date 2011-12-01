@@ -57,6 +57,8 @@ public class ImportModel
 
 	private String roName;
 
+	private int progressInPercent = 0;
+
 
 	public ImportModel(User user)
 	{
@@ -259,6 +261,24 @@ public class ImportModel
 	public void setRoName(String roName)
 	{
 		this.roName = roName;
+	}
+
+
+	/**
+	 * @return the progressInPercent
+	 */
+	public int getProgressInPercent()
+	{
+		return progressInPercent;
+	}
+
+
+	/**
+	 * @param progressInPercent the progressInPercent to set
+	 */
+	public void setProgressInPercent(int progressInPercent)
+	{
+		this.progressInPercent = progressInPercent;
 	}
 
 }

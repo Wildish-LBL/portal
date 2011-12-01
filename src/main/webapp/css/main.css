@@ -207,6 +207,11 @@ table.resourceList td.link {
     width: 50px;
 }
 
+#progressMeter {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
 /* layout
    ------ */
 .content {

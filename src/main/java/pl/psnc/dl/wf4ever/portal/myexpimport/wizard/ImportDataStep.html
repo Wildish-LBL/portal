@@ -10,11 +10,15 @@
 		<p>If you provided RO names that already exist in your account in
 			dLibra, the resources will be added to the existing RO. If resources
 			with the same name exist, they will be overwritten.</p>
-		<p>
-			Import status messages:<br />
-			<textarea rows="10" cols="125" wicket:id="messages"
-				readonly="readonly" style="white-space: nowrap;" wrap="off"></textarea>
-		</p>
+		<script>
+			$(function() {
+				$("#progressbar").progressbar();
+			});
+		</script>
+		<div id="progressMeter">
+			<div id="progressbar"></div>
+			<p wicket:id="message"></p>
+		</div>
 		<p>
 			<input class="btn primary" type="button" wicket:id="go" value="Start" />
 		</p>

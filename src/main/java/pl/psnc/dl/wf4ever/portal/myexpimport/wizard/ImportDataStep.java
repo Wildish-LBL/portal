@@ -6,8 +6,8 @@ package pl.psnc.dl.wf4ever.portal.myexpimport.wizard;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.time.Duration;
 import org.scribe.model.Token;
@@ -35,8 +35,7 @@ public class ImportDataStep
 	{
 		super("Import data", null);
 		setOutputMarkupId(true);
-		final TextArea<String> importStatus = new TextArea<String>("messages", new PropertyModel<String>(model,
-				"messages"));
+		final Label importStatus = new Label("message", new PropertyModel<String>(model, "message"));
 		importStatus.setOutputMarkupId(true);
 		add(importStatus);
 
@@ -46,6 +45,9 @@ public class ImportDataStep
 			protected void onPostProcessTarget(AjaxRequestTarget target)
 			{
 				super.onPostProcessTarget(target);
+				target.appendJavaScript("$(\"#progressbar\").progressbar(\"value\", " + model.getProgressInPercent()
+						+ ");");
+
 				if (model.getStatus() == ImportStatus.FINISHED) {
 					stop();
 					importStatus.remove(this);

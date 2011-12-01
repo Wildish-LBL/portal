@@ -4,6 +4,7 @@
 package pl.psnc.dl.wf4ever.portal.services;
 
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
@@ -89,6 +90,10 @@ public class MyExpImportService
 
 		private final Token dLibraToken;
 
+		private int stepsTotal = 0;
+
+		private int stepsComplete = 0;
+
 
 		public ImportThread(ImportModel importModel, Token myExpAccessToken, Token dLibraToken, String consumerKey,
 				String consumerSecret)
@@ -105,7 +110,14 @@ public class MyExpImportService
 		public void run()
 		{
 			model.setStatus(ImportStatus.RUNNING);
+			model.setMessage("Preparing the data");
 			try {
+				List<Pack> packs = getPacks(model.getSelectedPacks());
+				stepsTotal = model.getSelectedFiles().size() + model.getSelectedWorkflows().size();
+				for (Pack pack : packs) {
+					stepsTotal += pack.getResources().size();
+				}
+
 				if (model.getWorkspaceType() == WorkspaceType.NEW) {
 					createWorkspace(model.getWorkspaceId());
 				}
@@ -113,7 +125,7 @@ public class MyExpImportService
 					createRO(model.getRoName());
 					importSimpleResources(model.getSelectedFiles(), model.getRoName());
 					importSimpleResources(model.getSelectedWorkflows(), model.getRoName());
-					importPacks();
+					importPacks(packs, model.getRoName());
 				}
 				catch (Exception e) {
 					log.error("Error during import", e);
@@ -163,7 +175,20 @@ public class MyExpImportService
 		}
 
 
+		private List<Pack> getPacks(List<PackHeader> packHeaders)
+			throws OAuthException, JAXBException
+		{
+			List<Pack> packs = new ArrayList<Pack>();
+			for (PackHeader packHeader : packHeaders) {
+				packs.add((Pack) getResource(packHeader, Pack.class));
+			}
+			return packs;
+		}
+
+
 		/**
+		 * @param roName 
+		 * @param packs 
 		 * @param model
 		 * @param ro
 		 * @param myExpToken
@@ -171,12 +196,11 @@ public class MyExpImportService
 		 * @throws JAXBException
 		 * @throws Exception
 		 */
-		private void importPacks()
+		private void importPacks(List<Pack> packs, String roName)
 			throws JAXBException, Exception
 		{
-			for (PackHeader packHeader : model.getSelectedPacks()) {
-				Pack pack = (Pack) getResource(packHeader, Pack.class);
-				importResourceMetadata(pack, pack.getId() + ".rdf", model.getRoName(), "");
+			for (Pack pack : packs) {
+				importResourceMetadata(pack, pack.getId() + ".rdf", roName, "");
 
 				for (InternalPackItemHeader packItemHeader : pack.getResources()) {
 					importInternalPackItem(pack, packItemHeader);
@@ -216,6 +240,7 @@ public class MyExpImportService
 			DlibraService.sendResource(model.getWorkspaceId(), filename, roName, r.getContentDecoded(),
 				r.getContentType(), dLibraToken);
 
+			incrementStepsComplete();
 			return r;
 		}
 
@@ -277,6 +302,13 @@ public class MyExpImportService
 			Unmarshaller u = jc.createUnmarshaller();
 			StringBuffer xmlStr = new StringBuffer(xml);
 			return u.unmarshal(new StreamSource(new StringReader(xmlStr.toString())));
+		}
+
+
+		private void incrementStepsComplete()
+		{
+			stepsComplete++;
+			model.setProgressInPercent((int) Math.round((double) stepsComplete / stepsTotal * 100));
 		}
 
 	}
