@@ -10,7 +10,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.time.Duration;
-import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
@@ -38,6 +37,7 @@ public class ImportDataStep
 		final Label importStatus = new Label("message", new PropertyModel<String>(model, "message"));
 		importStatus.setOutputMarkupId(true);
 		add(importStatus);
+		setComplete(false);
 
 		final AjaxSelfUpdatingTimerBehavior updater = new AjaxSelfUpdatingTimerBehavior(Duration.milliseconds(INTERVAL)) {
 
@@ -51,7 +51,7 @@ public class ImportDataStep
 				if (model.getStatus() == ImportStatus.FINISHED) {
 					stop();
 					importStatus.remove(this);
-					MySession.get().setImportDone(true);
+					setComplete(true);
 					target.add(ImportDataStep.this.getParent().getParent());
 				}
 			}
@@ -68,11 +68,9 @@ public class ImportDataStep
 			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 			{
 				if (model.getStatus() == ImportStatus.NOT_STARTED) {
-					Token myExpAccessToken = MySession.get().getMyExpAccessToken();
-					Token dLibraAccessToken = MySession.get().getdLibraAccessToken();
 					PortalApplication app = (PortalApplication) getApplication();
-					MyExpImportService.startImport(model, myExpAccessToken, dLibraAccessToken,
-						app.getMyExpConsumerKey(), app.getMyExpConsumerSecret());
+					MyExpImportService.startImport(model, MySession.get().getMyExpAccessToken(), MySession.get()
+							.getdLibraAccessToken(), app.getMyExpConsumerKey(), app.getMyExpConsumerSecret());
 					importStatus.add(updater);
 					target.add(importStatus);
 

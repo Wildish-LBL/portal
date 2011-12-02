@@ -7,7 +7,6 @@ import org.apache.wicket.extensions.wizard.WizardModel;
 import org.apache.wicket.model.CompoundPropertyModel;
 
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.User;
-import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportModel.ImportStatus;
 import pl.psnc.dl.wf4ever.portal.pages.MyRosPage;
 
 public class ImportWizard
@@ -27,19 +26,18 @@ public class ImportWizard
 
 			private static final long serialVersionUID = 3739070705866873527L;
 
-
-			@Override
-			public boolean isPreviousAvailable()
-			{
-				return importModel.getStatus() != ImportStatus.RUNNING;
-			}
-
-
-			@Override
-			public boolean isNextAvailable()
-			{
-				return importModel.getStatus() != ImportStatus.RUNNING;
-			}
+			//			@Override
+			//			public boolean isPreviousAvailable()
+			//			{
+			//				return super.isPreviousAvailable() && importModel.getStatus() != ImportStatus.RUNNING;
+			//			}
+			//
+			//
+			//			@Override
+			//			public boolean isNextAvailable()
+			//			{
+			//				return super.isNextAvailable() && importModel.getStatus() != ImportStatus.RUNNING;
+			//			}
 
 		};
 		wizardModel.add(new StartImportStep());

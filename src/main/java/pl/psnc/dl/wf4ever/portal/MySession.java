@@ -33,10 +33,6 @@ public class MySession
 
 	private Token requestToken;
 
-	private boolean importDone;
-
-	private String nextUrl;
-
 
 	public MySession(Request request)
 	{
@@ -103,42 +99,6 @@ public class MySession
 	public void setRequestToken(Token requestToken)
 	{
 		this.requestToken = requestToken;
-	}
-
-
-	/**
-	 * @return the importDone
-	 */
-	public boolean isImportDone()
-	{
-		return importDone;
-	}
-
-
-	/**
-	 * @param importDone the importDone to set
-	 */
-	public void setImportDone(boolean importDone)
-	{
-		this.importDone = importDone;
-	}
-
-
-	/**
-	 * @return the nextUrl
-	 */
-	public String getNextUrl()
-	{
-		return nextUrl;
-	}
-
-
-	/**
-	 * @param nextUrl the nextUrl to set
-	 */
-	public void setNextUrl(String nextUrl)
-	{
-		this.nextUrl = nextUrl;
 	}
 
 

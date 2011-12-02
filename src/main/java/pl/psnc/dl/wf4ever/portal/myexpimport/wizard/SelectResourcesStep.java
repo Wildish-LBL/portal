@@ -18,14 +18,11 @@ public class SelectResourcesStep
 
 	private static final long serialVersionUID = -7984392838783804920L;
 
-	private final ImportModel model;
-
 
 	@SuppressWarnings("serial")
-	public SelectResourcesStep(ImportModel model)
+	public SelectResourcesStep(final ImportModel model)
 	{
 		super("Select resources", null);
-		this.model = model;
 
 		final ResourceListPanel filesDiv;
 		if (model.getMyExpUser().getFiles().isEmpty()) {
@@ -69,7 +66,7 @@ public class SelectResourcesStep
 					workflowsDiv.commit();
 				if (packsDiv != null)
 					packsDiv.commit();
-				if (!SelectResourcesStep.this.model.isValid()) {
+				if (!model.isValid()) {
 					error("You must select at least one resource.");
 				}
 			}
@@ -94,10 +91,4 @@ public class SelectResourcesStep
 		return div;
 	}
 
-
-	@Override
-	public boolean isComplete()
-	{
-		return model.isValid();
-	}
 }

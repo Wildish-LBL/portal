@@ -12,8 +12,10 @@ import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
 
 import pl.psnc.dl.wf4ever.portal.pages.AuthenticatePage;
+import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
 import pl.psnc.dl.wf4ever.portal.pages.HomePage;
 import pl.psnc.dl.wf4ever.portal.pages.MockupWelcomePage;
+import pl.psnc.dl.wf4ever.portal.pages.MyExpAuthorizePage;
 import pl.psnc.dl.wf4ever.portal.pages.MyExpImportPage;
 import pl.psnc.dl.wf4ever.portal.pages.MyRosPage;
 import pl.psnc.dl.wf4ever.portal.pages.OAuthPage;
@@ -66,8 +68,10 @@ public class PortalApplication
 		mountPage("/myros", MyRosPage.class);
 		mountPage("/ro", RoPage.class);
 		mountPage("/myexpimport", MyExpImportPage.class);
+		mountPage("/myexpauthorize", MyExpAuthorizePage.class);
 		mountPage("/oauth", OAuthPage.class);
 		mountPage("/authenticate", AuthenticatePage.class);
+		mountPage("/error", ErrorPage.class);
 
 		loadProperties("tokens.properties");
 	}
