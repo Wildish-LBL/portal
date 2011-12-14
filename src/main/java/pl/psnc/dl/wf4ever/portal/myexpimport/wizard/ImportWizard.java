@@ -28,7 +28,7 @@ public class ImportWizard
 		wizardModel.add(new SelectResourcesStep(importModel));
 		wizardModel.add(new ConfirmRONamesStep(importModel));
 		wizardModel.add(new ImportDataStep(importModel));
-		wizardModel.add(new SummaryStep(importModel));
+		//		wizardModel.add(new SummaryStep(importModel));
 		wizardModel.setCancelVisible(false);
 
 		init(wizardModel);
