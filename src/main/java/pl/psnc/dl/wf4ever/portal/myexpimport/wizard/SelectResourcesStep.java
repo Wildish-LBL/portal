@@ -6,7 +6,9 @@ package pl.psnc.dl.wf4ever.portal.myexpimport.wizard;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponent;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.validation.IFormValidator;
+import org.apache.wicket.validation.validator.PatternValidator;
 
 /**
  * @author Piotr Hołubowicz
@@ -17,6 +19,8 @@ public class SelectResourcesStep
 {
 
 	private static final long serialVersionUID = -7984392838783804920L;
+
+	private Form< ? > customPackIdForm;
 
 
 	@SuppressWarnings("serial")
@@ -55,6 +59,12 @@ public class SelectResourcesStep
 			add(packsDiv);
 		}
 
+		customPackIdForm = new Form<Void>("form");
+		TextField<String> customPackId = new TextField<String>("customPackId");
+		customPackId.add(new PatternValidator("[0-9]+"));
+		customPackIdForm.add(customPackId);
+		add(customPackIdForm);
+
 		add(new IFormValidator() {
 
 			@Override
@@ -66,6 +76,7 @@ public class SelectResourcesStep
 					workflowsDiv.commit();
 				if (packsDiv != null)
 					packsDiv.commit();
+				customPackIdForm.process(null);
 				if (!model.isValid()) {
 					error("You must select at least one resource.");
 				}

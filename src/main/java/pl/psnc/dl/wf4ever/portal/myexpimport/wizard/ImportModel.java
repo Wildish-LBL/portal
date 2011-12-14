@@ -45,19 +45,17 @@ public class ImportModel
 
 	private WorkspaceType workspaceType = WorkspaceType.EXISTING;
 
-	private String existingWorkspaceId;
-
-	private String newWorkspaceId;
-
 	private final List<FileHeader> selectedFiles;
 
 	private final List<WorkflowHeader> selectedWorkflows;
 
 	private final List<PackHeader> selectedPacks;
 
-	private String roName;
+	private String roId;
 
 	private int progressInPercent = 0;
+
+	private String customPackId;
 
 
 	public ImportModel(User user)
@@ -174,55 +172,6 @@ public class ImportModel
 
 
 	/**
-	 * @return the workspaceId
-	 */
-	public String getNewWorkspaceId()
-	{
-		return newWorkspaceId;
-	}
-
-
-	/**
-	 * @param workspaceId the workspaceId to set
-	 */
-	public void setNewWorkspaceId(String workspaceId)
-	{
-		this.newWorkspaceId = workspaceId;
-	}
-
-
-	/**
-	 * @return the existingWorkspaceId
-	 */
-	public String getExistingWorkspaceId()
-	{
-		return existingWorkspaceId;
-	}
-
-
-	/**
-	 * @param existingWorkspaceId the existingWorkspaceId to set
-	 */
-	public void setExistingWorkspaceId(String existingWorkspaceId)
-	{
-		this.existingWorkspaceId = existingWorkspaceId;
-	}
-
-
-	public String getWorkspaceId()
-	{
-		switch (getWorkspaceType()) {
-			case EXISTING:
-				return getExistingWorkspaceId();
-			case NEW:
-				return getNewWorkspaceId();
-			default:
-				return null;
-		}
-	}
-
-
-	/**
 	 * @return the workspaceType
 	 */
 	public WorkspaceType getWorkspaceType()
@@ -242,25 +191,26 @@ public class ImportModel
 
 	public boolean isValid()
 	{
-		return !selectedFiles.isEmpty() || !selectedWorkflows.isEmpty() || !selectedPacks.isEmpty();
+		return !selectedFiles.isEmpty() || !selectedWorkflows.isEmpty() || !selectedPacks.isEmpty()
+				|| customPackId != null;
 	}
 
 
 	/**
-	 * @return the roName
+	 * @return the roId
 	 */
-	public String getRoName()
+	public String getRoId()
 	{
-		return roName;
+		return roId;
 	}
 
 
 	/**
-	 * @param roName the roName to set
+	 * @param roId the roName to set
 	 */
-	public void setRoName(String roName)
+	public void setRoId(String roId)
 	{
-		this.roName = roName;
+		this.roId = roId;
 	}
 
 
@@ -279,6 +229,24 @@ public class ImportModel
 	public void setProgressInPercent(int progressInPercent)
 	{
 		this.progressInPercent = progressInPercent;
+	}
+
+
+	/**
+	 * @return the customPackId
+	 */
+	public String getCustomPackId()
+	{
+		return customPackId;
+	}
+
+
+	/**
+	 * @param customPackId the customPackId to set
+	 */
+	public void setCustomPackId(String customPackId)
+	{
+		this.customPackId = customPackId;
 	}
 
 }

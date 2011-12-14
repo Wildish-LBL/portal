@@ -23,7 +23,7 @@ public class ConfirmRONamesStep
 		super("Confirm RO identifier", null);
 
 		Form< ? > form = new Form<Void>("form");
-		RequiredTextField<String> name = new RequiredTextField<String>("roName");
+		RequiredTextField<String> name = new RequiredTextField<String>("roId");
 		name.add(new PatternValidator("[\\w]+"));
 		form.add(name);
 		add(form);

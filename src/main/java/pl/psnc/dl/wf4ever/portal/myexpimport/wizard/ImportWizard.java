@@ -22,26 +22,9 @@ public class ImportWizard
 		final ImportModel importModel = new ImportModel(user);
 		setDefaultModel(new CompoundPropertyModel<ImportModel>(importModel));
 
-		WizardModel wizardModel = new WizardModel() {
-
-			private static final long serialVersionUID = 3739070705866873527L;
-
-			//			@Override
-			//			public boolean isPreviousAvailable()
-			//			{
-			//				return super.isPreviousAvailable() && importModel.getStatus() != ImportStatus.RUNNING;
-			//			}
-			//
-			//
-			//			@Override
-			//			public boolean isNextAvailable()
-			//			{
-			//				return super.isNextAvailable() && importModel.getStatus() != ImportStatus.RUNNING;
-			//			}
-
-		};
+		WizardModel wizardModel = new WizardModel();
 		wizardModel.add(new StartImportStep());
-		wizardModel.add(new ChooseWorkspaceStep(importModel));
+		//		wizardModel.add(new ChooseWorkspaceStep(importModel));
 		wizardModel.add(new SelectResourcesStep(importModel));
 		wizardModel.add(new ConfirmRONamesStep(importModel));
 		wizardModel.add(new ImportDataStep(importModel));
