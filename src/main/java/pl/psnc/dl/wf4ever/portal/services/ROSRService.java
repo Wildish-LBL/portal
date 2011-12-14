@@ -6,6 +6,8 @@ package pl.psnc.dl.wf4ever.portal.services;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -20,10 +22,10 @@ import org.scribe.oauth.OAuthService;
  * @author Piotr Hołubowicz
  *
  */
-public class DlibraService
+public class ROSRService
 {
 
-	private static final Logger log = Logger.getLogger(DlibraService.class);
+	private static final Logger log = Logger.getLogger(ROSRService.class);
 
 	private static final String URI_SCHEME = "http";
 
@@ -117,5 +119,24 @@ public class DlibraService
 			log.error(e);
 			return null;
 		}
+	}
+
+
+	public static List<URI> getROList()
+		throws Exception
+	{
+		String url = new URI(URI_SCHEME, URI_HOST, URI_ROS, null).toURL().toString();
+		OAuthRequest request = new OAuthRequest(Verb.GET, url);
+		Response response = request.send();
+		if (response.getCode() != HttpURLConnection.HTTP_OK) {
+			throw new Exception("Error when getting RO list, response: " + response.getCode() + " "
+					+ response.getBody());
+		}
+		List<URI> uris = new ArrayList<URI>();
+		for (String s : response.getBody().split("[\\r\\n]+")) {
+			uris.add(new URI(s));
+		}
+
+		return uris;
 	}
 }

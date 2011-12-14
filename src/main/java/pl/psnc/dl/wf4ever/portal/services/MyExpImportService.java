@@ -230,7 +230,7 @@ public class MyExpImportService
 
 			String filename = path + r.getFilename();
 			model.setMessage(String.format("Uploading %s", filename));
-			DlibraService.sendResource(filename, roId, r.getContentDecoded(), r.getContentType(), dLibraToken);
+			ROSRService.sendResource(filename, roId, r.getContentDecoded(), r.getContentType(), dLibraToken);
 
 			incrementStepsComplete();
 			return r;
@@ -266,7 +266,7 @@ public class MyExpImportService
 			String rdf = response.getBody();
 
 			model.setMessage(String.format("Uploading metadata file %s", filename));
-			DlibraService.sendResource(filename, roId, rdf.getBytes(), "application/rdf+xml", dLibraToken);
+			ROSRService.sendResource(filename, roId, rdf.getBytes(), "application/rdf+xml", dLibraToken);
 		}
 
 
@@ -280,7 +280,7 @@ public class MyExpImportService
 			throws Exception
 		{
 			model.setMessage(String.format("Creating a Research Object \"%s\"", roId));
-			if (!DlibraService.createResearchObject(roId, dLibraToken, model.isMergeROs())) {
+			if (!ROSRService.createResearchObject(roId, dLibraToken, model.isMergeROs())) {
 				model.setMessage("Merged with an existing Research Object");
 			}
 		}
