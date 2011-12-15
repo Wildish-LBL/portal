@@ -3,6 +3,8 @@
  */
 package pl.psnc.dl.wf4ever.portal.myexpimport.model;
 
+import java.net.URI;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -21,9 +23,9 @@ public class WorkflowHeader
 
 
 	@Override
-	public String getResourceUrl()
+	public URI getResourceUrl()
 	{
-		return getUri() + "&elements=content,content-uri,content-type,id,title";
+		return URI.create(getUri().toString() + "&elements=content,content-uri,content-type,id,title");
 	}
 
 

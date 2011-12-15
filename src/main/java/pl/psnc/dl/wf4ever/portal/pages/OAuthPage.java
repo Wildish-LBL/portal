@@ -4,6 +4,8 @@
 package pl.psnc.dl.wf4ever.portal.pages;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -43,6 +45,7 @@ public class OAuthPage
 
 
 	public OAuthPage(PageParameters pageParameters)
+		throws URISyntaxException
 	{
 		super(pageParameters);
 
@@ -96,8 +99,10 @@ public class OAuthPage
 	 * @param pageParameters
 	 * @param service
 	 * @return
+	 * @throws URISyntaxException 
 	 */
 	private Token retrieveDlibraAccessToken(PageParameters pageParameters, OAuthService service)
+		throws URISyntaxException
 	{
 		Token accessToken = null;
 		//TODO in the OAuth 2.0 implicit grant flow the access token is sent 
@@ -111,14 +116,14 @@ public class OAuthPage
 			}
 		}
 		else if (!pageParameters.get("code").isEmpty()) {
-			String url = new DlibraApi().getAccessTokenEndpoint() + "?grant_type=authorization_code&code="
-					+ pageParameters.get("code").toString();
+			URI uri = new URI(new DlibraApi().getAccessTokenEndpoint() + "?grant_type=authorization_code&code="
+					+ pageParameters.get("code").toString());
 			ObjectMapper mapper = new ObjectMapper();
 			String body = null;
 			try {
 				Response response;
 				try {
-					response = OAuthHelpService.sendRequest(service, Verb.GET, url);
+					response = OAuthHelpService.sendRequest(service, Verb.GET, uri);
 					body = response.getBody();
 					@SuppressWarnings("unchecked")
 					Map<String, String> responseData = mapper.readValue(body, Map.class);

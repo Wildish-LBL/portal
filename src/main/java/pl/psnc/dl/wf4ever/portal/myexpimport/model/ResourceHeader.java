@@ -4,6 +4,7 @@
 package pl.psnc.dl.wf4ever.portal.myexpimport.model;
 
 import java.io.Serializable;
+import java.net.URI;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlValue;
@@ -21,10 +22,10 @@ public abstract class ResourceHeader
 	 * 
 	 */
 	private static final long serialVersionUID = -9038815722609845400L;
-	
-	private String uri;
 
-	private String resource;
+	private URI uri;
+
+	private URI resource;
 
 	private String title;
 
@@ -39,7 +40,7 @@ public abstract class ResourceHeader
 	 * @return the uri
 	 */
 	@XmlAttribute
-	public String getUri()
+	public URI getUri()
 	{
 		return uri;
 	}
@@ -48,7 +49,7 @@ public abstract class ResourceHeader
 	/**
 	 * @param uri the uri to set
 	 */
-	public void setUri(String uri)
+	public void setUri(URI uri)
 	{
 		this.uri = uri;
 	}
@@ -58,7 +59,7 @@ public abstract class ResourceHeader
 	 * @return the resource
 	 */
 	@XmlAttribute
-	public String getResource()
+	public URI getResource()
 	{
 		return resource;
 	}
@@ -67,7 +68,7 @@ public abstract class ResourceHeader
 	/**
 	 * @param resource the resource to set
 	 */
-	public void setResource(String resource)
+	public void setResource(URI resource)
 	{
 		this.resource = resource;
 	}
@@ -92,8 +93,9 @@ public abstract class ResourceHeader
 	}
 
 
-	public abstract String getResourceUrl();
-	
-	public abstract Class<? extends Resource> getResourceClass();
+	public abstract URI getResourceUrl();
+
+
+	public abstract Class< ? extends Resource> getResourceClass();
 
 }

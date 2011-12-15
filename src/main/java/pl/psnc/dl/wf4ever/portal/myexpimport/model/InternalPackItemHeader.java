@@ -3,6 +3,7 @@
  */
 package pl.psnc.dl.wf4ever.portal.myexpimport.model;
 
+import java.net.URI;
 
 /**
  * @author Piotr Hołubowicz
@@ -19,9 +20,9 @@ public class InternalPackItemHeader
 
 
 	@Override
-	public String getResourceUrl()
+	public URI getResourceUrl()
 	{
-		return getUri() + "&elements=id,item";
+		return URI.create(getUri().toString() + "&elements=id,item");
 	}
 
 

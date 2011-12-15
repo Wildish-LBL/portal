@@ -4,6 +4,7 @@
 package pl.psnc.dl.wf4ever.portal.services;
 
 import java.io.StringReader;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,7 +60,7 @@ public class MyExpImportService
 		myExpUser = createMyExpUserModel(response.getBody());
 
 		response = OAuthHelpService.sendRequest(service, Verb.GET,
-			String.format(MyExpApi.GET_USER_URL, myExpUser.getId()), accessToken);
+			URI.create(String.format(MyExpApi.GET_USER_URL_TMPL, myExpUser.getId())), accessToken);
 		myExpUser = createMyExpUserModel(response.getBody());
 		return myExpUser;
 	}
@@ -174,7 +175,7 @@ public class MyExpImportService
 			throws OAuthException, JAXBException
 		{
 			PackHeader packHeader = new PackHeader();
-			packHeader.setUri("http://www.myexperiment.org/pack.xml?id=" + customPackId);
+			packHeader.setUri(URI.create("http://www.myexperiment.org/pack.xml?id=" + customPackId));
 			return (Pack) getResource(packHeader, Pack.class);
 		}
 

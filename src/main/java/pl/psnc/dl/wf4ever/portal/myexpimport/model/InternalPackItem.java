@@ -3,6 +3,7 @@
  */
 package pl.psnc.dl.wf4ever.portal.myexpimport.model;
 
+import java.net.URI;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAttribute;
@@ -26,9 +27,9 @@ public class InternalPackItem
 	 */
 	private static final long serialVersionUID = -9038815722609845400L;
 
-	private String uri;
+	private URI uri;
 
-	private String resource;
+	private URI resource;
 
 	private int id;
 
@@ -44,8 +45,9 @@ public class InternalPackItem
 	/**
 	 * @return the uri
 	 */
+	@Override
 	@XmlAttribute
-	public String getUri()
+	public URI getUri()
 	{
 		return uri;
 	}
@@ -54,7 +56,8 @@ public class InternalPackItem
 	/**
 	 * @param uri the uri to set
 	 */
-	public void setUri(String uri)
+	@Override
+	public void setUri(URI uri)
 	{
 		this.uri = uri;
 	}
@@ -63,8 +66,9 @@ public class InternalPackItem
 	/**
 	 * @return the resource
 	 */
+	@Override
 	@XmlAttribute
-	public String getResource()
+	public URI getResource()
 	{
 		return resource;
 	}
@@ -73,7 +77,8 @@ public class InternalPackItem
 	/**
 	 * @param resource the resource to set
 	 */
-	public void setResource(String resource)
+	@Override
+	public void setResource(URI resource)
 	{
 		this.resource = resource;
 	}
@@ -86,6 +91,7 @@ public class InternalPackItem
 	/**
 	 * @return the id
 	 */
+	@Override
 	@XmlElement
 	public int getId()
 	{
@@ -96,6 +102,7 @@ public class InternalPackItem
 	/**
 	 * @param id the id to set
 	 */
+	@Override
 	public void setId(int id)
 	{
 		this.id = id;

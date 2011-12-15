@@ -3,16 +3,16 @@
  */
 package pl.psnc.dl.wf4ever.portal.services;
 
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.wicket.util.crypt.Base64;
-import org.scribe.model.OAuthRequest;
 import org.scribe.model.Response;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
@@ -48,59 +48,48 @@ public class ROSRService
 	 * @param user dLibra user model
 	 * @param ignoreIfExists should it finish without throwing exception if ROSRS returns 409?
 	 * @return true only if ROSRS returns 201 Created
+	 * @throws UnsupportedEncodingException 
+	 * @throws OAuthException 
 	 * @throws Exception if ROSRS doesn't return 201 Created (or 409 if ignoreIfExists is true)
 	 */
 	public static boolean createResearchObject(String roId, Token dLibraToken, boolean ignoreIfExists)
-		throws Exception
+		throws UnsupportedEncodingException, OAuthException
 	{
-		String url = createROsURL().toString();
-		OAuthRequest request = new OAuthRequest(Verb.POST, url);
-		request.addHeader("Content-type", "text/plain");
-		request.addPayload(roId);
-		dLibraService.signRequest(dLibraToken, request);
-		Response response = request.send();
-		if (response.getCode() == HttpURLConnection.HTTP_CREATED) {
-			return true;
+		try {
+			OAuthHelpService.sendRequest(dLibraService, Verb.POST, createROsURL(), dLibraToken, roId.getBytes("UTF-8"),
+				"text/plain");
 		}
-		else if (response.getCode() == HttpURLConnection.HTTP_CONFLICT && ignoreIfExists) {
-			return false;
+		catch (OAuthException e) {
+			if (e.getResponse().getCode() == HttpURLConnection.HTTP_CONFLICT && ignoreIfExists) {
+				return false;
+			}
+			else {
+				throw e;
+			}
 		}
-		else {
-			throw new Exception("Error when creating RO " + roId + ", response: " + response.getCode() + " "
-					+ response.getBody());
-		}
+		return true;
+	}
+
+
+	public static InputStream getResource(URI resourceURI)
+		throws OAuthException
+	{
+		return OAuthHelpService.sendRequest(dLibraService, Verb.GET, resourceURI).getStream();
 	}
 
 
 	public static void sendResource(String path, String roId, byte[] content, String contentType, Token dLibraToken)
 		throws Exception
 	{
-		String url = createResourceURL(roId, path).toString();
-		OAuthRequest request = new OAuthRequest(Verb.PUT, url);
-		request.addHeader("Content-Type", contentType != null ? contentType : "text/plain");
-		request.addPayload(content);
-		dLibraService.signRequest(dLibraToken, request);
-		Response response = request.send();
-		if (response.getCode() != HttpURLConnection.HTTP_OK) {
-			throw new Exception("Error when sending resource " + path + ", response: " + response.getCode() + " "
-					+ response.getBody());
-		}
+		OAuthHelpService.sendRequest(dLibraService, Verb.PUT, createResourceURL(roId, path), dLibraToken, content,
+			contentType != null ? contentType : "text/plain");
 	}
 
 
-	public static Token generateAccessToken(String username, String password)
-	{
-		String token = Base64.encodeBase64String((username + ":" + password).getBytes());
-		token = StringUtils.trim(token);
-		log.debug(String.format("Username %s, password %s, access token %s", username, password, token));
-		return new Token(token, null);
-	}
-
-
-	private static URL createROsURL()
+	private static URI createROsURL()
 	{
 		try {
-			return new URI(URI_SCHEME, URI_HOST, URI_ROS, null).toURL();
+			return new URI(URI_SCHEME, URI_HOST, URI_ROS, null);
 		}
 		catch (Exception e) {
 			log.error(e);
@@ -109,11 +98,25 @@ public class ROSRService
 	}
 
 
-	private static URL createResourceURL(String roId, String resource)
+	@SuppressWarnings("unused")
+	private static URI createROIdURL(String roId)
+	{
+		try {
+			String path = String.format(URI_RO_ID, roId);
+			return new URI(URI_SCHEME, URI_HOST, path, null);
+		}
+		catch (Exception e) {
+			log.error(e);
+			return null;
+		}
+	}
+
+
+	private static URI createResourceURL(String roId, String resource)
 	{
 		try {
 			String path = String.format(URI_RESOURCE, roId, resource);
-			return new URI(URI_SCHEME, URI_HOST, path, null).toURL();
+			return new URI(URI_SCHEME, URI_HOST, path, null);
 		}
 		catch (Exception e) {
 			log.error(e);
@@ -125,18 +128,26 @@ public class ROSRService
 	public static List<URI> getROList()
 		throws Exception
 	{
-		String url = new URI(URI_SCHEME, URI_HOST, URI_ROS, null).toURL().toString();
-		OAuthRequest request = new OAuthRequest(Verb.GET, url);
-		Response response = request.send();
-		if (response.getCode() != HttpURLConnection.HTTP_OK) {
-			throw new Exception("Error when getting RO list, response: " + response.getCode() + " "
-					+ response.getBody());
+		return getROList(null);
+	}
+
+
+	public static List<URI> getROList(Token dLibraToken)
+		throws MalformedURLException, OAuthException, URISyntaxException
+	{
+		Response response;
+		if (dLibraToken == null) {
+			response = OAuthHelpService.sendRequest(dLibraService, Verb.GET, new URI(URI_SCHEME, URI_HOST, URI_ROS,
+					null));
+		}
+		else {
+			response = OAuthHelpService.sendRequest(dLibraService, Verb.GET, new URI(URI_SCHEME, URI_HOST, URI_ROS,
+					null), dLibraToken);
 		}
 		List<URI> uris = new ArrayList<URI>();
 		for (String s : response.getBody().split("[\\r\\n]+")) {
 			uris.add(new URI(s));
 		}
-
 		return uris;
 	}
 }

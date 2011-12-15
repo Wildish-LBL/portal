@@ -3,6 +3,8 @@
  */
 package pl.psnc.dl.wf4ever.portal.services;
 
+import java.net.URI;
+
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.DefaultApi10a;
 import org.scribe.model.Token;
@@ -18,25 +20,21 @@ public class MyExpApi
 
 	public static final String OAUTH_VERIFIER = "oauth_token";
 
-	public static final String WHOAMI_URL = "http://www.myexperiment.org/whoami.xml";
+	public static final URI WHOAMI_URL = URI.create("http://www.myexperiment.org/whoami.xml");
 
-	public static final String GET_USER_URL = "http://www.myexperiment.org/user.xml?id=%d&elements=id,openid-url,name,email,city,country,website,packs,workflows,files";
+	public static final String GET_USER_URL_TMPL = "http://www.myexperiment.org/user.xml?id=%d&elements=id,openid-url,name,email,city,country,website,packs,workflows,files";
 
 
-	public static OAuthService getOAuthService(String consumerKey,
-			String consumerSecret, String oauthCallbackURL)
+	public static OAuthService getOAuthService(String consumerKey, String consumerSecret, String oauthCallbackURL)
 	{
-		return new ServiceBuilder().provider(MyExpApi.class)
-				.apiKey(consumerKey).apiSecret(consumerSecret)
+		return new ServiceBuilder().provider(MyExpApi.class).apiKey(consumerKey).apiSecret(consumerSecret)
 				.callback(oauthCallbackURL).build();
 	}
 
 
-	public static OAuthService getOAuthService(String consumerKey,
-			String consumerSecret)
+	public static OAuthService getOAuthService(String consumerKey, String consumerSecret)
 	{
-		return new ServiceBuilder().provider(MyExpApi.class)
-				.apiKey(consumerKey).apiSecret(consumerSecret).build();
+		return new ServiceBuilder().provider(MyExpApi.class).apiKey(consumerKey).apiSecret(consumerSecret).build();
 	}
 
 
@@ -56,8 +54,7 @@ public class MyExpApi
 	@Override
 	public String getAuthorizationUrl(Token requestToken)
 	{
-		return "http://www.myexperiment.org/oauth/authorize?oauth_token="
-				+ requestToken.getToken();
+		return "http://www.myexperiment.org/oauth/authorize?oauth_token=" + requestToken.getToken();
 	}
 
 

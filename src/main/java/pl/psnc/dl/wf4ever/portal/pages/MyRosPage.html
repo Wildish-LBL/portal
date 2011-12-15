@@ -21,48 +21,34 @@
 				</h3>
 				<div class="row">
 					<div class="span15">
-						<form class="form-stacked">
-							<table class="bordered-table zebra-striped">
-								<thead>
-									<tr>
-										<th>&nbsp;</th>
-										<th>Title</th>
-										<th>Created</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr class="selected">
-										<td><input type="checkbox" checked="checked" /></td>
-										<td><a href="ro">Graphing and Citing Time Series Data
-										</a></td>
-										<td>2011-09-06 11:00</td>
-									</tr>
-									<tr>
-										<td><input type="checkbox" /></td>
-										<td><a href="#">Sample IMPACT hackathon workflow</a></td>
-										<td>2011-02-56 13:50</td>
-									</tr>
-									<tr class="selected">
-										<td><input type="checkbox" checked="checked" /></td>
-										<td><a href="#">Example of conditional invocation</a></td>
-										<td>2010-11-22 09:45</td>
-									</tr>
-									<tr>
-										<td><input type="checkbox" /></td>
-										<td><a href="#">Compare OCR result of original and BW
-												version of image</a></td>
-										<td>2011-06-28 13:07</td>
-									</tr>
-								</tbody>
-							</table>
+						<form class="form-stacked" wicket:id="form">
+							<section wicket:id="group">
+								<table class="bordered-table zebra-striped">
+									<thead>
+										<tr>
+											<th>&nbsp;</th>
+											<th>Title</th>
+											<th>Created</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr wicket:id="rosListView">
+											<td><input type="checkbox" /></td>
+											<td><a href="ro"><span wicket:id="title"></span> </a></td>
+											<td>2011-09-06 11:00</td>
+										</tr>
+									</tbody>
+								</table>
+							</section>
 							<div class="actions">
-								<button class="btn success disabled" type="submit">Create an RO</button>
+								<button class="btn success disabled" type="submit">Create
+									an RO</button>
 								<button class="btn danger disabled" type="submit">Delete
 									selected ROs</button>
 							</div>
 							<div class="actions">
-								<button class="btn success" type="submit" wicket:id="myExpImport">Import an RO
-									from myExperiment</button>
+								<button class="btn success" type="submit"
+									wicket:id="myExpImport">Import an RO from myExperiment</button>
 							</div>
 						</form>
 					</div>

@@ -4,6 +4,7 @@
 package pl.psnc.dl.wf4ever.portal.services;
 
 import java.net.HttpURLConnection;
+import java.net.URI;
 
 import org.apache.log4j.Logger;
 import org.scribe.model.OAuthRequest;
@@ -31,11 +32,10 @@ public class OAuthHelpService
 	 * @return
 	 * @throws OAuthException
 	 */
-	public static Response sendRequest(OAuthService service, Verb verb,
-			String url)
+	public static Response sendRequest(OAuthService service, Verb verb, URI uri)
 		throws OAuthException
 	{
-		OAuthRequest request = new OAuthRequest(verb, url);
+		OAuthRequest request = new OAuthRequest(verb, uri.toString());
 		Response response = request.send();
 		validateResponseCode(verb, response);
 		return response;
@@ -51,11 +51,10 @@ public class OAuthHelpService
 	 * @return
 	 * @throws OAuthException
 	 */
-	public static Response sendRequest(OAuthService service, Verb verb,
-			String url, Token token)
+	public static Response sendRequest(OAuthService service, Verb verb, URI uri, Token token)
 		throws OAuthException
 	{
-		OAuthRequest request = new OAuthRequest(verb, url);
+		OAuthRequest request = new OAuthRequest(verb, uri.toString());
 		service.signRequest(token, request);
 		Response response = request.send();
 		validateResponseCode(verb, response);
@@ -73,14 +72,13 @@ public class OAuthHelpService
 	 * @return
 	 * @throws OAuthException
 	 */
-	public static Response sendRequest(OAuthService service, Verb verb,
-			String url, Token token, String accept)
+	public static Response sendRequest(OAuthService service, Verb verb, URI uri, Token token, String accept)
 		throws OAuthException
 	{
 		if (verb != Verb.GET) {
 			log.warn("Using accept header with " + verb + " request.");
 		}
-		OAuthRequest request = new OAuthRequest(verb, url);
+		OAuthRequest request = new OAuthRequest(verb, uri.toString());
 		request.addHeader("Accept", accept);
 		service.signRequest(token, request);
 		Response response = request.send();
@@ -100,11 +98,11 @@ public class OAuthHelpService
 	 * @return
 	 * @throws OAuthException
 	 */
-	public static Response sendRequest(OAuthService service, Verb verb,
-			String url, Token token, byte[] payload, String contentType)
+	public static Response sendRequest(OAuthService service, Verb verb, URI uri, Token token, byte[] payload,
+			String contentType)
 		throws OAuthException
 	{
-		OAuthRequest request = new OAuthRequest(verb, url);
+		OAuthRequest request = new OAuthRequest(verb, uri.toString());
 		request.addPayload(payload);
 		request.addHeader("Content-type", contentType);
 		service.signRequest(token, request);
@@ -150,8 +148,7 @@ public class OAuthHelpService
 	private static OAuthException prepareException(Response response)
 	{
 		if (response.getCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
-			return new OAuthException(response,
-					"the access token has been rejected");
+			return new OAuthException(response, "the access token has been rejected");
 		}
 		return new OAuthException(response);
 	}

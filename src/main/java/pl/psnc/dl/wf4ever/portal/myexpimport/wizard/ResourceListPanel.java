@@ -72,7 +72,7 @@ public class ResourceListPanel
 				label.add(new AttributeModifier("for", new Model<String>(check.getMarkupId())));
 				label.setEscapeModelStrings(false);
 				item.add(label);
-				item.add(new ExternalLink("link", resource.getResource()));
+				item.add(new ExternalLink("link", resource.getResource().toString()));
 			}
 		};
 		list.setReuseItems(true);
