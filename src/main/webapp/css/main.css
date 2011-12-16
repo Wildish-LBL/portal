@@ -348,3 +348,13 @@ hr.separation {
 	color: #808080;
 }
 
+/* feedback */
+
+ul.feedbackPanel {
+	margin: 0;
+}
+
+.feedbackPanel span.alert-message {
+	border: none;
+	box-shadow: none;
+}

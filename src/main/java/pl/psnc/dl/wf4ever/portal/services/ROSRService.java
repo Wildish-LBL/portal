@@ -150,4 +150,11 @@ public class ROSRService
 		}
 		return uris;
 	}
+
+
+	public static void deleteResearchObject(URI researchObjectURI)
+		throws OAuthException
+	{
+		OAuthHelpService.sendRequest(dLibraService, Verb.DELETE, researchObjectURI);
+	}
 }

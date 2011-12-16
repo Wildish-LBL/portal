@@ -22,6 +22,7 @@
 				<div class="row">
 					<div class="span15">
 						<form class="form-stacked" wicket:id="form">
+							<div wicket:id="feedbackPanel"></div>
 							<section wicket:id="group">
 								<table class="bordered-table zebra-striped">
 									<thead>
@@ -33,9 +34,9 @@
 									</thead>
 									<tbody>
 										<tr wicket:id="rosListView">
-											<td><input type="checkbox" /></td>
-											<td><a href="ro"><span wicket:id="title"></span> </a></td>
-											<td>2011-09-06 11:00</td>
+											<td><input type="checkbox" wicket:id="checkbox" /></td>
+											<td><a href="ro"><span wicket:id="title"></span></a></td>
+											<td><span wicket:id="created"></span></td>
 										</tr>
 									</tbody>
 								</table>
@@ -43,7 +44,7 @@
 							<div class="actions">
 								<button class="btn success disabled" type="submit">Create
 									an RO</button>
-								<button class="btn danger disabled" type="submit">Delete
+								<button class="btn danger" wicket:id="delete">Delete
 									selected ROs</button>
 							</div>
 							<div class="actions">
