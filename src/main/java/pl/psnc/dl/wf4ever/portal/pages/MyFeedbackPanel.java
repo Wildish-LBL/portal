@@ -29,16 +29,16 @@ public class MyFeedbackPanel
 		switch (message.getLevel()) {
 			case FeedbackMessage.DEBUG:
 			case FeedbackMessage.WARNING:
-				return "alert-message warning";
+				return "alert-message block-message warning";
 			case FeedbackMessage.FATAL:
 			case FeedbackMessage.ERROR:
-				return "alert-message error";
+				return "alert-message block-message error";
 			case FeedbackMessage.INFO:
-				return "alert-message info";
+				return "alert-message block-message info";
 			case FeedbackMessage.SUCCESS:
-				return "alert-message success";
+				return "alert-message block-message success";
 			default:
-				return "alert-message warning";
+				return "alert-message block-message warning";
 
 		}
 	}

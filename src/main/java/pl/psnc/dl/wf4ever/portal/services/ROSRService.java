@@ -152,9 +152,9 @@ public class ROSRService
 	}
 
 
-	public static void deleteResearchObject(URI researchObjectURI)
+	public static void deleteResearchObject(URI researchObjectURI, Token dLibraToken)
 		throws OAuthException
 	{
-		OAuthHelpService.sendRequest(dLibraService, Verb.DELETE, researchObjectURI);
+		OAuthHelpService.sendRequest(dLibraService, Verb.DELETE, researchObjectURI, dLibraToken);
 	}
 }

@@ -15,7 +15,9 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
@@ -31,6 +33,8 @@ public class MyRosPage
 
 	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z");
 
+	final List<ResearchObject> selectedResearchObjects = new ArrayList<ResearchObject>();;
+
 
 	public MyRosPage(final PageParameters parameters)
 		throws Exception
@@ -38,7 +42,7 @@ public class MyRosPage
 		super(parameters);
 
 		List<URI> uris = ROSRService.getROList(MySession.get().getdLibraAccessToken());
-		List<ResearchObject> researchObjects = new ArrayList<ResearchObject>();
+		final List<ResearchObject> researchObjects = new ArrayList<ResearchObject>();
 		for (URI uri : uris) {
 			try {
 				researchObjects.add(new ResearchObject(uri));
@@ -47,7 +51,6 @@ public class MyRosPage
 				error("Could not get manifest for: " + uri + " (" + e.getMessage() + ")");
 			}
 		}
-		final List<ResearchObject> selectedResearchObjects = new ArrayList<ResearchObject>();
 
 		Form< ? > form = new Form<Void>("form");
 		form.setOutputMarkupId(true);
@@ -72,6 +75,10 @@ public class MyRosPage
 		list.setReuseItems(true);
 		group.add(list);
 
+		final Label deleteCntLabel = new Label("deleteCnt", new PropertyModel<String>(this, "deleteCnt"));
+		deleteCntLabel.setOutputMarkupId(true);
+		form.add(deleteCntLabel);
+
 		form.add(new AjaxButton("delete", form) {
 
 			private static final long serialVersionUID = 1735622302239127515L;
@@ -81,16 +88,10 @@ public class MyRosPage
 			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 			{
 				form.process(null);
-				for (ResearchObject ro : selectedResearchObjects) {
-					try {
-						ROSRService.deleteResearchObject(ro.getResearchObjectURI());
-					}
-					catch (OAuthException e) {
-						error("Could not delete Research Object: " + ro.getResearchObjectURI() + " (" + e.getMessage()
-								+ ")");
-					}
+				if (!selectedResearchObjects.isEmpty()) {
+					target.add(deleteCntLabel);
+					target.appendJavaScript("$('#confirm-delete-modal').modal('show')");
 				}
-				target.add(form);
 			}
 
 
@@ -101,6 +102,67 @@ public class MyRosPage
 
 			}
 		});
+
+		form.add(new AjaxButton("confirmDelete", form) {
+
+			private static final long serialVersionUID = 1735622302239127515L;
+
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+			{
+				Token dLibraToken = MySession.get().getdLibraAccessToken();
+				for (ResearchObject ro : selectedResearchObjects) {
+					try {
+						ROSRService.deleteResearchObject(ro.getResearchObjectURI(), dLibraToken);
+						researchObjects.remove(ro);
+					}
+					catch (OAuthException e) {
+						error("Could not delete Research Object: " + ro.getResearchObjectURI() + " (" + e.getMessage()
+								+ ")");
+					}
+				}
+				target.add(form);
+				target.appendJavaScript("$('#confirm-delete-modal').modal('hide')");
+			}
+
+
+			@Override
+			protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
+			{
+				// TODO Auto-generated method stub
+
+			}
+		});
+
+		form.add(new AjaxButton("cancelDelete", form) {
+
+			private static final long serialVersionUID = 1735622302239127515L;
+
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+			{
+				target.appendJavaScript("$('#confirm-delete-modal').modal('hide')");
+			}
+
+
+			@Override
+			protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
+			{
+				// TODO Auto-generated method stub
+
+			}
+		});
+
 		form.add(new BookmarkablePageLink<Void>("myExpImport", MyExpAuthorizePage.class));
+	}
+
+
+	public String getDeleteCnt()
+	{
+		if (selectedResearchObjects.size() == 1)
+			return "1 Research Object";
+		return selectedResearchObjects.size() + " Research Objects";
 	}
 }

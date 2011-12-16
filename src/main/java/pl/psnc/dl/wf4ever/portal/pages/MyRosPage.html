@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wicket:extend xmlns:wicket="http://wicket.apache.org">
-	<script type="text/javascript" src="js/roPage.js"></script>
+	<script type="text/javascript" src="js/MyRosPage.js"></script>
 
 	<div class="row">
 		<div class="span16">
@@ -50,6 +50,22 @@
 							<div class="actions">
 								<button class="btn success" type="submit"
 									wicket:id="myExpImport">Import an RO from myExperiment</button>
+							</div>
+							<div id="confirm-delete-modal" class="modal hide">
+								<div class="modal-header">
+									<a class="close" href="#">×</a>
+									<h3>Confirm</h3>
+								</div>
+								<div class="modal-body">
+									<p>
+										Are you sure you want to delete <span wicket:id="deleteCnt">X
+											Research Objects</span> ?
+									</p>
+								</div>
+								<div class="modal-footer">
+									<a class="btn primary" wicket:id="confirmDelete">Yes</a> <a
+										class="btn secondary" wicket:id="cancelDelete">No</a>
+								</div>
 							</div>
 						</form>
 					</div>
