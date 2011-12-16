@@ -281,7 +281,7 @@ public class MyExpImportService
 			throws Exception
 		{
 			model.setMessage(String.format("Creating a Research Object \"%s\"", roId));
-			if (!ROSRService.createResearchObject(roId, dLibraToken, model.isMergeROs())) {
+			if (ROSRService.createResearchObject(roId, dLibraToken, model.isMergeROs()) != null) {
 				model.setMessage("Merged with an existing Research Object");
 			}
 		}

@@ -3,3 +3,9 @@ $(document).ready(function() {
 		backdrop : 'static'
 	})
 });
+
+$(document).ready(function() {
+	$('#confirm-add-modal').modal({
+		backdrop : 'static'
+	})
+});

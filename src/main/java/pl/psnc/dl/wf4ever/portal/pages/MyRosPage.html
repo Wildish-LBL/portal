@@ -42,8 +42,8 @@
 								</table>
 							</section>
 							<div class="actions">
-								<button class="btn success disabled" type="submit">Create
-									an RO</button>
+								<button class="btn success" wicket:id="add">Create an
+									RO</button>
 								<button class="btn danger" wicket:id="delete">Delete
 									selected ROs</button>
 							</div>
@@ -51,26 +51,47 @@
 								<button class="btn success" type="submit"
 									wicket:id="myExpImport">Import an RO from myExperiment</button>
 							</div>
-							<div id="confirm-delete-modal" class="modal hide">
-								<div class="modal-header">
-									<a class="close" href="#">×</a>
-									<h3>Confirm</h3>
-								</div>
-								<div class="modal-body">
-									<p>
-										Are you sure you want to delete <span wicket:id="deleteCnt">X
-											Research Objects</span> ?
-									</p>
-								</div>
-								<div class="modal-footer">
-									<a class="btn primary" wicket:id="confirmDelete">Yes</a> <a
-										class="btn secondary" wicket:id="cancelDelete">No</a>
-								</div>
-							</div>
 						</form>
 					</div>
 				</div>
 			</section>
 		</div>
+	</div>
+	<div id="confirm-delete-modal" class="modal hide">
+		<div class="modal-header">
+			<a class="close" href="#">×</a>
+			<h3>Confirm</h3>
+		</div>
+		<div class="modal-body">
+			<p>
+				Are you sure you want to delete <span wicket:id="deleteCnt">X
+					Research Objects</span> ?
+			</p>
+		</div>
+		<div class="modal-footer">
+			<a class="btn primary" wicket:id="confirmDelete">Yes</a> <a
+				class="btn secondary" wicket:id="cancelDelete">No</a>
+		</div>
+	</div>
+	<div id="confirm-add-modal" class="modal hide">
+		<form wicket:id="addForm">
+			<div class="modal-header">
+				<a class="close" href="#">×</a>
+				<h3>Prompt</h3>
+			</div>
+			<div class="modal-body">
+				<div wicket:id="addFeedbackPanel"></div>
+				<fieldset>
+					<label for="roId">RO identifier</label>
+					<div class="input">
+						<input type="text" id="roId" wicket:id="roId" />
+					</div>
+				</fieldset>
+			</div>
+			<div class="modal-footer">
+				<a class="btn primary" wicket:id="confirmAdd" type="submit">OK</a> <a
+					class="btn secondary" wicket:id="cancelAdd">Cancel</a>
+			</div>
+		</form>
 	</div>
 </wicket:extend>

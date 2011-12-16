@@ -52,22 +52,22 @@ public class ROSRService
 	 * @throws OAuthException 
 	 * @throws Exception if ROSRS doesn't return 201 Created (or 409 if ignoreIfExists is true)
 	 */
-	public static boolean createResearchObject(String roId, Token dLibraToken, boolean ignoreIfExists)
+	public static URI createResearchObject(String roId, Token dLibraToken, boolean ignoreIfExists)
 		throws UnsupportedEncodingException, OAuthException
 	{
 		try {
-			OAuthHelpService.sendRequest(dLibraService, Verb.POST, createROsURL(), dLibraToken, roId.getBytes("UTF-8"),
-				"text/plain");
+			Response response = OAuthHelpService.sendRequest(dLibraService, Verb.POST, createROsURL(), dLibraToken,
+				roId.getBytes("UTF-8"), "text/plain");
+			return URI.create(response.getHeader("Location"));
 		}
 		catch (OAuthException e) {
 			if (e.getResponse().getCode() == HttpURLConnection.HTTP_CONFLICT && ignoreIfExists) {
-				return false;
+				return null;
 			}
 			else {
 				throw e;
 			}
 		}
-		return true;
 	}
 
 
@@ -157,4 +157,5 @@ public class ROSRService
 	{
 		OAuthHelpService.sendRequest(dLibraService, Verb.DELETE, researchObjectURI, dLibraToken);
 	}
+
 }

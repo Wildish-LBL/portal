@@ -1,6 +1,8 @@
 package pl.psnc.dl.wf4ever.portal.pages;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,11 +14,13 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Check;
 import org.apache.wicket.markup.html.form.CheckGroup;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.RequiredTextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.validation.validator.PatternValidator;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
@@ -33,7 +37,9 @@ public class MyRosPage
 
 	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z");
 
-	final List<ResearchObject> selectedResearchObjects = new ArrayList<ResearchObject>();;
+	final List<ResearchObject> selectedResearchObjects = new ArrayList<ResearchObject>();
+
+	private String roId;
 
 
 	public MyRosPage(final PageParameters parameters)
@@ -52,7 +58,7 @@ public class MyRosPage
 			}
 		}
 
-		Form< ? > form = new Form<Void>("form");
+		final Form< ? > form = new Form<Void>("form");
 		form.setOutputMarkupId(true);
 		add(form);
 		form.add(new MyFeedbackPanel("feedbackPanel"));
@@ -77,7 +83,15 @@ public class MyRosPage
 
 		final Label deleteCntLabel = new Label("deleteCnt", new PropertyModel<String>(this, "deleteCnt"));
 		deleteCntLabel.setOutputMarkupId(true);
-		form.add(deleteCntLabel);
+		add(deleteCntLabel);
+
+		final Form< ? > addForm = new Form<Void>("addForm");
+		RequiredTextField<String> name = new RequiredTextField<String>("roId", new PropertyModel<String>(this, "roId"));
+		name.add(new PatternValidator("[\\w]+"));
+		addForm.add(name);
+		add(addForm);
+
+		addForm.add(new MyFeedbackPanel("addFeedbackPanel"));
 
 		form.add(new AjaxButton("delete", form) {
 
@@ -103,7 +117,7 @@ public class MyRosPage
 			}
 		});
 
-		form.add(new AjaxButton("confirmDelete", form) {
+		add(new AjaxButton("confirmDelete", form) {
 
 			private static final long serialVersionUID = 1735622302239127515L;
 
@@ -135,7 +149,7 @@ public class MyRosPage
 			}
 		});
 
-		form.add(new AjaxButton("cancelDelete", form) {
+		add(new AjaxButton("cancelDelete", form) {
 
 			private static final long serialVersionUID = 1735622302239127515L;
 
@@ -155,6 +169,74 @@ public class MyRosPage
 			}
 		});
 
+		form.add(new AjaxButton("add", form) {
+
+			private static final long serialVersionUID = 1735622302239127515L;
+
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+			{
+				target.appendJavaScript("$('#confirm-add-modal').modal('show')");
+			}
+
+
+			@Override
+			protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
+			{
+				// TODO Auto-generated method stub
+
+			}
+		});
+
+		addForm.add(new AjaxButton("confirmAdd", addForm) {
+
+			private static final long serialVersionUID = 1735622302239127515L;
+
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form< ? > addForm)
+			{
+				Token dLibraToken = MySession.get().getdLibraAccessToken();
+				try {
+					URI researchObjectURI = ROSRService.createResearchObject(roId, dLibraToken, false);
+					researchObjects.add(new ResearchObject(researchObjectURI));
+				}
+				catch (OAuthException | UnsupportedEncodingException | URISyntaxException e) {
+					error("Could not add Research Object: " + roId + " (" + e.getMessage() + ")");
+				}
+				target.add(form);
+				target.appendJavaScript("$('#confirm-add-modal').modal('hide')");
+			}
+
+
+			@Override
+			protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
+			{
+				// TODO Auto-generated method stub
+
+			}
+		});
+
+		addForm.add(new AjaxButton("cancelAdd", addForm) {
+
+			private static final long serialVersionUID = 1735622302239127515L;
+
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+			{
+				target.appendJavaScript("$('#confirm-add-modal').modal('hide')");
+			}
+
+
+			@Override
+			protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
+			{
+				// TODO Auto-generated method stub
+
+			}
+		}.setDefaultFormProcessing(false));
 		form.add(new BookmarkablePageLink<Void>("myExpImport", MyExpAuthorizePage.class));
 	}
 
@@ -165,4 +247,23 @@ public class MyRosPage
 			return "1 Research Object";
 		return selectedResearchObjects.size() + " Research Objects";
 	}
+
+
+	/**
+	 * @return the roId
+	 */
+	public String getRoId()
+	{
+		return roId;
+	}
+
+
+	/**
+	 * @param roId the roId to set
+	 */
+	public void setRoId(String roId)
+	{
+		this.roId = roId;
+	}
+
 }
