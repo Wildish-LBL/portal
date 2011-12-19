@@ -3,13 +3,12 @@
  */
 package pl.psnc.dl.wf4ever.portal;
 
-import java.util.Properties;
-
 import org.apache.log4j.Logger;
 import org.apache.wicket.Session;
 import org.apache.wicket.authroles.authentication.AbstractAuthenticatedWebSession;
 import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.request.Request;
+import org.apache.wicket.util.cookies.CookieUtils;
 import org.scribe.model.Token;
 
 /**
@@ -25,20 +24,35 @@ public class MySession
 	 */
 	private static final long serialVersionUID = -4113134277706549806L;
 
+	@SuppressWarnings("unused")
 	private static final Logger log = Logger.getLogger(MySession.class);
 
 	private Token dLibraAccessToken;
 
+	private boolean dirtydLibra = false;
+
 	private Token myExpAccessToken;
 
+	private boolean dirtyMyExp = false;
+
 	private Token requestToken;
+
+	private final static String DLIBRA_KEY = "dlibra";
+
+	private final static String MYEXP_KEY_TOKEN = "myexp1";
+
+	private final static String MYEXP_KEY_SECRET = "myexp2";
 
 
 	public MySession(Request request)
 	{
 		super(request);
-		dLibraAccessToken = tryLoadDlibraTestToken();
-		myExpAccessToken = tryLoadMyExpTestToken();
+		if (new CookieUtils().load(DLIBRA_KEY) != null)
+			dLibraAccessToken = new Token(new CookieUtils().load(DLIBRA_KEY), null);
+		if (new CookieUtils().load(MYEXP_KEY_TOKEN) != null && new CookieUtils().load(MYEXP_KEY_SECRET) != null) {
+			myExpAccessToken = new Token(new CookieUtils().load(MYEXP_KEY_TOKEN),
+					new CookieUtils().load(MYEXP_KEY_SECRET));
+		}
 	}
 
 
@@ -63,6 +77,7 @@ public class MySession
 	public void setdLibraAccessToken(Token dLibraAccessToken)
 	{
 		this.dLibraAccessToken = dLibraAccessToken;
+		dirtydLibra = true;
 	}
 
 
@@ -81,6 +96,7 @@ public class MySession
 	public void setMyExpAccessToken(Token myExpAccessToken)
 	{
 		this.myExpAccessToken = myExpAccessToken;
+		dirtyMyExp = true;
 	}
 
 
@@ -116,38 +132,31 @@ public class MySession
 	}
 
 
-	private Token tryLoadDlibraTestToken()
+	public void signOut()
 	{
-		Properties props = new Properties();
-		try {
-			props.load(getClass().getClassLoader().getResourceAsStream("testToken.properties"));
-			String token = props.getProperty("dLibraToken");
-			if (token != null) {
-				return new Token(token, null);
-			}
-		}
-		catch (Exception e) {
-			log.debug("Failed to load properties: " + e.getMessage());
-		}
-		return null;
+		dLibraAccessToken = null;
+		myExpAccessToken = null;
+		new CookieUtils().remove(DLIBRA_KEY);
+		new CookieUtils().remove(MYEXP_KEY_TOKEN);
+		new CookieUtils().remove(MYEXP_KEY_SECRET);
 	}
 
 
-	private Token tryLoadMyExpTestToken()
+	public void persist()
 	{
-		Properties props = new Properties();
-		try {
-			props.load(getClass().getClassLoader().getResourceAsStream("testToken.properties"));
-			String token = props.getProperty("token");
-			String secret = props.getProperty("secret");
-			if (token != null && secret != null) {
-				return new Token(token, secret);
+		if (dirtydLibra) {
+			if (dLibraAccessToken != null) {
+				new CookieUtils().save(DLIBRA_KEY, dLibraAccessToken.getToken());
 			}
+			dirtydLibra = false;
 		}
-		catch (Exception e) {
-			log.debug("Failed to load properties: " + e.getMessage());
+		if (dirtyMyExp) {
+			if (myExpAccessToken != null) {
+				new CookieUtils().save(MYEXP_KEY_TOKEN, myExpAccessToken.getToken());
+				new CookieUtils().save(MYEXP_KEY_SECRET, myExpAccessToken.getSecret());
+			}
+			dirtyMyExp = false;
 		}
-		return null;
 	}
 
 }

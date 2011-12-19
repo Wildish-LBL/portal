@@ -186,6 +186,10 @@ p {
 	background-image: -moz-linear-gradient(center top , #8d8c8c, #626262);
 }
 
+.btn.login a {
+    color: #FFFFFF !important;
+}
+
 /* wizard */
 #wizardActions, #wizardHeader {
     padding-left: 250px;
