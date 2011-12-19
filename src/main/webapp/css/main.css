@@ -12,11 +12,6 @@
     margin: 6px 0px;
 }
 
-.authorizationLinksList {
-	float:right;
-	margin-top:-4px;
-}
-
 #listMainMenu {
 	width:940px;
 	margin:0 auto;
@@ -184,10 +179,8 @@ p {
 .btn.login {
 	background-color: #626262;
 	background-image: -moz-linear-gradient(center top , #8d8c8c, #626262);
-}
-
-.btn.login a {
-    color: #FFFFFF !important;
+	float:right;
+	margin-top:-2px;
 }
 
 /* wizard */

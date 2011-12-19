@@ -15,7 +15,7 @@
 	content="Copyright (C) 2003 - 2008 PSNC, Poznan Supercomputer and Networking Center" />
 <meta http-equiv="Reply-to" content="dlibra.at.man.poznan.pl" />
 
-<meta wicket:id="redirect" http-equiv="refresh" content="0; url=app"/>
+<meta wicket:id="redirect" http-equiv="refresh" content="0; url=app" />
 
 <link rel="stylesheet"
 	href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css" />
@@ -59,8 +59,7 @@
 				</span>
 
 			</div>
-			<a id="mainBanerCoin" href="#"
-				title="Example Digital Library"> <img
+			<a id="mainBanerCoin" href="#" title="Example Digital Library"> <img
 				src="images/wf4ever_logo.png" alt="" /></a>&nbsp;
 			<h1>
 				<a href="#" title="Research Object Digital Library"> Research
@@ -75,16 +74,16 @@
 				<li class="mainMenuListItem"><a class="mainMenuOption" href="#"
 					accesskey="m" wicket:id="menu-home"> MAIN PAGE </a></li>
 				<li class="mainMenuListItem"><a
-					class="mainMenuOption mainMenuOptionIn" href="#" accesskey="s" wicket:id="menu-myros">
-						MY RESEARCH OBJECTS </a></li>
+					class="mainMenuOption mainMenuOptionIn" href="#" accesskey="s"
+					wicket:id="menu-myros"> MY RESEARCH OBJECTS </a></li>
 				<li class="mainMenuListItem"><a
 					class="mainMenuOption mainMenuOptionLast" href="#" accesskey="c">
 						CONTACT </a></li>
 				<li class="mmlEmpty mmlEmptyRight">&nbsp;</li>
 			</ul>
-			<ul class="authorizationLinksList">
-				<li class="btn info login"><a wicket:id="signIn"><span wicket:id="signInText">[Sign in]</span></a></li>
-			</ul>
+			<button class="btn info login" wicket:id="signIn">
+				<span wicket:id="signInText">[Sign in]</span>
+			</button>
 
 		</div>
 	</div>
