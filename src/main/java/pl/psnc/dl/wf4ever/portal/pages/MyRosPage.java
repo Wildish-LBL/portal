@@ -3,7 +3,6 @@ package pl.psnc.dl.wf4ever.portal.pages;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,8 +34,6 @@ public class MyRosPage
 {
 
 	private static final long serialVersionUID = 1L;
-
-	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z");
 
 	final List<ResearchObject> selectedResearchObjects = new ArrayList<ResearchObject>();
 
@@ -80,7 +77,7 @@ public class MyRosPage
 					UrlEncoder.QUERY_INSTANCE.encode(researchObject.getURI().toString(), "UTF-8"));
 				link.add(new Label("title", researchObject.getURI().toString()));
 				item.add(link);
-				item.add(new Label("created", sdf.format(researchObject.getCreated().getTime())));
+				item.add(new Label("created", new PropertyModel<String>(researchObject, "createdFormatted")));
 			}
 		};
 		list.setReuseItems(true);
@@ -137,8 +134,7 @@ public class MyRosPage
 						researchObjects.remove(ro);
 					}
 					catch (OAuthException e) {
-						error("Could not delete Research Object: " + ro.getURI() + " (" + e.getMessage()
-								+ ")");
+						error("Could not delete Research Object: " + ro.getURI() + " (" + e.getMessage() + ")");
 					}
 				}
 				target.add(form);

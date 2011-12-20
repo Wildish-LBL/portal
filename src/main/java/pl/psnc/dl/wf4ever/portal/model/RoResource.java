@@ -12,7 +12,8 @@ import java.util.Calendar;
  *
  */
 public class RoResource
-	implements AggregatedResource, Serializable
+	extends AggregatedResource
+	implements Serializable
 {
 
 	/**
@@ -24,14 +25,27 @@ public class RoResource
 
 	private final String name;
 
+	private final String creator;
+
+	private final Calendar created;
+
+	private final long size;
+
 
 	/**
 	 * @param uri
+	 * @param name
+	 * @param creator
+	 * @param created
+	 * @param rSize
 	 */
-	public RoResource(URI uri, String name)
+	public RoResource(URI uri, String name, String creator, Calendar created, long rSize)
 	{
 		this.uri = uri;
 		this.name = name;
+		this.creator = creator;
+		this.created = created;
+		this.size = rSize;
 	}
 
 
@@ -55,13 +69,6 @@ public class RoResource
 	}
 
 
-	@Override
-	public String toString()
-	{
-		return getName();
-	}
-
-
 	/* (non-Javadoc)
 	 * @see pl.psnc.dl.wf4ever.portal.model.AggregatedResource#isWorkflow()
 	 */
@@ -76,15 +83,21 @@ public class RoResource
 	@Override
 	public Calendar getCreated()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return created;
 	}
 
 
 	@Override
 	public String getCreator()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return creator;
+	}
+
+
+	@Override
+	public String getSize()
+	{
+		//TODO format it
+		return "" + size;
 	}
 }

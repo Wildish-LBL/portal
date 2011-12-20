@@ -19,8 +19,8 @@ import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
-import com.hp.hpl.jena.ontology.impl.OntModelImpl;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.NodeIterator;
 import com.hp.hpl.jena.rdf.model.Property;
@@ -31,8 +31,8 @@ import com.hp.hpl.jena.vocabulary.DCTerms;
  *
  */
 public class ResearchObject
-	extends OntModelImpl
-	implements Serializable, AggregatedResource
+	extends AggregatedResource
+	implements Serializable
 {
 
 	/**
@@ -57,16 +57,20 @@ public class ResearchObject
 	private static final Property foafName = ModelFactory.createDefaultModel().createProperty(
 		"http://xmlns.com/foaf/0.1/name");
 
+	private static final Property filesize = ModelFactory.createDefaultModel().createProperty(
+		"http://purl.org/wf4ever/ro#filesize");
+
 
 	public ResearchObject(URI baseURI)
 		throws OAuthException, URISyntaxException
 	{
-		super(OntModelSpec.OWL_LITE_MEM);
-		manifestURI = baseURI.resolve(".ro/manifest");
-		this.read(manifestURI.toString());
+		OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
 
-		Individual manifest = getIndividual(manifestURI.toString());
-		Individual ro = manifest.getPropertyResourceValue(createProperty(ORE_NAMESPACE + "describes")).as(
+		manifestURI = baseURI.resolve(".ro/manifest");
+		model.read(manifestURI.toString());
+
+		Individual manifest = model.getIndividual(manifestURI.toString());
+		Individual ro = manifest.getPropertyResourceValue(model.createProperty(ORE_NAMESPACE + "describes")).as(
 			Individual.class);
 		researchObjectURI = new URI(ro.getURI());
 		created = ((XSDDateTime) ro.getPropertyValue(DCTerms.created).asLiteral().getValue()).asCalendar();
@@ -78,7 +82,7 @@ public class ResearchObject
 			log.warn("RO " + researchObjectURI + " does not define a creator");
 		}
 
-		this.aggregatedResourcesTree = createAggregatedResourcesTree(ro);
+		this.aggregatedResourcesTree = createAggregatedResourcesTree(ro, model);
 	}
 
 
@@ -111,19 +115,51 @@ public class ResearchObject
 	}
 
 
-	private TreeModel createAggregatedResourcesTree(Individual ro)
+	private TreeModel createAggregatedResourcesTree(Individual ro, OntModel model)
 		throws URISyntaxException
 	{
 		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(this);
 
 		//TODO take care of proxies & folders
-		NodeIterator it = listObjectsOfProperty(ro, createProperty(ORE_NAMESPACE + "aggregates"));
+		NodeIterator it = model.listObjectsOfProperty(ro, model.createProperty(ORE_NAMESPACE + "aggregates"));
 		while (it.hasNext()) {
 			URI resURI = new URI(it.next().asResource().getURI());
-			String name = UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.relativize(resURI).toString(), "UTF-8");
-			rootNode.add(new DefaultMutableTreeNode(new RoResource(resURI, name)));
+			rootNode.add(new DefaultMutableTreeNode(createResource(resURI, model)));
 		}
 		return new DefaultTreeModel(rootNode);
+	}
+
+
+	/**
+	 * @param rootNode
+	 * @param resURI
+	 */
+	private RoResource createResource(URI resURI, OntModel model)
+	{
+		Individual res = model.getIndividual(resURI.toString());
+		Calendar rCreated = null;
+		String rCreator = null;
+		long rSize = 0;
+
+		try {
+			rCreated = ((XSDDateTime) res.getPropertyValue(DCTerms.created).asLiteral().getValue()).asCalendar();
+		}
+		catch (Exception e) {
+		}
+		try {
+			creator = res.getPropertyResourceValue(DCTerms.creator).as(Individual.class).getPropertyValue(foafName)
+					.asLiteral().getString();
+		}
+		catch (Exception e) {
+		}
+		try {
+			rSize = res.getPropertyValue(filesize).asLiteral().getLong();
+		}
+		catch (Exception e) {
+		}
+
+		String name = UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.relativize(resURI).toString(), "UTF-8");
+		return new RoResource(resURI, name, rCreator, rCreated, rSize);
 	}
 
 
@@ -144,13 +180,6 @@ public class ResearchObject
 
 
 	@Override
-	public String toString()
-	{
-		return getName();
-	}
-
-
-	@Override
 	public boolean isWorkflow()
 	{
 		return false;
@@ -162,4 +191,12 @@ public class ResearchObject
 	{
 		return creator;
 	}
+
+
+	@Override
+	public String getSize()
+	{
+		return "--";
+	}
+
 }

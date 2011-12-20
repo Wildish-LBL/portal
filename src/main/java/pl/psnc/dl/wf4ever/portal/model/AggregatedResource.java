@@ -1,38 +1,64 @@
 package pl.psnc.dl.wf4ever.portal.model;
 
 import java.net.URI;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public interface AggregatedResource
+public abstract class AggregatedResource
 {
+
+	public static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z");
+
 
 	/**
 	 * @return the resource URI
 	 */
-	public URI getURI();
+	public abstract URI getURI();
 
 
 	/**
 	 * @return the name
 	 */
-	public String getName();
+	public abstract String getName();
 
 
 	/**
 	 * TODO change to resource classes
 	 * @return
 	 */
-	public boolean isWorkflow();
+	public abstract boolean isWorkflow();
 
 
 	/**
 	 * @return the created
 	 */
-	public Calendar getCreated();
+	public abstract Calendar getCreated();
 
 
 	/**
 	 * @return the created
 	 */
-	public String getCreator();
+	public String getCreatedFormatted()
+	{
+		return SDF.format(getCreated().getTime());
+	}
+
+
+	@Override
+	public String toString()
+	{
+		return getName();
+	}
+
+
+	/**
+	 * @return the created
+	 */
+	public abstract String getCreator();
+
+
+	/**
+	 * @return the size, nicely formatted (i.e. 23 MB)
+	 */
+	public abstract String getSize();
 }
