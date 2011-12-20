@@ -12,6 +12,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 
+import org.apache.wicket.request.UrlDecoder;
+
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
@@ -90,7 +92,7 @@ public class ResearchObject
 	}
 
 
-	public TreeModel createAggregatedResourcesTree(Individual ro)
+	private TreeModel createAggregatedResourcesTree(Individual ro)
 		throws URISyntaxException
 	{
 		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(new AggregatedResource(researchObjectURI, "RO"));
@@ -99,7 +101,7 @@ public class ResearchObject
 		NodeIterator it = listObjectsOfProperty(ro, createProperty(ORE_NAMESPACE + "aggregates"));
 		while (it.hasNext()) {
 			URI resURI = new URI(it.next().asResource().getURI());
-			String name = researchObjectURI.relativize(resURI).toString();
+			String name = UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.relativize(resURI).toString(), "UTF-8");
 			rootNode.add(new DefaultMutableTreeNode(new AggregatedResource(resURI, name)));
 		}
 		return new DefaultTreeModel(rootNode);

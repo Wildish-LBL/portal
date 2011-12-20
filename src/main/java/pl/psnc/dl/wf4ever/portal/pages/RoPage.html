@@ -25,7 +25,7 @@
 				</h3>
 				<div class="row">
 					<div class="span8 separated">
-						<ul id="ro-tree" class="treeview filetree">
+						<!-- 						<ul id="ro-tree" class="treeview filetree">
 							<li class="open"><a href="#" class="icon folder">Research
 									Object</a>
 								<ul>
@@ -44,13 +44,16 @@
 													of Lynx Pelts</a></li>
 										</ul></li>
 								</ul></li>
-						</ul>
+						</ul> -->
+						<div wicket:id="treeTable" class="my-tree"></div>
 						<form class="form-stacked" wicket:id="roForm">
 							<div class="actions">
-								<button class="btn success" type="submit" wicket:id="addFolder">Add folder</button>
-								<button class="btn success" type="submit" wicket:id="addResource">Add resource</button>
-								<button class="btn danger" type="submit" wicket:id="deleteResource">Delete
-									resource</button>
+								<button class="btn success" type="submit" wicket:id="addFolder">Add
+									folder</button>
+								<button class="btn success" type="submit"
+									wicket:id="addResource">Add resource</button>
+								<button class="btn danger" type="submit"
+									wicket:id="deleteResource">Delete resource</button>
 							</div>
 						</form>
 					</div>

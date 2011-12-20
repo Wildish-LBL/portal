@@ -9,12 +9,14 @@ import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.extensions.markup.html.tree.Tree;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.UrlDecoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
+import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 
@@ -24,7 +26,7 @@ public class RoPage
 
 	private static final long serialVersionUID = 1L;
 
-	private URI roURI;
+	private ResearchObject ro;
 
 	private boolean canEdit = false;
 
@@ -34,7 +36,8 @@ public class RoPage
 	{
 		super(parameters);
 		if (!parameters.get("ro").isEmpty()) {
-			roURI = new URI(UrlDecoder.QUERY_INSTANCE.decode(parameters.get("ro").toString(), "UTF-8"));
+			URI roURI = new URI(UrlDecoder.QUERY_INSTANCE.decode(parameters.get("ro").toString(), "UTF-8"));
+			ro = new ResearchObject(roURI);
 		}
 		else {
 			throw new RestartResponseException(ErrorPage.class, new PageParameters().add("message",
@@ -43,10 +46,14 @@ public class RoPage
 
 		if (MySession.get().isSignedIn()) {
 			List<URI> uris = ROSRService.getROList(MySession.get().getdLibraAccessToken());
-			canEdit = uris.contains(roURI);
+			canEdit = uris.contains(ro.getResearchObjectURI());
 		}
 
-		add(new Label("title", roURI.toString()));
+		add(new Label("title", ro.getResearchObjectURI().toString()));
+
+		Tree tree = new RoTree("treeTable", ro.getAggregatedResourcesTree());
+		tree.getTreeState().expandAll();
+		add(tree);
 
 		Form< ? > roForm = new Form<Void>("roForm");
 		add(roForm);
