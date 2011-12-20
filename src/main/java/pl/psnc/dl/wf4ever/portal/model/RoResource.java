@@ -99,4 +99,11 @@ public class RoResource
 	{
 		return size;
 	}
+
+
+	@Override
+	public URI getDownloadURI()
+	{
+		return URI.create(getURI().toString() + "?content=true");
+	}
 }

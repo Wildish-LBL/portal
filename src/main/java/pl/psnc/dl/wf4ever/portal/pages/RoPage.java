@@ -24,6 +24,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
+import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 
@@ -42,9 +43,11 @@ public class RoPage
 		throws URISyntaxException, MalformedURLException, OAuthException
 	{
 		super(parameters);
+		RoFactory factory = null;
 		if (!parameters.get("ro").isEmpty()) {
 			URI roURI = new URI(UrlDecoder.QUERY_INSTANCE.decode(parameters.get("ro").toString(), "UTF-8"));
-			ro = new ResearchObject(roURI);
+			factory = new RoFactory(roURI);
+			ro = factory.createResearchObject();
 		}
 		else {
 			throw new RestartResponseException(ErrorPage.class, new PageParameters().add("message",
@@ -63,7 +66,7 @@ public class RoPage
 		itemInfo.setOutputMarkupId(true);
 		add(itemInfo);
 
-		Tree tree = new RoTree("treeTable", ro.getAggregatedResourcesTree()) {
+		Tree tree = new RoTree("treeTable", factory.createAggregatedResourcesTree(ro)) {
 
 			private static final long serialVersionUID = -7512570425701073804L;
 
@@ -147,6 +150,8 @@ public class RoPage
 
 		itemInfo.add(new ExternalLink("resourceURI", itemModel.<String> bind("URI.toString"), itemModel
 				.<URI> bind("URI")));
+		itemInfo.add(new ExternalLink("downloadURI", itemModel.<String> bind("downloadURI.toString"), itemModel
+				.<URI> bind("downloadURI")));
 		itemInfo.add(new Label("creator"));
 		itemInfo.add(new Label("createdFormatted"));
 		itemInfo.add(new Label("sizeFormatted"));

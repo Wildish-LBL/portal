@@ -17,6 +17,12 @@ public abstract class AggregatedResource
 
 
 	/**
+	 * @return the download URI
+	 */
+	public abstract URI getDownloadURI();
+
+
+	/**
 	 * @return the name
 	 */
 	public abstract String getName();
