@@ -146,7 +146,9 @@ public class ROSRService
 		}
 		List<URI> uris = new ArrayList<URI>();
 		for (String s : response.getBody().split("[\\r\\n]+")) {
-			uris.add(new URI(s));
+			if (!s.isEmpty()) {
+				uris.add(new URI(s));
+			}
 		}
 		return uris;
 	}

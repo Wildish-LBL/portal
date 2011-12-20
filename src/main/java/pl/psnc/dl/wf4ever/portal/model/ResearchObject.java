@@ -8,12 +8,17 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Calendar;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeModel;
+
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.ontology.impl.OntModelImpl;
+import com.hp.hpl.jena.rdf.model.NodeIterator;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 
 /**
@@ -38,6 +43,8 @@ public class ResearchObject
 
 	private final Calendar created;
 
+	private final TreeModel aggregatedResourcesTree;
+
 
 	public ResearchObject(URI baseURI)
 		throws OAuthException, URISyntaxException
@@ -51,6 +58,8 @@ public class ResearchObject
 			Individual.class);
 		researchObjectURI = new URI(ro.getURI());
 		created = ((XSDDateTime) ro.getPropertyValue(DCTerms.created).asLiteral().getValue()).asCalendar();
+
+		this.aggregatedResourcesTree = createAggregatedResourcesTree(ro);
 	}
 
 
@@ -78,5 +87,30 @@ public class ResearchObject
 	public Calendar getCreated()
 	{
 		return created;
+	}
+
+
+	public TreeModel createAggregatedResourcesTree(Individual ro)
+		throws URISyntaxException
+	{
+		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(new AggregatedResource(researchObjectURI, "RO"));
+
+		//TODO take care of proxies & folders
+		NodeIterator it = listObjectsOfProperty(ro, createProperty(ORE_NAMESPACE + "aggregates"));
+		while (it.hasNext()) {
+			URI resURI = new URI(it.next().asResource().getURI());
+			String name = researchObjectURI.relativize(resURI).toString();
+			rootNode.add(new DefaultMutableTreeNode(new AggregatedResource(resURI, name)));
+		}
+		return new DefaultTreeModel(rootNode);
+	}
+
+
+	/**
+	 * @return the aggregatedResourcesTree
+	 */
+	public TreeModel getAggregatedResourcesTree()
+	{
+		return aggregatedResourcesTree;
 	}
 }

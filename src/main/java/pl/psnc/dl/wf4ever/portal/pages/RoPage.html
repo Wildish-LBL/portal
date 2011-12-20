@@ -7,7 +7,8 @@
 			<div class="inspan16">
 				<ul class="breadcrumb">
 					<li><a href="home">Home</a> <span class="divider">/</span></li>
-					<li><a href="myros">My Research Objects</a> <span class="divider">/</span></li>
+					<li><a href="myros">My Research Objects</a> <span
+						class="divider">/</span></li>
 					<li><a href="#">Research Object: Graphing and Citing Time
 							Series Data</a></li>
 				</ul>
@@ -19,8 +20,8 @@
 		<div class="span16">
 			<section id="ro-viewer" class="left_box inspan16">
 				<h3>
-					Research Object: Graphing and Citing Time Series Data <img
-						class="sh_button" src="images/l_open.gif">
+					<span wicket:id="title"> </span> <img class="sh_button"
+						src="images/l_open.gif">
 				</h3>
 				<div class="row">
 					<div class="span8 separated">
@@ -28,10 +29,10 @@
 							<li class="open"><a href="#" class="icon folder">Research
 									Object</a>
 								<ul>
-									<li><a href="#" class="icon workflow">Time
-											Series Data Graphed and Cited</a></li>
-									<li class="selected"><a href="#" class="icon file">Google charts line
-											chart result</a></li>
+									<li><a href="#" class="icon workflow">Time Series Data
+											Graphed and Cited</a></li>
+									<li class="selected"><a href="#" class="icon file">Google
+											charts line chart result</a></li>
 									<li><a href="#" class="icon file">Time Series Data
 											Library Citation Result</a></li>
 									<li class="open"><a href="#" class="icon folder">External</a>
@@ -44,11 +45,11 @@
 										</ul></li>
 								</ul></li>
 						</ul>
-						<form class="form-stacked">
+						<form class="form-stacked" wicket:id="roForm">
 							<div class="actions">
-								<button class="btn success" type="submit">Add folder</button>
-								<button class="btn success" type="submit">Add resource</button>
-								<button class="btn danger" type="submit">Delete
+								<button class="btn success" type="submit" wicket:id="addFolder">Add folder</button>
+								<button class="btn success" type="submit" wicket:id="addResource">Add resource</button>
+								<button class="btn danger" type="submit" wicket:id="deleteResource">Delete
 									resource</button>
 							</div>
 						</form>

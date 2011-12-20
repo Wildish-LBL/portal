@@ -19,6 +19,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.UrlEncoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.validation.validator.PatternValidator;
 import org.scribe.model.Token;
@@ -74,7 +75,11 @@ public class MyRosPage
 			{
 				ResearchObject researchObject = (ResearchObject) item.getDefaultModelObject();
 				item.add(new Check<ResearchObject>("checkbox", item.getModel()));
-				item.add(new Label("title", researchObject.getResearchObjectURI().toString()));
+				BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);
+				link.getPageParameters().add("ro",
+					UrlEncoder.QUERY_INSTANCE.encode(researchObject.getResearchObjectURI().toString(), "UTF-8"));
+				link.add(new Label("title", researchObject.getResearchObjectURI().toString()));
+				item.add(link);
 				item.add(new Label("created", sdf.format(researchObject.getCreated().getTime())));
 			}
 		};
