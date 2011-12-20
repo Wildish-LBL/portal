@@ -77,8 +77,8 @@ public class MyRosPage
 				item.add(new Check<ResearchObject>("checkbox", item.getModel()));
 				BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);
 				link.getPageParameters().add("ro",
-					UrlEncoder.QUERY_INSTANCE.encode(researchObject.getResearchObjectURI().toString(), "UTF-8"));
-				link.add(new Label("title", researchObject.getResearchObjectURI().toString()));
+					UrlEncoder.QUERY_INSTANCE.encode(researchObject.getURI().toString(), "UTF-8"));
+				link.add(new Label("title", researchObject.getURI().toString()));
 				item.add(link);
 				item.add(new Label("created", sdf.format(researchObject.getCreated().getTime())));
 			}
@@ -133,11 +133,11 @@ public class MyRosPage
 				Token dLibraToken = MySession.get().getdLibraAccessToken();
 				for (ResearchObject ro : selectedResearchObjects) {
 					try {
-						ROSRService.deleteResearchObject(ro.getResearchObjectURI(), dLibraToken);
+						ROSRService.deleteResearchObject(ro.getURI(), dLibraToken);
 						researchObjects.remove(ro);
 					}
 					catch (OAuthException e) {
-						error("Could not delete Research Object: " + ro.getResearchObjectURI() + " (" + e.getMessage()
+						error("Could not delete Research Object: " + ro.getURI() + " (" + e.getMessage()
 								+ ")");
 					}
 				}

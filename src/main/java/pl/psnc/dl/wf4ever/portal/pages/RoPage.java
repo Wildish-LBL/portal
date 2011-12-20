@@ -10,12 +10,16 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.tree.Tree;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.ExternalLink;
+import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.request.UrlDecoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
+import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.services.ROSRService;
@@ -46,10 +50,10 @@ public class RoPage
 
 		if (MySession.get().isSignedIn()) {
 			List<URI> uris = ROSRService.getROList(MySession.get().getdLibraAccessToken());
-			canEdit = uris.contains(ro.getResearchObjectURI());
+			canEdit = uris.contains(ro.getURI());
 		}
 
-		add(new Label("title", ro.getResearchObjectURI().toString()));
+		add(new Label("title", ro.getURI().toString()));
 
 		Tree tree = new RoTree("treeTable", ro.getAggregatedResourcesTree());
 		tree.getTreeState().expandAll();
@@ -120,5 +124,11 @@ public class RoPage
 			deleteResource.add(new AttributeAppender("class", " disabled"));
 		}
 		roForm.add(deleteResource);
+
+		CompoundPropertyModel<AggregatedResource> itemModel = new CompoundPropertyModel<AggregatedResource>(ro);
+		WebMarkupContainer itemInfo = new WebMarkupContainer("itemInfo", itemModel);
+		add(itemInfo);
+		itemInfo.add(new ExternalLink("resourceURI", itemModel.<String> bind("URI.toString"), itemModel
+				.<URI> bind("URI")));
 	}
 }

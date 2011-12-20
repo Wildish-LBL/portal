@@ -1,60 +1,38 @@
-/**
- * 
- */
 package pl.psnc.dl.wf4ever.portal.model;
 
 import java.net.URI;
+import java.util.Calendar;
 
-/**
- * @author piotrhol
- *
- */
-public class AggregatedResource
+public interface AggregatedResource
 {
 
-	private final URI uri;
-
-	private final String name;
-
-
 	/**
-	 * @param uri
+	 * @return the resource URI
 	 */
-	public AggregatedResource(URI uri, String name)
-	{
-		this.uri = uri;
-		this.name = name;
-	}
-
-
-	/**
-	 * @return the uri
-	 */
-	public URI getUri()
-	{
-		return uri;
-	}
+	public URI getURI();
 
 
 	/**
 	 * @return the name
 	 */
-	public String getName()
-	{
-		return name;
-	}
+	public String getName();
 
 
-	@Override
-	public String toString()
-	{
-		return getName();
-	}
+	/**
+	 * TODO change to resource classes
+	 * @return
+	 */
+	public boolean isWorkflow();
 
 
-	public boolean isWorkflow()
-	{
-		//FIXME should rely on RO ontology
-		return uri.getPath().endsWith(".t2flow");
-	}
+	/**
+	 * @return the created
+	 */
+	public Calendar getCreated();
+
+
+	/**
+	 * @return the created
+	 */
+	public String getCreator();
 }
