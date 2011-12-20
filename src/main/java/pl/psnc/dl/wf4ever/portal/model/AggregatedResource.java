@@ -50,4 +50,11 @@ public class AggregatedResource
 	{
 		return getName();
 	}
+
+
+	public boolean isWorkflow()
+	{
+		//FIXME should rely on RO ontology
+		return uri.getPath().endsWith(".t2flow");
+	}
 }
