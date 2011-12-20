@@ -23,6 +23,7 @@ import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.NodeIterator;
 import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 
 /**
@@ -44,11 +45,17 @@ public class RoFactory
 
 	private final Individual ro;
 
+	private static final Resource roResource = ModelFactory.createDefaultModel().createResource(
+		"http://purl.org/wf4ever/ro#Resource");
+
 	private static final Property foafName = ModelFactory.createDefaultModel().createProperty(
 		"http://xmlns.com/foaf/0.1/name");
 
 	private static final Property filesize = ModelFactory.createDefaultModel().createProperty(
 		"http://purl.org/wf4ever/ro#filesize");
+
+	private static final Property aggregates = ModelFactory.createDefaultModel().createProperty(
+		ORE_NAMESPACE + "aggregates");
 
 
 	public RoFactory(URI baseURI)
@@ -94,10 +101,12 @@ public class RoFactory
 		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(researchObject);
 
 		//TODO take care of proxies & folders
-		NodeIterator it = model.listObjectsOfProperty(ro, model.createProperty(ORE_NAMESPACE + "aggregates"));
+		NodeIterator it = model.listObjectsOfProperty(ro, aggregates);
 		while (it.hasNext()) {
-			URI resURI = new URI(it.next().asResource().getURI());
-			rootNode.add(new DefaultMutableTreeNode(createResource(resURI)));
+			Individual res = it.next().as(Individual.class);
+			if (res.hasRDFType(roResource)) {
+				rootNode.add(new DefaultMutableTreeNode(createResource(new URI(res.getURI()))));
+			}
 		}
 		return new DefaultTreeModel(rootNode);
 	}
