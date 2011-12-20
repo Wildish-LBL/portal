@@ -14,7 +14,6 @@ import org.apache.wicket.request.Response;
 import pl.psnc.dl.wf4ever.portal.pages.AuthenticatePage;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
 import pl.psnc.dl.wf4ever.portal.pages.HomePage;
-import pl.psnc.dl.wf4ever.portal.pages.MockupWelcomePage;
 import pl.psnc.dl.wf4ever.portal.pages.MyExpAuthorizePage;
 import pl.psnc.dl.wf4ever.portal.pages.MyExpImportPage;
 import pl.psnc.dl.wf4ever.portal.pages.MyRosPage;
@@ -48,7 +47,7 @@ public class PortalApplication
 	@Override
 	public Class< ? extends WebPage> getHomePage()
 	{
-		return MockupWelcomePage.class;
+		return HomePage.class;
 	}
 
 
@@ -63,7 +62,6 @@ public class PortalApplication
 		getSecuritySettings().setAuthorizationStrategy(new AnnotationsRoleAuthorizationStrategy(this));
 
 		mountPage("/wickethome", WicketHomePage.class);
-		mountPage("/welcome", MockupWelcomePage.class);
 		mountPage("/home", HomePage.class);
 		mountPage("/myros", MyRosPage.class);
 		mountPage("/ro", RoPage.class);
