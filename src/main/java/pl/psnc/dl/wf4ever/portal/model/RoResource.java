@@ -95,9 +95,8 @@ public class RoResource
 
 
 	@Override
-	public String getSize()
+	public long getSize()
 	{
-		//TODO format it
-		return "" + size;
+		return size;
 	}
 }

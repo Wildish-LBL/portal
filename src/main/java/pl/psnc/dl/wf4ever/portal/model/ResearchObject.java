@@ -194,9 +194,15 @@ public class ResearchObject
 
 
 	@Override
-	public String getSize()
+	public long getSize()
+	{
+		return 0;
+	}
+
+
+	@Override
+	public String getSizeFormatted()
 	{
 		return "--";
 	}
-
 }

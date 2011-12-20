@@ -5,6 +5,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeNode;
+
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -55,7 +58,24 @@ public class RoPage
 
 		add(new Label("title", ro.getURI().toString()));
 
-		Tree tree = new RoTree("treeTable", ro.getAggregatedResourcesTree());
+		final CompoundPropertyModel<AggregatedResource> itemModel = new CompoundPropertyModel<AggregatedResource>(ro);
+		final WebMarkupContainer itemInfo = new WebMarkupContainer("itemInfo", itemModel);
+		itemInfo.setOutputMarkupId(true);
+		add(itemInfo);
+
+		Tree tree = new RoTree("treeTable", ro.getAggregatedResourcesTree()) {
+
+			private static final long serialVersionUID = -7512570425701073804L;
+
+
+			@Override
+			protected void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node)
+			{
+				AggregatedResource res = (AggregatedResource) ((DefaultMutableTreeNode) node).getUserObject();
+				itemModel.setObject(res);
+				target.add(itemInfo);
+			}
+		};
 		tree.getTreeState().expandAll();
 		add(tree);
 
@@ -125,13 +145,10 @@ public class RoPage
 		}
 		roForm.add(deleteResource);
 
-		CompoundPropertyModel<AggregatedResource> itemModel = new CompoundPropertyModel<AggregatedResource>(ro);
-		WebMarkupContainer itemInfo = new WebMarkupContainer("itemInfo", itemModel);
-		add(itemInfo);
 		itemInfo.add(new ExternalLink("resourceURI", itemModel.<String> bind("URI.toString"), itemModel
 				.<URI> bind("URI")));
 		itemInfo.add(new Label("creator"));
 		itemInfo.add(new Label("createdFormatted"));
-		itemInfo.add(new Label("size"));
+		itemInfo.add(new Label("sizeFormatted"));
 	}
 }
