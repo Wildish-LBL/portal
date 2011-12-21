@@ -21,6 +21,7 @@ public class RoResource
 	 */
 	private static final long serialVersionUID = 3584549388168924987L;
 
+
 	/**
 	 * @param uri
 	 * @param name
@@ -31,6 +32,12 @@ public class RoResource
 	public RoResource(URI uri, Calendar created, String creator, String name, long size)
 	{
 		super(uri, created, creator, name, size);
+	}
+
+
+	public RoResource()
+	{
+		super();
 	}
 
 

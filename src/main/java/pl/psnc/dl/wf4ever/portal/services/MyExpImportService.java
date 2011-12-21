@@ -3,10 +3,18 @@
  */
 package pl.psnc.dl.wf4ever.portal.services;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.UUID;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -19,6 +27,7 @@ import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
 
+import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.InternalPackItem;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.InternalPackItemHeader;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.Pack;
@@ -30,6 +39,12 @@ import pl.psnc.dl.wf4ever.portal.myexpimport.model.SimpleResourceHeader;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.User;
 import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportModel;
 import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportModel.ImportStatus;
+
+import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.ontology.OntModelSpec;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.vocabulary.DCTerms;
 
 /**
  * @author Piotr Hołubowicz
@@ -94,6 +109,20 @@ public class MyExpImportService
 
 		private int stepsComplete = 0;
 
+		private URI researchObjectURI;
+
+		private OntModel manifest;
+
+		/**
+		 * bodyURI, bodyRDF
+		 */
+		private final Map<URI, OntModel> annBodies = new HashMap<>();
+
+		/**
+		 * targetURI, bodyURI
+		 */
+		private final Map<URI, URI> annotations = new HashMap<>();
+
 
 		public ImportThread(ImportModel importModel, Token myExpAccessToken, Token dLibraToken, String consumerKey,
 				String consumerSecret)
@@ -111,51 +140,92 @@ public class MyExpImportService
 		{
 			model.setStatus(ImportStatus.RUNNING);
 			model.setMessage("Preparing the data");
+
 			try {
 				List<Pack> packs = getPacks(model.getSelectedPacks());
 				if (model.getCustomPackId() != null) {
 					packs.add(getPack(model.getCustomPackId()));
 				}
-				stepsTotal = model.getSelectedFiles().size() + model.getSelectedWorkflows().size();
+				int simpleResourcesCnt = model.getSelectedFiles().size() + model.getSelectedWorkflows().size();
 				for (Pack pack : packs) {
-					stepsTotal += pack.getResources().size();
+					simpleResourcesCnt += pack.getResources().size();
 				}
-				stepsTotal *= 2;
+				stepsTotal = simpleResourcesCnt * 4 + packs.size() * 2 + 3;
 
-				try {
-					createRO(model.getRoId());
-					importSimpleResources(model.getSelectedFiles(), model.getRoId());
-					importSimpleResources(model.getSelectedWorkflows(), model.getRoId());
-					importPacks(packs, model.getRoId());
-				}
-				catch (Exception e) {
-					log.error("Error during import", e);
-					model.setMessage(e.getMessage());
-				}
+				researchObjectURI = createRO(model.getRoId());
+				importSimpleResources(model.getSelectedFiles());
+				importSimpleResources(model.getSelectedWorkflows());
+				importPacks(packs);
+				manifest = getManifest();
+				updateManifest();
+				uploadAnnotations();
+				model.setMessage("Finished");
 			}
-			catch (Exception e1) {
-				log.error("Error when creating workspace", e1);
-				model.setMessage(e1.getMessage());
+			catch (Exception e) {
+				log.error("Error during import", e);
+				model.setMessage("Error during import: " + e.getMessage());
 			}
-			model.setMessage("Finished");
 			model.setStatus(ImportStatus.FINISHED);
 		}
 
 
-		/**
-		 * @param model
-		 * @param ro
-		 * @param myExpToken
-		 * @param dLibraUser
-		 * @throws JAXBException
-		 * @throws Exception
-		 */
-		private void importSimpleResources(List< ? extends SimpleResourceHeader> resourceHeaders, String roName)
+		private URI createRO(String roId)
+			throws Exception
+		{
+			model.setMessage(String.format("Creating a Research Object \"%s\"", roId));
+			URI roURI = ROSRService.createResearchObject(roId, dLibraToken, model.isMergeROs());
+			incrementStepsComplete();
+			return roURI;
+		}
+
+
+		private OntModel getManifest()
+			throws OAuthException
+		{
+			model.setMessage("Downloading the manifest");
+			InputStream is = ROSRService.getResource(researchObjectURI.resolve(".ro/manifest"));
+			OntModel manifest = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+			manifest.read(is, null);
+			incrementStepsComplete();
+			return manifest;
+		}
+
+
+		private void updateManifest()
+			throws Exception
+		{
+			model.setMessage("Updating the manifest");
+			for (Entry<URI, URI> e : annotations.entrySet()) {
+				addAnnotation(manifest, researchObjectURI, e.getKey(), e.getValue());
+			}
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			manifest.write(out);
+			ROSRService.sendResource(researchObjectURI.resolve(".ro/manifest"), out.toByteArray(),
+				"application/rdf+xml", dLibraToken);
+			incrementStepsComplete();
+		}
+
+
+		private void uploadAnnotations()
+			throws Exception
+		{
+			for (Entry<URI, OntModel> e : annBodies.entrySet()) {
+				model.setMessage(String.format("Uploading annotation body %s", e.getKey()));
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				e.getValue().write(out);
+				URI annBodyURI = e.getKey();
+				ROSRService.sendResource(annBodyURI, out.toByteArray(), "application/rdf+xml", dLibraToken);
+				incrementStepsComplete();
+			}
+		}
+
+
+		private void importSimpleResources(List< ? extends SimpleResourceHeader> resourceHeaders)
 			throws JAXBException, Exception
 		{
 			for (SimpleResourceHeader header : resourceHeaders) {
-				SimpleResource r = importSimpleResource(header, roName, "", header.getResourceClass());
-				importResourceMetadata(r, r.getFilename() + ".rdf", roName, "");
+				SimpleResource r = importSimpleResource(header, header.getResourceClass());
+				downloadResourceMetadata(r);
 			}
 		}
 
@@ -190,11 +260,11 @@ public class MyExpImportService
 		 * @throws JAXBException
 		 * @throws Exception
 		 */
-		private void importPacks(List<Pack> packs, String roName)
+		private void importPacks(List<Pack> packs)
 			throws JAXBException, Exception
 		{
 			for (Pack pack : packs) {
-				importResourceMetadata(pack, pack.getId() + ".rdf", roName, "");
+				downloadResourceMetadata(pack);
 
 				for (InternalPackItemHeader packItemHeader : pack.getResources()) {
 					importInternalPackItem(pack, packItemHeader);
@@ -218,20 +288,21 @@ public class MyExpImportService
 		{
 			InternalPackItem internalItem = (InternalPackItem) getResource(packItemHeader, InternalPackItem.class);
 			SimpleResourceHeader resourceHeader = internalItem.getItem();
-			importSimpleResource(resourceHeader, model.getRoId(), pack.getId() + "/", resourceHeader.getResourceClass());
+			SimpleResource r = importSimpleResource(resourceHeader, resourceHeader.getResourceClass());
+			downloadResourceMetadata(r);
 		}
 
 
-		private SimpleResource importSimpleResource(SimpleResourceHeader res, String roId, String path,
+		private SimpleResource importSimpleResource(SimpleResourceHeader res,
 				Class< ? extends SimpleResource> resourceClass)
 			throws Exception
 		{
 			SimpleResource r = (SimpleResource) getResource(res, resourceClass);
 			incrementStepsComplete();
 
-			String filename = path + r.getFilename();
-			model.setMessage(String.format("Uploading %s", filename));
-			ROSRService.sendResource(filename, roId, r.getContentDecoded(), r.getContentType(), dLibraToken);
+			model.setMessage(String.format("Uploading %s", r.getFilename()));
+			ROSRService.sendResource(researchObjectURI.resolve(r.getFilename()), r.getContentDecoded(),
+				r.getContentType(), dLibraToken);
 
 			incrementStepsComplete();
 			return r;
@@ -256,7 +327,7 @@ public class MyExpImportService
 		}
 
 
-		private void importResourceMetadata(Resource res, String filename, String roId, String path)
+		private void downloadResourceMetadata(Resource res)
 			throws Exception
 		{
 			model.setMessage(String.format("Downloading metadata file %s", res.getResource()));
@@ -265,25 +336,18 @@ public class MyExpImportService
 			// in the future, the RDF could be parsed (and somewhat validated)
 			// and the filename can be extracted from it
 			String rdf = response.getBody();
-
-			model.setMessage(String.format("Uploading metadata file %s", filename));
-			ROSRService.sendResource(filename, roId, rdf.getBytes(), "application/rdf+xml", dLibraToken);
-		}
-
-
-		/**
-		 * @param model
-		 * @param ro
-		 * @param dLibraUser
-		 * @throws Exception
-		 */
-		private void createRO(String roId)
-			throws Exception
-		{
-			model.setMessage(String.format("Creating a Research Object \"%s\"", roId));
-			if (ROSRService.createResearchObject(roId, dLibraToken, model.isMergeROs()) != null) {
-				model.setMessage("Merged with an existing Research Object");
+			URI annTargetURI;
+			if (res instanceof SimpleResource) {
+				annTargetURI = researchObjectURI.resolve(((SimpleResource) res).getFilename());
 			}
+			else {
+				annTargetURI = researchObjectURI;
+			}
+			URI bodyURI = createAnnotationBodyURI(researchObjectURI, annTargetURI);
+			annBodies.put(bodyURI, createAnnotationBody(rdf));
+			annotations.put(annTargetURI, bodyURI);
+
+			incrementStepsComplete();
 		}
 
 
@@ -303,5 +367,64 @@ public class MyExpImportService
 			model.setProgressInPercent((int) Math.round((double) stepsComplete / stepsTotal * 100));
 		}
 
+	}
+
+
+	static OntModel createAnnotationBody(String myExperimentRDF)
+	{
+		OntModel body = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+		return body;
+	}
+
+
+	static void addAnnotation(OntModel manifest, URI researchObjectURI, URI targetURI, URI bodyURI)
+		throws URISyntaxException
+	{
+		Individual ann = manifest.createIndividual(createAnnotationURI(manifest, researchObjectURI).toString(),
+			RoFactory.aggregatedAnnotation);
+		ann.addProperty(RoFactory.annotatesResource, targetURI.toString());
+		ann.addProperty(RoFactory.aoBody, bodyURI.toString());
+		ann.addProperty(DCTerms.created, manifest.createTypedLiteral(Calendar.getInstance()));
+		Individual agent = manifest.createIndividual(RoFactory.foafAgent);
+		agent.addProperty(RoFactory.foafName, "myExperiment");
+		ann.addProperty(DCTerms.creator, agent);
+	}
+
+
+	/**
+	 * 
+	 * @param researchObjectURI
+	 * @param targetURI
+	 * @return i.e. http://sandbox.wf4ever-project.org/rosrs5/ROs/ann217/.ro/ro--5600459667350895101.rdf
+	 * @throws URISyntaxException
+	 */
+	static URI createAnnotationBodyURI(URI researchObjectURI, URI targetURI)
+		throws URISyntaxException
+	{
+		String targetName;
+		if (targetURI.equals(researchObjectURI))
+			targetName = "ro";
+		else
+			targetName = targetURI.resolve(".").relativize(targetURI).toString();
+		String randomBit = "" + Math.abs(UUID.randomUUID().getLeastSignificantBits());
+
+		return researchObjectURI.resolve(".ro/" + targetName + "-" + randomBit + ".rdf");
+	}
+
+
+	/**
+	 * 
+	 * @param manifest
+	 * @param researchObjectURI
+	 * @return i.e. http://sandbox.wf4ever-project.org/rosrs5/ROs/ann217/52a272f1-864f-4a42-89ff-2501a739d6f0
+	 */
+	static URI createAnnotationURI(OntModel manifest, URI researchObjectURI)
+	{
+		URI ann = null;
+		do {
+			ann = researchObjectURI.resolve(UUID.randomUUID().toString());
+		}
+		while (manifest.containsResource(manifest.createResource(ann.toString())));
+		return ann;
 	}
 }

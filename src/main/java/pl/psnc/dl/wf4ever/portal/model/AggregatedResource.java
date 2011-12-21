@@ -10,11 +10,11 @@ public abstract class AggregatedResource
 
 	public static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z");
 
-	protected final URI uri;
+	protected URI uri;
 
-	protected final Calendar created;
+	protected Calendar created;
 
-	protected final String creator;
+	protected String creator;
 
 	protected String name;
 
@@ -30,6 +30,11 @@ public abstract class AggregatedResource
 		this.creator = creator;
 		this.name = name;
 		this.size = size;
+	}
+
+
+	public AggregatedResource()
+	{
 	}
 
 

@@ -50,22 +50,28 @@ public class RoFactory
 
 	private final Individual ro;
 
-	private static final Resource roResource = ModelFactory.createDefaultModel().createResource(
+	public static final Resource roResource = ModelFactory.createDefaultModel().createResource(
 		"http://purl.org/wf4ever/ro#Resource");
 
-	private static final Property foafName = ModelFactory.createDefaultModel().createProperty(
+	public static final Resource aggregatedAnnotation = ModelFactory.createDefaultModel().createResource(
+		"http://purl.org/wf4ever/ro#AggregatedAnnotation");
+
+	public static final Resource foafAgent = ModelFactory.createDefaultModel().createResource(
+		"http://xmlns.com/foaf/0.1/Agent");
+
+	public static final Property foafName = ModelFactory.createDefaultModel().createProperty(
 		"http://xmlns.com/foaf/0.1/name");
 
-	private static final Property filesize = ModelFactory.createDefaultModel().createProperty(
+	public static final Property filesize = ModelFactory.createDefaultModel().createProperty(
 		"http://purl.org/wf4ever/ro#filesize");
 
-	private static final Property aggregates = ModelFactory.createDefaultModel().createProperty(
+	public static final Property aggregates = ModelFactory.createDefaultModel().createProperty(
 		ORE_NAMESPACE + "aggregates");
 
-	private static final Property annotatesResource = ModelFactory.createDefaultModel().createProperty(
+	public static final Property annotatesResource = ModelFactory.createDefaultModel().createProperty(
 		AO_NAMESPACE + "annotatesResource");
 
-	private static final Property aoBody = ModelFactory.createDefaultModel().createProperty(AO_NAMESPACE + "body");
+	public static final Property aoBody = ModelFactory.createDefaultModel().createProperty(AO_NAMESPACE + "body");
 
 
 	public RoFactory(URI baseURI)

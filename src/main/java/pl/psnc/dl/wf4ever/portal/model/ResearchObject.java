@@ -28,6 +28,12 @@ public class ResearchObject
 	}
 
 
+	public ResearchObject()
+	{
+		super();
+	}
+
+
 	@Override
 	public boolean isWorkflow()
 	{

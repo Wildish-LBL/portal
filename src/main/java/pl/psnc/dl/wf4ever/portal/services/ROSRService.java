@@ -37,8 +37,6 @@ public class ROSRService
 
 	private static final String URI_RO_ID = URI_ROS + "%s/";
 
-	private static final String URI_RESOURCE = URI_RO_ID + "%s";
-
 	private static final OAuthService dLibraService = DlibraApi.getOAuthService("notused", null);
 
 
@@ -78,10 +76,10 @@ public class ROSRService
 	}
 
 
-	public static void sendResource(String path, String roId, byte[] content, String contentType, Token dLibraToken)
+	public static void sendResource(URI resourceURI, byte[] content, String contentType, Token dLibraToken)
 		throws Exception
 	{
-		OAuthHelpService.sendRequest(dLibraService, Verb.PUT, createResourceURL(roId, path), dLibraToken, content,
+		OAuthHelpService.sendRequest(dLibraService, Verb.PUT, resourceURI, dLibraToken, content,
 			contentType != null ? contentType : "text/plain");
 	}
 
@@ -103,19 +101,6 @@ public class ROSRService
 	{
 		try {
 			String path = String.format(URI_RO_ID, roId);
-			return new URI(URI_SCHEME, URI_HOST, path, null);
-		}
-		catch (Exception e) {
-			log.error(e);
-			return null;
-		}
-	}
-
-
-	private static URI createResourceURL(String roId, String resource)
-	{
-		try {
-			String path = String.format(URI_RESOURCE, roId, resource);
 			return new URI(URI_SCHEME, URI_HOST, path, null);
 		}
 		catch (Exception e) {
