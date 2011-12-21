@@ -21,17 +21,6 @@ public class RoResource
 	 */
 	private static final long serialVersionUID = 3584549388168924987L;
 
-	private final URI uri;
-
-	private final String name;
-
-	private final String creator;
-
-	private final Calendar created;
-
-	private final long size;
-
-
 	/**
 	 * @param uri
 	 * @param name
@@ -39,33 +28,9 @@ public class RoResource
 	 * @param created
 	 * @param rSize
 	 */
-	public RoResource(URI uri, String name, String creator, Calendar created, long rSize)
+	public RoResource(URI uri, Calendar created, String creator, String name, long size)
 	{
-		this.uri = uri;
-		this.name = name;
-		this.creator = creator;
-		this.created = created;
-		this.size = rSize;
-	}
-
-
-	/* (non-Javadoc)
-	 * @see pl.psnc.dl.wf4ever.portal.model.AggregatedResource#getUri()
-	 */
-	@Override
-	public URI getURI()
-	{
-		return uri;
-	}
-
-
-	/* (non-Javadoc)
-	 * @see pl.psnc.dl.wf4ever.portal.model.AggregatedResource#getName()
-	 */
-	@Override
-	public String getName()
-	{
-		return name;
+		super(uri, created, creator, name, size);
 	}
 
 
@@ -77,27 +42,6 @@ public class RoResource
 	{
 		//FIXME should rely on RO ontology
 		return uri.getPath().endsWith(".t2flow");
-	}
-
-
-	@Override
-	public Calendar getCreated()
-	{
-		return created;
-	}
-
-
-	@Override
-	public String getCreator()
-	{
-		return creator;
-	}
-
-
-	@Override
-	public long getSize()
-	{
-		return size;
 	}
 
 

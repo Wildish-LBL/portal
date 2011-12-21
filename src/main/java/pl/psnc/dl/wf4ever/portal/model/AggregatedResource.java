@@ -3,17 +3,43 @@ package pl.psnc.dl.wf4ever.portal.model;
 import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Set;
 
 public abstract class AggregatedResource
 {
 
 	public static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z");
 
+	protected final URI uri;
+
+	protected final Calendar created;
+
+	protected final String creator;
+
+	protected String name;
+
+	protected long size;
+
+	private Set<Annotation> annotations;
+
+
+	public AggregatedResource(URI uri, Calendar created, String creator, String name, long size)
+	{
+		this.uri = uri;
+		this.created = created;
+		this.creator = creator;
+		this.name = name;
+		this.size = size;
+	}
+
 
 	/**
-	 * @return the resource URI
+	 * @return the researchObjectURI
 	 */
-	public abstract URI getURI();
+	public URI getURI()
+	{
+		return uri;
+	}
 
 
 	/**
@@ -23,22 +49,12 @@ public abstract class AggregatedResource
 
 
 	/**
-	 * @return the name
-	 */
-	public abstract String getName();
-
-
-	/**
-	 * TODO change to resource classes
-	 * @return
-	 */
-	public abstract boolean isWorkflow();
-
-
-	/**
 	 * @return the created
 	 */
-	public abstract Calendar getCreated();
+	public Calendar getCreated()
+	{
+		return created;
+	}
 
 
 	/**
@@ -50,6 +66,29 @@ public abstract class AggregatedResource
 	}
 
 
+	public String getCreator()
+	{
+		return creator;
+	}
+
+
+	/**
+	 * @return the name
+	 */
+	public String getName()
+	{
+		return name;
+	}
+
+
+	/**
+	 * TODO change to resource classes
+	 * 
+	 * @return
+	 */
+	public abstract boolean isWorkflow();
+
+
 	@Override
 	public String toString()
 	{
@@ -58,15 +97,12 @@ public abstract class AggregatedResource
 
 
 	/**
-	 * @return the created
-	 */
-	public abstract String getCreator();
-
-
-	/**
 	 * @return the size, nicely formatted (i.e. 23 MB)
 	 */
-	public abstract long getSize();
+	public long getSize()
+	{
+		return size;
+	}
 
 
 	/**
@@ -78,8 +114,23 @@ public abstract class AggregatedResource
 	}
 
 
+	public void setAnnotations(Set<Annotation> annotations)
+	{
+		this.annotations = annotations;
+	}
+
+
+	public Set<Annotation> getAnnotations()
+	{
+		return this.annotations;
+	}
+
+
 	/**
-	 * Adapted from http://stackoverflow.com/questions/3758606/how-to-convert-byte-size-into-human-readable-format-in-java
+	 * Adapted from
+	 * http://stackoverflow.com/questions/3758606/how-to-convert-byte
+	 * -size-into-human-readable-format-in-java
+	 * 
 	 * @param bytes
 	 * @param si
 	 * @return

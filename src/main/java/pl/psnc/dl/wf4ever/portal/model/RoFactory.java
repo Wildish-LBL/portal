@@ -6,6 +6,8 @@ package pl.psnc.dl.wf4ever.portal.model;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -23,6 +25,7 @@ import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.NodeIterator;
 import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 
@@ -36,6 +39,8 @@ public class RoFactory
 	private static final Logger log = Logger.getLogger(RoFactory.class);
 
 	private static final String ORE_NAMESPACE = "http://www.openarchives.org/ore/terms/";
+
+	private static final String AO_NAMESPACE = "http://purl.org/ao/core/";
 
 	private final OntModel model;
 
@@ -57,6 +62,11 @@ public class RoFactory
 	private static final Property aggregates = ModelFactory.createDefaultModel().createProperty(
 		ORE_NAMESPACE + "aggregates");
 
+	private static final Property annotatesResource = ModelFactory.createDefaultModel().createProperty(
+		AO_NAMESPACE + "annotatesResource");
+
+	private static final Property aoBody = ModelFactory.createDefaultModel().createProperty(AO_NAMESPACE + "body");
+
 
 	public RoFactory(URI baseURI)
 		throws OAuthException, URISyntaxException
@@ -72,7 +82,7 @@ public class RoFactory
 	}
 
 
-	public ResearchObject createResearchObject()
+	public ResearchObject createResearchObject(boolean includeAnnotations)
 		throws URISyntaxException
 	{
 
@@ -91,11 +101,15 @@ public class RoFactory
 		catch (Exception e) {
 			log.warn("RO " + researchObjectURI + " does not define a creator");
 		}
-		return new ResearchObject(researchObjectURI, created, creator);
+		ResearchObject ro = new ResearchObject(researchObjectURI, created, creator);
+		if (includeAnnotations) {
+			ro.setAnnotations(createAnnotations(researchObjectURI));
+		}
+		return ro;
 	}
 
 
-	public TreeModel createAggregatedResourcesTree(ResearchObject researchObject)
+	public TreeModel createAggregatedResourcesTree(AggregatedResource researchObject, boolean includeAnnotations)
 		throws URISyntaxException
 	{
 		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(researchObject);
@@ -105,7 +119,7 @@ public class RoFactory
 		while (it.hasNext()) {
 			Individual res = it.next().as(Individual.class);
 			if (res.hasRDFType(roResource)) {
-				rootNode.add(new DefaultMutableTreeNode(createResource(new URI(res.getURI()))));
+				rootNode.add(new DefaultMutableTreeNode(createResource(new URI(res.getURI()), includeAnnotations)));
 			}
 		}
 		return new DefaultTreeModel(rootNode);
@@ -116,7 +130,7 @@ public class RoFactory
 	 * @param rootNode
 	 * @param resourceURI
 	 */
-	public RoResource createResource(URI resourceURI)
+	public AggregatedResource createResource(URI resourceURI, boolean includeAnnotations)
 	{
 		Individual res = model.getIndividual(resourceURI.toString());
 		Calendar created = null;
@@ -141,7 +155,36 @@ public class RoFactory
 		}
 
 		String name = UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.relativize(resourceURI).toString(), "UTF-8");
-		return new RoResource(resourceURI, name, creator, created, size);
+		AggregatedResource resource = new RoResource(resourceURI, created, creator, name, size);
+		if (includeAnnotations) {
+			resource.setAnnotations(createAnnotations(resourceURI));
+		}
+		return resource;
 	}
 
+
+	public Set<Annotation> createAnnotations(URI resourceURI)
+	{
+		Set<Annotation> anns = new HashSet<>();
+
+		Individual res = model.getIndividual(resourceURI.toString());
+		ResIterator it = model.listSubjectsWithProperty(annotatesResource, res);
+		while (it.hasNext()) {
+			Individual ann = it.next().as(Individual.class);
+			try {
+				Calendar created = ((XSDDateTime) ann.getPropertyValue(DCTerms.created).asLiteral().getValue())
+						.asCalendar();
+				String creator = ann.getPropertyResourceValue(DCTerms.creator).as(Individual.class)
+						.getPropertyValue(foafName).asLiteral().getString();
+				Resource body = ann.getPropertyResourceValue(aoBody);
+				String name = UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.relativize(new URI(ann.getURI()))
+						.toString(), "UTF-8");
+				anns.add(new Annotation(new URI(ann.getURI()), created, creator, name, new URI(body.getURI())));
+			}
+			catch (Exception e) {
+				log.warn("Could not add annotation " + ann.getURI() + ": " + e.getMessage());
+			}
+		}
+		return anns;
+	}
 }

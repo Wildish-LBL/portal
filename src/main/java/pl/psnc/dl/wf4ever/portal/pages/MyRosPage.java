@@ -24,6 +24,7 @@ import org.apache.wicket.validation.validator.PatternValidator;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
+import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
@@ -50,7 +51,7 @@ public class MyRosPage
 		final List<ResearchObject> researchObjects = new ArrayList<ResearchObject>();
 		for (URI uri : uris) {
 			try {
-				researchObjects.add(new RoFactory(uri).createResearchObject());
+				researchObjects.add(new RoFactory(uri).createResearchObject(false));
 			}
 			catch (Exception e) {
 				error("Could not get manifest for: " + uri + " (" + e.getMessage() + ")");
@@ -71,7 +72,7 @@ public class MyRosPage
 			@Override
 			protected void populateItem(ListItem<ResearchObject> item)
 			{
-				ResearchObject researchObject = (ResearchObject) item.getDefaultModelObject();
+				AggregatedResource researchObject = (AggregatedResource) item.getDefaultModelObject();
 				item.add(new Check<ResearchObject>("checkbox", item.getModel()));
 				BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);
 				link.getPageParameters().add("ro",
@@ -129,7 +130,7 @@ public class MyRosPage
 			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 			{
 				Token dLibraToken = MySession.get().getdLibraAccessToken();
-				for (ResearchObject ro : selectedResearchObjects) {
+				for (AggregatedResource ro : selectedResearchObjects) {
 					try {
 						ROSRService.deleteResearchObject(ro.getURI(), dLibraToken);
 						researchObjects.remove(ro);
@@ -202,7 +203,7 @@ public class MyRosPage
 				Token dLibraToken = MySession.get().getdLibraAccessToken();
 				try {
 					URI researchObjectURI = ROSRService.createResearchObject(roId, dLibraToken, false);
-					researchObjects.add(new RoFactory(researchObjectURI).createResearchObject());
+					researchObjects.add(new RoFactory(researchObjectURI).createResearchObject(false));
 				}
 				catch (OAuthException | UnsupportedEncodingException | URISyntaxException e) {
 					error("Could not add Research Object: " + roId + " (" + e.getMessage() + ")");
