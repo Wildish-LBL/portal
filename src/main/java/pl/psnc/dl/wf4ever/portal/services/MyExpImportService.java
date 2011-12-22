@@ -43,6 +43,7 @@ import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportModel.ImportStatus;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
+import com.hp.hpl.jena.rdf.model.AnonId;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 
@@ -382,10 +383,11 @@ public class MyExpImportService
 	{
 		Individual ann = manifest.createIndividual(createAnnotationURI(manifest, researchObjectURI).toString(),
 			RoFactory.aggregatedAnnotation);
-		ann.addProperty(RoFactory.annotatesResource, targetURI.toString());
-		ann.addProperty(RoFactory.aoBody, bodyURI.toString());
+		ann.addProperty(RoFactory.annotatesResource, manifest.createResource(targetURI.toString()));
+		ann.addProperty(RoFactory.aoBody, manifest.createResource(bodyURI.toString()));
 		ann.addProperty(DCTerms.created, manifest.createTypedLiteral(Calendar.getInstance()));
-		Individual agent = manifest.createIndividual(RoFactory.foafAgent);
+		Individual agent = manifest.createResource(new AnonId("myExperiment")).as(Individual.class);
+		agent.setOntClass(RoFactory.foafAgent);
 		agent.addProperty(RoFactory.foafName, "myExperiment");
 		ann.addProperty(DCTerms.creator, agent);
 	}

@@ -40,7 +40,7 @@ public class RoFactory
 
 	private static final String ORE_NAMESPACE = "http://www.openarchives.org/ore/terms/";
 
-	private static final String AO_NAMESPACE = "http://purl.org/ao/core/";
+	private static final String AO_NAMESPACE = "http://purl.org/ao/";
 
 	private final OntModel model;
 
