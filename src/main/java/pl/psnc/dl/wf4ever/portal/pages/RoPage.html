@@ -25,26 +25,6 @@
 				</h3>
 				<div class="row">
 					<div class="span8 separated">
-						<!-- 						<ul id="ro-tree" class="treeview filetree">
-							<li class="open"><a href="#" class="icon folder">Research
-									Object</a>
-								<ul>
-									<li><a href="#" class="icon workflow">Time Series Data
-											Graphed and Cited</a></li>
-									<li class="selected"><a href="#" class="icon file">Google
-											charts line chart result</a></li>
-									<li><a href="#" class="icon file">Time Series Data
-											Library Citation Result</a></li>
-									<li class="open"><a href="#" class="icon folder">External</a>
-										<ul>
-											<li><a href="#" class="icon external">TSDL Home Page</a></li>
-											<li><a href="#" class="icon external">Annual Unit
-													Price of Lynx Pelts</a></li>
-											<li><a href="#" class="icon external">Annual Number
-													of Lynx Pelts</a></li>
-										</ul></li>
-								</ul></li>
-						</ul> -->
 						<div wicket:id="treeTable" class="my-tree"></div>
 						<form class="form-stacked" wicket:id="roForm">
 							<div class="actions">
@@ -62,7 +42,7 @@
 						<p>
 							<strong>Resource URI:</strong> <a wicket:id="resourceURI">[uri]</a>
 						</p>
- 						<p>
+						<p>
 							<strong>Download URI:</strong> <a wicket:id="downloadURI">[uri]</a>
 						</p>
 						<p>
@@ -73,9 +53,10 @@
 						</p>
 						<p>
 							<strong>File size:</strong> <span wicket:id="sizeFormatted">[filesize]</span>
-						</p> 
+						</p>
 						<p>
-							<strong>Number of annotations:</strong> <span wicket:id="annotations.size">[annotationsCnt]</span>
+							<strong>Number of annotations:</strong> <span
+								wicket:id="annotations.size">[annotationsCnt]</span>
 						</p>
 					</div>
 				</div>
@@ -91,117 +72,97 @@
 						src="images/l_open.gif">
 				</h3>
 				<div class="row">
-					<div class="span8 separated">
-						<div class="row">
-							<div class="span8 annotations-list">
-								<table class="bordered-table zebra-striped" style="width: 95%">
-									<thead>
-										<tr>
-											<th>Existing annotations</th>
-										</tr>
-									</thead>
-									<tbody>
-										<tr>
-											<td><span class="label">Type</span> GEO series datafile</td>
-										</tr>
-										<tr>
-											<td><span class="label">Subject</span> human, brain,
-												datas...</td>
-										</tr>
-										<tr class="selected">
-											<td><span class="label">Description</span> Human brain
-												data...</td>
-										</tr>
-										<tr>
-											<td><span class="label">Note</span> To be used as
-												input...</td>
-										</tr>
-										<tr>
-											<td><span class="label">Created</span> 2011-09-06
-												11:00...</td>
-										</tr>
-									</tbody>
-								</table>
-								<form class="form-stacked">
-									<div class="actions">
-										<button class="btn success" type="submit">Add
-											annotation</button>
-										<button class="btn danger" type="submit">Delete
-											annotation</button>
-									</div>
-								</form>
-								<hr class="separation" />
+					<div class="span6 annotations-list separated">
+						<table class="bordered-table zebra-striped" style="width: 95%">
+							<thead>
+								<tr>
+									<th colspan=2>Annotations</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr class="selected">
+									<td>2011.12.22 11:23:28 CET</td>
+									<td>myExperiment</td>
+								</tr>
+								<tr>
+									<td>2011.17.22 06:23:28 CET</td>
+									<td>John Doe</td>
+								</tr>
+							</tbody>
+						</table>
+						<form class="form-stacked">
+							<div class="actions">
+								<button class="btn success" type="submit">Add
+									annotation</button>
+								<button class="btn danger" type="submit">Delete
+									annotation</button>
 							</div>
-						</div>
-						<div class="row">
-							<div class="span8">
-								<h4>Annotation info</h4>
-								<p>
-									<strong>Annotation URI:</strong> <a
-										href="http://example.com/ROs/annotations/5352">http://example.com/ROs/annotations/5352</a>
-								</p>
-								<p>
-									<strong>Added by:</strong> Macy Gray
-								</p>
-								<p>
-									<strong>Added on:</strong> 2011-05-11
-								</p>
-							</div>
-						</div>
+						</form>
 					</div>
-
-					<div class="span7">
-						<ul class="tabs" data-tabs="tabs">
-							<li><a href="#annotationView">View</a></li>
-							<li><a href="#annotationEdit">Edit</a></li>
-						</ul>
-						<div class="tab-content">
-							<div id="annotationView" class="tab-pane">
-								<p>Human brain dataset. 44 HD samples, 36 Controls age and
-									sex matched. Brain areas:caudate nucleus, frontal cortex and
-									cerebellum. Affymetrix platform. Rows correspond to probe ids
-									and columns to samples.</p>
+					<div class="span9 entries-list">
+						<table class="bordered-table zebra-striped" style="width: 95%">
+							<thead>
+								<tr>
+									<th colspan=3>Entries (John Doe on 2011.17.22 06:23:28 CET)</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><span class="label">Type</span> GEO series datafile</td>
+									<td><a>Edit</a></td>
+									<td><a>View</a></td>
+								</tr>
+								<tr class="selected">
+									<td><span class="label">Description</span> Human brain
+										data...</td>
+									<td><a>Edit</a></td>
+									<td><a>View</a></td>
+								</tr>
+							</tbody>
+						</table>
+						<form class="form-stacked">
+							<div class="actions">
+								<button class="btn success" type="submit">Add entry</button>
+								<button class="btn danger" type="submit">Delete entry</button>
 							</div>
-							<div id="annotationEdit" class="tab-pane active">
-								<form class="form-stacked">
-									<fieldset>
-										<div class="clearfix">
-											<label for="annAttribute">What kind of annotation is
-												this?</label>
-											<div class="input">
-												<select name="annAttribute" id="annAttribute">
-													<option>Type</option>
-													<option>Subject</option>
-													<option selected="selected">Description</option>
-													<option>Format</option>
-													<option>Note</option>
-													<option>Title</option>
-													<option>Created</option>
-												</select>
-											</div>
-										</div>
-										<div class="clearfix">
-											<label for="annValue">Value for the annotation</label>
-											<div class="input">
-												<textarea class="large" id="annValue" name="annValue"
-													style="width: 90%; height: 18em;">
-Human brain dataset. 44 HD samples, 36 Controls age and sex matched. Brain areas:caudate nucleus, frontal cortex and cerebellum. Affymetrix platform.
-Rows correspond to probe ids and columns to samples.
-                      </textarea>
-											</div>
-										</div>
-									</fieldset>
-									<div class="actions">
-										<button type="submit" class="btn primary">Save
-											Changes</button>
-										<button type="reset" class="btn">Cancel</button>
-									</div>
-								</form>
-							</div>
-						</div>
+						</form>
 					</div>
 				</div>
 			</section>
 		</div>
+	</div>
+	<div id="edit-ann-modal" class="modal hide">
+		<form class="form-stacked">
+			<fieldset>
+				<div class="clearfix">
+					<label for="annAttribute">What kind of annotation is this?</label>
+					<div class="input">
+						<select name="annAttribute" id="annAttribute">
+							<option>Type</option>
+							<option>Subject</option>
+							<option selected="selected">Description</option>
+							<option>Format</option>
+							<option>Note</option>
+							<option>Title</option>
+							<option>Created</option>
+						</select>
+					</div>
+				</div>
+				<div class="clearfix">
+					<label for="annValue">Value for the annotation</label>
+					<div class="input">
+						<textarea class="large" id="annValue" name="annValue"
+							style="width: 90%; height: 18em;">
+Human brain dataset. 44 HD samples, 36 Controls age and sex matched. Brain areas:caudate nucleus, frontal cortex and cerebellum. Affymetrix platform.
+Rows correspond to probe ids and columns to samples.
+                      </textarea>
+					</div>
+				</div>
+			</fieldset>
+			<div class="actions">
+				<button type="submit" class="btn primary">Save Changes</button>
+				<button type="reset" class="btn">Cancel</button>
+			</div>
+		</form>
 	</div>
 </wicket:extend>

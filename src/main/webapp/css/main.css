@@ -121,7 +121,7 @@ a.mainMenuOption:hover {
 body {
 	padding: 0;
 	margin: 0;
-	font: 10pt "trebuchet ms", tahoma, sans-serif;
+/*	font: 10pt "trebuchet ms", tahoma, sans-serif;*/
 	line-height: 1.5em;
 	background: #d2e2ef;
 	color: #414141;

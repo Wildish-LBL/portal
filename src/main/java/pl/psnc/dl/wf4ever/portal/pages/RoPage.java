@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 
 import org.apache.wicket.RestartResponseException;
@@ -65,7 +66,8 @@ public class RoPage
 		itemInfo.setOutputMarkupId(true);
 		add(itemInfo);
 
-		Tree tree = new RoTree("treeTable", factory.createAggregatedResourcesTree(ro, true)) {
+		TreeModel treeModel = factory.createAggregatedResourcesTree(ro, true);
+		Tree tree = new RoTree("treeTable", treeModel) {
 
 			private static final long serialVersionUID = -7512570425701073804L;
 
@@ -79,6 +81,7 @@ public class RoPage
 			}
 		};
 		tree.getTreeState().expandAll();
+		tree.getTreeState().selectNode(treeModel.getRoot(), true);
 		add(tree);
 
 		Form< ? > roForm = new Form<Void>("roForm");
