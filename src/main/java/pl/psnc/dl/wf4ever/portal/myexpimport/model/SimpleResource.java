@@ -12,7 +12,7 @@ import org.apache.wicket.util.crypt.Base64;
  *
  */
 public abstract class SimpleResource
-	extends Resource
+	extends BaseResource
 {
 
 	/**

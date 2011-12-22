@@ -3,9 +3,11 @@
  */
 package pl.psnc.dl.wf4ever.portal.services;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -28,11 +30,11 @@ import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
 
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
+import pl.psnc.dl.wf4ever.portal.myexpimport.model.BaseResource;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.InternalPackItem;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.InternalPackItemHeader;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.Pack;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.PackHeader;
-import pl.psnc.dl.wf4ever.portal.myexpimport.model.Resource;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.ResourceHeader;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.SimpleResource;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.SimpleResourceHeader;
@@ -44,7 +46,10 @@ import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.rdf.model.AnonId;
+import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 
 /**
@@ -117,7 +122,7 @@ public class MyExpImportService
 		/**
 		 * bodyURI, bodyRDF
 		 */
-		private final Map<URI, OntModel> annBodies = new HashMap<>();
+		private final Map<URI, Model> annBodies = new HashMap<>();
 
 		/**
 		 * targetURI, bodyURI
@@ -210,7 +215,7 @@ public class MyExpImportService
 		private void uploadAnnotations()
 			throws Exception
 		{
-			for (Entry<URI, OntModel> e : annBodies.entrySet()) {
+			for (Entry<URI, Model> e : annBodies.entrySet()) {
 				model.setMessage(String.format("Uploading annotation body %s", e.getKey()));
 				ByteArrayOutputStream out = new ByteArrayOutputStream();
 				e.getValue().write(out);
@@ -318,17 +323,17 @@ public class MyExpImportService
 		 * @throws OAuthException
 		 * @throws JAXBException
 		 */
-		private Resource getResource(ResourceHeader res, Class< ? extends Resource> resourceClass)
+		private BaseResource getResource(ResourceHeader res, Class< ? extends BaseResource> resourceClass)
 			throws OAuthException, JAXBException
 		{
 			model.setMessage(String.format("Downloading %s", res.getResourceUrl()));
 			Response response = OAuthHelpService.sendRequest(service, Verb.GET, res.getResourceUrl(), myExpToken);
-			Resource r = (Resource) createMyExpResource(response.getBody(), resourceClass);
+			BaseResource r = (BaseResource) createMyExpResource(response.getBody(), resourceClass);
 			return r;
 		}
 
 
-		private void downloadResourceMetadata(Resource res)
+		private void downloadResourceMetadata(BaseResource res)
 			throws Exception
 		{
 			model.setMessage(String.format("Downloading metadata file %s", res.getResource()));
@@ -345,14 +350,14 @@ public class MyExpImportService
 				annTargetURI = researchObjectURI;
 			}
 			URI bodyURI = createAnnotationBodyURI(researchObjectURI, annTargetURI);
-			annBodies.put(bodyURI, createAnnotationBody(rdf));
+			annBodies.put(bodyURI, createAnnotationBody(annTargetURI, rdf));
 			annotations.put(annTargetURI, bodyURI);
 
 			incrementStepsComplete();
 		}
 
 
-		private static Object createMyExpResource(String xml, Class< ? extends Resource> resourceClass)
+		private static Object createMyExpResource(String xml, Class< ? extends BaseResource> resourceClass)
 			throws JAXBException
 		{
 			JAXBContext jc = JAXBContext.newInstance(resourceClass);
@@ -371,9 +376,31 @@ public class MyExpImportService
 	}
 
 
-	static OntModel createAnnotationBody(String myExperimentRDF)
+	static Model createAnnotationBody(URI targetURI, String myExperimentRDF)
+		throws UnsupportedEncodingException
 	{
-		OntModel body = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+		OntModel me = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+		me.read(new ByteArrayInputStream(myExperimentRDF.getBytes("UTF-8")), null);
+		Model body = ModelFactory.createDefaultModel();
+
+		Resource target = body.createResource(targetURI.toString());
+
+		// source
+		Resource source = me.listObjectsOfProperty(RoFactory.foafPrimaryTopic).next().asResource();
+		target.addProperty(DCTerms.source, source);
+
+		//title
+		if (source.hasProperty(DCTerms.title))
+			target.addProperty(DCTerms.title, source.getProperty(DCTerms.title).getLiteral());
+
+		//description
+		if (source.hasProperty(DCTerms.description))
+			target.addProperty(DCTerms.description, source.getProperty(DCTerms.description).getLiteral());
+
+		//contributor
+		Property owner = me.createProperty("http://rdfs.org/sioc/ns#has_owner");
+		if (source.hasProperty(owner))
+			target.addProperty(DCTerms.contributor, source.getPropertyResourceValue(owner));
 		return body;
 	}
 

@@ -18,7 +18,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name = "internal-pack-item")
 public class InternalPackItem
-	extends Resource
+	extends BaseResource
 
 {
 

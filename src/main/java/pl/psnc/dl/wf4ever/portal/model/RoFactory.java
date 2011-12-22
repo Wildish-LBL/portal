@@ -62,6 +62,9 @@ public class RoFactory
 	public static final Property foafName = ModelFactory.createDefaultModel().createProperty(
 		"http://xmlns.com/foaf/0.1/name");
 
+	public static final Property foafPrimaryTopic = ModelFactory.createDefaultModel().createProperty(
+		"http://xmlns.com/foaf/0.1/primaryTopic");
+
 	public static final Property filesize = ModelFactory.createDefaultModel().createProperty(
 		"http://purl.org/wf4ever/ro#filesize");
 

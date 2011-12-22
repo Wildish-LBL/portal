@@ -17,7 +17,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name = "pack")
 public class Pack
-	extends Resource
+	extends BaseResource
 {
 
 	/**

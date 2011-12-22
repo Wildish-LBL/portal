@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlElement;
  * @author Piotr Hołubowicz
  *
  */
-public abstract class Resource
+public abstract class BaseResource
 	implements Serializable
 
 {
@@ -32,7 +32,7 @@ public abstract class Resource
 	private int id;
 
 
-	public Resource()
+	public BaseResource()
 	{
 
 	}
