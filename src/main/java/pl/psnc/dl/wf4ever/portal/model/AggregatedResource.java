@@ -1,12 +1,16 @@
 package pl.psnc.dl.wf4ever.portal.model;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Set;
+import java.util.List;
 
 public abstract class AggregatedResource
+	implements Serializable
 {
+
+	private static final long serialVersionUID = -472666872267555742L;
 
 	public static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z");
 
@@ -20,7 +24,7 @@ public abstract class AggregatedResource
 
 	protected long size;
 
-	private Set<Annotation> annotations;
+	private List<Annotation> annotations;
 
 
 	public AggregatedResource(URI uri, Calendar created, String creator, String name, long size)
@@ -119,13 +123,13 @@ public abstract class AggregatedResource
 	}
 
 
-	public void setAnnotations(Set<Annotation> annotations)
+	public void setAnnotations(List<Annotation> annotations)
 	{
 		this.annotations = annotations;
 	}
 
 
-	public Set<Annotation> getAnnotations()
+	public List<Annotation> getAnnotations()
 	{
 		return this.annotations;
 	}

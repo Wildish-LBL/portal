@@ -3,7 +3,6 @@
  */
 package pl.psnc.dl.wf4ever.portal.model;
 
-import java.io.Serializable;
 import java.net.URI;
 import java.util.Calendar;
 
@@ -13,7 +12,6 @@ import java.util.Calendar;
  */
 public class ResearchObject
 	extends AggregatedResource
-	implements Serializable
 {
 
 	/**

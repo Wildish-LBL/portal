@@ -68,11 +68,11 @@
 			<!-- Annotating box -->
 			<section id="annotating-box" class="left_box inspan16">
 				<h3>
-					Annotating: Google charts line chart result <img class="sh_button"
-						src="images/l_open.gif">
+					Annotating: <span id="annTarget">[title]</span> <img
+						class="sh_button" src="images/l_open.gif">
 				</h3>
 				<div class="row">
-					<div class="span6 annotations-list separated">
+					<div wicket:id="annotationsList" class="span6 annotations-list separated">
 						<table class="bordered-table zebra-striped" style="width: 95%">
 							<thead>
 								<tr>
@@ -80,13 +80,9 @@
 								</tr>
 							</thead>
 							<tbody>
-								<tr class="selected">
-									<td>2011.12.22 11:23:28 CET</td>
-									<td>myExperiment</td>
-								</tr>
-								<tr>
-									<td>2011.17.22 06:23:28 CET</td>
-									<td>John Doe</td>
+								<tr wicket:id="annsListView">
+									<td><span wicket:id="createdFormatted">[created]</span></td>
+									<td><span wicket:id="creator">[creator]</span></td>
 								</tr>
 							</tbody>
 						</table>
@@ -103,7 +99,8 @@
 						<table class="bordered-table zebra-striped" style="width: 95%">
 							<thead>
 								<tr>
-									<th colspan=3>Entries (John Doe on 2011.17.22 06:23:28 CET)</th>
+									<th colspan=3>Entries (John Doe on 2011.17.22 06:23:28
+										CET)</th>
 								</tr>
 							</thead>
 							<tbody>

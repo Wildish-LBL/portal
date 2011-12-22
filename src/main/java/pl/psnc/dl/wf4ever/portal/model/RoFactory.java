@@ -5,9 +5,9 @@ package pl.psnc.dl.wf4ever.portal.model;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -172,9 +172,9 @@ public class RoFactory
 	}
 
 
-	public Set<Annotation> createAnnotations(URI resourceURI)
+	public List<Annotation> createAnnotations(URI resourceURI)
 	{
-		Set<Annotation> anns = new HashSet<>();
+		List<Annotation> anns = new ArrayList<>();
 
 		Individual res = model.getIndividual(resourceURI.toString());
 		ResIterator it = model.listSubjectsWithProperty(annotatesResource, res);

@@ -14,6 +14,11 @@ public class Annotation
 	extends AggregatedResource
 {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8821418401311175036L;
+
 	private URI bodyURI;
 
 
