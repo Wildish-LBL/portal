@@ -9,7 +9,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -239,23 +238,13 @@ public class RoPage
 
 
 			@Override
-			public void onDeselectObject(AjaxRequestTarget target, ListItem<Annotation> item)
+			public void onSelectItem(AjaxRequestTarget target, ListItem<Annotation> item)
 			{
-				item.add(AttributeModifier.remove("class"));
-				target.add(item);
-			}
-
-
-			@Override
-			public void onSelectObject(AjaxRequestTarget target, ListItem<Annotation> item)
-			{
-				item.add(new AttributeAppender("class", "selected").setSeparator(" "));
-				target.add(item);
 				target.add(entriesDiv);
 			}
 
 		};
-		annList.setReuseItems(true);
+		annList.setReuseItems(false);
 		annotationsListDiv.add(annList);
 
 		entriesList.setModel(new PropertyModel<List<Statement>>(annList, "selectedObject.body"));
