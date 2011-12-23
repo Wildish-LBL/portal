@@ -20,7 +20,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.PropertyListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
@@ -194,7 +193,8 @@ public class RoPage
 		final WebMarkupContainer entriesDiv = new WebMarkupContainer("entriesDiv");
 		entriesDiv.setOutputMarkupId(true);
 		box.add(entriesDiv);
-		final PropertyListView<Statement> entriesList = new PropertyListView<Statement>("entriesListView") {
+		final SelectablePropertyListView<Statement> entriesList = new SelectablePropertyListView<Statement>(
+				"entriesListView") {
 
 			private static final long serialVersionUID = -6310254217773728128L;
 
@@ -202,6 +202,7 @@ public class RoPage
 			@Override
 			protected void populateItem(ListItem<Statement> item)
 			{
+				super.populateItem(item);
 				item.add(new Label("predicate.localName"));
 				if (item.getModelObject().getObject().isResource()) {
 					item.add(new ExternalLinkFragment("object", "externalLinkFragment", RoPage.this,
@@ -211,6 +212,13 @@ public class RoPage
 					item.add(new Label("object", ((CompoundPropertyModel<Statement>) item.getModel())
 							.<String> bind("object.asLiteral.value")).setEscapeModelStrings(false));
 				}
+			}
+
+
+			@Override
+			public void onSelectItem(AjaxRequestTarget target, ListItem<Statement> item)
+			{
+				target.add(entriesDiv);
 			}
 
 		};
@@ -244,6 +252,10 @@ public class RoPage
 			}
 
 		};
+		if (!itemModel.getObject().getAnnotations().isEmpty()) {
+			annList.setSelectedObject(itemModel.getObject().getAnnotations().get(0));
+		}
+
 		annList.setReuseItems(false);
 		annotationsListDiv.add(annList);
 

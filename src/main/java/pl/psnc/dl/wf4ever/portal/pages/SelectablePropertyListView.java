@@ -39,12 +39,12 @@ public abstract class SelectablePropertyListView<T>
 	public SelectablePropertyListView(String id, IModel< ? extends List< ? extends T>> model)
 	{
 		super(id, model);
-		if (!getModelObject().isEmpty()) {
-			setSelectedObject(getModelObject().get(0));
-		}
-		else {
-			setSelectedObject(null);
-		}
+	}
+
+
+	public SelectablePropertyListView(String id)
+	{
+		super(id);
 	}
 
 
