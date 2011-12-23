@@ -44,6 +44,10 @@ public class RoPage
 
 	private boolean canEdit = false;
 
+	private final WebMarkupContainer roViewerBox;
+
+	private final WebMarkupContainer annotatingBox;
+
 
 	public RoPage(final PageParameters parameters)
 		throws URISyntaxException, MalformedURLException, OAuthException
@@ -65,10 +69,23 @@ public class RoPage
 			canEdit = uris.contains(ro.getURI());
 		}
 
-		add(new Label("title", ro.getURI().toString()));
+		final CompoundPropertyModel<AggregatedResource> itemModel = new CompoundPropertyModel<AggregatedResource>(ro);
+		final TreeModel treeModel = factory.createAggregatedResourcesTree(ro, true);
+		annotatingBox = createAnnotatingBox(itemModel);
+		add(annotatingBox);
+		roViewerBox = createRoViewerBox(itemModel, treeModel);
+		add(roViewerBox);
+	}
+
+
+	private WebMarkupContainer createRoViewerBox(final CompoundPropertyModel<AggregatedResource> itemModel,
+			TreeModel treeModel)
+	{
+		WebMarkupContainer box = new WebMarkupContainer("roViewerBox", itemModel);
+		box.add(new Label("title", ro.getURI().toString()));
 
 		Form< ? > roForm = new Form<Void>("roForm");
-		add(roForm);
+		box.add(roForm);
 
 		AjaxButton addFolder = new AjaxButton("addFolder", roForm) {
 
@@ -133,10 +150,9 @@ public class RoPage
 		}
 		roForm.add(deleteResource);
 
-		final CompoundPropertyModel<AggregatedResource> itemModel = new CompoundPropertyModel<AggregatedResource>(ro);
 		final WebMarkupContainer itemInfo = new WebMarkupContainer("itemInfo", itemModel);
 		itemInfo.setOutputMarkupId(true);
-		add(itemInfo);
+		box.add(itemInfo);
 		itemInfo.add(new ExternalLink("resourceURI", itemModel.<String> bind("URI.toString"), itemModel
 				.<URI> bind("URI")));
 		itemInfo.add(new ExternalLink("downloadURI", itemModel.<String> bind("downloadURI.toString"), itemModel
@@ -146,13 +162,63 @@ public class RoPage
 		itemInfo.add(new Label("sizeFormatted"));
 		itemInfo.add(new Label("annotations.size"));
 
+		Tree tree = new RoTree("treeTable", treeModel) {
+
+			private static final long serialVersionUID = -7512570425701073804L;
+
+
+			@Override
+			protected void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node)
+			{
+				AggregatedResource res = (AggregatedResource) ((DefaultMutableTreeNode) node).getUserObject();
+				itemModel.setObject(res);
+				target.add(itemInfo);
+				target.add(annotatingBox);
+			}
+		};
+		tree.getTreeState().expandAll();
+		tree.getTreeState().selectNode(treeModel.getRoot(), true);
+		box.add(tree);
+		return box;
+	}
+
+
+	private WebMarkupContainer createAnnotatingBox(final CompoundPropertyModel<AggregatedResource> itemModel)
+	{
+		WebMarkupContainer box = new WebMarkupContainer("annotatingBox", itemModel);
+		box.setOutputMarkupId(true);
+		box.add(new Label("annTarget", itemModel.<URI> bind("URI")));
+
 		final WebMarkupContainer entriesDiv = new WebMarkupContainer("entriesDiv");
 		entriesDiv.setOutputMarkupId(true);
-		add(entriesDiv);
+		box.add(entriesDiv);
+		final PropertyListView<Statement> entriesList = new PropertyListView<Statement>("entriesListView") {
+
+			private static final long serialVersionUID = -6310254217773728128L;
+
+
+			@Override
+			protected void populateItem(ListItem<Statement> item)
+			{
+				item.add(new Label("predicate.localName"));
+				if (item.getModelObject().getObject().isResource()) {
+					item.add(new ExternalLink("object", ((CompoundPropertyModel<Statement>) item.getModel())
+							.<String> bind("object.asResource.URI"), ((CompoundPropertyModel<Statement>) item
+							.getModel()).<String> bind("object.asResource.toString")));
+				}
+				else {
+					item.add(new Label("object", ((CompoundPropertyModel<Statement>) item.getModel())
+							.<String> bind("object.asLiteral.value")).setEscapeModelStrings(false));
+				}
+			}
+
+		};
+		entriesList.setReuseItems(false);
+		entriesDiv.add(entriesList);
 
 		final WebMarkupContainer annotationsListDiv = new WebMarkupContainer("annotationsDiv");
 		annotationsListDiv.setOutputMarkupId(true);
-		add(annotationsListDiv);
+		box.add(annotationsListDiv);
 		SelectablePropertyListView<Annotation> annList = new SelectablePropertyListView<Annotation>("annsListView",
 				new PropertyModel<List<Annotation>>(itemModel, "annotations")) {
 
@@ -187,48 +253,8 @@ public class RoPage
 		annList.setReuseItems(true);
 		annotationsListDiv.add(annList);
 
-		final PropertyListView<Statement> entriesList = new PropertyListView<Statement>("entriesListView",
-				new PropertyModel<List<Statement>>(annList, "selectedObject.body")) {
+		entriesList.setModel(new PropertyModel<List<Statement>>(annList, "selectedObject.body"));
 
-			private static final long serialVersionUID = -6310254217773728128L;
-
-
-			@Override
-			protected void populateItem(ListItem<Statement> item)
-			{
-				item.add(new Label("predicate.localName"));
-				if (item.getModelObject().getObject().isURIResource()) {
-					item.add(new ExternalLink("object", ((CompoundPropertyModel<Statement>) item.getModel())
-							.<String> bind("object.asResource.URI"), ((CompoundPropertyModel<Statement>) item
-							.getModel()).<String> bind("object.asResource.toString")));
-				}
-				else {
-					item.add(new Label("object", ((CompoundPropertyModel<Statement>) item.getModel())
-							.<String> bind("object.asLiteral.value")).setEscapeModelStrings(false));
-				}
-			}
-
-		};
-		entriesList.setReuseItems(true);
-		entriesDiv.add(entriesList);
-
-		TreeModel treeModel = factory.createAggregatedResourcesTree(ro, true);
-		Tree tree = new RoTree("treeTable", treeModel) {
-
-			private static final long serialVersionUID = -7512570425701073804L;
-
-
-			@Override
-			protected void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node)
-			{
-				AggregatedResource res = (AggregatedResource) ((DefaultMutableTreeNode) node).getUserObject();
-				itemModel.setObject(res);
-				target.add(itemInfo);
-				target.add(annotationsListDiv);
-			}
-		};
-		tree.getTreeState().expandAll();
-		tree.getTreeState().selectNode(treeModel.getRoot(), true);
-		add(tree);
+		return box;
 	}
 }
