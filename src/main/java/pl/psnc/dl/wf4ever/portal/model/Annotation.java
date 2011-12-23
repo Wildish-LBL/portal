@@ -24,6 +24,8 @@ public class Annotation
 
 	private URI bodyURI;
 
+	private transient List<Statement> body;
+
 
 	public Annotation(URI uri, Calendar created, String creator, String name, URI bodyURI)
 	{
@@ -76,7 +78,10 @@ public class Annotation
 
 	public List<Statement> getBody()
 	{
-		return RoFactory.createAnnotationBody(bodyURI);
+		if (body == null) {
+			body = RoFactory.createAnnotationBody(bodyURI);
+		}
+		return body;
 	}
 
 }

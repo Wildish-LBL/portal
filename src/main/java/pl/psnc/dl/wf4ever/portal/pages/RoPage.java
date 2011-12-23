@@ -9,6 +9,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 
+import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -20,6 +22,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PropertyListView;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.UrlDecoder;
@@ -202,9 +205,8 @@ public class RoPage
 			{
 				item.add(new Label("predicate.localName"));
 				if (item.getModelObject().getObject().isResource()) {
-					item.add(new ExternalLink("object", ((CompoundPropertyModel<Statement>) item.getModel())
-							.<String> bind("object.asResource.URI"), ((CompoundPropertyModel<Statement>) item
-							.getModel()).<String> bind("object.asResource.toString")));
+					item.add(new ExternalLinkFragment("object", "externalLinkFragment", RoPage.this,
+							(CompoundPropertyModel<Statement>) item.getModel()));
 				}
 				else {
 					item.add(new Label("object", ((CompoundPropertyModel<Statement>) item.getModel())
@@ -232,20 +234,23 @@ public class RoPage
 				item.add(new Label("createdFormatted"));
 				item.add(new Label("creator"));
 				item.add(new AttributeAppender("title", new PropertyModel<URI>(item.getModel(), "URI")));
+				item.setOutputMarkupId(true);
 			}
 
 
 			@Override
 			public void onDeselectObject(AjaxRequestTarget target, ListItem<Annotation> item)
 			{
-				// TODO Auto-generated method stub
-
+				item.add(AttributeModifier.remove("class"));
+				target.add(item);
 			}
 
 
 			@Override
 			public void onSelectObject(AjaxRequestTarget target, ListItem<Annotation> item)
 			{
+				item.add(new AttributeAppender("class", "selected").setSeparator(" "));
+				target.add(item);
 				target.add(entriesDiv);
 			}
 
@@ -257,4 +262,24 @@ public class RoPage
 
 		return box;
 	}
+
+	class ExternalLinkFragment
+		extends Fragment
+	{
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -7541060078430742169L;
+
+
+		public ExternalLinkFragment(String id, String markupId, MarkupContainer markupProvider,
+				CompoundPropertyModel<Statement> model)
+		{
+			super(id, markupId, markupProvider, model);
+			add(new ExternalLink("link", model.<String> bind("object.asResource.URI"),
+					model.<String> bind("object.asResource.toString")));
+		}
+	}
+
 }

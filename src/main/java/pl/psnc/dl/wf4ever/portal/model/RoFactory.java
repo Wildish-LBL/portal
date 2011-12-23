@@ -7,6 +7,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -211,6 +213,14 @@ public class RoFactory
 		while (it.hasNext()) {
 			statements.add(it.next());
 		}
+		Collections.sort(statements, new Comparator<Statement>() {
+
+			@Override
+			public int compare(Statement s1, Statement s2)
+			{
+				return s1.getPredicate().getLocalName().compareTo(s2.getPredicate().getLocalName());
+			}
+		});
 		return statements;
 	}
 }
