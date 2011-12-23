@@ -5,6 +5,9 @@ package pl.psnc.dl.wf4ever.portal.model;
 
 import java.net.URI;
 import java.util.Calendar;
+import java.util.List;
+
+import com.hp.hpl.jena.rdf.model.Statement;
 
 /**
  * @author piotrhol
@@ -68,6 +71,12 @@ public class Annotation
 	public String getSizeFormatted()
 	{
 		return "--";
+	}
+
+
+	public List<Statement> getBody()
+	{
+		return RoFactory.createAnnotationBody(bodyURI);
 	}
 
 }

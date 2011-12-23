@@ -22,11 +22,14 @@ import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
+import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.NodeIterator;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 
 /**
@@ -195,5 +198,19 @@ public class RoFactory
 			}
 		}
 		return anns;
+	}
+
+
+	public static List<Statement> createAnnotationBody(URI annotationBodyURI)
+	{
+		Model body = ModelFactory.createDefaultModel();
+		body.read(annotationBodyURI.toString());
+
+		List<Statement> statements = new ArrayList<Statement>();
+		StmtIterator it = body.listStatements();
+		while (it.hasNext()) {
+			statements.add(it.next());
+		}
+		return statements;
 	}
 }

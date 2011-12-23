@@ -32,6 +32,8 @@ import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 
+import com.hp.hpl.jena.rdf.model.Statement;
+
 public class RoPage
 	extends TemplatePage
 {
@@ -144,10 +146,14 @@ public class RoPage
 		itemInfo.add(new Label("sizeFormatted"));
 		itemInfo.add(new Label("annotations.size"));
 
-		final WebMarkupContainer annotationsListDiv = new WebMarkupContainer("annotationsList");
+		final WebMarkupContainer entriesDiv = new WebMarkupContainer("entriesDiv");
+		entriesDiv.setOutputMarkupId(true);
+		add(entriesDiv);
+
+		final WebMarkupContainer annotationsListDiv = new WebMarkupContainer("annotationsDiv");
 		annotationsListDiv.setOutputMarkupId(true);
 		add(annotationsListDiv);
-		PropertyListView<Annotation> annList = new PropertyListView<Annotation>("annsListView",
+		SelectablePropertyListView<Annotation> annList = new SelectablePropertyListView<Annotation>("annsListView",
 				new PropertyModel<List<Annotation>>(itemModel, "annotations")) {
 
 			private static final long serialVersionUID = -6310254217773728128L;
@@ -156,14 +162,55 @@ public class RoPage
 			@Override
 			protected void populateItem(ListItem<Annotation> item)
 			{
+				super.populateItem(item);
 				item.add(new Label("createdFormatted"));
 				item.add(new Label("creator"));
+				item.add(new AttributeAppender("title", new PropertyModel<URI>(item.getModel(), "URI")));
+			}
+
+
+			@Override
+			public void onDeselectObject(AjaxRequestTarget target, ListItem<Annotation> item)
+			{
+				// TODO Auto-generated method stub
+
+			}
+
+
+			@Override
+			public void onSelectObject(AjaxRequestTarget target, ListItem<Annotation> item)
+			{
+				target.add(entriesDiv);
 			}
 
 		};
 		annList.setReuseItems(true);
-		annList.setOutputMarkupId(true);
 		annotationsListDiv.add(annList);
+
+		final PropertyListView<Statement> entriesList = new PropertyListView<Statement>("entriesListView",
+				new PropertyModel<List<Statement>>(annList, "selectedObject.body")) {
+
+			private static final long serialVersionUID = -6310254217773728128L;
+
+
+			@Override
+			protected void populateItem(ListItem<Statement> item)
+			{
+				item.add(new Label("predicate.localName"));
+				if (item.getModelObject().getObject().isURIResource()) {
+					item.add(new ExternalLink("object", ((CompoundPropertyModel<Statement>) item.getModel())
+							.<String> bind("object.asResource.URI"), ((CompoundPropertyModel<Statement>) item
+							.getModel()).<String> bind("object.asResource.toString")));
+				}
+				else {
+					item.add(new Label("object", ((CompoundPropertyModel<Statement>) item.getModel())
+							.<String> bind("object.asLiteral.value")).setEscapeModelStrings(false));
+				}
+			}
+
+		};
+		entriesList.setReuseItems(true);
+		entriesDiv.add(entriesList);
 
 		TreeModel treeModel = factory.createAggregatedResourcesTree(ro, true);
 		Tree tree = new RoTree("treeTable", treeModel) {
