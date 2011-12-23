@@ -13,6 +13,7 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PropertyListView;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 
 /**
  * @author piotrhol
@@ -28,7 +29,7 @@ public abstract class SelectablePropertyListView<T>
 	/**
 	 * Used to set selectedItem when repainting
 	 */
-	private T selectedObject;
+	private LoadableDetachableModel<T> selectedObjectModel;
 
 	/**
 	 * Has precedence over selectedObject
@@ -39,12 +40,38 @@ public abstract class SelectablePropertyListView<T>
 	public SelectablePropertyListView(String id, IModel< ? extends List< ? extends T>> model)
 	{
 		super(id, model);
+		init();
 	}
 
 
 	public SelectablePropertyListView(String id)
 	{
 		super(id);
+		init();
+	}
+
+
+	/**
+	 * 
+	 */
+	private void init()
+	{
+		selectedObjectModel = new LoadableDetachableModel<T>() {
+
+			private static final long serialVersionUID = 4657541968660868729L;
+
+
+			@Override
+			protected T load()
+			{
+				if (selectedItem != null) {
+					return selectedItem.getModelObject();
+				}
+				else {
+					return null;
+				}
+			}
+		};
 	}
 
 
@@ -77,12 +104,9 @@ public abstract class SelectablePropertyListView<T>
 			public void onComponentTag(final Component component, final ComponentTag tag)
 			{
 				super.onComponentTag(component, tag);
-				if (getSelectedObject() == item.getModelObject()) {
+				if (item.getModelObject().equals(getSelectedObject())) {
 					tag.put("class", "selected");
 					selectedItem = item;
-				}
-				else {
-					//					tag.remove("class");
 				}
 			}
 		});
@@ -95,12 +119,13 @@ public abstract class SelectablePropertyListView<T>
 	public T getSelectedObject()
 	{
 		if (selectedItem != null) {
-			selectedObject = selectedItem.getModelObject();
+			T selectedObject = selectedItem.getModelObject();
 			if (selectedObject == null) {
 				selectedItem = null;
 			}
+			setSelectedObject(selectedObject);
 		}
-		return selectedObject;
+		return selectedObjectModel.getObject();
 	}
 
 
@@ -109,7 +134,7 @@ public abstract class SelectablePropertyListView<T>
 	 */
 	public void setSelectedObject(T selectedObject)
 	{
-		this.selectedObject = selectedObject;
+		this.selectedObjectModel.setObject(selectedObject);
 	}
 
 

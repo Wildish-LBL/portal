@@ -7,6 +7,8 @@ import java.net.URI;
 import java.util.Calendar;
 import java.util.List;
 
+import org.apache.wicket.model.LoadableDetachableModel;
+
 import com.hp.hpl.jena.rdf.model.Statement;
 
 /**
@@ -24,13 +26,25 @@ public class Annotation
 
 	private URI bodyURI;
 
-	private transient List<Statement> body;
+	private LoadableDetachableModel<List<Statement>> bodyModel;
 
 
 	public Annotation(URI uri, Calendar created, String creator, String name, URI bodyURI)
 	{
 		super(uri, created, creator, name, 0);
 		this.bodyURI = bodyURI;
+
+		bodyModel = new LoadableDetachableModel<List<Statement>>() {
+
+			private static final long serialVersionUID = 4142916952621994965L;
+
+
+			@Override
+			protected List<Statement> load()
+			{
+				return RoFactory.createAnnotationBody(getBodyURI());
+			}
+		};
 	}
 
 
@@ -78,10 +92,6 @@ public class Annotation
 
 	public List<Statement> getBody()
 	{
-		if (body == null) {
-			body = RoFactory.createAnnotationBody(bodyURI);
-		}
-		return body;
+		return bodyModel.getObject();
 	}
-
 }
