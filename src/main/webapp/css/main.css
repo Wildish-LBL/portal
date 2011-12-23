@@ -300,32 +300,7 @@ hr.separation {
     border-right:none;
 }
 
-.filetree a.folder {
-    background: url("../images/folder.gif") no-repeat scroll 0 0 transparent;
-}
-
-.filetree li.expandable a.folder {
-    background: url("../images/folder-closed.gif") no-repeat scroll 0 0 transparent;
-}
-
-.filetree a.workflow {
-    background: url("../images/workflow.png") no-repeat scroll 0 0 transparent;
-}
-
-.filetree a.file {
-    background: url("../images/file.png") no-repeat scroll 0 0 transparent;
-}
-
-.filetree a.external {
-    background: url("../images/external.png") no-repeat scroll 0 0 transparent;
-}
-
-.filetree a.icon  { 
-    padding: 1px 0 1px 20px; 
-    display: block; 
-}
-
-.filetree li.selected > a.icon, tr.selected > td {
+tr.selected > td {
     background-color: #FDF5D9 !important;
     border: 1px solid #FCEEC1 !important;
 }
