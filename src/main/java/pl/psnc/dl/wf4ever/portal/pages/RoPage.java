@@ -368,7 +368,10 @@ public class RoPage
 			@Override
 			protected List<Statement> load()
 			{
-				return annList.getSelectedObject().getBody();
+				if (annList.getSelectedObject() != null)
+					return annList.getSelectedObject().getBody();
+				else
+					return null;
 			}
 		});
 

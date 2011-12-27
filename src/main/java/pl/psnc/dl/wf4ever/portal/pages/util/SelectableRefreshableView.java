@@ -3,6 +3,7 @@
  */
 package pl.psnc.dl.wf4ever.portal.pages.util;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -15,7 +16,6 @@ import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.RefreshingView;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 
 /**
  * @author piotrhol
@@ -29,51 +29,20 @@ public abstract class SelectableRefreshableView<T>
 	private static final long serialVersionUID = -6801474007329856060L;
 
 	/**
-	 * Used to set selectedItem when repainting
-	 */
-	private LoadableDetachableModel<T> selectedObjectModel;
-
-	/**
 	 * Has precedence over selectedObject
 	 */
-	private transient Item<T> selectedItem;
+	private transient T selectedObject;
 
 
 	public SelectableRefreshableView(String id, IModel< ? extends List< ? extends T>> model)
 	{
 		super(id, model);
-		init();
 	}
 
 
 	public SelectableRefreshableView(String id)
 	{
 		super(id);
-		init();
-	}
-
-
-	/**
-	 * 
-	 */
-	private void init()
-	{
-		selectedObjectModel = new LoadableDetachableModel<T>() {
-
-			private static final long serialVersionUID = 4657541968660868729L;
-
-
-			@Override
-			protected T load()
-			{
-				if (selectedItem != null) {
-					return selectedItem.getModelObject();
-				}
-				else {
-					return null;
-				}
-			}
-		};
 	}
 
 
@@ -88,7 +57,8 @@ public abstract class SelectableRefreshableView<T>
 			@Override
 			protected void onEvent(AjaxRequestTarget target)
 			{
-				setSelectedItem(target, item);
+				selectedObject = item.getModelObject();
+				onSelectItem(target, item);
 			}
 		});
 		// do distinguish between selected and unselected rows we add an
@@ -108,7 +78,6 @@ public abstract class SelectableRefreshableView<T>
 				super.onComponentTag(component, tag);
 				if (item.getModelObject().equals(getSelectedObject())) {
 					tag.put("class", "selected");
-					selectedItem = item;
 				}
 			}
 		});
@@ -120,7 +89,10 @@ public abstract class SelectableRefreshableView<T>
 	{
 		@SuppressWarnings("unchecked")
 		IModel< ? extends List< ? extends T>> model = (IModel< ? extends List< ? extends T>>) getDefaultModel();
-		return new ModelIteratorAdapter<T>(model.getObject().iterator()) {
+		if (model.getObject() == null || !model.getObject().contains(selectedObject))
+			selectedObject = null;
+		List< ? extends T> source = (model.getObject() != null) ? model.getObject() : new ArrayList<T>();
+		return new ModelIteratorAdapter<T>(source.iterator()) {
 
 			@Override
 			protected IModel<T> model(T stmt)
@@ -136,17 +108,7 @@ public abstract class SelectableRefreshableView<T>
 	 */
 	public T getSelectedObject()
 	{
-		if (selectedItem != null) {
-			T selectedObject = null;
-			try {
-				selectedObject = selectedItem.getModelObject();
-			}
-			catch (IndexOutOfBoundsException e) {
-				selectedItem = null;
-			}
-			setSelectedObject(selectedObject);
-		}
-		return selectedObjectModel.getObject();
+		return selectedObject;
 	}
 
 
@@ -155,18 +117,7 @@ public abstract class SelectableRefreshableView<T>
 	 */
 	public void setSelectedObject(T selectedObject)
 	{
-		this.selectedObjectModel.setObject(selectedObject);
-	}
-
-
-	/**
-	 * @param target 
-	 * @param item the selectedItem to set
-	 */
-	private void setSelectedItem(AjaxRequestTarget target, Item<T> item)
-	{
-		this.selectedItem = item;
-		onSelectItem(target, item);
+		this.selectedObject = selectedObject;
 	}
 
 
