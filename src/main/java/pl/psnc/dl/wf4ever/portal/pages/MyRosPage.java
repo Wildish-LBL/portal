@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -15,8 +16,10 @@ import org.apache.wicket.markup.html.form.CheckGroup;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.RequiredTextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.markup.repeater.RefreshingView;
+import org.apache.wicket.model.CompoundPropertyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.UrlEncoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -27,6 +30,7 @@ import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
+import pl.psnc.dl.wf4ever.portal.pages.util.ModelIteratorAdapter;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 
@@ -64,25 +68,39 @@ public class MyRosPage
 		form.add(new MyFeedbackPanel("feedbackPanel"));
 		CheckGroup<ResearchObject> group = new CheckGroup<ResearchObject>("group", selectedResearchObjects);
 		form.add(group);
-		ListView<ResearchObject> list = new ListView<ResearchObject>("rosListView", researchObjects) {
+		RefreshingView<ResearchObject> list = new RefreshingView<ResearchObject>("rosListView") {
 
 			private static final long serialVersionUID = -6310254217773728128L;
 
 
 			@Override
-			protected void populateItem(ListItem<ResearchObject> item)
+			protected void populateItem(Item<ResearchObject> item)
 			{
 				AggregatedResource researchObject = (AggregatedResource) item.getDefaultModelObject();
 				item.add(new Check<ResearchObject>("checkbox", item.getModel()));
 				BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);
 				link.getPageParameters().add("ro",
 					UrlEncoder.QUERY_INSTANCE.encode(researchObject.getURI().toString(), "UTF-8"));
-				link.add(new Label("title", researchObject.getURI().toString()));
+				link.add(new Label("URI"));
 				item.add(link);
-				item.add(new Label("created", new PropertyModel<String>(researchObject, "createdFormatted")));
+				item.add(new Label("createdFormatted"));
 			}
+
+
+			@Override
+			protected Iterator<IModel<ResearchObject>> getItemModels()
+			{
+				return new ModelIteratorAdapter<ResearchObject>(researchObjects.iterator()) {
+
+					@Override
+					protected IModel<ResearchObject> model(ResearchObject ro)
+					{
+						return new CompoundPropertyModel<ResearchObject>(ro);
+					}
+				};
+			}
+
 		};
-		list.setReuseItems(true);
 		group.add(list);
 
 		final Label deleteCntLabel = new Label("deleteCnt", new PropertyModel<String>(this, "deleteCnt"));
