@@ -119,8 +119,11 @@ public abstract class SelectablePropertyListView<T>
 	public T getSelectedObject()
 	{
 		if (selectedItem != null) {
-			T selectedObject = selectedItem.getModelObject();
-			if (selectedObject == null) {
+			T selectedObject = null;
+			try {
+				selectedObject = selectedItem.getModelObject();
+			}
+			catch (IndexOutOfBoundsException e) {
 				selectedItem = null;
 			}
 			setSelectedObject(selectedObject);

@@ -14,23 +14,27 @@
 		<p>This wizard allows you to copy your resources
 			(workflows/files/packs) from myExperiment to dLibra, aggregating them
 			as a new Research Object (RO).</p>
-		<div class="alert-message block-message">
+		<div class="alert-message block-message info">
 			<p>
-				<strong>Note:</strong> Since the actual structure of RO and its
-				metadata is still under development, for every imported resource its
-				accompanying RDF file will also be transfered to make sure that the
-				metadata will be available for processing in the future.
+				<strong>Annotations.</strong> The following annotations will be made
+				automatically about each imported resource:
 			</p>
+			<ul>
+				<li>Source - a reference to the original myExperiment resource</li>
+				<li>Contributor - a reference of the myExperiment owner</li>
+				<li>Title - as in myExperiment</li>
+				<li>Description - as in myExperiment</li>
+			</ul>
 		</div>
 		<p>The wizard has the following steps:</p>
 		<ol>
 			<li>Start.</li>
-<!-- 			<li>Choose which workspace you want to import to.</li> -->
+			<!-- 			<li>Choose which workspace you want to import to.</li> -->
 			<li>Select resources: files, workflows or packs.</li>
 			<li>Confirm RO identifier.</li>
-			<li>Create the Research Object in RODL, and copy selected resources from
-				myExperiment.</li>
-<!-- 			<li>Summary.</li> -->
+			<li>Create the Research Object in RODL, and copy selected
+				resources from myExperiment.</li>
+			<!-- 			<li>Summary.</li> -->
 		</ol>
 	</div>
 </wicket:extend>

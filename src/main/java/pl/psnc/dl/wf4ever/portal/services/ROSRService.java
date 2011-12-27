@@ -3,6 +3,7 @@
  */
 package pl.psnc.dl.wf4ever.portal.services;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -10,13 +11,25 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.scribe.model.Response;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
+
+import pl.psnc.dl.wf4ever.portal.model.RoFactory;
+
+import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.ontology.OntModelSpec;
+import com.hp.hpl.jena.rdf.model.AnonId;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.vocabulary.DCTerms;
 
 /**
  * @author Piotr Hołubowicz
@@ -77,10 +90,18 @@ public class ROSRService
 
 
 	public static void sendResource(URI resourceURI, byte[] content, String contentType, Token dLibraToken)
-		throws Exception
+		throws OAuthException
+
 	{
 		OAuthHelpService.sendRequest(dLibraService, Verb.PUT, resourceURI, dLibraToken, content,
 			contentType != null ? contentType : "text/plain");
+	}
+
+
+	private static void deleteResource(URI resourceURI, Token dLibraAccessToken)
+		throws OAuthException
+	{
+		OAuthHelpService.sendRequest(dLibraService, Verb.DELETE, resourceURI, dLibraAccessToken);
 	}
 
 
@@ -143,6 +164,118 @@ public class ROSRService
 		throws OAuthException
 	{
 		OAuthHelpService.sendRequest(dLibraService, Verb.DELETE, researchObjectURI, dLibraToken);
+	}
+
+
+	/**
+	 * Creates an annotation and an empty annotation body in ROSRS 
+	 * @param researchObjectURI
+	 * @param targetURI
+	 * @param username
+	 * @param dLibraToken
+	 * @throws OAuthException
+	 * @throws URISyntaxException
+	 */
+	public static void addAnnotation(URI researchObjectURI, URI targetURI, String username, Token dLibraToken)
+		throws OAuthException, URISyntaxException
+	{
+		InputStream is = ROSRService.getResource(researchObjectURI.resolve(".ro/manifest"));
+		OntModel manifest = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+		manifest.read(is, null);
+
+		URI bodyURI = ROSRService.createAnnotationBodyURI(researchObjectURI, targetURI);
+		addAnnotation(manifest, researchObjectURI, targetURI, bodyURI, username);
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		manifest.write(out);
+		sendResource(researchObjectURI.resolve(".ro/manifest"), out.toByteArray(), "application/rdf+xml", dLibraToken);
+
+		OntModel body = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+		ByteArrayOutputStream out2 = new ByteArrayOutputStream();
+		body.write(out2);
+		sendResource(bodyURI, out2.toByteArray(), "application/rdf+xml", dLibraToken);
+	}
+
+
+	public static void deleteAnnotation(URI researchObjectURI, URI annURI, Token dLibraToken)
+		throws OAuthException, IllegalArgumentException, URISyntaxException
+	{
+		InputStream is = ROSRService.getResource(researchObjectURI.resolve(".ro/manifest"));
+		OntModel manifest = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+		manifest.read(is, null);
+
+		Individual ann = manifest.getIndividual(annURI.toString());
+		if (ann == null) {
+			throw new IllegalArgumentException("Annotation URI is not valid");
+		}
+		Resource body = ann.getPropertyResourceValue(RoFactory.aoBody);
+		deleteResource(new URI(body.getURI()), dLibraToken);
+
+		manifest.removeAll(ann, null, null);
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		manifest.write(out);
+		sendResource(researchObjectURI.resolve(".ro/manifest"), out.toByteArray(), "application/rdf+xml", dLibraToken);
+	}
+
+
+	/**
+	 * Adds an annotation to the manifest model
+	 * @param manifest
+	 * @param researchObjectURI
+	 * @param targetURI
+	 * @param bodyURI
+	 * @throws URISyntaxException
+	 */
+	public static void addAnnotation(OntModel manifest, URI researchObjectURI, URI targetURI, URI bodyURI,
+			String username)
+		throws URISyntaxException
+	{
+		Individual ann = manifest.createIndividual(createAnnotationURI(manifest, researchObjectURI).toString(),
+			RoFactory.aggregatedAnnotation);
+		ann.addProperty(RoFactory.annotatesResource, manifest.createResource(targetURI.toString()));
+		ann.addProperty(RoFactory.aoBody, manifest.createResource(bodyURI.toString()));
+		ann.addProperty(DCTerms.created, manifest.createTypedLiteral(Calendar.getInstance()));
+		Individual agent = manifest.createResource(new AnonId(username)).as(Individual.class);
+		agent.setOntClass(RoFactory.foafAgent);
+		agent.addProperty(RoFactory.foafName, username);
+		ann.addProperty(DCTerms.creator, agent);
+	}
+
+
+	/**
+	 * 
+	 * @param manifest
+	 * @param researchObjectURI
+	 * @return i.e. http://sandbox.wf4ever-project.org/rosrs5/ROs/ann217/52a272f1-864f-4a42-89ff-2501a739d6f0
+	 */
+	private static URI createAnnotationURI(OntModel manifest, URI researchObjectURI)
+	{
+		URI ann = null;
+		do {
+			ann = researchObjectURI.resolve(UUID.randomUUID().toString());
+		}
+		while (manifest.containsResource(manifest.createResource(ann.toString())));
+		return ann;
+	}
+
+
+	/**
+	 * 
+	 * @param researchObjectURI
+	 * @param targetURI
+	 * @return i.e. http://sandbox.wf4ever-project.org/rosrs5/ROs/ann217/.ro/ro--5600459667350895101.rdf
+	 * @throws URISyntaxException
+	 */
+	public static URI createAnnotationBodyURI(URI researchObjectURI, URI targetURI)
+		throws URISyntaxException
+	{
+		String targetName;
+		if (targetURI.equals(researchObjectURI))
+			targetName = "ro";
+		else
+			targetName = targetURI.resolve(".").relativize(targetURI).toString();
+		String randomBit = "" + Math.abs(UUID.randomUUID().getLeastSignificantBits());
+
+		return researchObjectURI.resolve(".ro/" + targetName + "-" + randomBit + ".rdf");
 	}
 
 }

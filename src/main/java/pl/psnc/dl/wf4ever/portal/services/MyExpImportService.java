@@ -9,14 +9,11 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -42,10 +39,8 @@ import pl.psnc.dl.wf4ever.portal.myexpimport.model.User;
 import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportModel;
 import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportModel.ImportStatus;
 
-import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
-import com.hp.hpl.jena.rdf.model.AnonId;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
@@ -202,7 +197,7 @@ public class MyExpImportService
 		{
 			model.setMessage("Updating the manifest");
 			for (Entry<URI, URI> e : annotations.entrySet()) {
-				addAnnotation(manifest, researchObjectURI, e.getKey(), e.getValue());
+				ROSRService.addAnnotation(manifest, researchObjectURI, e.getKey(), e.getValue(), "myExperiment");
 			}
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			manifest.write(out);
@@ -349,7 +344,7 @@ public class MyExpImportService
 			else {
 				annTargetURI = researchObjectURI;
 			}
-			URI bodyURI = createAnnotationBodyURI(researchObjectURI, annTargetURI);
+			URI bodyURI = ROSRService.createAnnotationBodyURI(researchObjectURI, annTargetURI);
 			annBodies.put(bodyURI, createAnnotationBody(annTargetURI, rdf));
 			annotations.put(annTargetURI, bodyURI);
 
@@ -404,56 +399,4 @@ public class MyExpImportService
 		return body;
 	}
 
-
-	static void addAnnotation(OntModel manifest, URI researchObjectURI, URI targetURI, URI bodyURI)
-		throws URISyntaxException
-	{
-		Individual ann = manifest.createIndividual(createAnnotationURI(manifest, researchObjectURI).toString(),
-			RoFactory.aggregatedAnnotation);
-		ann.addProperty(RoFactory.annotatesResource, manifest.createResource(targetURI.toString()));
-		ann.addProperty(RoFactory.aoBody, manifest.createResource(bodyURI.toString()));
-		ann.addProperty(DCTerms.created, manifest.createTypedLiteral(Calendar.getInstance()));
-		Individual agent = manifest.createResource(new AnonId("myExperiment")).as(Individual.class);
-		agent.setOntClass(RoFactory.foafAgent);
-		agent.addProperty(RoFactory.foafName, "myExperiment");
-		ann.addProperty(DCTerms.creator, agent);
-	}
-
-
-	/**
-	 * 
-	 * @param researchObjectURI
-	 * @param targetURI
-	 * @return i.e. http://sandbox.wf4ever-project.org/rosrs5/ROs/ann217/.ro/ro--5600459667350895101.rdf
-	 * @throws URISyntaxException
-	 */
-	static URI createAnnotationBodyURI(URI researchObjectURI, URI targetURI)
-		throws URISyntaxException
-	{
-		String targetName;
-		if (targetURI.equals(researchObjectURI))
-			targetName = "ro";
-		else
-			targetName = targetURI.resolve(".").relativize(targetURI).toString();
-		String randomBit = "" + Math.abs(UUID.randomUUID().getLeastSignificantBits());
-
-		return researchObjectURI.resolve(".ro/" + targetName + "-" + randomBit + ".rdf");
-	}
-
-
-	/**
-	 * 
-	 * @param manifest
-	 * @param researchObjectURI
-	 * @return i.e. http://sandbox.wf4ever-project.org/rosrs5/ROs/ann217/52a272f1-864f-4a42-89ff-2501a739d6f0
-	 */
-	static URI createAnnotationURI(OntModel manifest, URI researchObjectURI)
-	{
-		URI ann = null;
-		do {
-			ann = researchObjectURI.resolve(UUID.randomUUID().toString());
-		}
-		while (manifest.containsResource(manifest.createResource(ann.toString())));
-		return ann;
-	}
 }
