@@ -22,8 +22,8 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.ExternalLink;
-import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.UrlDecoder;
@@ -34,6 +34,7 @@ import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.Annotation;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
+import pl.psnc.dl.wf4ever.portal.pages.util.SelectableRefreshableView;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 
@@ -225,14 +226,14 @@ public class RoPage
 		final WebMarkupContainer entriesDiv = new WebMarkupContainer("entriesDiv");
 		entriesDiv.setOutputMarkupId(true);
 		box.add(entriesDiv);
-		final SelectablePropertyListView<Statement> entriesList = new SelectablePropertyListView<Statement>(
+		final SelectableRefreshableView<Statement> entriesList = new SelectableRefreshableView<Statement>(
 				"entriesListView") {
 
 			private static final long serialVersionUID = -6310254217773728128L;
 
 
 			@Override
-			protected void populateItem(ListItem<Statement> item)
+			protected void populateItem(Item<Statement> item)
 			{
 				super.populateItem(item);
 				item.add(new Label("predicate.localName"));
@@ -248,23 +249,22 @@ public class RoPage
 
 
 			@Override
-			public void onSelectItem(AjaxRequestTarget target, ListItem<Statement> item)
+			public void onSelectItem(AjaxRequestTarget target, Item<Statement> item)
 			{
 				target.add(entriesDiv);
 			}
 
 		};
-		entriesList.setReuseItems(false);
 		entriesDiv.add(entriesList);
 
 		final WebMarkupContainer annotationsListDiv = new WebMarkupContainer("annotationsDiv");
 		annotationsListDiv.setOutputMarkupId(true);
 		box.add(annotationsListDiv);
-		final SelectablePropertyListView<Annotation> annList = new SelectablePropertyListView<Annotation>(
+		final SelectableRefreshableView<Annotation> annList = new SelectableRefreshableView<Annotation>(
 				"annsListView", new PropertyModel<List<Annotation>>(itemModel, "annotations")) {
 
 			@Override
-			protected void populateItem(ListItem<Annotation> item)
+			protected void populateItem(Item<Annotation> item)
 			{
 				super.populateItem(item);
 				item.add(new Label("createdFormatted"));
@@ -275,7 +275,7 @@ public class RoPage
 
 
 			@Override
-			public void onSelectItem(AjaxRequestTarget target, ListItem<Annotation> item)
+			public void onSelectItem(AjaxRequestTarget target, Item<Annotation> item)
 			{
 				target.add(annotationsListDiv);
 				target.add(entriesDiv);
@@ -285,8 +285,6 @@ public class RoPage
 		if (!itemModel.getObject().getAnnotations().isEmpty()) {
 			annList.setSelectedObject(itemModel.getObject().getAnnotations().get(0));
 		}
-
-		annList.setReuseItems(false);
 		annotationsListDiv.add(annList);
 
 		Form< ? > annForm = new Form<Void>("annForm");
@@ -366,7 +364,7 @@ public class RoPage
 		});
 		annForm.add(deleteAnnotation);
 
-		entriesList.setModel(new PropertyModel<List<Statement>>(annList, "selectedObject.body"));
+		entriesList.setDefaultModel(new PropertyModel<List<Statement>>(annList, "selectedObject.body"));
 
 		return box;
 	}

@@ -1,8 +1,9 @@
 /**
  * 
  */
-package pl.psnc.dl.wf4ever.portal.pages;
+package pl.psnc.dl.wf4ever.portal.pages.util;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -10,8 +11,9 @@ import org.apache.wicket.ajax.AjaxEventBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.PropertyListView;
+import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.markup.repeater.RefreshingView;
+import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
@@ -20,8 +22,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
  * @param <T>
  *
  */
-public abstract class SelectablePropertyListView<T>
-	extends PropertyListView<T>
+public abstract class SelectableRefreshableView<T>
+	extends RefreshingView<T>
 {
 
 	private static final long serialVersionUID = -6801474007329856060L;
@@ -34,17 +36,17 @@ public abstract class SelectablePropertyListView<T>
 	/**
 	 * Has precedence over selectedObject
 	 */
-	private ListItem<T> selectedItem;
+	private Item<T> selectedItem;
 
 
-	public SelectablePropertyListView(String id, IModel< ? extends List< ? extends T>> model)
+	public SelectableRefreshableView(String id, IModel< ? extends List< ? extends T>> model)
 	{
 		super(id, model);
 		init();
 	}
 
 
-	public SelectablePropertyListView(String id)
+	public SelectableRefreshableView(String id)
 	{
 		super(id);
 		init();
@@ -76,7 +78,7 @@ public abstract class SelectablePropertyListView<T>
 
 
 	@Override
-	protected void populateItem(final ListItem<T> item)
+	protected void populateItem(final Item<T> item)
 	{
 		item.add(new AjaxEventBehavior("onclick") {
 
@@ -113,6 +115,22 @@ public abstract class SelectablePropertyListView<T>
 	}
 
 
+	@Override
+	protected Iterator<IModel<T>> getItemModels()
+	{
+		@SuppressWarnings("unchecked")
+		IModel< ? extends List< ? extends T>> model = (IModel< ? extends List< ? extends T>>) getDefaultModel();
+		return new ModelIteratorAdapter<T>(model.getObject().iterator()) {
+
+			@Override
+			protected IModel<T> model(T stmt)
+			{
+				return new CompoundPropertyModel<T>(stmt);
+			}
+		};
+	}
+
+
 	/**
 	 * @return the selectedItem
 	 */
@@ -145,12 +163,13 @@ public abstract class SelectablePropertyListView<T>
 	 * @param target 
 	 * @param item the selectedItem to set
 	 */
-	private void setSelectedItem(AjaxRequestTarget target, ListItem<T> item)
+	private void setSelectedItem(AjaxRequestTarget target, Item<T> item)
 	{
 		this.selectedItem = item;
 		onSelectItem(target, item);
 	}
 
 
-	public abstract void onSelectItem(AjaxRequestTarget target, ListItem<T> item);
+	public abstract void onSelectItem(AjaxRequestTarget target, Item<T> item);
+
 }
