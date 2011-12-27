@@ -307,7 +307,7 @@ public class MyExpImportService
 			incrementStepsComplete();
 
 			model.setMessage(String.format("Uploading %s", r.getFilename()));
-			ROSRService.sendResource(researchObjectURI.resolve(r.getFilename()), r.getContentDecoded(),
+			ROSRService.sendResource(researchObjectURI.resolve(r.getFilenameURI()), r.getContentDecoded(),
 				r.getContentType(), dLibraToken);
 
 			incrementStepsComplete();
@@ -344,7 +344,7 @@ public class MyExpImportService
 			String rdf = response.getBody();
 			URI annTargetURI;
 			if (res instanceof SimpleResource) {
-				annTargetURI = researchObjectURI.resolve(((SimpleResource) res).getFilename());
+				annTargetURI = researchObjectURI.resolve(((SimpleResource) res).getFilenameURI());
 			}
 			else {
 				annTargetURI = researchObjectURI;

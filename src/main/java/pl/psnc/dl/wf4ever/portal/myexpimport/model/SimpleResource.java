@@ -3,6 +3,9 @@
  */
 package pl.psnc.dl.wf4ever.portal.myexpimport.model;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import javax.xml.bind.annotation.XmlElement;
 
 import org.apache.wicket.util.crypt.Base64;
@@ -68,6 +71,17 @@ public abstract class SimpleResource
 	}
 
 
+	/**
+	 * File / workflow filename
+	 * @return a string that may not be a correct URI (may contain spaces etc.)
+	 */
 	public abstract String getFilename();
+
+
+	public URI getFilenameURI()
+		throws URISyntaxException
+	{
+		return new URI(null, null, getFilename(), null, null);
+	}
 
 }

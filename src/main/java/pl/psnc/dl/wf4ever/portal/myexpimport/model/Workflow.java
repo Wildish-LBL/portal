@@ -26,9 +26,11 @@ public class Workflow
 	/**
 	 * @return the filename
 	 */
+	@Override
 	@XmlElement
 	public String getFilename()
 	{
+		//FIXME this should be done using URI manipulation
 		return contentUri.substring(contentUri.lastIndexOf('/') + 1).trim();
 	}
 
