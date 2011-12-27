@@ -36,7 +36,7 @@ public abstract class SelectableRefreshableView<T>
 	/**
 	 * Has precedence over selectedObject
 	 */
-	private Item<T> selectedItem;
+	private transient Item<T> selectedItem;
 
 
 	public SelectableRefreshableView(String id, IModel< ? extends List< ? extends T>> model)

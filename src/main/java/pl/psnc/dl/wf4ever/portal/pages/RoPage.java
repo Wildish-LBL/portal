@@ -25,6 +25,7 @@ import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.CompoundPropertyModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.UrlDecoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -34,11 +35,10 @@ import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.Annotation;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
+import pl.psnc.dl.wf4ever.portal.model.Statement;
 import pl.psnc.dl.wf4ever.portal.pages.util.SelectableRefreshableView;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.services.ROSRService;
-
-import com.hp.hpl.jena.rdf.model.Statement;
 
 public class RoPage
 	extends TemplatePage
@@ -115,7 +115,7 @@ public class RoPage
 		addFolder.add(new Behavior() {
 
 			@Override
-			public void onComponentTag(final Component component, final ComponentTag tag)
+			public void onComponentTag(Component component, ComponentTag tag)
 			{
 				super.onComponentTag(component, tag);
 				if (!canEdit) {
@@ -144,7 +144,7 @@ public class RoPage
 		addResource.add(new Behavior() {
 
 			@Override
-			public void onComponentTag(final Component component, final ComponentTag tag)
+			public void onComponentTag(Component component, ComponentTag tag)
 			{
 				super.onComponentTag(component, tag);
 				if (!canEdit) {
@@ -173,7 +173,7 @@ public class RoPage
 		deleteResource.add(new Behavior() {
 
 			@Override
-			public void onComponentTag(final Component component, final ComponentTag tag)
+			public void onComponentTag(Component component, ComponentTag tag)
 			{
 				super.onComponentTag(component, tag);
 				if (!canEdit) {
@@ -226,8 +226,7 @@ public class RoPage
 		final WebMarkupContainer entriesDiv = new WebMarkupContainer("entriesDiv");
 		entriesDiv.setOutputMarkupId(true);
 		box.add(entriesDiv);
-		final SelectableRefreshableView<Statement> entriesList = new SelectableRefreshableView<Statement>(
-				"entriesListView") {
+		SelectableRefreshableView<Statement> entriesList = new SelectableRefreshableView<Statement>("entriesListView") {
 
 			private static final long serialVersionUID = -6310254217773728128L;
 
@@ -236,14 +235,14 @@ public class RoPage
 			protected void populateItem(Item<Statement> item)
 			{
 				super.populateItem(item);
-				item.add(new Label("predicate.localName"));
-				if (item.getModelObject().getObject().isResource()) {
+				item.add(new Label("propertyLocalName"));
+				if (item.getModelObject().isObjectURIResource()) {
 					item.add(new ExternalLinkFragment("object", "externalLinkFragment", RoPage.this,
 							(CompoundPropertyModel<Statement>) item.getModel()));
 				}
 				else {
 					item.add(new Label("object", ((CompoundPropertyModel<Statement>) item.getModel())
-							.<String> bind("object.asLiteral.value")).setEscapeModelStrings(false));
+							.<String> bind("objectValue")).setEscapeModelStrings(false));
 				}
 			}
 
@@ -260,8 +259,8 @@ public class RoPage
 		final WebMarkupContainer annotationsListDiv = new WebMarkupContainer("annotationsDiv");
 		annotationsListDiv.setOutputMarkupId(true);
 		box.add(annotationsListDiv);
-		final SelectableRefreshableView<Annotation> annList = new SelectableRefreshableView<Annotation>(
-				"annsListView", new PropertyModel<List<Annotation>>(itemModel, "annotations")) {
+		final SelectableRefreshableView<Annotation> annList = new SelectableRefreshableView<Annotation>("annsListView",
+				new PropertyModel<List<Annotation>>(itemModel, "annotations")) {
 
 			@Override
 			protected void populateItem(Item<Annotation> item)
@@ -317,7 +316,7 @@ public class RoPage
 		addAnnotation.add(new Behavior() {
 
 			@Override
-			public void onComponentTag(final Component component, final ComponentTag tag)
+			public void onComponentTag(Component component, ComponentTag tag)
 			{
 				super.onComponentTag(component, tag);
 				if (!canEdit) {
@@ -354,7 +353,7 @@ public class RoPage
 		deleteAnnotation.add(new Behavior() {
 
 			@Override
-			public void onComponentTag(final Component component, final ComponentTag tag)
+			public void onComponentTag(Component component, ComponentTag tag)
 			{
 				super.onComponentTag(component, tag);
 				if (!canEdit || annList.getSelectedObject() == null) {
@@ -364,7 +363,14 @@ public class RoPage
 		});
 		annForm.add(deleteAnnotation);
 
-		entriesList.setDefaultModel(new PropertyModel<List<Statement>>(annList, "selectedObject.body"));
+		entriesList.setDefaultModel(new LoadableDetachableModel<List<Statement>>() {
+
+			@Override
+			protected List<Statement> load()
+			{
+				return annList.getSelectedObject().getBody();
+			}
+		});
 
 		return box;
 	}
@@ -383,8 +389,7 @@ public class RoPage
 				CompoundPropertyModel<Statement> model)
 		{
 			super(id, markupId, markupProvider, model);
-			add(new ExternalLink("link", model.<String> bind("object.asResource.URI"),
-					model.<String> bind("object.asResource.toString")));
+			add(new ExternalLink("link", model.<String> bind("objectURI"), model.<String> bind("objectValue")));
 		}
 	}
 

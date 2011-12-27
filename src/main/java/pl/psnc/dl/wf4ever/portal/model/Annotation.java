@@ -4,12 +4,12 @@
 package pl.psnc.dl.wf4ever.portal.model;
 
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 import org.apache.wicket.model.LoadableDetachableModel;
-
-import com.hp.hpl.jena.rdf.model.Statement;
 
 /**
  * @author piotrhol
@@ -42,7 +42,12 @@ public class Annotation
 			@Override
 			protected List<Statement> load()
 			{
-				return RoFactory.createAnnotationBody(getBodyURI());
+				try {
+					return RoFactory.createAnnotationBody(getBodyURI());
+				}
+				catch (URISyntaxException e) {
+					return new ArrayList<Statement>();
+				}
 			}
 		};
 	}
