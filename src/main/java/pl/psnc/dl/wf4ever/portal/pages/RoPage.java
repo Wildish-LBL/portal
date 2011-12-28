@@ -9,6 +9,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.RestartResponseException;
@@ -22,6 +23,7 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
@@ -54,6 +56,8 @@ public class RoPage
 
 	private final AnnotatingBox annotatingBox;
 
+	private final StatementEditForm stmtEditForm;
+
 
 	public RoPage(final PageParameters parameters)
 		throws URISyntaxException, MalformedURLException, OAuthException
@@ -83,6 +87,9 @@ public class RoPage
 		annotatingBox = new AnnotatingBox(itemModel);
 		add(annotatingBox);
 		annotatingBox.setAnnotationSelection(ro.getAnnotations().isEmpty() ? null : ro.getAnnotations().get(0));
+		stmtEditForm = new StatementEditForm(new CompoundPropertyModel<Statement>(new PropertyModel<Statement>(
+				annotatingBox.entriesList, "selectedObject")));
+		add(stmtEditForm);
 	}
 
 	@SuppressWarnings("serial")
@@ -232,7 +239,9 @@ public class RoPage
 
 		final WebMarkupContainer annotationsDiv;
 
-		private final SelectableRefreshableView<Annotation> annList;
+		final SelectableRefreshableView<Annotation> annList;
+
+		final SelectableRefreshableView<Statement> entriesList;
 
 
 		public AnnotatingBox(final CompoundPropertyModel<AggregatedResource> itemModel)
@@ -349,14 +358,14 @@ public class RoPage
 			entriesDiv = new WebMarkupContainer("entriesDiv");
 			entriesDiv.setOutputMarkupId(true);
 			add(entriesDiv);
-			SelectableRefreshableView<Statement> entriesList = new SelectableRefreshableView<Statement>(
-					"entriesListView", new PropertyModel<List<Statement>>(annList, "selectedObject.body")) {
+			entriesList = new SelectableRefreshableView<Statement>("entriesListView",
+					new PropertyModel<List<Statement>>(annList, "selectedObject.body")) {
 
 				private static final long serialVersionUID = -6310254217773728128L;
 
 
 				@Override
-				protected void populateItem(Item<Statement> item)
+				protected void populateItem(final Item<Statement> item)
 				{
 					super.populateItem(item);
 					item.add(new Label("propertyLocalName"));
@@ -375,7 +384,10 @@ public class RoPage
 						{
 							target.appendJavaScript("$('#annValue').wysiwyg('destroy');");
 							target.appendJavaScript("$('#edit-ann-modal').modal('show')");
-							target.appendJavaScript("$('#annValue').wysiwyg({css: 'http://twitter.github.com/bootstrap/assets/css/bootstrap-1.2.0.min.css'});");
+							target.appendJavaScript("$('#annValue').wysiwyg({css: 'http://twitter.github.com/bootstrap/assets/css/bootstrap-1.2.0.min.css'})"
+									+ ".wysiwyg('setContent', '"
+									+ StringEscapeUtils.escapeEcmaScript(item.getModelObject().getObjectValue())
+									+ "');");
 						}
 					});
 				}
@@ -397,6 +409,24 @@ public class RoPage
 			annList.setSelectedObject(ann);
 
 		}
+	}
+
+	@SuppressWarnings("serial")
+	class StatementEditForm
+		extends Form<Statement>
+	{
+
+		private final TextArea<String> body;
+
+
+		public StatementEditForm(CompoundPropertyModel<Statement> model)
+		{
+			super("stmtEditForm", model);
+			body = new TextArea<String>("annValue", model.<String> bind("objectValue"));
+			body.setEscapeModelStrings(false);
+			add(body);
+		}
+
 	}
 
 	class ExternalLinkFragment
