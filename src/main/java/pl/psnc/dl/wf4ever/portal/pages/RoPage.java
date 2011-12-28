@@ -13,6 +13,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.behavior.Behavior;
@@ -367,6 +368,16 @@ public class RoPage
 						item.add(new Label("object", ((CompoundPropertyModel<Statement>) item.getModel())
 								.<String> bind("objectValue")).setEscapeModelStrings(false));
 					}
+					item.add(new AjaxFallbackLink<String>("edit") {
+
+						@Override
+						public void onClick(AjaxRequestTarget target)
+						{
+							target.appendJavaScript("$('#annValue').wysiwyg('destroy');");
+							target.appendJavaScript("$('#edit-ann-modal').modal('show')");
+							target.appendJavaScript("$('#annValue').wysiwyg({css: 'http://twitter.github.com/bootstrap/assets/css/bootstrap-1.2.0.min.css'});");
+						}
+					});
 				}
 
 

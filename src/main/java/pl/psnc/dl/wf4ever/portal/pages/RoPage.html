@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wicket:extend xmlns:wicket="http://wicket.apache.org">
-	<script type="text/javascript" src="js/roPage.js"></script>
+	<script type="text/javascript" src="js/RoPage.js"></script>
 
 	<div class="row">
 		<div class="span16">
@@ -81,18 +81,18 @@
 								</tr>
 							</thead>
 							<tbody>
- 								<tr wicket:id="annsListView">
+								<tr wicket:id="annsListView">
 									<td><span wicket:id="createdFormatted">[created]</span></td>
 									<td><span wicket:id="creator">[creator]</span></td>
-								</tr> 
+								</tr>
 							</tbody>
 						</table>
 						<form wicket:id="annForm" class="form-stacked">
 							<div class="actions">
-								<button wicket:id="addAnnotation" class="btn success" type="submit">Add
-									annotation</button>
-								<button wicket:id="deleteAnnotation" class="btn danger" type="submit">Delete
-									annotation</button>
+								<button wicket:id="addAnnotation" class="btn success"
+									type="submit">Add annotation</button>
+								<button wicket:id="deleteAnnotation" class="btn danger"
+									type="submit">Delete annotation</button>
 							</div>
 						</form>
 					</div>
@@ -107,14 +107,15 @@
 								<tr wicket:id="entriesListView">
 									<td><span class="label" wicket:id="propertyLocalName">[Property]</span>
 										<span wicket:id="object">[object]</span></td>
-									<td><a>Edit</a></td>
+									<td><a wicket:id="edit">Edit</a></td>
 								</tr>
 							</tbody>
 						</table>
 						<form class="form-stacked">
 							<div class="actions">
 								<button class="btn success" type="submit">Add statement</button>
-								<button class="btn danger" type="submit">Delete statement</button>
+								<button class="btn danger" type="submit">Delete
+									statement</button>
 							</div>
 						</form>
 					</div>
@@ -123,38 +124,46 @@
 		</div>
 	</div>
 	<div id="edit-ann-modal" class="modal hide">
-		<form class="form-stacked">
-			<fieldset>
-				<div class="clearfix">
-					<label for="annAttribute">What kind of annotation is this?</label>
-					<div class="input">
-						<select name="annAttribute" id="annAttribute">
-							<option>Type</option>
-							<option>Subject</option>
-							<option selected="selected">Description</option>
-							<option>Format</option>
-							<option>Note</option>
-							<option>Title</option>
-							<option>Created</option>
-						</select>
+		<form>
+			<div class="modal-header">
+				<a class="close" href="#">×</a>
+				<h3>Edit statement</h3>
+			</div>
+			<div class="modal-body">
+				<fieldset>
+					<div class="clearfix">
+						<label for="annAttribute">What kind of statement is this?</label>
+						<div class="input">
+							<select name="annAttribute" id="annAttribute">
+								<option>Type</option>
+								<option>Subject</option>
+								<option selected="selected">Description</option>
+								<option>Format</option>
+								<option>Note</option>
+								<option>Title</option>
+								<option>Created</option>
+							</select>
+						</div>
 					</div>
-				</div>
-				<div class="clearfix">
-					<label for="annValue">Value for the annotation</label>
-					<div class="input">
-						<textarea class="large" id="annValue" name="annValue"
-							style="width: 90%; height: 18em;">
+					<div class="clearfix">
+						<label for="annValue">Value for the statement</label>
+						<div class="input">
+							<textarea class="large" id="annValue" name="annValue"
+								style="width: 90%; height: 18em;">
 Human brain dataset. 44 HD samples, 36 Controls age and sex matched. Brain areas:caudate nucleus, frontal cortex and cerebellum. Affymetrix platform.
 Rows correspond to probe ids and columns to samples.
                       </textarea>
+						</div>
 					</div>
-				</div>
-			</fieldset>
-			<div class="actions">
+				</fieldset>
+			</div>
+			<div class="modal-footer">
 				<button type="submit" class="btn primary">Save Changes</button>
 				<button type="reset" class="btn">Cancel</button>
 			</div>
 		</form>
 	</div>
-	<wicket:fragment wicket:id="externalLinkFragment"><a wicket:id="link"></a></wicket:fragment>
+	<wicket:fragment wicket:id="externalLinkFragment">
+		<a wicket:id="link"></a>
+	</wicket:fragment>
 </wicket:extend>
