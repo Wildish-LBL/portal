@@ -28,10 +28,7 @@ public abstract class SelectableRefreshableView<T>
 
 	private static final long serialVersionUID = -6801474007329856060L;
 
-	/**
-	 * Has precedence over selectedObject
-	 */
-	private transient T selectedObject;
+	private T selectedObject;
 
 
 	public SelectableRefreshableView(String id, IModel< ? extends List< ? extends T>> model)
@@ -89,8 +86,6 @@ public abstract class SelectableRefreshableView<T>
 	{
 		@SuppressWarnings("unchecked")
 		IModel< ? extends List< ? extends T>> model = (IModel< ? extends List< ? extends T>>) getDefaultModel();
-		if (model.getObject() == null || !model.getObject().contains(selectedObject))
-			selectedObject = null;
 		List< ? extends T> source = (model.getObject() != null) ? model.getObject() : new ArrayList<T>();
 		return new ModelIteratorAdapter<T>(source.iterator()) {
 

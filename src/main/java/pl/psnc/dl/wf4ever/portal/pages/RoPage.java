@@ -25,7 +25,6 @@ import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.CompoundPropertyModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.UrlDecoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -50,9 +49,9 @@ public class RoPage
 
 	private boolean canEdit = false;
 
-	private final WebMarkupContainer roViewerBox;
+	private final RoViewerBox roViewerBox;
 
-	private final WebMarkupContainer annotatingBox;
+	private final AnnotatingBox annotatingBox;
 
 
 	public RoPage(final PageParameters parameters)
@@ -78,304 +77,315 @@ public class RoPage
 
 		final CompoundPropertyModel<AggregatedResource> itemModel = new CompoundPropertyModel<AggregatedResource>(ro);
 		final TreeModel treeModel = factory.createAggregatedResourcesTree(ro, true);
-		annotatingBox = createAnnotatingBox(itemModel);
-		add(annotatingBox);
-		roViewerBox = createRoViewerBox(itemModel, treeModel);
+		roViewerBox = new RoViewerBox(itemModel, treeModel);
 		add(roViewerBox);
+		annotatingBox = new AnnotatingBox(itemModel);
+		add(annotatingBox);
+		annotatingBox.setAnnotationSelection(ro.getAnnotations().isEmpty() ? null : ro.getAnnotations().get(0));
 	}
 
-
 	@SuppressWarnings("serial")
-	private WebMarkupContainer createRoViewerBox(final CompoundPropertyModel<AggregatedResource> itemModel,
-			TreeModel treeModel)
+	class RoViewerBox
+		extends WebMarkupContainer
 	{
-		WebMarkupContainer box = new WebMarkupContainer("roViewerBox", itemModel);
-		box.setOutputMarkupId(true);
-		box.add(new Label("title", roURI.toString()));
 
-		Form< ? > roForm = new Form<Void>("roForm");
-		box.add(roForm);
-
-		AjaxButton addFolder = new AjaxButton("addFolder", roForm) {
-
-			private static final long serialVersionUID = -491963068167875L;
+		final WebMarkupContainer itemInfo;
 
 
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-			{
-			}
+		public RoViewerBox(final CompoundPropertyModel<AggregatedResource> itemModel, TreeModel treeModel)
+		{
+			super("roViewerBox", itemModel);
+			setOutputMarkupId(true);
+			add(new Label("title", roURI.toString()));
+
+			Form< ? > roForm = new Form<Void>("roForm");
+			add(roForm);
+
+			AjaxButton addFolder = new AjaxButton("addFolder", roForm) {
+
+				private static final long serialVersionUID = -491963068167875L;
 
 
-			@Override
-			protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
-			{
-			}
-		};
-		addFolder.add(new Behavior() {
-
-			@Override
-			public void onComponentTag(Component component, ComponentTag tag)
-			{
-				super.onComponentTag(component, tag);
-				if (!canEdit) {
-					tag.append("class", "disabled", " ");
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+				{
 				}
-			}
-		});
-		roForm.add(addFolder);
-
-		AjaxButton addResource = new AjaxButton("addResource", roForm) {
-
-			private static final long serialVersionUID = -491963068167875L;
 
 
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-			{
-			}
-
-
-			@Override
-			protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
-			{
-			}
-		};
-		addResource.add(new Behavior() {
-
-			@Override
-			public void onComponentTag(Component component, ComponentTag tag)
-			{
-				super.onComponentTag(component, tag);
-				if (!canEdit) {
-					tag.append("class", "disabled", " ");
+				@Override
+				protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
+				{
 				}
-			}
-		});
-		roForm.add(addResource);
+			};
+			addFolder.add(new Behavior() {
 
-		AjaxButton deleteResource = new AjaxButton("deleteResource", roForm) {
-
-			private static final long serialVersionUID = -491963068167875L;
-
-
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-			{
-			}
-
-
-			@Override
-			protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
-			{
-			}
-		};
-		deleteResource.add(new Behavior() {
-
-			@Override
-			public void onComponentTag(Component component, ComponentTag tag)
-			{
-				super.onComponentTag(component, tag);
-				if (!canEdit) {
-					tag.append("class", "disabled", " ");
+				@Override
+				public void onComponentTag(Component component, ComponentTag tag)
+				{
+					super.onComponentTag(component, tag);
+					if (!canEdit) {
+						tag.append("class", "disabled", " ");
+					}
 				}
-			}
-		});
-		roForm.add(deleteResource);
+			});
+			roForm.add(addFolder);
 
-		final WebMarkupContainer itemInfo = new WebMarkupContainer("itemInfo", itemModel);
-		itemInfo.setOutputMarkupId(true);
-		box.add(itemInfo);
-		itemInfo.add(new ExternalLink("resourceURI", itemModel.<String> bind("URI.toString"), itemModel
-				.<URI> bind("URI")));
-		itemInfo.add(new ExternalLink("downloadURI", itemModel.<String> bind("downloadURI.toString"), itemModel
-				.<URI> bind("downloadURI")));
-		itemInfo.add(new Label("creator"));
-		itemInfo.add(new Label("createdFormatted"));
-		itemInfo.add(new Label("sizeFormatted"));
-		itemInfo.add(new Label("annotations.size"));
+			AjaxButton addResource = new AjaxButton("addResource", roForm) {
 
-		Tree tree = new RoTree("treeTable", treeModel) {
-
-			private static final long serialVersionUID = -7512570425701073804L;
+				private static final long serialVersionUID = -491963068167875L;
 
 
-			@Override
-			protected void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node)
-			{
-				AggregatedResource res = (AggregatedResource) ((DefaultMutableTreeNode) node).getUserObject();
-				itemModel.setObject(res);
-				target.add(itemInfo);
-				target.add(annotatingBox);
-			}
-		};
-		tree.getTreeState().expandAll();
-		tree.getTreeState().selectNode(treeModel.getRoot(), true);
-		box.add(tree);
-		return box;
-	}
-
-
-	@SuppressWarnings("serial")
-	private WebMarkupContainer createAnnotatingBox(final CompoundPropertyModel<AggregatedResource> itemModel)
-	{
-		WebMarkupContainer box = new WebMarkupContainer("annotatingBox", itemModel);
-		box.setOutputMarkupId(true);
-		box.add(new Label("annTarget", itemModel.<URI> bind("URI")));
-
-		final WebMarkupContainer entriesDiv = new WebMarkupContainer("entriesDiv");
-		entriesDiv.setOutputMarkupId(true);
-		box.add(entriesDiv);
-		SelectableRefreshableView<Statement> entriesList = new SelectableRefreshableView<Statement>("entriesListView") {
-
-			private static final long serialVersionUID = -6310254217773728128L;
-
-
-			@Override
-			protected void populateItem(Item<Statement> item)
-			{
-				super.populateItem(item);
-				item.add(new Label("propertyLocalName"));
-				if (item.getModelObject().isObjectURIResource()) {
-					item.add(new ExternalLinkFragment("object", "externalLinkFragment", RoPage.this,
-							(CompoundPropertyModel<Statement>) item.getModel()));
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+				{
 				}
-				else {
-					item.add(new Label("object", ((CompoundPropertyModel<Statement>) item.getModel())
-							.<String> bind("objectValue")).setEscapeModelStrings(false));
+
+
+				@Override
+				protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
+				{
 				}
-			}
+			};
+			addResource.add(new Behavior() {
+
+				@Override
+				public void onComponentTag(Component component, ComponentTag tag)
+				{
+					super.onComponentTag(component, tag);
+					if (!canEdit) {
+						tag.append("class", "disabled", " ");
+					}
+				}
+			});
+			roForm.add(addResource);
+
+			AjaxButton deleteResource = new AjaxButton("deleteResource", roForm) {
+
+				private static final long serialVersionUID = -491963068167875L;
 
 
-			@Override
-			public void onSelectItem(AjaxRequestTarget target, Item<Statement> item)
-			{
-				target.add(entriesDiv);
-			}
-
-		};
-		entriesDiv.add(entriesList);
-
-		final WebMarkupContainer annotationsListDiv = new WebMarkupContainer("annotationsDiv");
-		annotationsListDiv.setOutputMarkupId(true);
-		box.add(annotationsListDiv);
-		final SelectableRefreshableView<Annotation> annList = new SelectableRefreshableView<Annotation>("annsListView",
-				new PropertyModel<List<Annotation>>(itemModel, "annotations")) {
-
-			@Override
-			protected void populateItem(Item<Annotation> item)
-			{
-				super.populateItem(item);
-				item.add(new Label("createdFormatted"));
-				item.add(new Label("creator"));
-				item.add(new AttributeAppender("title", new PropertyModel<URI>(item.getModel(), "URI")));
-				item.setOutputMarkupId(true);
-			}
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+				{
+				}
 
 
-			@Override
-			public void onSelectItem(AjaxRequestTarget target, Item<Annotation> item)
-			{
-				target.add(annotationsListDiv);
-				target.add(entriesDiv);
-			}
+				@Override
+				protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
+				{
+				}
+			};
+			deleteResource.add(new Behavior() {
 
-		};
-		if (!itemModel.getObject().getAnnotations().isEmpty()) {
-			annList.setSelectedObject(itemModel.getObject().getAnnotations().get(0));
+				@Override
+				public void onComponentTag(Component component, ComponentTag tag)
+				{
+					super.onComponentTag(component, tag);
+					if (!canEdit) {
+						tag.append("class", "disabled", " ");
+					}
+				}
+			});
+			roForm.add(deleteResource);
+
+			itemInfo = new WebMarkupContainer("itemInfo", itemModel);
+			itemInfo.setOutputMarkupId(true);
+			add(itemInfo);
+			itemInfo.add(new ExternalLink("resourceURI", itemModel.<String> bind("URI.toString"), itemModel
+					.<URI> bind("URI")));
+			itemInfo.add(new ExternalLink("downloadURI", itemModel.<String> bind("downloadURI.toString"), itemModel
+					.<URI> bind("downloadURI")));
+			itemInfo.add(new Label("creator"));
+			itemInfo.add(new Label("createdFormatted"));
+			itemInfo.add(new Label("sizeFormatted"));
+			itemInfo.add(new Label("annotations.size"));
+
+			Tree tree = new RoTree("treeTable", treeModel) {
+
+				private static final long serialVersionUID = -7512570425701073804L;
+
+
+				@Override
+				protected void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node)
+				{
+					AggregatedResource res = (AggregatedResource) ((DefaultMutableTreeNode) node).getUserObject();
+					itemModel.setObject(res);
+					annotatingBox.setAnnotationSelection(res.getAnnotations().isEmpty() ? null : res.getAnnotations()
+							.get(0));
+					target.add(itemInfo);
+					target.add(annotatingBox);
+				}
+			};
+			tree.getTreeState().expandAll();
+			tree.getTreeState().selectNode(treeModel.getRoot(), true);
+			add(tree);
 		}
-		annotationsListDiv.add(annList);
+	}
 
-		Form< ? > annForm = new Form<Void>("annForm");
-		annotationsListDiv.add(annForm);
+	@SuppressWarnings("serial")
+	class AnnotatingBox
+		extends WebMarkupContainer
+	{
 
-		AjaxButton addAnnotation = new AjaxButton("addAnnotation", annForm) {
+		final WebMarkupContainer entriesDiv;
 
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-			{
-				try {
-					ROSRService.addAnnotation(roURI, itemModel.getObject().getURI(), "Yet unknown", MySession.get()
-							.getdLibraAccessToken());
-					RoFactory factory = new RoFactory(roURI);
-					itemModel.getObject().setAnnotations(factory.createAnnotations(itemModel.getObject().getURI()));
-					target.add(annotationsListDiv);
-					target.add(roViewerBox);
+		final WebMarkupContainer annotationsDiv;
+
+		private final SelectableRefreshableView<Annotation> annList;
+
+
+		public AnnotatingBox(final CompoundPropertyModel<AggregatedResource> itemModel)
+
+		{
+			super("annotatingBox", itemModel);
+			setOutputMarkupId(true);
+			add(new Label("annTarget", itemModel.<URI> bind("URI")));
+
+			annotationsDiv = new WebMarkupContainer("annotationsDiv");
+			annotationsDiv.setOutputMarkupId(true);
+			add(annotationsDiv);
+			annList = new SelectableRefreshableView<Annotation>("annsListView", new PropertyModel<List<Annotation>>(
+					itemModel, "annotations")) {
+
+				@Override
+				protected void populateItem(Item<Annotation> item)
+				{
+					super.populateItem(item);
+					item.add(new Label("createdFormatted"));
+					item.add(new Label("creator"));
+					item.add(new AttributeAppender("title", new PropertyModel<URI>(item.getModel(), "URI")));
+					item.setOutputMarkupId(true);
 				}
-				catch (OAuthException | URISyntaxException e) {
-					error(e.getMessage());
+
+
+				@Override
+				public void onSelectItem(AjaxRequestTarget target, Item<Annotation> item)
+				{
+					target.add(annotationsDiv);
+					target.add(entriesDiv);
 				}
-			}
 
+			};
+			annotationsDiv.add(annList);
 
-			@Override
-			protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
-			{
-			}
-		};
-		addAnnotation.add(new Behavior() {
+			Form< ? > annForm = new Form<Void>("annForm");
+			annotationsDiv.add(annForm);
 
-			@Override
-			public void onComponentTag(Component component, ComponentTag tag)
-			{
-				super.onComponentTag(component, tag);
-				if (!canEdit) {
-					tag.append("class", "disabled", " ");
+			AjaxButton addAnnotation = new AjaxButton("addAnnotation", annForm) {
+
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+				{
+					try {
+						ROSRService.addAnnotation(roURI, itemModel.getObject().getURI(), "Yet unknown", MySession.get()
+								.getdLibraAccessToken());
+						RoFactory factory = new RoFactory(roURI);
+						itemModel.getObject().setAnnotations(factory.createAnnotations(itemModel.getObject().getURI()));
+						target.add(annotationsDiv);
+						target.add(roViewerBox.itemInfo);
+					}
+					catch (OAuthException | URISyntaxException e) {
+						error(e.getMessage());
+					}
 				}
-			}
-		});
-		annForm.add(addAnnotation);
 
-		AjaxButton deleteAnnotation = new AjaxButton("deleteAnnotation", annForm) {
 
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-			{
-				try {
-					ROSRService.deleteAnnotation(roURI, annList.getSelectedObject().getURI(), MySession.get()
-							.getdLibraAccessToken());
-					RoFactory factory = new RoFactory(roURI);
-					itemModel.getObject().setAnnotations(factory.createAnnotations(itemModel.getObject().getURI()));
-					target.add(annotationsListDiv);
-					target.add(roViewerBox);
+				@Override
+				protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
+				{
 				}
-				catch (OAuthException | URISyntaxException e) {
-					error(e.getMessage());
+			};
+			addAnnotation.add(new Behavior() {
+
+				@Override
+				public void onComponentTag(Component component, ComponentTag tag)
+				{
+					super.onComponentTag(component, tag);
+					if (!canEdit) {
+						tag.append("class", "disabled", " ");
+					}
 				}
-			}
+			});
+			annForm.add(addAnnotation);
 
+			AjaxButton deleteAnnotation = new AjaxButton("deleteAnnotation", annForm) {
 
-			@Override
-			protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
-			{
-			}
-		};
-		deleteAnnotation.add(new Behavior() {
-
-			@Override
-			public void onComponentTag(Component component, ComponentTag tag)
-			{
-				super.onComponentTag(component, tag);
-				if (!canEdit || annList.getSelectedObject() == null) {
-					tag.append("class", "disabled", " ");
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+				{
+					try {
+						ROSRService.deleteAnnotation(roURI, annList.getSelectedObject().getURI(), MySession.get()
+								.getdLibraAccessToken());
+						RoFactory factory = new RoFactory(roURI);
+						itemModel.getObject().setAnnotations(factory.createAnnotations(itemModel.getObject().getURI()));
+						target.add(annotationsDiv);
+						target.add(roViewerBox.itemInfo);
+					}
+					catch (OAuthException | URISyntaxException e) {
+						error(e.getMessage());
+					}
 				}
-			}
-		});
-		annForm.add(deleteAnnotation);
 
-		entriesList.setDefaultModel(new LoadableDetachableModel<List<Statement>>() {
 
-			@Override
-			protected List<Statement> load()
-			{
-				if (annList.getSelectedObject() != null)
-					return annList.getSelectedObject().getBody();
-				else
-					return null;
-			}
-		});
+				@Override
+				protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
+				{
+				}
+			};
+			deleteAnnotation.add(new Behavior() {
 
-		return box;
+				@Override
+				public void onComponentTag(Component component, ComponentTag tag)
+				{
+					super.onComponentTag(component, tag);
+					if (!canEdit || annList.getSelectedObject() == null) {
+						tag.append("class", "disabled", " ");
+					}
+				}
+			});
+			annForm.add(deleteAnnotation);
+
+			entriesDiv = new WebMarkupContainer("entriesDiv");
+			entriesDiv.setOutputMarkupId(true);
+			add(entriesDiv);
+			SelectableRefreshableView<Statement> entriesList = new SelectableRefreshableView<Statement>(
+					"entriesListView", new PropertyModel<List<Statement>>(annList, "selectedObject.body")) {
+
+				private static final long serialVersionUID = -6310254217773728128L;
+
+
+				@Override
+				protected void populateItem(Item<Statement> item)
+				{
+					super.populateItem(item);
+					item.add(new Label("propertyLocalName"));
+					if (item.getModelObject().isObjectURIResource()) {
+						item.add(new ExternalLinkFragment("object", "externalLinkFragment", RoPage.this,
+								(CompoundPropertyModel<Statement>) item.getModel()));
+					}
+					else {
+						item.add(new Label("object", ((CompoundPropertyModel<Statement>) item.getModel())
+								.<String> bind("objectValue")).setEscapeModelStrings(false));
+					}
+				}
+
+
+				@Override
+				public void onSelectItem(AjaxRequestTarget target, Item<Statement> item)
+				{
+					target.add(entriesDiv);
+				}
+
+			};
+			entriesDiv.add(entriesList);
+		}
+
+
+		public void setAnnotationSelection(Annotation ann)
+		{
+			annList.setSelectedObject(ann);
+
+		}
 	}
 
 	class ExternalLinkFragment
