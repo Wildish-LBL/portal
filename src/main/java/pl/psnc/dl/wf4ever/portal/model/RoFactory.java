@@ -3,6 +3,7 @@
  */
 package pl.psnc.dl.wf4ever.portal.model;
 
+import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -202,7 +203,7 @@ public class RoFactory
 	}
 
 
-	public static List<Statement> createAnnotationBody(URI annotationBodyURI)
+	public static List<Statement> createAnnotationBody(Annotation annotation, URI annotationBodyURI)
 		throws URISyntaxException
 	{
 		Model body = ModelFactory.createDefaultModel();
@@ -211,7 +212,7 @@ public class RoFactory
 		List<Statement> statements = new ArrayList<Statement>();
 		StmtIterator it = body.listStatements();
 		while (it.hasNext()) {
-			statements.add(new Statement(it.next()));
+			statements.add(new Statement(it.next(), annotation));
 		}
 		Collections.sort(statements, new Comparator<Statement>() {
 
@@ -222,5 +223,17 @@ public class RoFactory
 			}
 		});
 		return statements;
+	}
+
+
+	public static byte[] wrapAnnotationBody(List<Statement> statements)
+	{
+		Model body = ModelFactory.createDefaultModel();
+		for (Statement stmt : statements) {
+			body.add(stmt.createJenaStatement());
+		}
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		body.write(out);
+		return out.toByteArray();
 	}
 }

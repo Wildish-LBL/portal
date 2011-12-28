@@ -22,8 +22,10 @@ import org.apache.wicket.extensions.markup.html.tree.Tree;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
@@ -31,6 +33,7 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.UrlDecoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
@@ -38,6 +41,7 @@ import pl.psnc.dl.wf4ever.portal.model.Annotation;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.model.Statement;
+import pl.psnc.dl.wf4ever.portal.pages.util.RoTree;
 import pl.psnc.dl.wf4ever.portal.pages.util.SelectableRefreshableView;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.services.ROSRService;
@@ -382,10 +386,7 @@ public class RoPage
 						@Override
 						public void onClick(AjaxRequestTarget target)
 						{
-							target.appendJavaScript("$('#annValue').wysiwyg('destroy');");
-							target.appendJavaScript("$('#edit-ann-modal').modal('show')");
-							target.appendJavaScript("$('#annValue').wysiwyg({css: 'http://twitter.github.com/bootstrap/assets/css/bootstrap-1.2.0.min.css'})"
-									+ ".wysiwyg('setContent', '"
+							target.appendJavaScript("showStmtEdit('"
 									+ StringEscapeUtils.escapeEcmaScript(item.getModelObject().getObjectValue())
 									+ "');");
 						}
@@ -407,7 +408,6 @@ public class RoPage
 		public void setAnnotationSelection(Annotation ann)
 		{
 			annList.setSelectedObject(ann);
-
 		}
 	}
 
@@ -416,28 +416,80 @@ public class RoPage
 		extends Form<Statement>
 	{
 
-		private final TextArea<String> body;
+		private final TextArea<String> value;
+
+		private final TextField<URI> objectURI;
 
 
 		public StatementEditForm(CompoundPropertyModel<Statement> model)
 		{
 			super("stmtEditForm", model);
-			body = new TextArea<String>("annValue", model.<String> bind("objectValue"));
-			body.setEscapeModelStrings(false);
-			add(body);
-		}
 
+			final WebMarkupContainer uriDiv = new WebMarkupContainer("objectURIDiv");
+			add(uriDiv);
+
+			objectURI = new TextField<URI>("objectURI");
+			uriDiv.add(objectURI);
+
+			final WebMarkupContainer valueDiv = new WebMarkupContainer("objectValueDiv");
+			add(valueDiv);
+
+			value = new TextArea<String>("objectValue");
+			value.setEscapeModelStrings(false);
+			valueDiv.add(value);
+
+			CheckBox objectType = new CheckBox("objectURIResource");
+			add(objectType);
+
+			add(new AjaxButton("save", this) {
+
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+				{
+					Token dLibraToken = MySession.get().getdLibraAccessToken();
+					Annotation ann = ((Statement) getDefaultModelObject()).getAnnotation();
+					try {
+						ROSRService.sendResource(ann.getBodyURI(), RoFactory.wrapAnnotationBody(ann.getBody()),
+							"application/rdf+xml", dLibraToken);
+						target.add(form);
+						target.appendJavaScript("$('#edit-ann-modal').modal('hide')");
+					}
+					catch (OAuthException e) {
+						error("Could not update annotation (" + e.getMessage() + ")");
+					}
+				}
+
+
+				@Override
+				protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
+				{
+					// TODO Auto-generated method stub
+
+				}
+			});
+			add(new AjaxButton("cancel", this) {
+
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+				{
+					target.appendJavaScript("$('#edit-ann-modal').modal('hide')");
+				}
+
+
+				@Override
+				protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
+				{
+					// TODO Auto-generated method stub
+
+				}
+			});
+		}
 	}
 
+	@SuppressWarnings("serial")
 	class ExternalLinkFragment
 		extends Fragment
 	{
-
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = -7541060078430742169L;
-
 
 		public ExternalLinkFragment(String id, String markupId, MarkupContainer markupProvider,
 				CompoundPropertyModel<Statement> model)

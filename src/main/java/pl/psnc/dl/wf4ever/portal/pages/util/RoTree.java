@@ -1,7 +1,7 @@
 /**
  * 
  */
-package pl.psnc.dl.wf4ever.portal.pages;
+package pl.psnc.dl.wf4ever.portal.pages.util;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;

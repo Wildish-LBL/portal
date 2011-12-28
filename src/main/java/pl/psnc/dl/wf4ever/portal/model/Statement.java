@@ -7,8 +7,11 @@ import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.Resource;
 
 /**
  * @author piotrhol
@@ -23,20 +26,25 @@ public class Statement
 	 */
 	private static final long serialVersionUID = 1704407898614509230L;
 
-	private final URI propertyURI;
+	private final URI subjectURI;
 
-	private final String propertyLocalName;
+	private URI propertyURI;
 
-	private final boolean isObjectURIResource;
+	private String propertyLocalName;
 
-	private final String objectValue;
+	private boolean isObjectURIResource;
 
-	private final URI objectURI;
+	private final Annotation annotation;
+
+	private String objectValue;
+
+	private URI objectURI;
 
 
-	public Statement(com.hp.hpl.jena.rdf.model.Statement original)
+	public Statement(com.hp.hpl.jena.rdf.model.Statement original, Annotation annotation)
 		throws URISyntaxException
 	{
+		subjectURI = new URI(original.getSubject().getURI());
 		Property property = original.getPredicate();
 		propertyURI = new URI(property.getURI());
 		propertyLocalName = property.getLocalName();
@@ -50,6 +58,16 @@ public class Statement
 			objectURI = null;
 			objectValue = original.getObject().asLiteral().getValue().toString();
 		}
+		this.annotation = annotation;
+	}
+
+
+	/**
+	 * @return the annotation
+	 */
+	public Annotation getAnnotation()
+	{
+		return annotation;
 	}
 
 
@@ -95,6 +113,67 @@ public class Statement
 	public boolean isObjectURIResource()
 	{
 		return isObjectURIResource;
+	}
+
+
+	/**
+	 * @param propertyURI the propertyURI to set
+	 */
+	public void setPropertyURI(URI propertyURI)
+	{
+		this.propertyURI = propertyURI;
+	}
+
+
+	/**
+	 * @param propertyLocalName the propertyLocalName to set
+	 */
+	public void setPropertyLocalName(String propertyLocalName)
+	{
+		this.propertyLocalName = propertyLocalName;
+	}
+
+
+	/**
+	 * @param isObjectURIResource the isObjectURIResource to set
+	 */
+	public void setObjectURIResource(boolean isObjectURIResource)
+	{
+		this.isObjectURIResource = isObjectURIResource;
+	}
+
+
+	/**
+	 * @param objectValue the objectValue to set
+	 */
+	public void setObjectValue(String objectValue)
+	{
+		this.objectValue = objectValue;
+	}
+
+
+	/**
+	 * @param objectURI the objectURI to set
+	 */
+	public void setObjectURI(URI objectURI)
+	{
+		this.objectURI = objectURI;
+	}
+
+
+	public com.hp.hpl.jena.rdf.model.Statement createJenaStatement()
+	{
+		Model model = ModelFactory.createDefaultModel();
+		Resource subject = model.createResource(subjectURI.toString());
+		Property property = model.createProperty(propertyURI.toString());
+		RDFNode object = null;
+		if (isObjectURIResource()) {
+			object = model.createResource(objectURI.toString());
+		}
+		else {
+			object = model.createTypedLiteral(objectValue);
+		}
+		return model.createStatement(subject, property, object);
 	}
 
 }
