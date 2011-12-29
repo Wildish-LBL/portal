@@ -5,8 +5,6 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
-	var type = document.getElementById('objectType');
-	type.onclick = checkStmtEditType;
 });
 
 function showStmtEdit(content) {
@@ -16,6 +14,7 @@ function showStmtEdit(content) {
 					{
 						css : 'http://twitter.github.com/bootstrap/assets/css/bootstrap-1.2.0.min.css'
 					}).wysiwyg('setContent', content);
+	document.getElementById('objectType').onclick = checkStmtEditType;
 	checkStmtEditType();
 }
 

@@ -33,6 +33,7 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.UrlDecoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.util.convert.IConverter;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
@@ -43,6 +44,7 @@ import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.model.Statement;
 import pl.psnc.dl.wf4ever.portal.pages.util.RoTree;
 import pl.psnc.dl.wf4ever.portal.pages.util.SelectableRefreshableView;
+import pl.psnc.dl.wf4ever.portal.pages.util.URIConverter;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 
@@ -386,6 +388,8 @@ public class RoPage
 						@Override
 						public void onClick(AjaxRequestTarget target)
 						{
+							stmtEditForm.setModelObject(item.getModelObject());
+							target.add(stmtEditForm);
 							target.appendJavaScript("showStmtEdit('"
 									+ StringEscapeUtils.escapeEcmaScript(item.getModelObject().getObjectValue())
 									+ "');");
@@ -428,7 +432,15 @@ public class RoPage
 			final WebMarkupContainer uriDiv = new WebMarkupContainer("objectURIDiv");
 			add(uriDiv);
 
-			objectURI = new TextField<URI>("objectURI");
+			objectURI = new TextField<URI>("objectURI", URI.class) {
+
+				@SuppressWarnings("unchecked")
+				@Override
+				public <C> IConverter<C> getConverter(Class<C> type)
+				{
+					return (IConverter<C>) new URIConverter();
+				}
+			};
 			uriDiv.add(objectURI);
 
 			final WebMarkupContainer valueDiv = new WebMarkupContainer("objectValueDiv");
@@ -447,11 +459,12 @@ public class RoPage
 				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 				{
 					Token dLibraToken = MySession.get().getdLibraAccessToken();
-					Annotation ann = ((Statement) getDefaultModelObject()).getAnnotation();
+					Annotation ann = StatementEditForm.this.getModelObject().getAnnotation();
 					try {
 						ROSRService.sendResource(ann.getBodyURI(), RoFactory.wrapAnnotationBody(ann.getBody()),
 							"application/rdf+xml", dLibraToken);
 						target.add(form);
+						target.add(annotatingBox.entriesDiv);
 						target.appendJavaScript("$('#edit-ann-modal').modal('hide')");
 					}
 					catch (OAuthException e) {
@@ -482,7 +495,7 @@ public class RoPage
 					// TODO Auto-generated method stub
 
 				}
-			});
+			}.setDefaultFormProcessing(false));
 		}
 	}
 
