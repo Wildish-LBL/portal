@@ -87,6 +87,7 @@ public class RoPage
 			List<URI> uris = ROSRService.getROList(MySession.get().getdLibraAccessToken());
 			canEdit = uris.contains(ro.getURI());
 		}
+		add(new Label("title", ro.getURI().toString()));
 
 		final CompoundPropertyModel<AggregatedResource> itemModel = new CompoundPropertyModel<AggregatedResource>(ro);
 		final TreeModel treeModel = factory.createAggregatedResourcesTree(ro, true);
