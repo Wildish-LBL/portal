@@ -111,10 +111,10 @@
 								</tr>
 							</tbody>
 						</table>
-						<form class="form-stacked">
+						<form wicket:id="stmtForm" class="form-stacked">
 							<div class="actions">
-								<button class="btn success" type="submit">Add statement</button>
-								<button class="btn danger" type="submit">Delete
+								<button wicket:id="addStatement" class="btn success" type="submit">Add statement</button>
+								<button wicket:id="deleteStatement" class="btn danger" type="submit">Delete
 									statement</button>
 							</div>
 						</form>
@@ -126,7 +126,7 @@
 	<div id="edit-ann-modal" class="modal hide">
 		<form wicket:id="stmtEditForm">
 			<div class="modal-header">
-				<h3>Edit statement</h3>
+				<h3><span wicket:id="title">[title]</span></h3>
 			</div>
 			<div class="modal-body">
 				<fieldset>

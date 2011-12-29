@@ -336,7 +336,9 @@ public class RoPage
 								.getdLibraAccessToken());
 						RoFactory factory = new RoFactory(roURI);
 						itemModel.getObject().setAnnotations(factory.createAnnotations(itemModel.getObject().getURI()));
+						annList.setSelectedObject(null);
 						target.add(annotationsDiv);
+						target.add(entriesDiv);
 						target.add(roViewerBox.itemInfo);
 					}
 					catch (OAuthException | URISyntaxException e) {
@@ -391,6 +393,7 @@ public class RoPage
 						public void onClick(AjaxRequestTarget target)
 						{
 							stmtEditForm.setModelObject(item.getModelObject());
+							stmtEditForm.setTitle("Edit statement");
 							target.add(stmtEditForm);
 							target.appendJavaScript("showStmtEdit('"
 									+ StringEscapeUtils.escapeEcmaScript(item.getModelObject().getObjectValue())
@@ -408,6 +411,84 @@ public class RoPage
 
 			};
 			entriesDiv.add(entriesList);
+
+			Form< ? > stmtForm = new Form<Void>("stmtForm");
+			entriesDiv.add(stmtForm);
+
+			AjaxButton addStatement = new AjaxButton("addStatement", stmtForm) {
+
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+				{
+					try {
+						stmtEditForm.setModelObject(new Statement(itemModel.getObject().getURI(), annList
+								.getSelectedObject()));
+						stmtEditForm.setTitle("Add statement");
+						target.add(stmtEditForm);
+						target.appendJavaScript("showStmtEdit('');");
+					}
+					catch (URISyntaxException e) {
+						error("Error when adding preparing statement: " + e.getMessage());
+					}
+				}
+
+
+				@Override
+				protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
+				{
+				}
+			};
+			addStatement.add(new Behavior() {
+
+				@Override
+				public void onComponentTag(Component component, ComponentTag tag)
+				{
+					super.onComponentTag(component, tag);
+					if (!canEdit || annList.getSelectedObject() == null) {
+						tag.append("class", "disabled", " ");
+					}
+				}
+			});
+			stmtForm.add(addStatement);
+
+			AjaxButton deleteStatement = new AjaxButton("deleteStatement", stmtForm) {
+
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+				{
+					Token dLibraToken = MySession.get().getdLibraAccessToken();
+					Annotation ann = annList.getSelectedObject();
+					ann.getBody().remove(entriesList.getSelectedObject());
+					try {
+						ROSRService.sendResource(ann.getBodyURI(), RoFactory.wrapAnnotationBody(ann.getBody()),
+							"application/rdf+xml", dLibraToken);
+						entriesList.setSelectedObject(null);
+						target.add(annotatingBox.entriesDiv);
+					}
+					catch (OAuthException e) {
+						ann.getBody().add(entriesList.getSelectedObject());
+						error("Could not delete statement (" + e.getMessage() + ")");
+					}
+				}
+
+
+				@Override
+				protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
+				{
+				}
+			};
+			deleteStatement.add(new Behavior() {
+
+				@Override
+				public void onComponentTag(Component component, ComponentTag tag)
+				{
+					super.onComponentTag(component, tag);
+					if (!canEdit || entriesList.getSelectedObject() == null) {
+						tag.append("class", "disabled", " ");
+					}
+				}
+			});
+			stmtForm.add(deleteStatement);
 		}
 
 
@@ -430,10 +511,14 @@ public class RoPage
 
 		private URI selectedProperty;
 
+		private String title;
+
 
 		public StatementEditForm(CompoundPropertyModel<Statement> model)
 		{
 			super("stmtEditForm", model);
+
+			add(new Label("title", new PropertyModel<String>(this, "title")));
 
 			List<URI> choices = Arrays.asList(RoFactory.defaultProperties);
 			DropDownChoice<URI> properties = new DropDownChoice<URI>("propertyURI", new PropertyModel<URI>(this,
@@ -487,7 +572,10 @@ public class RoPage
 				{
 					Token dLibraToken = MySession.get().getdLibraAccessToken();
 					Annotation ann = StatementEditForm.this.getModelObject().getAnnotation();
+					boolean isNew = !ann.getBody().contains(StatementEditForm.this.getModelObject());
 					try {
+						if (isNew)
+							ann.getBody().add(StatementEditForm.this.getModelObject());
 						ROSRService.sendResource(ann.getBodyURI(), RoFactory.wrapAnnotationBody(ann.getBody()),
 							"application/rdf+xml", dLibraToken);
 						target.add(form);
@@ -496,6 +584,8 @@ public class RoPage
 					}
 					catch (OAuthException e) {
 						error("Could not update annotation (" + e.getMessage() + ")");
+						if (isNew)
+							ann.getBody().remove(StatementEditForm.this.getModelObject());
 					}
 				}
 
@@ -564,8 +654,26 @@ public class RoPage
 		 */
 		public void setCustomProperty(URI customProperty)
 		{
-			if (selectedProperty == null)
+			if (selectedProperty == null && customProperty != null)
 				getModelObject().setPropertyURI(customProperty);
+		}
+
+
+		/**
+		 * @return the title
+		 */
+		public String getTitle()
+		{
+			return title;
+		}
+
+
+		/**
+		 * @param title the title to set
+		 */
+		public void setTitle(String title)
+		{
+			this.title = title;
 		}
 	}
 

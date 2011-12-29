@@ -212,7 +212,12 @@ public class RoFactory
 		throws URISyntaxException
 	{
 		Model body = ModelFactory.createDefaultModel();
-		body.read(annotationBodyURI.toString());
+		try {
+			body.read(annotationBodyURI.toString());
+		}
+		catch (Exception e) {
+			return null;
+		}
 
 		List<Statement> statements = new ArrayList<Statement>();
 		StmtIterator it = body.listStatements();

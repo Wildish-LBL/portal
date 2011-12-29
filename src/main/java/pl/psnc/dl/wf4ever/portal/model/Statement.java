@@ -12,6 +12,7 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.vocabulary.DCTerms;
 
 /**
  * @author piotrhol
@@ -56,6 +57,18 @@ public class Statement
 			objectURI = null;
 			objectValue = original.getObject().asLiteral().getValue().toString();
 		}
+		this.annotation = annotation;
+	}
+
+
+	public Statement(URI subjectURI, Annotation annotation)
+		throws URISyntaxException
+	{
+		this.subjectURI = subjectURI;
+		setPropertyURI(new URI(DCTerms.title.getURI()));
+		isObjectURIResource = false;
+		objectURI = null;
+		objectValue = "";
 		this.annotation = annotation;
 	}
 

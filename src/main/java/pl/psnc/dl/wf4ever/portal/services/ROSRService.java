@@ -208,7 +208,12 @@ public class ROSRService
 			throw new IllegalArgumentException("Annotation URI is not valid");
 		}
 		Resource body = ann.getPropertyResourceValue(RoFactory.aoBody);
-		deleteResource(new URI(body.getURI()), dLibraToken);
+		try {
+			deleteResource(new URI(body.getURI()), dLibraToken);
+		}
+		catch (OAuthException e) {
+			log.warn("Problem with deleting annotation body: " + e.getMessage());
+		}
 
 		manifest.removeAll(ann, null, null);
 		ByteArrayOutputStream out = new ByteArrayOutputStream();

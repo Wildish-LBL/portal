@@ -43,7 +43,8 @@ public class Annotation
 			protected List<Statement> load()
 			{
 				try {
-					return RoFactory.createAnnotationBody(Annotation.this, getBodyURI());
+					List<Statement> res = RoFactory.createAnnotationBody(Annotation.this, getBodyURI());
+					return res != null ? res : new ArrayList<Statement>();
 				}
 				catch (URISyntaxException e) {
 					return new ArrayList<Statement>();
