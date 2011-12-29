@@ -3,6 +3,7 @@ package pl.psnc.dl.wf4ever.portal.pages;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -23,6 +24,7 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
+import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
@@ -424,10 +426,35 @@ public class RoPage
 
 		private final TextField<URI> objectURI;
 
+		private final TextField<URI> propertyURI;
+
+		private URI selectedProperty;
+
 
 		public StatementEditForm(CompoundPropertyModel<Statement> model)
 		{
 			super("stmtEditForm", model);
+
+			List<URI> choices = Arrays.asList(RoFactory.defaultProperties);
+			DropDownChoice<URI> properties = new DropDownChoice<URI>("propertyURI", new PropertyModel<URI>(this,
+					"selectedProperty"), choices);
+			properties.setNullValid(true);
+			add(properties);
+
+			final WebMarkupContainer propertyURIDiv = new WebMarkupContainer("customPropertyURIDiv");
+			add(propertyURIDiv);
+
+			propertyURI = new TextField<URI>("customPropertyURI", new PropertyModel<URI>(this, "customProperty"),
+					URI.class) {
+
+				@SuppressWarnings("unchecked")
+				@Override
+				public <C> IConverter<C> getConverter(Class<C> type)
+				{
+					return (IConverter<C>) new URIConverter();
+				}
+			};
+			propertyURIDiv.add(propertyURI);
 
 			final WebMarkupContainer uriDiv = new WebMarkupContainer("objectURIDiv");
 			add(uriDiv);
@@ -496,6 +523,49 @@ public class RoPage
 
 				}
 			}.setDefaultFormProcessing(false));
+		}
+
+
+		/**
+		 * @return the selectedProperty
+		 */
+		public URI getSelectedProperty()
+		{
+			if (selectedProperty == null && getModelObject() != null)
+				return getModelObject().getPropertyURI();
+			return selectedProperty;
+		}
+
+
+		/**
+		 * @param selectedProperty the selectedProperty to set
+		 */
+		public void setSelectedProperty(URI selectedProperty)
+		{
+			this.selectedProperty = selectedProperty;
+			if (selectedProperty != null)
+				getModelObject().setPropertyURI(selectedProperty);
+		}
+
+
+		/**
+		 * @return the selectedProperty
+		 */
+		public URI getCustomProperty()
+		{
+			if (getModelObject() != null)
+				return getModelObject().getPropertyURI();
+			return null;
+		}
+
+
+		/**
+		 * @param selectedProperty the selectedProperty to set
+		 */
+		public void setCustomProperty(URI customProperty)
+		{
+			if (selectedProperty == null)
+				getModelObject().setPropertyURI(customProperty);
 		}
 	}
 

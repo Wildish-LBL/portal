@@ -45,9 +45,7 @@ public class Statement
 		throws URISyntaxException
 	{
 		subjectURI = new URI(original.getSubject().getURI());
-		Property property = original.getPredicate();
-		propertyURI = new URI(property.getURI());
-		propertyLocalName = property.getLocalName();
+		setPropertyURI(new URI(original.getPredicate().getURI()));
 		RDFNode node = original.getObject();
 		isObjectURIResource = node.isURIResource();
 		if (isObjectURIResource) {
@@ -121,16 +119,11 @@ public class Statement
 	 */
 	public void setPropertyURI(URI propertyURI)
 	{
+		if (propertyURI == null)
+			throw new NullPointerException("Property URI cannot be null");
 		this.propertyURI = propertyURI;
-	}
-
-
-	/**
-	 * @param propertyLocalName the propertyLocalName to set
-	 */
-	public void setPropertyLocalName(String propertyLocalName)
-	{
-		this.propertyLocalName = propertyLocalName;
+		this.propertyLocalName = ModelFactory.createDefaultModel().createProperty(propertyURI.toString())
+				.getLocalName();
 	}
 
 

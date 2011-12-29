@@ -55,6 +55,11 @@ public class RoFactory
 
 	private final Individual ro;
 
+	public static final URI[] defaultProperties = { URI.create(DCTerms.type.getURI()),
+			URI.create(DCTerms.subject.getURI()), URI.create(DCTerms.description.getURI()),
+			URI.create(DCTerms.format.getURI()), URI.create(DCTerms.title.getURI()),
+			URI.create(DCTerms.created.getURI())};
+
 	public static final Resource roResource = ModelFactory.createDefaultModel().createResource(
 		"http://purl.org/wf4ever/ro#Resource");
 
@@ -236,4 +241,5 @@ public class RoFactory
 		body.write(out);
 		return out.toByteArray();
 	}
+
 }

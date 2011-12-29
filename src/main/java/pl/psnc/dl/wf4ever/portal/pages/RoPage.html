@@ -131,19 +131,18 @@
 			<div class="modal-body">
 				<fieldset>
 					<div class="clearfix">
-						<label for="annAttribute">What kind of statement is this?</label>
+						<label for="propertyURI">What kind of statement is this?</label>
 						<div class="input">
-							<select name="annAttribute" id="annAttribute">
-								<option>Type</option>
-								<option>Subject</option>
-								<option selected="selected">Description</option>
-								<option>Format</option>
-								<option>Note</option>
-								<option>Title</option>
-								<option>Created</option>
+							<select name="propertyURI" id="propertyURI" wicket:id="propertyURI">
 							</select>
 						</div>
 					</div>
+ 					<div class="clearfix" id="customPropertyURIDiv" wicket:id="customPropertyURIDiv">
+						<label for="objectURI">Custom property URI</label>
+						<div class="input">
+							<input type="text" class="xlarge" id="customPropertyURI" wicket:id="customPropertyURI"/>
+						</div>
+					</div> 
 					<div class="clearfix">
 						<label for="objectType">Statement object type</label>
 						<div class="input">
