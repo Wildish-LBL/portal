@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Check;
@@ -31,6 +30,7 @@ import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.pages.util.ModelIteratorAdapter;
+import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 
@@ -46,6 +46,7 @@ public class MyRosPage
 	private String roId;
 
 
+	@SuppressWarnings("serial")
 	public MyRosPage(final PageParameters parameters)
 		throws Exception
 	{
@@ -115,38 +116,26 @@ public class MyRosPage
 
 		addForm.add(new MyFeedbackPanel("addFeedbackPanel"));
 
-		form.add(new AjaxButton("delete", form) {
-
-			private static final long serialVersionUID = 1735622302239127515L;
-
+		form.add(new MyAjaxButton("delete", form) {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 			{
+				super.onSubmit(target, form);
 				form.process(null);
 				if (!selectedResearchObjects.isEmpty()) {
 					target.add(deleteCntLabel);
 					target.appendJavaScript("$('#confirm-delete-modal').modal('show')");
 				}
 			}
-
-
-			@Override
-			protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
-			{
-				// TODO Auto-generated method stub
-
-			}
 		});
 
-		add(new AjaxButton("confirmDelete", form) {
-
-			private static final long serialVersionUID = 1735622302239127515L;
-
+		add(new MyAjaxButton("confirmDelete", form) {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 			{
+				super.onSubmit(target, form);
 				Token dLibraToken = MySession.get().getdLibraAccessToken();
 				for (AggregatedResource ro : selectedResearchObjects) {
 					try {
@@ -160,64 +149,34 @@ public class MyRosPage
 				target.add(form);
 				target.appendJavaScript("$('#confirm-delete-modal').modal('hide')");
 			}
-
-
-			@Override
-			protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
-			{
-				// TODO Auto-generated method stub
-
-			}
 		});
 
-		add(new AjaxButton("cancelDelete", form) {
-
-			private static final long serialVersionUID = 1735622302239127515L;
-
+		add(new MyAjaxButton("cancelDelete", form) {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 			{
+				super.onSubmit(target, form);
 				target.appendJavaScript("$('#confirm-delete-modal').modal('hide')");
 			}
-
-
-			@Override
-			protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
-			{
-				// TODO Auto-generated method stub
-
-			}
 		});
 
-		form.add(new AjaxButton("add", form) {
-
-			private static final long serialVersionUID = 1735622302239127515L;
-
+		form.add(new MyAjaxButton("add", form) {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 			{
+				super.onSubmit(target, form);
 				target.appendJavaScript("$('#confirm-add-modal').modal('show')");
-			}
-
-
-			@Override
-			protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
-			{
-				// TODO Auto-generated method stub
-
 			}
 		});
 
-		addForm.add(new AjaxButton("confirmAdd", addForm) {
-
-			private static final long serialVersionUID = 1735622302239127515L;
-
+		addForm.add(new MyAjaxButton("confirmAdd", addForm) {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form< ? > addForm)
 			{
+				super.onSubmit(target, addForm);
 				Token dLibraToken = MySession.get().getdLibraAccessToken();
 				try {
 					URI researchObjectURI = ROSRService.createResearchObject(roId, dLibraToken, false);
@@ -229,33 +188,15 @@ public class MyRosPage
 				target.add(form);
 				target.appendJavaScript("$('#confirm-add-modal').modal('hide')");
 			}
-
-
-			@Override
-			protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
-			{
-				// TODO Auto-generated method stub
-
-			}
 		});
 
-		addForm.add(new AjaxButton("cancelAdd", addForm) {
-
-			private static final long serialVersionUID = 1735622302239127515L;
-
+		addForm.add(new MyAjaxButton("cancelAdd", addForm) {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 			{
+				super.onSubmit(target, form);
 				target.appendJavaScript("$('#confirm-add-modal').modal('hide')");
-			}
-
-
-			@Override
-			protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
-			{
-				// TODO Auto-generated method stub
-
 			}
 		}.setDefaultFormProcessing(false));
 		form.add(new BookmarkablePageLink<Void>("myExpImport", MyExpAuthorizePage.class));

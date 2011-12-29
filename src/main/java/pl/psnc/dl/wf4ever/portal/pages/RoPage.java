@@ -44,6 +44,7 @@ import pl.psnc.dl.wf4ever.portal.model.Annotation;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.model.Statement;
+import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.RoTree;
 import pl.psnc.dl.wf4ever.portal.pages.util.SelectableRefreshableView;
 import pl.psnc.dl.wf4ever.portal.pages.util.URIConverter;
@@ -290,28 +291,25 @@ public class RoPage
 			Form< ? > annForm = new Form<Void>("annForm");
 			annotationsDiv.add(annForm);
 
-			AjaxButton addAnnotation = new AjaxButton("addAnnotation", annForm) {
+			AjaxButton addAnnotation = new MyAjaxButton("addAnnotation", annForm) {
 
 				@Override
 				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 				{
+					super.onSubmit(target, form);
 					try {
 						ROSRService.addAnnotation(roURI, itemModel.getObject().getURI(), "Yet unknown", MySession.get()
 								.getdLibraAccessToken());
 						RoFactory factory = new RoFactory(roURI);
 						itemModel.getObject().setAnnotations(factory.createAnnotations(itemModel.getObject().getURI()));
+						annList.setSelectedObject(itemModel.getObject().getAnnotations()
+								.get(itemModel.getObject().getAnnotations().size() - 1));
 						target.add(annotationsDiv);
 						target.add(roViewerBox.itemInfo);
 					}
 					catch (OAuthException | URISyntaxException e) {
 						error(e.getMessage());
 					}
-				}
-
-
-				@Override
-				protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
-				{
 				}
 			};
 			addAnnotation.add(new Behavior() {
@@ -327,14 +325,19 @@ public class RoPage
 			});
 			annForm.add(addAnnotation);
 
-			AjaxButton deleteAnnotation = new AjaxButton("deleteAnnotation", annForm) {
+			AjaxButton deleteAnnotation = new MyAjaxButton("deleteAnnotation", annForm) {
 
 				@Override
 				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 				{
+					super.onSubmit(target, form);
 					try {
-						ROSRService.deleteAnnotation(roURI, annList.getSelectedObject().getURI(), MySession.get()
-								.getdLibraAccessToken());
+						try {
+							ROSRService.deleteAnnotation(roURI, annList.getSelectedObject().getURI(), MySession.get()
+									.getdLibraAccessToken());
+						}
+						catch (IllegalArgumentException e) {
+						}
 						RoFactory factory = new RoFactory(roURI);
 						itemModel.getObject().setAnnotations(factory.createAnnotations(itemModel.getObject().getURI()));
 						annList.setSelectedObject(null);
@@ -345,12 +348,6 @@ public class RoPage
 					catch (OAuthException | URISyntaxException e) {
 						error(e.getMessage());
 					}
-				}
-
-
-				@Override
-				protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
-				{
 				}
 			};
 			deleteAnnotation.add(new Behavior() {
@@ -416,11 +413,12 @@ public class RoPage
 			Form< ? > stmtForm = new Form<Void>("stmtForm");
 			entriesDiv.add(stmtForm);
 
-			AjaxButton addStatement = new AjaxButton("addStatement", stmtForm) {
+			AjaxButton addStatement = new MyAjaxButton("addStatement", stmtForm) {
 
 				@Override
 				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 				{
+					super.onSubmit(target, form);
 					try {
 						stmtEditForm.setModelObject(new Statement(itemModel.getObject().getURI(), annList
 								.getSelectedObject()));
@@ -431,12 +429,6 @@ public class RoPage
 					catch (URISyntaxException e) {
 						error("Error when adding preparing statement: " + e.getMessage());
 					}
-				}
-
-
-				@Override
-				protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
-				{
 				}
 			};
 			addStatement.add(new Behavior() {
@@ -452,11 +444,12 @@ public class RoPage
 			});
 			stmtForm.add(addStatement);
 
-			AjaxButton deleteStatement = new AjaxButton("deleteStatement", stmtForm) {
+			AjaxButton deleteStatement = new MyAjaxButton("deleteStatement", stmtForm) {
 
 				@Override
 				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 				{
+					super.onSubmit(target, form);
 					Token dLibraToken = MySession.get().getdLibraAccessToken();
 					Annotation ann = annList.getSelectedObject();
 					ann.getBody().remove(entriesList.getSelectedObject());
@@ -470,12 +463,6 @@ public class RoPage
 						ann.getBody().add(entriesList.getSelectedObject());
 						error("Could not delete statement (" + e.getMessage() + ")");
 					}
-				}
-
-
-				@Override
-				protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
-				{
 				}
 			};
 			deleteStatement.add(new Behavior() {
@@ -566,11 +553,12 @@ public class RoPage
 			CheckBox objectType = new CheckBox("objectURIResource");
 			add(objectType);
 
-			add(new AjaxButton("save", this) {
+			add(new MyAjaxButton("save", this) {
 
 				@Override
 				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 				{
+					super.onSubmit(target, form);
 					Token dLibraToken = MySession.get().getdLibraAccessToken();
 					Annotation ann = StatementEditForm.this.getModelObject().getAnnotation();
 					boolean isNew = !ann.getBody().contains(StatementEditForm.this.getModelObject());
@@ -589,29 +577,14 @@ public class RoPage
 							ann.getBody().remove(StatementEditForm.this.getModelObject());
 					}
 				}
-
-
-				@Override
-				protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
-				{
-					// TODO Auto-generated method stub
-
-				}
 			});
-			add(new AjaxButton("cancel", this) {
+			add(new MyAjaxButton("cancel", this) {
 
 				@Override
 				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 				{
+					super.onSubmit(target, form);
 					target.appendJavaScript("$('#edit-ann-modal').modal('hide')");
-				}
-
-
-				@Override
-				protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
-				{
-					// TODO Auto-generated method stub
-
 				}
 			}.setDefaultFormProcessing(false));
 		}
