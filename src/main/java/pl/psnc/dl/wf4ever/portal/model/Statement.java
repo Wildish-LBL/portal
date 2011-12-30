@@ -174,7 +174,7 @@ public class Statement
 		Property property = model.createProperty(propertyURI.toString());
 		RDFNode object = null;
 		if (isObjectURIResource()) {
-			object = model.createResource(objectURI.toString());
+			object = model.createResource(subjectURI.resolve(objectURI).toString());
 		}
 		else {
 			object = model.createTypedLiteral(objectValue);
