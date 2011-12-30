@@ -163,7 +163,7 @@ public class Statement
 	 */
 	public void setObjectURI(URI objectURI)
 	{
-		this.objectURI = objectURI;
+		this.objectURI = subjectURI.resolve(objectURI);
 	}
 
 
@@ -174,7 +174,7 @@ public class Statement
 		Property property = model.createProperty(propertyURI.toString());
 		RDFNode object = null;
 		if (isObjectURIResource()) {
-			object = model.createResource(subjectURI.resolve(objectURI).toString());
+			object = model.createResource(objectURI.toString());
 		}
 		else {
 			object = model.createTypedLiteral(objectValue);

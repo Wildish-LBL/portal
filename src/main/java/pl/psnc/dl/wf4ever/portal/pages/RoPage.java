@@ -660,7 +660,7 @@ public class RoPage
 				CompoundPropertyModel<Statement> model)
 		{
 			super(id, markupId, markupProvider, model);
-			add(new ExternalLink("link", model.<String> bind("objectURI"), model.<String> bind("objectValue")));
+			add(new ExternalLink("link", model.<String> bind("objectURI"), model.<String> bind("objectURI")));
 		}
 	}
 
