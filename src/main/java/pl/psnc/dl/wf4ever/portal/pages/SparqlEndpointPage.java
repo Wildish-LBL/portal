@@ -42,6 +42,7 @@ public class SparqlEndpointPage
 	public SparqlEndpointPage(final PageParameters parameters)
 	{
 		super(parameters);
+		add(new MyFeedbackPanel("feedbackPanel"));
 		Form< ? > form = new Form<Void>("form");
 		add(form);
 

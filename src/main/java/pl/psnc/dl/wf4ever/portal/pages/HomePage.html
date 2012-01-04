@@ -11,19 +11,6 @@
 	</div>
 	<div class="row">
 		<div class="span4">
-			<section class="left_box inspan4">
-				<h3>
-					Browse by annotations <img class="sh_button"
-						src="images/l_open.gif" />
-				</h3>
-				<div class="simple_left_box">
-					<ul>
-						<li><a href="#">Titles</a></li>
-						<li><a href="#">Creators</a></li>
-						<li><a href="#">Keywords</a></li>
-					</ul>
-				</div>
-			</section>
 
 			<section class="left_box inspan4">
 				<h3>
@@ -31,9 +18,10 @@
 				</h3>
 				<div class="simple_left_box">
 					<ul>
-						<li><a href="#">About Wf4Ever </a></li>
-						<li><a href="#">Frequently asked questions </a></li>
-						<li><a href="#">Contact </a></li>
+						<li><a href="http://www.wf4ever-project.org">Wf4Ever home
+								page</a></li>
+						<li><a wicket:id="faq">Frequently asked questions </a></li>
+						<li><a wicket:id="contact">Contact </a></li>
 					</ul>
 
 				</div>
@@ -45,16 +33,13 @@
 				</h3>
 				<div class="simple_left_box">
 					<p>
-						Number of Research Objects: <b><span wicket:id="roCnt"></span></b>
+						Number of ROs: <b><span wicket:id="roCnt"></span></b>
 					</p>
 
 					<p>
-						Readers on-line: <b><span wicket:id="usersOnlineCnt"></span></b>
+						Readers online: <b><span wicket:id="usersOnlineCnt"></span></b>
 					</p>
 
-					<p>
-						Total number of users since Mar 1, 2011: <b>40942</b>
-					</p>
 					<p></p>
 					<ul>
 						<li><a href="#">Mostly viewed </a></li>
@@ -83,7 +68,7 @@
 					</p>
 				</div>
 			</section>
-
+			<!-- 
 			<section class="left_box inspan4">
 				<h3>
 					OAI <img class="sh_button" src="images/l_open.gif" />
@@ -98,7 +83,7 @@
 						</a>
 					</p>
 				</div>
-			</section>
+			</section> -->
 		</div>
 
 		<div class="span12">
@@ -108,10 +93,7 @@
 						<p>
 							<input class="span8" autocomplete="off" name="query" id="query"
 								type="text" /> <input class="btn danger" value="Search"
-								id="search" type="submit" /> <a href="#" style="cursor: help;">
-								<img id="gfxHelp" src="images/help_m.png"
-								title="Proper query syntax" />
-							</a>
+								id="search" type="submit" />
 						</p>
 						<p>
 							<a href="#"> Advanced search.. </a>
@@ -122,52 +104,21 @@
 
 			<div class="row">
 				<div class="span6">
-					<h3>Recently added</h3>
+					<h3>Most recent Research Objects</h3>
 					<ol>
-						<li><a id="bcsc_a_664" href="ro">Graphing and Citing Time
-								Series Data </a> by <a href="#">Tadamus</a>
-							<hr class="listLine" /></li>
-						<li><a id="bcsc_a_315" href="#">Find source at Sun of SW
-								events on Earth</a> by <a href="#">Anja Le Blanc</a>
-							<hr class="listLine" /></li>
-						<li><a id="bcsc_a_343" href="#">Arc/Warc mounter</a> by <a
-							href="#">Asger Askov Blekinge</a>
-							<hr class="listLine" /></li>
-						<li><a id="bcsc_a_658" href="#">Sample IMPACT hackathon
-								workflow</a> by <a href="#">Donal Fellows</a>
-							<hr class="listLine" /></li>
-						<li><a id="bcsc_a_321" href="#">Example of explicit
-								looping</a> by <a href="#">Alan Williams</a>
-							<hr class="listLine" /></li>
-						<li><a id="bcsc_a_330" href="#">Calculating the Total
-								Luminosity of a galaxy using properties extracted from HyperLEDA
-								service</a> by <a href="#">Susana</a>
-							<hr class="listLine" /></li>
-						<li><a id="bcsc_a_344" href="#">Example of conditional
-								invocation</a> by <a href="#">Alan Williamis</a>
-							<hr class="listLine" /></li>
-						<li><a id="bcsc_a_496" href="#">SEP event</a> by <a href="#">Anja
-								Le Blanc</a>
-							<hr class="listLine" /></li>
-						<li><a id="bcsc_a_326" href="#">Calculate edit distance
-								based on words</a> by <a href="#">perdalum</a>
-							<hr class="listLine" /></li>
-						<li><a id="bcsc_a_666" href="#">Compare OCR result of
-								original and BW version of image</a> by <a href="#">perdalum</a>
+						<li wicket:id="10randomROsListView"><a wicket:id="link"><span
+								wicket:id="title">Find source at Sun of SW events on
+									Earth</span></a>
 							<hr class="listLine" /></li>
 					</ol>
-					<p class="more2">
+					<p class="more2" style="margin-top: 1em;">
 						<a class="sfunctionAnchor" href="#"> More... </a>
 					</p>
 				</div>
 				<div class="span6">
-					<h3>10 random Research Objects</h3>
-					<ol>
-						<li wicket:id="10randomROsListView"><a wicket:id="link"><span
-								wicket:id="title">Find source at Sun of SW events on Earth</span></a>
-							<hr class="listLine" /></li>
-					</ol>
-					<p class="more2" style="margin-top: 1em;">
+					<h3>Most viewed Research Objects</h3>
+					<p>TBD</p>
+					<p class="more2">
 						<a class="sfunctionAnchor" href="#"> More... </a>
 					</p>
 				</div>
@@ -179,17 +130,17 @@
 						<div class="span6">
 							<p>
 								<b><img src="images/arrow.gif" alt="-" /> <a class="title"
-									href="#">Dropbox synchronization</a></b><br />
+									href="http://sandbox.wf4ever-project.org/robox">Dropbox synchronization</a></b><br />
 							</p>
 							<p>
 								<b><img src="images/arrow.gif" alt="-" /> <a class="title"
-									href="#">Command line tools</a></b><br />
+									href="https://github.com/wf4ever/ro-manager">Command line tools</a></b><br />
 							</p>
 						</div>
 						<div class="span6">
 							<p>
 								<b><img src="images/arrow.gif" alt="-" /> <a class="title"
-									href="#"> Collaboration spheres</a></b><br />
+									href="http://www.wf4ever-project.org/wiki/display/docs/Collaboration+Spheres"> Collaboration spheres</a></b><br />
 							</p>
 						</div>
 					</div>

@@ -40,6 +40,9 @@ public class TemplatePage
 		}
 		add(redirect);
 
+		add(new BookmarkablePageLink<Void>("baner", HomePage.class));
+		add(new BookmarkablePageLink<Void>("banerTitle", HomePage.class));
+
 		add(new BookmarkablePageLink<Void>("menu-home", HomePage.class));
 		add(new BookmarkablePageLink<Void>("menu-myros", MyRosPage.class));
 		add(new BookmarkablePageLink<Void>("menu-sparql", SparqlEndpointPage.class));

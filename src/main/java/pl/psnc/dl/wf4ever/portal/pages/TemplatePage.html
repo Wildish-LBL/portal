@@ -48,10 +48,10 @@
 				</span>
 
 			</div>
-			<a id="mainBanerCoin" href="#" title="Example Digital Library"> <img
+			<a id="mainBanerCoin" wicket:id="baner" title="RO Digital Library"> <img
 				src="images/wf4ever_logo.png" alt="" /></a>&nbsp;
 			<h1>
-				<a href="#" title="Research Object Digital Library"> Research
+				<a wicket:id="banerTitle" title="Research Object Digital Library"> Research
 					Object Digital Library </a>
 			</h1>
 		</div>
@@ -68,9 +68,6 @@
 				<li class="mainMenuListItem"><a
 					class="mainMenuOption mainMenuOptionIn" href="#" accesskey="s"
 					wicket:id="menu-sparql"> SPARQL ENDPOINT </a></li>
-				<li class="mainMenuListItem"><a
-					class="mainMenuOption mainMenuOptionLast" href="#" accesskey="c">
-						CONTACT </a></li>
 				<li class="mmlEmpty mmlEmptyRight">&nbsp;</li>
 			</ul>
 			<button class="btn info login" wicket:id="signIn">
@@ -92,7 +89,8 @@
 			</div>
 		</div>
 	</div>
-	<div id="busy-modal" class="modal hide" style="width: 250px; margin-left: -125px;">
+	<div id="busy-modal" class="modal hide"
+		style="width: 250px; margin-left: -125px;">
 		<div class="modal-body">
 			<p>
 				<img src="images/busy.gif" />

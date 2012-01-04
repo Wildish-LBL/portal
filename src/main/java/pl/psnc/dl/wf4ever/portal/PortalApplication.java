@@ -13,6 +13,7 @@ import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
 
 import pl.psnc.dl.wf4ever.portal.pages.AuthenticatePage;
+import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
 import pl.psnc.dl.wf4ever.portal.pages.HomePage;
 import pl.psnc.dl.wf4ever.portal.pages.MyExpAuthorizePage;
@@ -76,6 +77,7 @@ public class PortalApplication
 		mountPage("/oauth", OAuthPage.class);
 		mountPage("/authenticate", AuthenticatePage.class);
 		mountPage("/error", ErrorPage.class);
+		mountPage("/contact", ContactPage.class);
 
 		loadProperties("tokens.properties");
 	}

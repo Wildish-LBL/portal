@@ -47,8 +47,12 @@ public class HomePage
 		list.setReuseItems(true);
 		add(list);
 
+		add(new BookmarkablePageLink<Void>("faq", HelpPage.class));
+		add(new BookmarkablePageLink<Void>("contact", ContactPage.class));
+
 		add(new Label("roCnt", "" + uris.size()));
-		add(new Label("usersOnlineCnt", "" + getRequestLogger().getLiveSessions().length));
+		//FIXME does the below really work?
+		add(new Label("usersOnlineCnt", "" + (getRequestLogger().getLiveSessions().length + 1)));
 
 	}
 
