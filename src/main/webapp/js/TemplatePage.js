@@ -11,3 +11,7 @@ function showBusy() {
 function hideBusy() {
 	$('#busy-modal').modal('hide');
 }
+
+$(document).ready(function() {
+	$('#signedInAs').twipsy();
+});

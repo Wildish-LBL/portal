@@ -13,7 +13,7 @@ import org.scribe.model.Token;
 
 /**
  * @author piotrhol
- *
+ * 
  */
 public class MySession
 	extends AbstractAuthenticatedWebSession
@@ -37,7 +37,11 @@ public class MySession
 
 	private Token requestToken;
 
+	private String username;
+
 	private final static String DLIBRA_KEY = "dlibra";
+
+	private final static String USERNAME_KEY = "username";
 
 	private final static String MYEXP_KEY_TOKEN = "myexp1";
 
@@ -49,6 +53,8 @@ public class MySession
 		super(request);
 		if (new CookieUtils().load(DLIBRA_KEY) != null)
 			dLibraAccessToken = new Token(new CookieUtils().load(DLIBRA_KEY), null);
+		if (new CookieUtils().load(USERNAME_KEY) != null)
+			username = new CookieUtils().load(USERNAME_KEY);
 		if (new CookieUtils().load(MYEXP_KEY_TOKEN) != null && new CookieUtils().load(MYEXP_KEY_SECRET) != null) {
 			myExpAccessToken = new Token(new CookieUtils().load(MYEXP_KEY_TOKEN),
 					new CookieUtils().load(MYEXP_KEY_SECRET));
@@ -72,7 +78,8 @@ public class MySession
 
 
 	/**
-	 * @param dLibraAccessToken the dLibraAccessToken to set
+	 * @param dLibraAccessToken
+	 *            the dLibraAccessToken to set
 	 */
 	public void setdLibraAccessToken(Token dLibraAccessToken)
 	{
@@ -91,7 +98,8 @@ public class MySession
 
 
 	/**
-	 * @param myExpAccessToken the myExpAccessToken to set
+	 * @param myExpAccessToken
+	 *            the myExpAccessToken to set
 	 */
 	public void setMyExpAccessToken(Token myExpAccessToken)
 	{
@@ -110,7 +118,8 @@ public class MySession
 
 
 	/**
-	 * @param requestToken the requestToken to set
+	 * @param requestToken
+	 *            the requestToken to set
 	 */
 	public void setRequestToken(Token requestToken)
 	{
@@ -136,7 +145,9 @@ public class MySession
 	{
 		dLibraAccessToken = null;
 		myExpAccessToken = null;
+		username = null;
 		new CookieUtils().remove(DLIBRA_KEY);
+		new CookieUtils().remove(USERNAME_KEY);
 		new CookieUtils().remove(MYEXP_KEY_TOKEN);
 		new CookieUtils().remove(MYEXP_KEY_SECRET);
 	}
@@ -148,6 +159,9 @@ public class MySession
 			if (dLibraAccessToken != null) {
 				new CookieUtils().save(DLIBRA_KEY, dLibraAccessToken.getToken());
 			}
+			if (username != null) {
+				new CookieUtils().save(USERNAME_KEY, username);
+			}
 			dirtydLibra = false;
 		}
 		if (dirtyMyExp) {
@@ -157,6 +171,25 @@ public class MySession
 			}
 			dirtyMyExp = false;
 		}
+	}
+
+
+	/**
+	 * @return the username
+	 */
+	public String getUsername()
+	{
+		return username;
+	}
+
+
+	/**
+	 * @param username
+	 *            the username to set
+	 */
+	public void setUsername(String username)
+	{
+		this.username = username;
 	}
 
 }

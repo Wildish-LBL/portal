@@ -33,7 +33,7 @@ import com.hp.hpl.jena.vocabulary.DCTerms;
 
 /**
  * @author Piotr Hołubowicz
- *
+ * 
  */
 public class ROSRService
 {
@@ -50,18 +50,25 @@ public class ROSRService
 
 	private static final String URI_RO_ID = URI_ROS + "%s/";
 
+	private static final String URI_WHOAMI = URI_PATH_BASE + "whoami/";
+
 	private static final OAuthService dLibraService = DlibraApi.getOAuthService("notused", null);
 
 
 	/**
 	 * Creates a Research Object.
-	 * @param roId RO identifier
-	 * @param user dLibra user model
-	 * @param ignoreIfExists should it finish without throwing exception if ROSRS returns 409?
+	 * 
+	 * @param roId
+	 *            RO identifier
+	 * @param user
+	 *            dLibra user model
+	 * @param ignoreIfExists
+	 *            should it finish without throwing exception if ROSRS returns 409?
 	 * @return true only if ROSRS returns 201 Created
-	 * @throws UnsupportedEncodingException 
-	 * @throws OAuthException 
-	 * @throws Exception if ROSRS doesn't return 201 Created (or 409 if ignoreIfExists is true)
+	 * @throws UnsupportedEncodingException
+	 * @throws OAuthException
+	 * @throws Exception
+	 *             if ROSRS doesn't return 201 Created (or 409 if ignoreIfExists is true)
 	 */
 	public static URI createResearchObject(String roId, Token dLibraToken, boolean ignoreIfExists)
 		throws UnsupportedEncodingException, OAuthException
@@ -168,7 +175,8 @@ public class ROSRService
 
 
 	/**
-	 * Creates an annotation and an empty annotation body in ROSRS 
+	 * Creates an annotation and an empty annotation body in ROSRS
+	 * 
 	 * @param researchObjectURI
 	 * @param targetURI
 	 * @param username
@@ -224,6 +232,7 @@ public class ROSRService
 
 	/**
 	 * Adds an annotation to the manifest model
+	 * 
 	 * @param manifest
 	 * @param researchObjectURI
 	 * @param targetURI
@@ -250,7 +259,9 @@ public class ROSRService
 	 * 
 	 * @param manifest
 	 * @param researchObjectURI
-	 * @return i.e. http://sandbox.wf4ever-project.org/rosrs5/ROs/ann217/52a272f1-864f-4a42-89ff-2501a739d6f0
+	 * @return i.e.
+	 *         http://sandbox.wf4ever-project.org/rosrs5/ROs/ann217/52a272f1-864f-4a42
+	 *         -89ff-2501a739d6f0
 	 */
 	private static URI createAnnotationURI(OntModel manifest, URI researchObjectURI)
 	{
@@ -267,7 +278,9 @@ public class ROSRService
 	 * 
 	 * @param researchObjectURI
 	 * @param targetURI
-	 * @return i.e. http://sandbox.wf4ever-project.org/rosrs5/ROs/ann217/.ro/ro--5600459667350895101.rdf
+	 * @return i.e.
+	 *         http://sandbox.wf4ever-project.org/rosrs5/ROs/ann217/.ro/ro--5600459667350895101.
+	 *         rdf
 	 * @throws URISyntaxException
 	 */
 	public static URI createAnnotationBodyURI(URI researchObjectURI, URI targetURI)
@@ -281,6 +294,15 @@ public class ROSRService
 		String randomBit = "" + Math.abs(UUID.randomUUID().getLeastSignificantBits());
 
 		return researchObjectURI.resolve(".ro/" + targetName + "-" + randomBit + ".rdf");
+	}
+
+
+	public static String[] getWhoAmi(Token dLibraToken)
+		throws OAuthException, URISyntaxException
+	{
+		Response response = OAuthHelpService.sendRequest(dLibraService, Verb.GET, new URI(URI_SCHEME, URI_HOST,
+				URI_WHOAMI, null), dLibraToken);
+		return response.getBody().split("[\\r\\n]+");
 	}
 
 }

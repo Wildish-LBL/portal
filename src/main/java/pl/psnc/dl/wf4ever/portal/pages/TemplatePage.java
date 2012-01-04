@@ -47,7 +47,10 @@ public class TemplatePage
 		add(new BookmarkablePageLink<Void>("menu-myros", MyRosPage.class));
 		add(new BookmarkablePageLink<Void>("menu-sparql", SparqlEndpointPage.class));
 
-		add(new AjaxFallbackLink<String>("signIn") {
+		WebMarkupContainer signedInAs = new WebMarkupContainer("signedInAs");
+		signedInAs.add(new AttributeModifier("data-original-title", new PropertyModel<String>(this, "signInTwipsy")));
+		add(signedInAs);
+		signedInAs.add(new AjaxFallbackLink<String>("signIn") {
 
 			private static final long serialVersionUID = -4458301162412620530L;
 
@@ -78,4 +81,14 @@ public class TemplatePage
 		}
 	}
 
+
+	public String getSignInTwipsy()
+	{
+		if (MySession.get().isSignedIn()) {
+			return "Signed in as " + MySession.get().getUsername();
+		}
+		else {
+			return "Click to sign in!";
+		}
+	}
 }

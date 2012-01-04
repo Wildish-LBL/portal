@@ -290,8 +290,8 @@ public class RoPage
 				{
 					super.onSubmit(target, form);
 					try {
-						ROSRService.addAnnotation(roURI, itemModel.getObject().getURI(), "Yet unknown", MySession.get()
-								.getdLibraAccessToken());
+						ROSRService.addAnnotation(roURI, itemModel.getObject().getURI(), MySession.get().getUsername(),
+							MySession.get().getdLibraAccessToken());
 						RoFactory factory = new RoFactory(roURI);
 						itemModel.getObject().setAnnotations(factory.createAnnotations(itemModel.getObject().getURI()));
 						annList.setSelectedObject(itemModel.getObject().getAnnotations()
