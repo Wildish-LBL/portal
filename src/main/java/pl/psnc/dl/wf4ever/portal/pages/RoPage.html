@@ -36,7 +36,7 @@
 							</div>
 						</form>
 					</div>
-					<div class="span7" wicket:id="itemInfo">
+					<div class="span7" wicket:id="itemInfo" style="overflow: hidden">
 						<h4>Item info</h4>
 						<p>
 							<strong>Resource URI:</strong> <a wicket:id="resourceURI">[uri]</a>
@@ -112,9 +112,10 @@
 						</table>
 						<form wicket:id="stmtForm" class="form-stacked">
 							<div class="actions">
-								<button wicket:id="addStatement" class="btn success" type="submit">Add statement</button>
-								<button wicket:id="deleteStatement" class="btn danger" type="submit">Delete
-									statement</button>
+								<button wicket:id="addStatement" class="btn success"
+									type="submit">Add statement</button>
+								<button wicket:id="deleteStatement" class="btn danger"
+									type="submit">Delete statement</button>
 							</div>
 						</form>
 					</div>
@@ -125,39 +126,47 @@
 	<div id="edit-ann-modal" class="modal hide">
 		<form wicket:id="stmtEditForm">
 			<div class="modal-header">
-				<h3><span wicket:id="title">[title]</span></h3>
+				<h3>
+					<span wicket:id="title">[title]</span>
+				</h3>
 			</div>
 			<div class="modal-body">
 				<fieldset>
 					<div class="clearfix">
 						<label for="propertyURI">What kind of statement is this?</label>
 						<div class="input">
-							<select name="propertyURI" id="propertyURI" wicket:id="propertyURI">
+							<select name="propertyURI" id="propertyURI"
+								wicket:id="propertyURI">
 							</select>
 						</div>
 					</div>
- 					<div class="clearfix" id="customPropertyURIDiv" wicket:id="customPropertyURIDiv">
+					<div class="clearfix" id="customPropertyURIDiv"
+						wicket:id="customPropertyURIDiv">
 						<label for="objectURI">Custom property URI</label>
 						<div class="input">
-							<input type="text" class="xlarge" id="customPropertyURI" wicket:id="customPropertyURI"/>
+							<input type="text" class="xlarge" id="customPropertyURI"
+								wicket:id="customPropertyURI" />
 						</div>
-					</div> 
+					</div>
 					<div class="clearfix">
 						<label for="objectType">Statement object type</label>
 						<div class="input">
 							<div class="inputs-list">
 								<label><input type="checkbox" value="objectResource"
-									id="objectType" wicket:id="objectURIResource" /><span>Statement object is a resource</span> </label>
+									id="objectType" wicket:id="objectURIResource" /><span>Statement
+										object is a resource</span> </label>
 							</div>
 						</div>
 					</div>
 					<div class="clearfix" id="objectURIDiv" wicket:id="objectURIDiv">
 						<label for="objectURI">Resource URI</label>
 						<div class="input">
-							<input type="text" class="xlarge" id="objectURI" wicket:id="objectURI"/>
+							<input type="text" class="xlarge" id="objectURI"
+								wicket:id="objectURI" />
 						</div>
 					</div>
-					<div class="clearfix" id="objectValueDiv" wicket:id="objectValueDiv">
+					<div class="clearfix" id="objectValueDiv"
+						wicket:id="objectValueDiv">
 						<label for="objectValue">Value for the statement</label>
 						<div class="input">
 							<textarea class="large" id="objectValue" name="objectValue"
@@ -169,7 +178,8 @@
 				</fieldset>
 			</div>
 			<div class="modal-footer">
-				<button type="submit" class="btn primary" wicket:id="save">Save Changes</button>
+				<button type="submit" class="btn primary" wicket:id="save">Save
+					Changes</button>
 				<button type="submit" class="btn" wicket:id="cancel">Cancel</button>
 			</div>
 		</form>
