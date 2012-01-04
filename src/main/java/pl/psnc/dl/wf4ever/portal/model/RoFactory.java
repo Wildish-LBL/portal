@@ -36,7 +36,7 @@ import com.hp.hpl.jena.vocabulary.DCTerms;
 
 /**
  * @author piotrhol
- *
+ * 
  */
 public class RoFactory
 {
@@ -204,6 +204,14 @@ public class RoFactory
 				log.warn("Could not add annotation " + ann.getURI() + ": " + e.getMessage());
 			}
 		}
+		Collections.sort(anns, new Comparator<Annotation>() {
+
+			@Override
+			public int compare(Annotation a1, Annotation a2)
+			{
+				return a1.getCreated().compareTo(a2.getCreated());
+			}
+		});
 		return anns;
 	}
 
