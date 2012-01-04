@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wicket:extend xmlns:wicket="http://wicket.apache.org">
+	<div class="row">
+		<div class="span16">
+			<form wicket:id="form">
+				<fieldset>
+					<div class="clearfix">
+						<label for="query">SPARQL query:</label>
+						<div class="input">
+							<textarea class="xxlarge" id="query" wicket:id="query"></textarea>
+							<span class="help-inline" wicket:id="queryFeedback"></span> <span
+								class="help-block">Type in the query, for example:
+								"DESCRIBE
+								&lt;http://sandbox.wf4ever-project.org/rosrs5/ROs/55/snp_table.doc&gt;".
+								You can check the <a
+								href="http://www.wf4ever-project.org/wiki/display/docs/Research+Object+Vocabulary+Specification+v0.1">RO
+									vocabulary specification 0.1</a> for more help.
+							</span>
+						</div>
+					</div>
+					<div class="actions">
+						<input class="btn primary" wicket:id="execute" type="submit"
+							value="Execute" /> <input class="btn" wicket:id="generateURL"
+							type="submit" value="Generate URL" />
+					</div>
+					<div class="clearfix">
+						<label for="url">URL:</label>
+						<div class="input">
+							<pre id="url" wicket:id="url"></pre>
+						</div>
+					</div>
+					<div class="clearfix">
+						<label for="result">Query result:</label>
+						<div class="input">
+							<pre id="result" wicket:id="result"></pre>
+						</div>
+					</div>
+				</fieldset>
+			</form>
+		</div>
+	</div>
+</wicket:extend>

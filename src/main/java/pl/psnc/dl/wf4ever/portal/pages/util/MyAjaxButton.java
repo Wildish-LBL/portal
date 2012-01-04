@@ -12,7 +12,7 @@ import org.apache.wicket.markup.html.form.Form;
 
 /**
  * @author piotrhol
- *
+ * 
  */
 public abstract class MyAjaxButton
 	extends AjaxButton
@@ -30,8 +30,12 @@ public abstract class MyAjaxButton
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.apache.wicket.ajax.markup.html.form.AjaxButton#onSubmit(org.apache.wicket.ajax.AjaxRequestTarget, org.apache.wicket.markup.html.form.Form)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.apache.wicket.ajax.markup.html.form.AjaxButton#onSubmit(org.apache.wicket.ajax
+	 * .AjaxRequestTarget, org.apache.wicket.markup.html.form.Form)
 	 */
 	@Override
 	protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
@@ -40,14 +44,17 @@ public abstract class MyAjaxButton
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.apache.wicket.ajax.markup.html.form.AjaxButton#onError(org.apache.wicket.ajax.AjaxRequestTarget, org.apache.wicket.markup.html.form.Form)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.apache.wicket.ajax.markup.html.form.AjaxButton#onError(org.apache.wicket.ajax
+	 * .AjaxRequestTarget, org.apache.wicket.markup.html.form.Form)
 	 */
 	@Override
 	protected void onError(AjaxRequestTarget target, Form< ? > form)
 	{
-		// TODO Auto-generated method stub
-
+		target.appendJavaScript("hideBusy()");
 	}
 
 

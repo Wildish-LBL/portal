@@ -1,5 +1,6 @@
 package pl.psnc.dl.wf4ever.portal;
 
+import java.net.URL;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -19,10 +20,12 @@ import pl.psnc.dl.wf4ever.portal.pages.MyExpImportPage;
 import pl.psnc.dl.wf4ever.portal.pages.MyRosPage;
 import pl.psnc.dl.wf4ever.portal.pages.OAuthPage;
 import pl.psnc.dl.wf4ever.portal.pages.RoPage;
+import pl.psnc.dl.wf4ever.portal.pages.SparqlEndpointPage;
 import pl.psnc.dl.wf4ever.portal.services.DlibraApi;
 
 /**
- * Application object for your web application. If you want to run this application without deploying, run the Start class.
+ * Application object for your web application. If you want to run this application
+ * without deploying, run the Start class.
  * 
  * @see pl.psnc.dl.wf4ever.portal.Start#main(String[])
  */
@@ -39,6 +42,8 @@ public class PortalApplication
 	private String myExpConsumerSecret;
 
 	private String callbackURL;
+
+	private URL sparqlEndpointURL;
 
 
 	/**
@@ -65,6 +70,7 @@ public class PortalApplication
 		mountPage("/home", HomePage.class);
 		mountPage("/myros", MyRosPage.class);
 		mountPage("/ro", RoPage.class);
+		mountPage("/sparql", SparqlEndpointPage.class);
 		mountPage("/myexpimport", MyExpImportPage.class);
 		mountPage("/myexpauthorize", MyExpAuthorizePage.class);
 		mountPage("/oauth", OAuthPage.class);
@@ -91,6 +97,7 @@ public class PortalApplication
 			myExpConsumerSecret = props.getProperty("myExpConsumerSecret");
 			dLibraClientId = props.getProperty("dLibraClientId");
 			callbackURL = props.getProperty("callbackURL");
+			sparqlEndpointURL = new URL(props.getProperty("sparqlEndpointURL"));
 
 			AuthenticatePage.setAuthorizationURL(DlibraApi.getOAuthService(getdLibraClientId(), getCallbackURL())
 					.getAuthorizationUrl(null));
@@ -148,6 +155,25 @@ public class PortalApplication
 	protected Class< ? extends AbstractAuthenticatedWebSession> getWebSessionClass()
 	{
 		return MySession.class;
+	}
+
+
+	/**
+	 * @return the sparqlEndpoint
+	 */
+	public URL getSparqlEndpointURL()
+	{
+		return sparqlEndpointURL;
+	}
+
+
+	/**
+	 * @param sparqlEndpoint
+	 *            the sparqlEndpoint to set
+	 */
+	public void setSparqlEndpointURL(URL sparqlEndpoint)
+	{
+		this.sparqlEndpointURL = sparqlEndpoint;
 	}
 
 }

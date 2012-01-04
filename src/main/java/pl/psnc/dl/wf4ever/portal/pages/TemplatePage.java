@@ -42,6 +42,7 @@ public class TemplatePage
 
 		add(new BookmarkablePageLink<Void>("menu-home", HomePage.class));
 		add(new BookmarkablePageLink<Void>("menu-myros", MyRosPage.class));
+		add(new BookmarkablePageLink<Void>("menu-sparql", SparqlEndpointPage.class));
 
 		add(new AjaxFallbackLink<String>("signIn") {
 
