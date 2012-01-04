@@ -8,6 +8,8 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.IAjaxCallDecorator;
 import org.apache.wicket.ajax.calldecorator.AjaxCallDecorator;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.behavior.Behavior;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.form.Form;
 
 /**
@@ -24,9 +26,22 @@ public abstract class MyAjaxButton
 	private static final long serialVersionUID = 6819868729651344345L;
 
 
+	@SuppressWarnings("serial")
 	public MyAjaxButton(String id, Form< ? > form)
 	{
 		super(id, form);
+		add(new Behavior() {
+
+			@Override
+			public void onComponentTag(Component component, ComponentTag tag)
+			{
+				super.onComponentTag(component, tag);
+				if (!component.isEnabled()) {
+					tag.append("class", "disabled", " ");
+				}
+			}
+		});
+
 	}
 
 

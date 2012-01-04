@@ -163,18 +163,14 @@ public class RoPage
 				protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
 				{
 				}
-			};
-			addResource.add(new Behavior() {
+
 
 				@Override
-				public void onComponentTag(Component component, ComponentTag tag)
+				public boolean isEnabled()
 				{
-					super.onComponentTag(component, tag);
-					if (!canEdit) {
-						tag.append("class", "disabled", " ");
-					}
+					return super.isEnabled() && canEdit;
 				}
-			});
+			};
 			roForm.add(addResource);
 
 			AjaxButton deleteResource = new AjaxButton("deleteResource", roForm) {
@@ -192,18 +188,14 @@ public class RoPage
 				protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
 				{
 				}
-			};
-			deleteResource.add(new Behavior() {
+
 
 				@Override
-				public void onComponentTag(Component component, ComponentTag tag)
+				public boolean isEnabled()
 				{
-					super.onComponentTag(component, tag);
-					if (!canEdit) {
-						tag.append("class", "disabled", " ");
-					}
+					return super.isEnabled() && canEdit;
 				}
-			});
+			};
 			roForm.add(deleteResource);
 
 			itemInfo = new WebMarkupContainer("itemInfo", itemModel);
@@ -311,18 +303,14 @@ public class RoPage
 						error(e.getMessage());
 					}
 				}
-			};
-			addAnnotation.add(new Behavior() {
+
 
 				@Override
-				public void onComponentTag(Component component, ComponentTag tag)
+				public boolean isEnabled()
 				{
-					super.onComponentTag(component, tag);
-					if (!canEdit) {
-						tag.append("class", "disabled", " ");
-					}
+					return super.isEnabled() && canEdit;
 				}
-			});
+			};
 			annForm.add(addAnnotation);
 
 			AjaxButton deleteAnnotation = new MyAjaxButton("deleteAnnotation", annForm) {
@@ -349,18 +337,14 @@ public class RoPage
 						error(e.getMessage());
 					}
 				}
-			};
-			deleteAnnotation.add(new Behavior() {
+
 
 				@Override
-				public void onComponentTag(Component component, ComponentTag tag)
+				public boolean isEnabled()
 				{
-					super.onComponentTag(component, tag);
-					if (!canEdit || annList.getSelectedObject() == null) {
-						tag.append("class", "disabled", " ");
-					}
+					return super.isEnabled() && canEdit && annList.getSelectedObject() != null;
 				}
-			});
+			};
 			annForm.add(deleteAnnotation);
 
 			entriesDiv = new WebMarkupContainer("entriesDiv");
@@ -436,18 +420,14 @@ public class RoPage
 						error("Error when adding preparing statement: " + e.getMessage());
 					}
 				}
-			};
-			addStatement.add(new Behavior() {
+
 
 				@Override
-				public void onComponentTag(Component component, ComponentTag tag)
+				public boolean isEnabled()
 				{
-					super.onComponentTag(component, tag);
-					if (!canEdit || annList.getSelectedObject() == null) {
-						tag.append("class", "disabled", " ");
-					}
+					return super.isEnabled() && canEdit && annList.getSelectedObject() != null;
 				}
-			});
+			};
 			stmtForm.add(addStatement);
 
 			AjaxButton deleteStatement = new MyAjaxButton("deleteStatement", stmtForm) {
@@ -470,18 +450,14 @@ public class RoPage
 						error("Could not delete statement (" + e.getMessage() + ")");
 					}
 				}
-			};
-			deleteStatement.add(new Behavior() {
+
 
 				@Override
-				public void onComponentTag(Component component, ComponentTag tag)
+				public boolean isEnabled()
 				{
-					super.onComponentTag(component, tag);
-					if (!canEdit || entriesList.getSelectedObject() == null) {
-						tag.append("class", "disabled", " ");
-					}
+					return super.isEnabled() && canEdit && entriesList.getSelectedObject() != null;
 				}
-			});
+			};
 			stmtForm.add(deleteStatement);
 		}
 
@@ -489,6 +465,7 @@ public class RoPage
 		public void setAnnotationSelection(Annotation ann)
 		{
 			annList.setSelectedObject(ann);
+			entriesList.setSelectedObject(null);
 		}
 	}
 
