@@ -124,6 +124,11 @@ public class MyExpImportService
 		 */
 		private final Map<URI, URI> annotations = new HashMap<>();
 
+		/**
+		 * targetURI, creator name
+		 */
+		private final Map<URI, String> creators = new HashMap<>();
+
 
 		public ImportThread(ImportModel importModel, Token myExpAccessToken, Token dLibraToken, String consumerKey,
 				String consumerSecret)
@@ -197,7 +202,8 @@ public class MyExpImportService
 		{
 			model.setMessage("Updating the manifest");
 			for (Entry<URI, URI> e : annotations.entrySet()) {
-				ROSRService.addAnnotation(manifest, researchObjectURI, e.getKey(), e.getValue(), "myExperiment");
+				ROSRService.addAnnotation(manifest, researchObjectURI, e.getKey(), e.getValue(),
+					creators.get(e.getKey()));
 			}
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			manifest.write(out);
@@ -347,6 +353,7 @@ public class MyExpImportService
 			URI bodyURI = ROSRService.createAnnotationBodyURI(researchObjectURI, annTargetURI);
 			annBodies.put(bodyURI, createAnnotationBody(annTargetURI, rdf));
 			annotations.put(annTargetURI, bodyURI);
+			creators.put(annTargetURI, getResourceAuthor(rdf));
 
 			incrementStepsComplete();
 		}
@@ -392,11 +399,31 @@ public class MyExpImportService
 		if (source.hasProperty(DCTerms.description))
 			target.addProperty(DCTerms.description, source.getProperty(DCTerms.description).getLiteral());
 
-		//contributor
+		//creator
 		Property owner = me.createProperty("http://rdfs.org/sioc/ns#has_owner");
 		if (source.hasProperty(owner))
-			target.addProperty(DCTerms.contributor, source.getPropertyResourceValue(owner));
+			target.addProperty(DCTerms.creator, source.getPropertyResourceValue(owner));
 		return body;
+	}
+
+
+	static String getResourceAuthor(String myExperimentRDF)
+		throws UnsupportedEncodingException
+	{
+		OntModel me = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+		me.read(new ByteArrayInputStream(myExperimentRDF.getBytes("UTF-8")), null);
+
+		Resource source = me.listObjectsOfProperty(RoFactory.foafPrimaryTopic).next().asResource();
+
+		//creator
+		Property owner = me.createProperty("http://rdfs.org/sioc/ns#has_owner");
+		if (source.hasProperty(owner)) {
+			Resource user = source.getPropertyResourceValue(owner);
+			Property name = me.createProperty("http://xmlns.com/foaf/0.1/name");
+			if (user.hasProperty(name))
+				return user.getProperty(name).getLiteral().getString();
+		}
+		return null;
 	}
 
 }
