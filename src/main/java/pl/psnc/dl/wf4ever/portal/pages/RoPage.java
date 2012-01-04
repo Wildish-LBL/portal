@@ -385,19 +385,25 @@ public class RoPage
 						item.add(new Label("object", ((CompoundPropertyModel<Statement>) item.getModel())
 								.<String> bind("objectValue")).setEscapeModelStrings(false));
 					}
-					item.add(new AjaxFallbackLink<String>("edit") {
+					if (canEdit) {
+						item.add(new EditLinkFragment("edit", "editLinkFragment", RoPage.this,
+								new AjaxFallbackLink<String>("link") {
 
-						@Override
-						public void onClick(AjaxRequestTarget target)
-						{
-							stmtEditForm.setModelObject(item.getModelObject());
-							stmtEditForm.setTitle("Edit statement");
-							target.add(stmtEditForm);
-							target.appendJavaScript("showStmtEdit('"
-									+ StringEscapeUtils.escapeEcmaScript(item.getModelObject().getObjectValue())
-									+ "');");
-						}
-					});
+									@Override
+									public void onClick(AjaxRequestTarget target)
+									{
+										stmtEditForm.setModelObject(item.getModelObject());
+										stmtEditForm.setTitle("Edit statement");
+										target.add(stmtEditForm);
+										target.appendJavaScript("showStmtEdit('"
+												+ StringEscapeUtils.escapeEcmaScript(item.getModelObject()
+														.getObjectValue()) + "');");
+									}
+								}));
+					}
+					else {
+						item.add(new Label("edit", "Edit"));
+					}
 				}
 
 
@@ -602,7 +608,8 @@ public class RoPage
 
 
 		/**
-		 * @param selectedProperty the selectedProperty to set
+		 * @param selectedProperty
+		 *            the selectedProperty to set
 		 */
 		public void setSelectedProperty(URI selectedProperty)
 		{
@@ -624,7 +631,8 @@ public class RoPage
 
 
 		/**
-		 * @param selectedProperty the selectedProperty to set
+		 * @param selectedProperty
+		 *            the selectedProperty to set
 		 */
 		public void setCustomProperty(URI customProperty)
 		{
@@ -643,7 +651,8 @@ public class RoPage
 
 
 		/**
-		 * @param title the title to set
+		 * @param title
+		 *            the title to set
 		 */
 		public void setTitle(String title)
 		{
@@ -661,6 +670,19 @@ public class RoPage
 		{
 			super(id, markupId, markupProvider, model);
 			add(new ExternalLink("link", model.<String> bind("objectURI"), model.<String> bind("objectURI")));
+		}
+	}
+
+	@SuppressWarnings("serial")
+	class EditLinkFragment
+		extends Fragment
+	{
+
+		public EditLinkFragment(String id, String markupId, MarkupContainer markupProvider,
+				AjaxFallbackLink<String> link)
+		{
+			super(id, markupId, markupProvider);
+			add(link);
 		}
 	}
 

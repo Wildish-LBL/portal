@@ -106,7 +106,7 @@
 								<tr wicket:id="entriesListView">
 									<td><span class="label" wicket:id="propertyLocalName">[Property]</span>
 										<span wicket:id="object">[object]</span></td>
-									<td><a wicket:id="edit">Edit</a></td>
+									<td><span wicket:id="edit"></span></td>
 								</tr>
 							</tbody>
 						</table>
@@ -186,5 +186,8 @@
 	</div>
 	<wicket:fragment wicket:id="externalLinkFragment">
 		<a wicket:id="link"></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="editLinkFragment">
+		<a wicket:id="link">Edit</a>
 	</wicket:fragment>
 </wicket:extend>
