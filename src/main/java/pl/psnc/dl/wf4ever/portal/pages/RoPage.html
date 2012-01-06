@@ -34,6 +34,9 @@
 								<button class="btn danger" type="submit"
 									wicket:id="deleteResource">Delete resource</button>
 							</div>
+							<div class="actions">
+								<button class="btn" type="submit" wicket:id="downloadMetadata">Download metadata</button>
+							</div>
 						</form>
 					</div>
 					<div class="span7" wicket:id="itemInfo" style="overflow: hidden">
@@ -181,6 +184,28 @@
 				<button type="submit" class="btn primary" wicket:id="save">Save
 					Changes</button>
 				<button type="submit" class="btn" wicket:id="cancel">Cancel</button>
+			</div>
+		</form>
+	</div>
+	<div id="download-metadata-modal" class="modal hide">
+		<form wicket:id="downloadMetadataForm">
+			<div class="modal-header">
+				<a class="close" href="#">×</a>
+				<h3>Choose format</h3>
+			</div>
+			<div class="modal-body">
+				<fieldset>
+					<label for="rdfFormat">RDF format</label>
+					<div class="input">
+							<select name="rdfFormat" id="rdfFormat"
+								wicket:id="rdfFormat">
+							</select>
+					</div>
+				</fieldset>
+			</div>
+			<div class="modal-footer">
+				<a class="btn primary" wicket:id="confirmDownloadMetadata" type="submit">OK</a> <a
+					class="btn secondary" wicket:id="cancelDownloadMetadata">Cancel</a>
 			</div>
 		</form>
 	</div>

@@ -26,6 +26,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.ExternalLink;
@@ -36,6 +37,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.UrlDecoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.convert.IConverter;
+import org.openrdf.rio.RDFFormat;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
@@ -100,6 +102,7 @@ public class RoPage
 		stmtEditForm = new StatementEditForm(new CompoundPropertyModel<Statement>(new PropertyModel<Statement>(
 				annotatingBox.entriesList, "selectedObject")));
 		add(stmtEditForm);
+		add(new ChooseRdfFormat());
 	}
 
 	@SuppressWarnings("serial")
@@ -197,6 +200,18 @@ public class RoPage
 				}
 			};
 			roForm.add(deleteResource);
+
+			AjaxButton downloadMetadata = new MyAjaxButton("downloadMetadata", roForm) {
+
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+				{
+					super.onSubmit(target, form);
+					target.appendJavaScript("$('#download-metadata-modal').modal('show')");
+				}
+
+			};
+			roForm.add(downloadMetadata);
 
 			itemInfo = new WebMarkupContainer("itemInfo", itemModel);
 			itemInfo.setOutputMarkupId(true);
@@ -466,6 +481,68 @@ public class RoPage
 		{
 			annList.setSelectedObject(ann);
 			entriesList.setSelectedObject(null);
+		}
+	}
+
+	@SuppressWarnings("serial")
+	class ChooseRdfFormat
+		extends Form<Void>
+	{
+
+		private RDFFormat format = RDFFormat.RDFXML;
+
+
+		public ChooseRdfFormat()
+		{
+			super("downloadMetadataForm");
+			List<RDFFormat> formats = Arrays.asList(RDFFormat.RDFXML, RDFFormat.TURTLE, RDFFormat.TRIG, RDFFormat.TRIX,
+				RDFFormat.N3);
+			DropDownChoice<RDFFormat> formatDropDown = new DropDownChoice<RDFFormat>("rdfFormat",
+					new PropertyModel<RDFFormat>(this, "format"), formats, new IChoiceRenderer<RDFFormat>() {
+
+						@Override
+						public Object getDisplayValue(RDFFormat format)
+						{
+							return format.getName();
+						}
+
+
+						@Override
+						public String getIdValue(RDFFormat format, int index)
+						{
+							return "" + index;
+						}
+					});
+			add(formatDropDown);
+			add(new MyAjaxButton("confirmDownloadMetadata", this) {
+
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+				{
+					super.onSubmit(target, form);
+				}
+			});
+			add(new MyAjaxButton("cancelDownloadMetadata", this) {
+
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+				{
+					super.onSubmit(target, form);
+					target.appendJavaScript("$('#download-metadata-modal').modal('hide')");
+				}
+			}.setDefaultFormProcessing(false));
+		}
+
+
+		public RDFFormat getFormat()
+		{
+			return format;
+		}
+
+
+		public void setFormat(RDFFormat format)
+		{
+			this.format = format;
 		}
 	}
 

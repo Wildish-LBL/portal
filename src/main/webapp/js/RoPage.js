@@ -1,10 +1,13 @@
 $(document).ready(function() {
-	$('#edit-ann-modal').modal({
+	$('#download-metadata-modal').modal({
 		backdrop : 'static'
 	})
 });
 
 $(document).ready(function() {
+	$('#edit-ann-modal').modal({
+		backdrop : 'static'
+	})
 });
 
 function showStmtEdit(content) {
