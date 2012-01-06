@@ -1,0 +1,13 @@
+PREFIX ro: <http://purl.org/wf4ever/ro#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?resource ?creator ?created
+WHERE {
+	?resource a ro:ResearchObject ;
+		dcterms:created ?created ;
+		dcterms:creator ?foaf .
+	?foaf foaf:Name ?creator.
+}
+ORDER BY DESC(?created)
+LIMIT 10
