@@ -5,6 +5,8 @@ import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import com.ocpsoft.pretty.time.PrettyTime;
+
 public class ROHeader
 	implements Serializable
 {
@@ -68,7 +70,7 @@ public class ROHeader
 	 */
 	public String getCreatedFormatted()
 	{
-		return SDF.format(getCreated().getTime());
+		return new PrettyTime().format(getCreated().getTime());
 	}
 
 

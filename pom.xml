@@ -157,6 +157,11 @@
 			<version>2.1</version>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.ocpsoft</groupId>
+			<artifactId>ocpsoft-pretty-time</artifactId>
+			<version>1.0.7</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>portal</finalName>

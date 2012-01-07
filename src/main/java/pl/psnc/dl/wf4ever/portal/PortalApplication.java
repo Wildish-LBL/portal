@@ -1,6 +1,7 @@
 package pl.psnc.dl.wf4ever.portal;
 
 import java.net.URL;
+import java.util.Locale;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -81,6 +82,8 @@ public class PortalApplication
 
 		loadTokens("tokens.properties");
 		loadProperties("portal.properties");
+		
+		Locale.setDefault(Locale.ENGLISH);
 	}
 
 
