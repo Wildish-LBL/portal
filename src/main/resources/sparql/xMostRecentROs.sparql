@@ -10,4 +10,4 @@ WHERE {
 	?foaf foaf:Name ?creator.
 }
 ORDER BY DESC(?created)
-LIMIT 10
+LIMIT %d

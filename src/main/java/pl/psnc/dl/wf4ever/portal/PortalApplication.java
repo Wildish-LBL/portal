@@ -79,7 +79,8 @@ public class PortalApplication
 		mountPage("/error", ErrorPage.class);
 		mountPage("/contact", ContactPage.class);
 
-		loadProperties("tokens.properties");
+		loadTokens("tokens.properties");
+		loadProperties("portal.properties");
 	}
 
 
@@ -95,17 +96,28 @@ public class PortalApplication
 		Properties props = new Properties();
 		try {
 			props.load(getClass().getClassLoader().getResourceAsStream(propertiesFile));
+			sparqlEndpointURL = new URL(props.getProperty("sparqlEndpointURL"));
+		}
+		catch (Exception e) {
+			log.error("Failed to load properties: " + e.getMessage());
+		}
+	}
+
+	private void loadTokens(String propertiesFile)
+	{
+		Properties props = new Properties();
+		try {
+			props.load(getClass().getClassLoader().getResourceAsStream(propertiesFile));
 			myExpConsumerKey = props.getProperty("myExpConsumerKey");
 			myExpConsumerSecret = props.getProperty("myExpConsumerSecret");
 			dLibraClientId = props.getProperty("dLibraClientId");
 			callbackURL = props.getProperty("callbackURL");
-			sparqlEndpointURL = new URL(props.getProperty("sparqlEndpointURL"));
 
 			AuthenticatePage.setAuthorizationURL(DlibraApi.getOAuthService(getdLibraClientId(), getCallbackURL())
 					.getAuthorizationUrl(null));
 		}
 		catch (Exception e) {
-			log.error("Failed to load properties: " + e.getMessage());
+			log.error("Failed to load tokens: " + e.getMessage());
 		}
 	}
 
