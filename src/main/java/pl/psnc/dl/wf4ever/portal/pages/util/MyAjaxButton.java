@@ -12,6 +12,8 @@ import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.form.Form;
 
+import pl.psnc.dl.wf4ever.portal.MySession;
+
 /**
  * @author piotrhol
  * 
@@ -87,5 +89,11 @@ public abstract class MyAjaxButton
 				return "showBusy(); " + script;
 			}
 		};
+	}
+	
+	@Override
+	public MySession getSession()
+	{
+		return (MySession) super.getSession();
 	}
 }

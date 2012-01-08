@@ -3,6 +3,8 @@
  */
 package pl.psnc.dl.wf4ever.portal;
 
+import java.net.URISyntaxException;
+
 import org.apache.log4j.Logger;
 import org.apache.wicket.Session;
 import org.apache.wicket.authroles.authentication.AbstractAuthenticatedWebSession;
@@ -10,6 +12,9 @@ import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.util.cookies.CookieUtils;
 import org.scribe.model.Token;
+
+import pl.psnc.dl.wf4ever.portal.services.OAuthException;
+import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 
 /**
  * @author piotrhol
@@ -24,7 +29,6 @@ public class MySession
 	 */
 	private static final long serialVersionUID = -4113134277706549806L;
 
-	@SuppressWarnings("unused")
 	private static final Logger log = Logger.getLogger(MySession.class);
 
 	private Token dLibraAccessToken;
@@ -41,8 +45,6 @@ public class MySession
 
 	private final static String DLIBRA_KEY = "dlibra";
 
-	private final static String USERNAME_KEY = "username";
-
 	private final static String MYEXP_KEY_TOKEN = "myexp1";
 
 	private final static String MYEXP_KEY_SECRET = "myexp2";
@@ -52,9 +54,7 @@ public class MySession
 	{
 		super(request);
 		if (new CookieUtils().load(DLIBRA_KEY) != null)
-			dLibraAccessToken = new Token(new CookieUtils().load(DLIBRA_KEY), null);
-		if (new CookieUtils().load(USERNAME_KEY) != null)
-			username = new CookieUtils().load(USERNAME_KEY);
+			setdLibraAccessToken(new Token(new CookieUtils().load(DLIBRA_KEY), null));
 		if (new CookieUtils().load(MYEXP_KEY_TOKEN) != null && new CookieUtils().load(MYEXP_KEY_SECRET) != null) {
 			myExpAccessToken = new Token(new CookieUtils().load(MYEXP_KEY_TOKEN),
 					new CookieUtils().load(MYEXP_KEY_SECRET));
@@ -84,6 +84,7 @@ public class MySession
 	public void setdLibraAccessToken(Token dLibraAccessToken)
 	{
 		this.dLibraAccessToken = dLibraAccessToken;
+		this.username = fetchUsername();
 		dirtydLibra = true;
 	}
 
@@ -147,7 +148,6 @@ public class MySession
 		myExpAccessToken = null;
 		username = null;
 		new CookieUtils().remove(DLIBRA_KEY);
-		new CookieUtils().remove(USERNAME_KEY);
 		new CookieUtils().remove(MYEXP_KEY_TOKEN);
 		new CookieUtils().remove(MYEXP_KEY_SECRET);
 	}
@@ -158,9 +158,6 @@ public class MySession
 		if (dirtydLibra) {
 			if (dLibraAccessToken != null) {
 				new CookieUtils().save(DLIBRA_KEY, dLibraAccessToken.getToken());
-			}
-			if (username != null) {
-				new CookieUtils().save(USERNAME_KEY, username);
 			}
 			dirtydLibra = false;
 		}
@@ -184,12 +181,40 @@ public class MySession
 
 
 	/**
+	 * @return the username
+	 */
+	public String getUsername(String defaultValue)
+	{
+		if (username != null)
+			return username;
+		return defaultValue;
+	}
+
+
+	/**
 	 * @param username
 	 *            the username to set
 	 */
 	public void setUsername(String username)
 	{
 		this.username = username;
+	}
+
+
+	private String fetchUsername()
+	{
+		try {
+			String[] data = ROSRService.getWhoAmi(getdLibraAccessToken());
+			if (data.length >= 2)
+				return data[1];
+			if (data.length >= 1)
+				return data[0];
+			return null;
+		}
+		catch (OAuthException | URISyntaxException e) {
+			log.error("Error when retrieving username: " + e.getMessage());
+			return null;
+		}
 	}
 
 }

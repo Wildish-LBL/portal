@@ -27,7 +27,6 @@ import pl.psnc.dl.wf4ever.portal.services.DlibraApi;
 import pl.psnc.dl.wf4ever.portal.services.MyExpApi;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.services.OAuthHelpService;
-import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 
 /**
  * @author Piotr Hołubowicz
@@ -59,7 +58,6 @@ public class OAuthPage
 			session.setdLibraAccessToken(token);
 			if (token != null) {
 				log.info("Successfully received dLibra access token");
-				session.setUsername(getUsername(service));
 			}
 		}
 		else if (session.getMyExpAccessToken() == null) {
@@ -74,22 +72,6 @@ public class OAuthPage
 		if (!continueToOriginalDestination()) {
 			log.warn("Could not find the original destination");
 			throw new RestartResponseException(getApplication().getHomePage());
-		}
-	}
-
-
-	private String getUsername(OAuthService service)
-	{
-		try {
-			String[] data = ROSRService.getWhoAmi(MySession.get().getdLibraAccessToken());
-			if (data.length >= 2)
-				return data[1];
-			else
-				return null;
-		}
-		catch (OAuthException | URISyntaxException e) {
-			log.error("Error when retrieving username: " + e.getMessage());
-			return null;
 		}
 	}
 
@@ -123,8 +105,8 @@ public class OAuthPage
 		throws URISyntaxException
 	{
 		Token accessToken = null;
-		//TODO in the OAuth 2.0 implicit grant flow the access token is sent 
-		//in URL fragment - how to retrieve it in Wicket?
+		// TODO in the OAuth 2.0 implicit grant flow the access token is sent
+		// in URL fragment - how to retrieve it in Wicket?
 		if (!pageParameters.get("access_token").isEmpty() && !pageParameters.get("token_type").isEmpty()) {
 			if (pageParameters.get("token_type").equals("bearer")) {
 				accessToken = new Token(pageParameters.get("access_token").toString(), null);

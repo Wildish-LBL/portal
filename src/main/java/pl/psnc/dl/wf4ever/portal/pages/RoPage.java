@@ -305,8 +305,8 @@ public class RoPage
 				{
 					super.onSubmit(target, form);
 					try {
-						ROSRService.addAnnotation(roURI, itemModel.getObject().getURI(), MySession.get().getUsername(),
-							MySession.get().getdLibraAccessToken());
+						ROSRService.addAnnotation(roURI, itemModel.getObject().getURI(),
+							getSession().getUsername("Unknown"), getSession().getdLibraAccessToken());
 						RoFactory factory = new RoFactory(roURI);
 						itemModel.getObject().setAnnotations(factory.createAnnotations(itemModel.getObject().getURI()));
 						annList.setSelectedObject(itemModel.getObject().getAnnotations()
@@ -336,7 +336,7 @@ public class RoPage
 					super.onSubmit(target, form);
 					try {
 						try {
-							ROSRService.deleteAnnotation(roURI, annList.getSelectedObject().getURI(), MySession.get()
+							ROSRService.deleteAnnotation(roURI, annList.getSelectedObject().getURI(), getSession()
 									.getdLibraAccessToken());
 						}
 						catch (IllegalArgumentException e) {
@@ -451,7 +451,7 @@ public class RoPage
 				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 				{
 					super.onSubmit(target, form);
-					Token dLibraToken = MySession.get().getdLibraAccessToken();
+					Token dLibraToken = getSession().getdLibraAccessToken();
 					Annotation ann = annList.getSelectedObject();
 					ann.getBody().remove(entriesList.getSelectedObject());
 					try {
@@ -619,7 +619,7 @@ public class RoPage
 				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 				{
 					super.onSubmit(target, form);
-					Token dLibraToken = MySession.get().getdLibraAccessToken();
+					Token dLibraToken = getSession().getdLibraAccessToken();
 					Annotation ann = StatementEditForm.this.getModelObject().getAnnotation();
 					boolean isNew = !ann.getBody().contains(StatementEditForm.this.getModelObject());
 					try {
