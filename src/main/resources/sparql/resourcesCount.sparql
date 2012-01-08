@@ -1,0 +1,5 @@
+PREFIX ro: <http://purl.org/wf4ever/ro#>
+SELECT count(?resource)
+WHERE {
+	?resource a %s .
+}
