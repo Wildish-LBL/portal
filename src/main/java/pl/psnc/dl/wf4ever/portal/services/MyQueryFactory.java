@@ -8,11 +8,15 @@ import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
 
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.Syntax;
+
 /**
  * @author piotrek
  * 
  */
-public class QueryFactory
+public class MyQueryFactory
 {
 
 	private static String xMostRecentROs = null;
@@ -41,19 +45,19 @@ public class QueryFactory
 	 * @return the query in the ARQ extension format (with "count")
 	 * @throws IOException
 	 */
-	public static String getResourcesCount(String resourceClass)
+	public static Query getResourcesCount(String resourceClass)
 		throws IOException
 	{
 		if (resourcesCount == null)
 			resourcesCount = loadQuery("resourcesCount.sparql");
-		return String.format(resourcesCount, resourceClass);
+		return QueryFactory.create(String.format(resourcesCount, resourceClass), Syntax.syntaxARQ);
 	}
 
 
 	private static String loadQuery(String file)
 		throws IOException
 	{
-		InputStream is = QueryFactory.class.getClassLoader().getResourceAsStream("sparql/" + file);
+		InputStream is = MyQueryFactory.class.getClassLoader().getResourceAsStream("sparql/" + file);
 		return IOUtils.toString(is, "UTF-8");
 	}
 
