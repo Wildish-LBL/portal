@@ -32,8 +32,11 @@ public class TemplatePage
 		final WebMarkupContainer redirect = new WebMarkupContainer("redirect");
 		String redirectionURL = parameters.get("redirectTo").toString();
 		if (redirectionURL != null) {
-			final String content = "3;URL=" + redirectionURL;
+			int redirectionDelay = parameters.get("redirectDelay").toInt(3);
+			final String content = "" + redirectionDelay + ";URL=" + redirectionURL;
 			redirect.add(new AttributeModifier("content", new Model<String>(content)));
+			parameters.remove("redirectTo");
+			parameters.remove("redirectDelay");
 		}
 		else {
 			redirect.setVisible(false);

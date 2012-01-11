@@ -520,6 +520,11 @@ public class RoPage
 				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 				{
 					super.onSubmit(target, form);
+					throw new RestartResponseException(RoPage.class, RoPage.this
+							.getPageParameters()
+							.add("redirectTo",
+								roURI.resolve(".ro/manifest." + getFormat().getDefaultFileExtension()).toString())
+							.add("redirectDelay", 1));
 				}
 			});
 			add(new MyAjaxButton("cancelDownloadMetadata", this) {
