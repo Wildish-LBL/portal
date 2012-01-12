@@ -293,7 +293,7 @@ public class ROSRService
 			targetName = targetURI.resolve(".").relativize(targetURI).toString();
 		String randomBit = "" + Math.abs(UUID.randomUUID().getLeastSignificantBits());
 
-		return researchObjectURI.resolve(".ro/" + targetName + "-" + randomBit + ".rdf");
+		return researchObjectURI.resolve(".ro/" + targetName + "-" + randomBit);
 	}
 
 
