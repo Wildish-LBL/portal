@@ -84,7 +84,7 @@ public class SparqlEndpointPage
 				Client client = Client.create();
 				try {
 					WebResource webResource = client.resource(getEndpointUrl().toString());
-					String response = webResource.header("Content-type", "application/x-turtle").get(String.class);
+					String response = webResource.accept("application/x-turtle").get(String.class);
 					setResult(response);
 				}
 				catch (Exception e) {
