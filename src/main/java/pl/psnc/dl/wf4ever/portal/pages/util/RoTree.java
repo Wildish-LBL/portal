@@ -8,6 +8,7 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 
 import org.apache.wicket.extensions.markup.html.tree.Tree;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 
@@ -15,7 +16,7 @@ import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 
 /**
  * @author piotrhol
- *
+ * 
  */
 public class RoTree
 	extends Tree
@@ -32,7 +33,7 @@ public class RoTree
 	private static final ResourceReference WORKFLOW = new PackageResourceReference(RoTree.class, "res/workflow.png");
 
 
-	public RoTree(String id, TreeModel model)
+	public RoTree(String id, IModel< ? extends TreeModel> model)
 	{
 		super(id, model);
 		// TODO Auto-generated constructor stub

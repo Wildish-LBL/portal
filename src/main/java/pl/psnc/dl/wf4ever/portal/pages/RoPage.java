@@ -1,5 +1,6 @@
 package pl.psnc.dl.wf4ever.portal.pages;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -11,16 +12,13 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.extensions.markup.html.tree.Tree;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
@@ -29,14 +27,18 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.form.upload.FileUpload;
+import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.CompoundPropertyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.UrlDecoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.convert.IConverter;
+import org.apache.wicket.util.lang.Bytes;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
@@ -69,17 +71,18 @@ public class RoPage
 
 	private final StatementEditForm stmtEditForm;
 
+	private RoFactory roFactory;
+
 
 	public RoPage(final PageParameters parameters)
 		throws URISyntaxException, MalformedURLException, OAuthException
 	{
 		super(parameters);
-		RoFactory factory = null;
 		ResearchObject ro = null;
 		if (!parameters.get("ro").isEmpty()) {
 			roURI = new URI(UrlDecoder.QUERY_INSTANCE.decode(parameters.get("ro").toString(), "UTF-8"));
-			factory = new RoFactory(roURI);
-			ro = factory.createResearchObject(true);
+			roFactory = new RoFactory(roURI);
+			ro = roFactory.createResearchObject(true);
 		}
 		else {
 			throw new RestartResponseException(ErrorPage.class, new PageParameters().add("message",
@@ -93,8 +96,7 @@ public class RoPage
 		add(new Label("title", ro.getURI().toString()));
 
 		final CompoundPropertyModel<AggregatedResource> itemModel = new CompoundPropertyModel<AggregatedResource>(ro);
-		final TreeModel treeModel = factory.createAggregatedResourcesTree(ro, true);
-		roViewerBox = new RoViewerBox(itemModel, treeModel);
+		roViewerBox = new RoViewerBox(itemModel, new PropertyModel<TreeModel>(roFactory, "aggregatedResourcesTree"));
 		add(roViewerBox);
 		annotatingBox = new AnnotatingBox(itemModel);
 		add(annotatingBox);
@@ -103,6 +105,7 @@ public class RoPage
 				annotatingBox.entriesList, "selectedObject")));
 		add(stmtEditForm);
 		add(new ChooseRdfFormat());
+		add(new UploadResourceForm());
 	}
 
 	@SuppressWarnings("serial")
@@ -110,96 +113,96 @@ public class RoPage
 		extends WebMarkupContainer
 	{
 
+		final Tree tree;
+
 		final WebMarkupContainer itemInfo;
 
+		final WebMarkupContainer actionButtons;
 
-		public RoViewerBox(final CompoundPropertyModel<AggregatedResource> itemModel, TreeModel treeModel)
+
+		public RoViewerBox(final CompoundPropertyModel<AggregatedResource> itemModel,
+				IModel< ? extends TreeModel> treeModel)
 		{
 			super("roViewerBox", itemModel);
 			setOutputMarkupId(true);
 			add(new Label("title", roURI.toString()));
 
+			tree = new RoTree("treeTable", treeModel) {
+
+				private static final long serialVersionUID = -7512570425701073804L;
+
+
+				@Override
+				protected void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node)
+				{
+					AggregatedResource res = (AggregatedResource) ((DefaultMutableTreeNode) node).getUserObject();
+					itemModel.setObject(res);
+					annotatingBox.setAnnotationSelection(res.getAnnotations().isEmpty() ? null : res.getAnnotations()
+							.get(0));
+					target.add(actionButtons);
+					target.add(itemInfo);
+					target.add(annotatingBox);
+				}
+			};
+			tree.getTreeState().expandAll();
+			tree.getTreeState().selectNode(treeModel.getObject().getRoot(), true);
+			add(tree);
+
 			Form< ? > roForm = new Form<Void>("roForm");
 			add(roForm);
 
-			AjaxButton addFolder = new AjaxButton("addFolder", roForm) {
+			actionButtons = new WebMarkupContainer("actionButtons");
+			actionButtons.setOutputMarkupId(true);
+			roForm.add(actionButtons);
 
-				private static final long serialVersionUID = -491963068167875L;
-
+			MyAjaxButton addResource = new MyAjaxButton("addResource", roForm) {
 
 				@Override
 				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 				{
+					super.onSubmit(target, form);
+					target.appendJavaScript("$('#upload-resource-modal').modal('show')");
 				}
 
 
 				@Override
-				protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
+				public boolean isEnabled()
 				{
+					return super.isEnabled() && canEdit;
 				}
 			};
-			addFolder.add(new Behavior() {
+			actionButtons.add(addResource);
+
+			MyAjaxButton deleteResource = new MyAjaxButton("deleteResource", roForm) {
 
 				@Override
-				public void onComponentTag(Component component, ComponentTag tag)
+				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 				{
-					super.onComponentTag(component, tag);
-					if (!canEdit) {
-						tag.append("class", "disabled", " ");
+					super.onSubmit(target, form);
+					AggregatedResource res = (AggregatedResource) ((DefaultMutableTreeNode) tree.getTreeState()
+							.getSelectedNodes().iterator().next()).getUserObject();
+					try {
+						ROSRService.deleteResource(res.getURI(), MySession.get().getdLibraAccessToken());
+						roFactory.reload();
+						target.add(RoViewerBox.this);
+					}
+					catch (OAuthException e) {
+						error(e);
 					}
 				}
-			});
-			roForm.add(addFolder);
-
-			AjaxButton addResource = new AjaxButton("addResource", roForm) {
-
-				private static final long serialVersionUID = -491963068167875L;
-
-
-				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-				{
-				}
-
-
-				@Override
-				protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
-				{
-				}
 
 
 				@Override
 				public boolean isEnabled()
 				{
-					return super.isEnabled() && canEdit;
+					return super.isEnabled()
+							&& canEdit
+							&& !tree.getTreeState().getSelectedNodes().isEmpty()
+							&& !((AggregatedResource) ((DefaultMutableTreeNode) tree.getTreeState().getSelectedNodes()
+									.iterator().next()).getUserObject()).getURI().equals(roURI);
 				}
 			};
-			roForm.add(addResource);
-
-			AjaxButton deleteResource = new AjaxButton("deleteResource", roForm) {
-
-				private static final long serialVersionUID = -491963068167875L;
-
-
-				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-				{
-				}
-
-
-				@Override
-				protected void onError(AjaxRequestTarget arg0, Form< ? > arg1)
-				{
-				}
-
-
-				@Override
-				public boolean isEnabled()
-				{
-					return super.isEnabled() && canEdit;
-				}
-			};
-			roForm.add(deleteResource);
+			actionButtons.add(deleteResource);
 
 			AjaxButton downloadMetadata = new MyAjaxButton("downloadMetadata", roForm) {
 
@@ -225,25 +228,6 @@ public class RoPage
 			itemInfo.add(new Label("sizeFormatted"));
 			itemInfo.add(new Label("annotations.size"));
 
-			Tree tree = new RoTree("treeTable", treeModel) {
-
-				private static final long serialVersionUID = -7512570425701073804L;
-
-
-				@Override
-				protected void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node)
-				{
-					AggregatedResource res = (AggregatedResource) ((DefaultMutableTreeNode) node).getUserObject();
-					itemModel.setObject(res);
-					annotatingBox.setAnnotationSelection(res.getAnnotations().isEmpty() ? null : res.getAnnotations()
-							.get(0));
-					target.add(itemInfo);
-					target.add(annotatingBox);
-				}
-			};
-			tree.getTreeState().expandAll();
-			tree.getTreeState().selectNode(treeModel.getRoot(), true);
-			add(tree);
 		}
 	}
 
@@ -548,6 +532,56 @@ public class RoPage
 		public void setFormat(RDFFormat format)
 		{
 			this.format = format;
+		}
+	}
+
+	@SuppressWarnings("serial")
+	class UploadResourceForm
+		extends Form<Void>
+	{
+
+		public UploadResourceForm()
+		{
+			super("uploadResourceForm");
+
+			// Enable multipart mode (need for uploads file)
+			setMultiPart(true);
+
+			// max upload size, 10k
+			setMaxSize(Bytes.megabytes(10));
+			final FileUploadField fileUpload = new FileUploadField("fileUpload");
+			add(fileUpload);
+			add(new MyAjaxButton("confirmUploadResource", this) {
+
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+				{
+					super.onSubmit(target, form);
+					final FileUpload uploadedFile = fileUpload.getFileUpload();
+					if (uploadedFile != null) {
+						URI resourceURI = roURI.resolve(uploadedFile.getClientFileName());
+						try {
+							ROSRService.sendResource(resourceURI, uploadedFile.getInputStream(),
+								uploadedFile.getContentType(), MySession.get().getdLibraAccessToken());
+							roFactory.reload();
+							target.appendJavaScript("$('#upload-resource-modal').modal('hide')");
+							target.add(roViewerBox);
+						}
+						catch (IOException e) {
+							error(e);
+						}
+					}
+				}
+			});
+			add(new MyAjaxButton("cancelUploadResource", this) {
+
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+				{
+					super.onSubmit(target, form);
+					target.appendJavaScript("$('#upload-resource-modal').modal('hide')");
+				}
+			}.setDefaultFormProcessing(false));
 		}
 	}
 

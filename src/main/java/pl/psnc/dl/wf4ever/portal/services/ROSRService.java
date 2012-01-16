@@ -30,6 +30,8 @@ import com.hp.hpl.jena.rdf.model.AnonId;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.DCTerms;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
 
 /**
  * @author Piotr Hołubowicz
@@ -105,7 +107,16 @@ public class ROSRService
 	}
 
 
-	private static void deleteResource(URI resourceURI, Token dLibraAccessToken)
+	public static String sendResource(URI resourceURI, InputStream content, String contentType, Token dLibraToken)
+	{
+		Client client = Client.create();
+		WebResource webResource = client.resource(resourceURI.toString());
+		return webResource.header("Authorization", "Bearer " + dLibraToken.getToken()).type(contentType)
+				.put(String.class, content);
+	}
+
+
+	public static void deleteResource(URI resourceURI, Token dLibraAccessToken)
 		throws OAuthException
 	{
 		OAuthHelpService.sendRequest(dLibraService, Verb.DELETE, resourceURI, dLibraAccessToken);

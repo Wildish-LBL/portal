@@ -1,4 +1,10 @@
 $(document).ready(function() {
+	$('#upload-resource-modal').modal({
+		backdrop : 'static'
+	})
+});
+
+$(document).ready(function() {
 	$('#download-metadata-modal').modal({
 		backdrop : 'static'
 	})

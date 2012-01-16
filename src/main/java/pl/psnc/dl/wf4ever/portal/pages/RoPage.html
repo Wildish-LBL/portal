@@ -24,16 +24,17 @@
 					<div class="span8 separated">
 						<div wicket:id="treeTable" class="my-tree"></div>
 						<form class="form-stacked" wicket:id="roForm">
-							<div class="actions">
-								<button class="btn success" type="submit" wicket:id="addFolder">Add
-									folder</button>
+							<div class="actions" wicket:id="actionButtons">
+<!-- 								<button class="btn success" type="submit" wicket:id="addFolder">Add
+									folder</button> -->
 								<button class="btn success" type="submit"
 									wicket:id="addResource">Add resource</button>
 								<button class="btn danger" type="submit"
 									wicket:id="deleteResource">Delete resource</button>
 							</div>
 							<div class="actions">
-								<button class="btn" type="submit" wicket:id="downloadMetadata">Download metadata</button>
+								<button class="btn" type="submit" wicket:id="downloadMetadata">Download
+									metadata</button>
 								<button class="btn">Publish</button>
 							</div>
 						</form>
@@ -196,15 +197,37 @@
 				<fieldset>
 					<label for="rdfFormat">RDF format</label>
 					<div class="input">
-							<select name="rdfFormat" id="rdfFormat"
-								wicket:id="rdfFormat">
-							</select>
+						<select name="rdfFormat" id="rdfFormat" wicket:id="rdfFormat">
+						</select>
 					</div>
 				</fieldset>
 			</div>
 			<div class="modal-footer">
-				<a class="btn primary" wicket:id="confirmDownloadMetadata" type="submit">OK</a> <a
-					class="btn secondary" wicket:id="cancelDownloadMetadata">Cancel</a>
+				<a class="btn primary" wicket:id="confirmDownloadMetadata"
+					type="submit">OK</a> <a class="btn secondary"
+					wicket:id="cancelDownloadMetadata">Cancel</a>
+			</div>
+		</form>
+	</div>
+	<div id="upload-resource-modal" class="modal hide">
+		<form wicket:id="uploadResourceForm">
+			<div class="modal-header">
+				<a class="close" href="#">×</a>
+				<h3>Choose file</h3>
+			</div>
+			<div class="modal-body">
+				<fieldset>
+					<label for="fileUpload">File to upload</label>
+					<div class="input">
+						<input wicket:id="fileUpload" id="fileUpload" size="40"
+							type="file" />
+					</div>
+				</fieldset>
+			</div>
+			<div class="modal-footer">
+				<a class="btn primary" wicket:id="confirmUploadResource"
+					type="submit">OK</a> <a class="btn secondary"
+					wicket:id="cancelUploadResource">Cancel</a>
 			</div>
 		</form>
 	</div>

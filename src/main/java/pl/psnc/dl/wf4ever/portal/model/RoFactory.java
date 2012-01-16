@@ -55,6 +55,8 @@ public class RoFactory
 
 	private final Individual ro;
 
+	private TreeModel aggregatedResourcesTree;
+
 	public static final URI[] defaultProperties = { URI.create(DCTerms.type.getURI()),
 			URI.create(DCTerms.subject.getURI()), URI.create(DCTerms.description.getURI()),
 			URI.create(DCTerms.format.getURI()), URI.create(DCTerms.title.getURI()),
@@ -101,6 +103,15 @@ public class RoFactory
 	}
 
 
+	public void reload()
+	{
+		model.removeAll();
+		model.read(manifestURI.toString());
+
+		aggregatedResourcesTree = null;
+	}
+
+
 	public ResearchObject createResearchObject(boolean includeAnnotations)
 		throws URISyntaxException
 	{
@@ -128,17 +139,28 @@ public class RoFactory
 	}
 
 
-	public TreeModel createAggregatedResourcesTree(AggregatedResource researchObject, boolean includeAnnotations)
+	public TreeModel getAggregatedResourcesTree()
 		throws URISyntaxException
 	{
+		if (aggregatedResourcesTree == null) {
+			aggregatedResourcesTree = createAggregatedResourcesTree();
+		}
+		return aggregatedResourcesTree;
+	}
+
+
+	public TreeModel createAggregatedResourcesTree()
+		throws URISyntaxException
+	{
+		ResearchObject researchObject = createResearchObject(true);
 		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(researchObject);
 
-		//TODO take care of proxies & folders
+		// TODO take care of proxies & folders
 		NodeIterator it = model.listObjectsOfProperty(ro, aggregates);
 		while (it.hasNext()) {
 			Individual res = it.next().as(Individual.class);
 			if (res.hasRDFType(roResource)) {
-				rootNode.add(new DefaultMutableTreeNode(createResource(new URI(res.getURI()), includeAnnotations)));
+				rootNode.add(new DefaultMutableTreeNode(createResource(new URI(res.getURI()), true)));
 			}
 		}
 		return new DefaultTreeModel(rootNode);
