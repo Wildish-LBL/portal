@@ -1,6 +1,5 @@
 package pl.psnc.dl.wf4ever.portal.pages;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -142,7 +141,7 @@ public class MyRosPage
 						ROSRService.deleteResearchObject(ro.getURI(), dLibraToken);
 						researchObjects.remove(ro);
 					}
-					catch (OAuthException e) {
+					catch (Exception e) {
 						error("Could not delete Research Object: " + ro.getURI() + " (" + e.getMessage() + ")");
 					}
 				}
@@ -179,10 +178,10 @@ public class MyRosPage
 				super.onSubmit(target, addForm);
 				Token dLibraToken = MySession.get().getdLibraAccessToken();
 				try {
-					URI researchObjectURI = ROSRService.createResearchObject(roId, dLibraToken, false);
+					URI researchObjectURI = ROSRService.createResearchObject(roId, dLibraToken).getLocation();
 					researchObjects.add(new RoFactory(researchObjectURI).createResearchObject(false));
 				}
-				catch (OAuthException | UnsupportedEncodingException | URISyntaxException e) {
+				catch (OAuthException | URISyntaxException e) {
 					error("Could not add Research Object: " + roId + " (" + e.getMessage() + ")");
 				}
 				target.add(form);

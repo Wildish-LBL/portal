@@ -187,7 +187,7 @@ public class RoPage
 						roFactory.reload();
 						target.add(RoViewerBox.this);
 					}
-					catch (OAuthException e) {
+					catch (Exception e) {
 						error(e);
 					}
 				}
@@ -439,16 +439,10 @@ public class RoPage
 					Token dLibraToken = getSession().getdLibraAccessToken();
 					Annotation ann = annList.getSelectedObject();
 					ann.getBody().remove(entriesList.getSelectedObject());
-					try {
-						ROSRService.sendResource(ann.getBodyURI(), RoFactory.wrapAnnotationBody(ann.getBody()),
-							"application/rdf+xml", dLibraToken);
-						entriesList.setSelectedObject(null);
-						target.add(annotatingBox.entriesDiv);
-					}
-					catch (OAuthException e) {
-						ann.getBody().add(entriesList.getSelectedObject());
-						error("Could not delete statement (" + e.getMessage() + ")");
-					}
+					ROSRService.sendResource(ann.getBodyURI(), RoFactory.wrapAnnotationBody(ann.getBody()),
+						"application/rdf+xml", dLibraToken);
+					entriesList.setSelectedObject(null);
+					target.add(annotatingBox.entriesDiv);
 				}
 
 
@@ -672,7 +666,7 @@ public class RoPage
 						target.add(annotatingBox.entriesDiv);
 						target.appendJavaScript("$('#edit-ann-modal').modal('hide')");
 					}
-					catch (OAuthException e) {
+					catch (Exception e) {
 						error("Could not update annotation (" + e.getMessage() + ")");
 						if (isNew)
 							ann.getBody().remove(StatementEditForm.this.getModelObject());

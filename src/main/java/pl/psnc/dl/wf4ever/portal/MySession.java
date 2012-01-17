@@ -3,8 +3,6 @@
  */
 package pl.psnc.dl.wf4ever.portal;
 
-import java.net.URISyntaxException;
-
 import org.apache.log4j.Logger;
 import org.apache.wicket.Session;
 import org.apache.wicket.authroles.authentication.AbstractAuthenticatedWebSession;
@@ -13,7 +11,6 @@ import org.apache.wicket.request.Request;
 import org.apache.wicket.util.cookies.CookieUtils;
 import org.scribe.model.Token;
 
-import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 
 /**
@@ -211,7 +208,7 @@ public class MySession
 				return data[0];
 			return null;
 		}
-		catch (OAuthException | URISyntaxException e) {
+		catch (Exception e) {
 			log.error("Error when retrieving username: " + e.getMessage());
 			return null;
 		}

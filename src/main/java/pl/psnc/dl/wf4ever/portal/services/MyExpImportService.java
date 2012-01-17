@@ -179,7 +179,7 @@ public class MyExpImportService
 			throws Exception
 		{
 			model.setMessage(String.format("Creating a Research Object \"%s\"", roId));
-			URI roURI = ROSRService.createResearchObject(roId, dLibraToken, model.isMergeROs());
+			URI roURI = ROSRService.createResearchObject(roId, dLibraToken).getLocation();
 			incrementStepsComplete();
 			return roURI;
 		}
@@ -207,8 +207,8 @@ public class MyExpImportService
 			}
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			manifest.write(out);
-			ROSRService.sendResource(researchObjectURI.resolve(".ro/manifest"), out.toByteArray(),
-				"application/rdf+xml", dLibraToken);
+			ROSRService.sendResource(researchObjectURI.resolve(".ro/manifest"),
+				new ByteArrayInputStream(out.toByteArray()), "application/rdf+xml", dLibraToken);
 			incrementStepsComplete();
 		}
 
@@ -221,7 +221,8 @@ public class MyExpImportService
 				ByteArrayOutputStream out = new ByteArrayOutputStream();
 				e.getValue().write(out);
 				URI annBodyURI = e.getKey();
-				ROSRService.sendResource(annBodyURI, out.toByteArray(), "application/rdf+xml", dLibraToken);
+				ROSRService.sendResource(annBodyURI, new ByteArrayInputStream(out.toByteArray()),
+					"application/rdf+xml", dLibraToken);
 				incrementStepsComplete();
 			}
 		}
@@ -308,8 +309,8 @@ public class MyExpImportService
 			incrementStepsComplete();
 
 			model.setMessage(String.format("Uploading %s", r.getFilename()));
-			ROSRService.sendResource(researchObjectURI.resolve(r.getFilenameURI()), r.getContentDecoded(),
-				r.getContentType(), dLibraToken);
+			ROSRService.sendResource(researchObjectURI.resolve(r.getFilenameURI()),
+				new ByteArrayInputStream(r.getContentDecoded()), r.getContentType(), dLibraToken);
 
 			incrementStepsComplete();
 			return r;
@@ -391,15 +392,15 @@ public class MyExpImportService
 		Resource source = me.listObjectsOfProperty(RoFactory.foafPrimaryTopic).next().asResource();
 		target.addProperty(DCTerms.source, source);
 
-		//title
+		// title
 		if (source.hasProperty(DCTerms.title))
 			target.addProperty(DCTerms.title, source.getProperty(DCTerms.title).getLiteral());
 
-		//description
+		// description
 		if (source.hasProperty(DCTerms.description))
 			target.addProperty(DCTerms.description, source.getProperty(DCTerms.description).getLiteral());
 
-		//creator
+		// creator
 		Property owner = me.createProperty("http://rdfs.org/sioc/ns#has_owner");
 		if (source.hasProperty(owner))
 			target.addProperty(DCTerms.creator, source.getPropertyResourceValue(owner));
@@ -415,7 +416,7 @@ public class MyExpImportService
 
 		Resource source = me.listObjectsOfProperty(RoFactory.foafPrimaryTopic).next().asResource();
 
-		//creator
+		// creator
 		Property owner = me.createProperty("http://rdfs.org/sioc/ns#has_owner");
 		if (source.hasProperty(owner)) {
 			Resource user = source.getPropertyResourceValue(owner);

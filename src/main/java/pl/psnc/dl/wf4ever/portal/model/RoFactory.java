@@ -3,7 +3,9 @@
  */
 package pl.psnc.dl.wf4ever.portal.model;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -266,7 +268,7 @@ public class RoFactory
 	}
 
 
-	public static byte[] wrapAnnotationBody(List<Statement> statements)
+	public static InputStream wrapAnnotationBody(List<Statement> statements)
 	{
 		Model body = ModelFactory.createDefaultModel();
 		for (Statement stmt : statements) {
@@ -274,7 +276,7 @@ public class RoFactory
 		}
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		body.write(out);
-		return out.toByteArray();
+		return new ByteArrayInputStream(out.toByteArray());
 	}
 
 }

@@ -17,7 +17,7 @@ import pl.psnc.dl.wf4ever.portal.myexpimport.model.WorkflowHeader;
 
 /**
  * @author Piotr Hołubowicz
- *
+ * 
  */
 public class ImportModel
 	implements Serializable
@@ -40,8 +40,6 @@ public class ImportModel
 	private List<String> messages = new ArrayList<String>();
 
 	private ImportStatus status = ImportStatus.NOT_STARTED;
-
-	private boolean mergeROs = true;
 
 	private WorkspaceType workspaceType = WorkspaceType.EXISTING;
 
@@ -105,7 +103,8 @@ public class ImportModel
 
 
 	/**
-	 * @param message the message to set
+	 * @param message
+	 *            the message to set
 	 */
 	public void setMessage(String message)
 	{
@@ -127,29 +126,12 @@ public class ImportModel
 
 	/**
 	 * This method doesn't do anything.
+	 * 
 	 * @param messages
 	 */
 	public void setMessages(List<String> messages)
 	{
 		// do nothing
-	}
-
-
-	/**
-	 * @return the mergeROs
-	 */
-	public boolean isMergeROs()
-	{
-		return mergeROs;
-	}
-
-
-	/**
-	 * @param mergeROs the mergeROs to set
-	 */
-	public void setMergeROs(boolean mergeROs)
-	{
-		this.mergeROs = mergeROs;
 	}
 
 
@@ -163,7 +145,8 @@ public class ImportModel
 
 
 	/**
-	 * @param status the status to set
+	 * @param status
+	 *            the status to set
 	 */
 	public void setStatus(ImportStatus status)
 	{
@@ -181,7 +164,8 @@ public class ImportModel
 
 
 	/**
-	 * @param workspaceType the workspaceType to set
+	 * @param workspaceType
+	 *            the workspaceType to set
 	 */
 	public void setWorkspaceType(WorkspaceType workspaceType)
 	{
@@ -206,7 +190,8 @@ public class ImportModel
 
 
 	/**
-	 * @param roId the roName to set
+	 * @param roId
+	 *            the roName to set
 	 */
 	public void setRoId(String roId)
 	{
@@ -224,7 +209,8 @@ public class ImportModel
 
 
 	/**
-	 * @param progressInPercent the progressInPercent to set
+	 * @param progressInPercent
+	 *            the progressInPercent to set
 	 */
 	public void setProgressInPercent(int progressInPercent)
 	{
@@ -242,7 +228,8 @@ public class ImportModel
 
 
 	/**
-	 * @param customPackId the customPackId to set
+	 * @param customPackId
+	 *            the customPackId to set
 	 */
 	public void setCustomPackId(String customPackId)
 	{

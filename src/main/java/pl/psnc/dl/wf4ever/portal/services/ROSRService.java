@@ -3,10 +3,9 @@
  */
 package pl.psnc.dl.wf4ever.portal.services;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -16,10 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
-import org.scribe.model.Response;
 import org.scribe.model.Token;
-import org.scribe.model.Verb;
-import org.scribe.oauth.OAuthService;
 
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 
@@ -31,6 +27,7 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
 /**
@@ -42,110 +39,41 @@ public class ROSRService
 
 	private static final Logger log = Logger.getLogger(ROSRService.class);
 
-	private static final String URI_SCHEME = "http";
-
-	private static final String URI_HOST = "sandbox.wf4ever-project.org";
-
-	private static final String URI_PATH_BASE = "/rosrs5/";
-
-	private static final String URI_ROS = URI_PATH_BASE + "ROs/";
-
-	private static final String URI_RO_ID = URI_ROS + "%s/";
-
-	private static final String URI_WHOAMI = URI_PATH_BASE + "whoami/";
-
-	private static final OAuthService dLibraService = DlibraApi.getOAuthService("notused", null);
+	private static final URI baseURI = URI.create("http://sandbox.wf4ever-project.org/rosrs5");
 
 
-	/**
-	 * Creates a Research Object.
-	 * 
-	 * @param roId
-	 *            RO identifier
-	 * @param user
-	 *            dLibra user model
-	 * @param ignoreIfExists
-	 *            should it finish without throwing exception if ROSRS returns 409?
-	 * @return true only if ROSRS returns 201 Created
-	 * @throws UnsupportedEncodingException
-	 * @throws OAuthException
-	 * @throws Exception
-	 *             if ROSRS doesn't return 201 Created (or 409 if ignoreIfExists is true)
-	 */
-	public static URI createResearchObject(String roId, Token dLibraToken, boolean ignoreIfExists)
-		throws UnsupportedEncodingException, OAuthException
+	public static ClientResponse createResearchObject(String roId, Token dLibraToken)
 	{
-		try {
-			Response response = OAuthHelpService.sendRequest(dLibraService, Verb.POST, createROsURL(), dLibraToken,
-				roId.getBytes("UTF-8"), "text/plain");
-			return URI.create(response.getHeader("Location"));
-		}
-		catch (OAuthException e) {
-			if (e.getResponse().getCode() == HttpURLConnection.HTTP_CONFLICT && ignoreIfExists) {
-				return null;
-			}
-			else {
-				throw e;
-			}
-		}
+		Client client = Client.create();
+		WebResource webResource = client.resource(baseURI.toString()).path("ROs");
+		return webResource.header("Authorization", "Bearer " + dLibraToken.getToken()).type("text/plain")
+				.post(ClientResponse.class, roId);
 	}
 
 
 	public static InputStream getResource(URI resourceURI)
-		throws OAuthException
 	{
-		return OAuthHelpService.sendRequest(dLibraService, Verb.GET, resourceURI).getStream();
+		Client client = Client.create();
+		WebResource webResource = client.resource(resourceURI.toString());
+		return webResource.get(InputStream.class);
 	}
 
 
-	public static void sendResource(URI resourceURI, byte[] content, String contentType, Token dLibraToken)
-		throws OAuthException
-
-	{
-		OAuthHelpService.sendRequest(dLibraService, Verb.PUT, resourceURI, dLibraToken, content,
-			contentType != null ? contentType : "text/plain");
-	}
-
-
-	public static String sendResource(URI resourceURI, InputStream content, String contentType, Token dLibraToken)
+	public static ClientResponse sendResource(URI resourceURI, InputStream content, String contentType,
+			Token dLibraToken)
 	{
 		Client client = Client.create();
 		WebResource webResource = client.resource(resourceURI.toString());
 		return webResource.header("Authorization", "Bearer " + dLibraToken.getToken()).type(contentType)
-				.put(String.class, content);
+				.put(ClientResponse.class, content);
 	}
 
 
-	public static void deleteResource(URI resourceURI, Token dLibraAccessToken)
-		throws OAuthException
+	public static ClientResponse deleteResource(URI resourceURI, Token dLibraToken)
 	{
-		OAuthHelpService.sendRequest(dLibraService, Verb.DELETE, resourceURI, dLibraAccessToken);
-	}
-
-
-	private static URI createROsURL()
-	{
-		try {
-			return new URI(URI_SCHEME, URI_HOST, URI_ROS, null);
-		}
-		catch (Exception e) {
-			log.error(e);
-			return null;
-		}
-	}
-
-
-	@SuppressWarnings("unused")
-	private static URI createROIdURL(String roId)
-	{
-		try {
-			String path = String.format(URI_RO_ID, roId);
-			return new URI(URI_SCHEME, URI_HOST, path, null);
-		}
-		catch (Exception e) {
-			log.error(e);
-			return null;
-		}
+		Client client = Client.create();
+		WebResource webResource = client.resource(resourceURI.toString());
+		return webResource.header("Authorization", "Bearer " + dLibraToken.getToken()).delete(ClientResponse.class);
 	}
 
 
@@ -157,19 +85,19 @@ public class ROSRService
 
 
 	public static List<URI> getROList(Token dLibraToken)
-		throws MalformedURLException, OAuthException, URISyntaxException
+		throws MalformedURLException, URISyntaxException
 	{
-		Response response;
+		Client client = Client.create();
+		WebResource webResource = client.resource(baseURI.toString()).path("ROs");
+		String response;
 		if (dLibraToken == null) {
-			response = OAuthHelpService.sendRequest(dLibraService, Verb.GET, new URI(URI_SCHEME, URI_HOST, URI_ROS,
-					null));
+			response = webResource.get(String.class);
 		}
 		else {
-			response = OAuthHelpService.sendRequest(dLibraService, Verb.GET, new URI(URI_SCHEME, URI_HOST, URI_ROS,
-					null), dLibraToken);
+			response = webResource.header("Authorization", "Bearer " + dLibraToken.getToken()).get(String.class);
 		}
 		List<URI> uris = new ArrayList<URI>();
-		for (String s : response.getBody().split("[\\r\\n]+")) {
+		for (String s : response.split("[\\r\\n]+")) {
 			if (!s.isEmpty()) {
 				uris.add(new URI(s));
 			}
@@ -178,10 +106,11 @@ public class ROSRService
 	}
 
 
-	public static void deleteResearchObject(URI researchObjectURI, Token dLibraToken)
-		throws OAuthException
+	public static ClientResponse deleteResearchObject(URI researchObjectURI, Token dLibraToken)
 	{
-		OAuthHelpService.sendRequest(dLibraService, Verb.DELETE, researchObjectURI, dLibraToken);
+		Client client = Client.create();
+		WebResource webResource = client.resource(researchObjectURI.toString());
+		return webResource.header("Authorization", "Bearer " + dLibraToken.getToken()).delete(ClientResponse.class);
 	}
 
 
@@ -195,8 +124,8 @@ public class ROSRService
 	 * @throws OAuthException
 	 * @throws URISyntaxException
 	 */
-	public static void addAnnotation(URI researchObjectURI, URI targetURI, String username, Token dLibraToken)
-		throws OAuthException, URISyntaxException
+	public static ClientResponse addAnnotation(URI researchObjectURI, URI targetURI, String username, Token dLibraToken)
+		throws URISyntaxException
 	{
 		InputStream is = ROSRService.getResource(researchObjectURI.resolve(".ro/manifest"));
 		OntModel manifest = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
@@ -206,17 +135,18 @@ public class ROSRService
 		addAnnotation(manifest, researchObjectURI, targetURI, bodyURI, username);
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		manifest.write(out);
-		sendResource(researchObjectURI.resolve(".ro/manifest"), out.toByteArray(), "application/rdf+xml", dLibraToken);
+		sendResource(researchObjectURI.resolve(".ro/manifest"), new ByteArrayInputStream(out.toByteArray()),
+			"application/rdf+xml", dLibraToken);
 
 		OntModel body = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 		ByteArrayOutputStream out2 = new ByteArrayOutputStream();
 		body.write(out2);
-		sendResource(bodyURI, out2.toByteArray(), "application/rdf+xml", dLibraToken);
+		return sendResource(bodyURI, new ByteArrayInputStream(out2.toByteArray()), "application/rdf+xml", dLibraToken);
 	}
 
 
-	public static void deleteAnnotation(URI researchObjectURI, URI annURI, Token dLibraToken)
-		throws OAuthException, IllegalArgumentException, URISyntaxException
+	public static ClientResponse deleteAnnotation(URI researchObjectURI, URI annURI, Token dLibraToken)
+		throws IllegalArgumentException, URISyntaxException
 	{
 		InputStream is = ROSRService.getResource(researchObjectURI.resolve(".ro/manifest"));
 		OntModel manifest = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
@@ -230,14 +160,15 @@ public class ROSRService
 		try {
 			deleteResource(new URI(body.getURI()), dLibraToken);
 		}
-		catch (OAuthException e) {
+		catch (Exception e) {
 			log.warn("Problem with deleting annotation body: " + e.getMessage());
 		}
 
 		manifest.removeAll(ann, null, null);
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		manifest.write(out);
-		sendResource(researchObjectURI.resolve(".ro/manifest"), out.toByteArray(), "application/rdf+xml", dLibraToken);
+		return sendResource(researchObjectURI.resolve(".ro/manifest"), new ByteArrayInputStream(out.toByteArray()),
+			"application/rdf+xml", dLibraToken);
 	}
 
 
@@ -309,11 +240,11 @@ public class ROSRService
 
 
 	public static String[] getWhoAmi(Token dLibraToken)
-		throws OAuthException, URISyntaxException
+		throws URISyntaxException
 	{
-		Response response = OAuthHelpService.sendRequest(dLibraService, Verb.GET, new URI(URI_SCHEME, URI_HOST,
-				URI_WHOAMI, null), dLibraToken);
-		return response.getBody().split("[\\r\\n]+");
+		Client client = Client.create();
+		WebResource webResource = client.resource(baseURI.toString()).path("whoami");
+		return webResource.header("Authorization", "Bearer " + dLibraToken.getToken()).get(String.class)
+				.split("[\\r\\n]+");
 	}
-
 }
