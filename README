@@ -1,3 +1,8 @@
-This is the Research Object Digital Library portal. At the moment it's just a mockup but the goal is to have a simple page for the Y1 review.
+This is the Research Object Digital Library portal.
 
 This service is running at http://sandbox.wf4ever-project.org/portal.
+
+Changelog:
+
+0.1.0:
+- can add and delete resources to RO

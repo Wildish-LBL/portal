@@ -36,6 +36,7 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.UrlDecoder;
+import org.apache.wicket.request.UrlEncoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.convert.IConverter;
 import org.apache.wicket.util.lang.Bytes;
@@ -559,7 +560,8 @@ public class RoPage
 					super.onSubmit(target, form);
 					final FileUpload uploadedFile = fileUpload.getFileUpload();
 					if (uploadedFile != null) {
-						URI resourceURI = roURI.resolve(uploadedFile.getClientFileName());
+						URI resourceURI = roURI.resolve(UrlEncoder.PATH_INSTANCE.encode(
+							uploadedFile.getClientFileName(), "UTF-8"));
 						try {
 							ROSRService.sendResource(resourceURI, uploadedFile.getInputStream(),
 								uploadedFile.getContentType(), MySession.get().getdLibraAccessToken());
