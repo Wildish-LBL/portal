@@ -72,7 +72,7 @@ public class RoPage
 
 	private final StatementEditForm stmtEditForm;
 
-	private RoFactory roFactory;
+	private transient RoFactory roFactory;
 
 
 	public RoPage(final PageParameters parameters)

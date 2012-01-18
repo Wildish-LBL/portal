@@ -162,6 +162,16 @@
 			<artifactId>ocpsoft-pretty-time</artifactId>
 			<version>1.0.7</version>
 		</dependency>
+		<dependency>
+			<groupId>rome</groupId>
+			<artifactId>opensearch</artifactId>
+			<version>0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>rome</groupId>
+			<artifactId>rome</artifactId>
+			<version>1.0</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>portal</finalName>

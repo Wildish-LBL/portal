@@ -24,6 +24,8 @@ public abstract class AggregatedResource
 
 	protected long size;
 
+	protected String title;
+
 	private List<Annotation> annotations;
 
 
@@ -136,8 +138,26 @@ public abstract class AggregatedResource
 
 
 	/**
-	 * Adapted from
-	 * http://stackoverflow.com/questions/3758606/how-to-convert-byte
+	 * @return the title
+	 */
+	public String getTitle()
+	{
+		return title;
+	}
+
+
+	/**
+	 * @param title
+	 *            the title to set
+	 */
+	public void setTitle(String title)
+	{
+		this.title = title;
+	}
+
+
+	/**
+	 * Adapted from http://stackoverflow.com/questions/3758606/how-to-convert-byte
 	 * -size-into-human-readable-format-in-java
 	 * 
 	 * @param bytes
