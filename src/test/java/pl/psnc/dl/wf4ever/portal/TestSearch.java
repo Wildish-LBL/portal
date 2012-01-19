@@ -2,14 +2,18 @@ package pl.psnc.dl.wf4ever.portal;
 
 import static org.junit.Assert.assertNotNull;
 
-import java.util.Arrays;
-import java.util.List;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.util.LinkedHashMap;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.services.SearchService;
+
+import com.sun.syndication.io.FeedException;
 
 public class TestSearch
 {
@@ -23,8 +27,10 @@ public class TestSearch
 
 	@Test
 	public final void testFindByKeywords()
+		throws IllegalArgumentException, MalformedURLException, FeedException, IOException
 	{
-		List<ResearchObject> ros = SearchService.findByKeywords(Arrays.asList("Jingle", "bells"));
+		LinkedHashMap<ResearchObject, Double> ros = SearchService.findByKeywords(
+			URI.create("http://sandbox.wf4ever-project.org/opensearch/search.rss"), "riders");
 		assertNotNull(ros);
 	}
 

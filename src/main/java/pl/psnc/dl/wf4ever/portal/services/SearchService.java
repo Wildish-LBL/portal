@@ -3,21 +3,26 @@
  */
 package pl.psnc.dl.wf4ever.portal.services;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.LinkedHashMap;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.jdom.Element;
 
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 
-import com.sun.syndication.feed.atom.Link;
-import com.sun.syndication.feed.module.Module;
-import com.sun.syndication.feed.module.opensearch.OpenSearchModule;
-import com.sun.syndication.feed.module.opensearch.entity.OSQuery;
-import com.sun.syndication.feed.module.opensearch.impl.OpenSearchModuleImpl;
+import com.sun.jersey.api.uri.UriBuilderImpl;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
-import com.sun.syndication.feed.synd.SyndFeedImpl;
+import com.sun.syndication.io.FeedException;
+import com.sun.syndication.io.SyndFeedInput;
+import com.sun.syndication.io.XmlReader;
 
 /**
  * @author piotrek
@@ -26,44 +31,69 @@ import com.sun.syndication.feed.synd.SyndFeedImpl;
 public class SearchService
 {
 
+	private final static Logger logger = Logger.getLogger(SearchService.class);
+
+	private static final String DL_QUERY_NS = "http://dlibra.psnc.pl/opensearch/";
+
+	public static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z");
+
+
 	@SuppressWarnings("unchecked")
-	public static List<ResearchObject> findByKeywords(List<String> keywords)
+	public static LinkedHashMap<ResearchObject, Double> findByKeywords(URI baseURI, String keywords)
+		throws IllegalArgumentException, MalformedURLException, FeedException, IOException
 	{
-		SyndFeed feed = new SyndFeedImpl();
-		feed.setFeedType("atom_1.0");
+		URI queryURI = new UriBuilderImpl().uri(baseURI).queryParam("searchTerms", keywords)
+				.queryParam("aggregate", "false").queryParam("count", 50).build();
 
-		// Add the opensearch module, you would get information like totalResults from the
-		// return results of your search
-		List<Module> mods = feed.getModules();
-		OpenSearchModule osm = new OpenSearchModuleImpl();
-		osm.setItemsPerPage(1);
-		osm.setStartIndex(1);
-		osm.setTotalResults(20);
-		osm.setItemsPerPage(10);
-
-		OSQuery query = new OSQuery();
-		query.setRole("superset");
-		query.setSearchTerms(StringUtils.join(keywords.toArray(), "+"));
-		query.setStartPage(1);
-		osm.addQuery(query);
-
-		Link link = new Link();
-		link.setHref("http://sandbox.wf4ever-project.org/opensearch/descriptor_en.xml");
-		link.setType("application/opensearchdescription+xml");
-		osm.setLink(link);
-
-		mods.add(osm);
-
-		feed.setModules(mods);
-		// end add module
+		SyndFeedInput input = new SyndFeedInput();
+		SyndFeed feed = input.build(new XmlReader(queryURI.toURL()));
 
 		List<SyndEntry> entries = feed.getEntries();
-		List<ResearchObject> ros = new ArrayList<>();
+		LinkedHashMap<ResearchObject, Double> ros = new LinkedHashMap<>();
 		for (SyndEntry entry : entries) {
-			// ResearchObject ro = new ResearchObject(researchObjectURI, created,
-			// creator);
-			// ros.add(ro);
-			System.out.println(entry);
+			URI researchObjectURI = null;
+			Calendar created = null;
+			String creator = null, title = null;
+			double score = -1;
+			List<Element> dlMarkup = (List<Element>) entry.getForeignMarkup();
+			for (Element element : dlMarkup) {
+				if (!DL_QUERY_NS.equals(element.getNamespaceURI()))
+					continue;
+				switch (element.getName()) {
+					case "attribute":
+						switch (element.getAttributeValue("name")) {
+							case "Identifier":
+								researchObjectURI = URI.create(element.getValue());
+								break;
+							case "Creator":
+								creator = element.getValue();
+								break;
+							case "Created":
+								try {
+									created = Calendar.getInstance();
+									created.setTime(SDF.parse(element.getValue()));
+								}
+								catch (ParseException e) {
+									logger.warn("Incorrect date", e);
+									created = null;
+								}
+								break;
+							case "Title":
+								title = element.getValue();
+								break;
+						}
+						break;
+					case "score":
+						score = Double.parseDouble(element.getValue());
+						break;
+				}
+			}
+
+			if (researchObjectURI != null && score != -1) {
+				ResearchObject ro = new ResearchObject(researchObjectURI, created, creator);
+				ro.setTitle(title);
+				ros.put(ro, score);
+			}
 		}
 
 		return ros;

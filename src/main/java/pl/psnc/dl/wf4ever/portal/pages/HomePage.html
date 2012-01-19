@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wicket:extend xmlns:wicket="http://wicket.apache.org">
+	<script type="text/javascript" src="js/HomePage.js"></script>
+
 	<div class="row">
 		<div class="span16">
 			<div class="inspan16">
@@ -91,23 +93,6 @@
 					</ul>
 				</div>
 			</section>
-
-			<!-- 
-			<section class="left_box inspan4">
-				<h3>
-					OAI <img class="sh_button" src="images/l_open.gif" />
-				</h3>
-				<div class="simple_left_box">
-					<p style="text-align: center">
-						<a href="#"> <img alt="oai" src="images/OA50.png" /><br /></a> <a
-							href="http://fbc.pionier.net.pl/"
-							title="Digital Libraries Federation - Search Polish digital libraries!">
-							<img src="images/FBC-B1-medium-pl.png"
-							alt="Digital Libraries Federation" border="0" />
-						</a>
-					</p>
-				</div>
-			</section> -->
 		</div>
 
 		<div class="span12">
@@ -119,33 +104,44 @@
 								type="text" /> <input class="btn danger" value="Search"
 								id="search" type="submit" />
 						</p>
-						<p>
+						<!-- 						<p>
 							<a href="#"> Advanced search.. </a>
-						</p>
+						</p> -->
 					</form>
 				</div>
 			</div>
 
-			<div class="row">
-				<div class="span6">
-					<h3>Most recent Research Objects</h3>
-					<ol>
-						<li wicket:id="10recentROsListView"><a wicket:id="link"><span
-								wicket:id="name">[uri]</span></a> <br /> <span
-							style="font-size: x-small">by <span wicket:id="author"></span>,
-								<span wicket:id="createdFormatted"></span></span>
-							<hr class="listLine" /></li>
-					</ol>
-					<p class="more2" style="margin-top: 1em;">
-						<a class="sfunctionAnchor" href="#"> More... </a>
-					</p>
+			<ul class="tabs">
+				<li class="active"><a href="#mainView">Main view</a></li>
+				<li><a href="#searchResults">Search results</a></li>
+			</ul>
+			<div class="tab-content">
+				<div class="row active" id="mainView">
+					<div class="span6">
+						<h3>Most recent Research Objects</h3>
+						<ol>
+							<li wicket:id="10recentROsListView"><a wicket:id="link"><span
+									wicket:id="name">[uri]</span></a> <br /> <span
+								style="font-size: x-small">by <span wicket:id="author"></span>,
+									<span wicket:id="createdFormatted"></span></span>
+								<hr class="listLine" /></li>
+						</ol>
+						<p class="more2" style="margin-top: 1em;">
+							<a class="sfunctionAnchor" href="#"> More... </a>
+						</p>
+					</div>
+					<div class="span6">
+						<h3>Recommended Research Objects</h3>
+						<p>TBD</p>
+						<p class="more2">
+							<a class="sfunctionAnchor" href="#"> More... </a>
+						</p>
+					</div>
 				</div>
-				<div class="span6">
-					<h3>Most viewed Research Objects</h3>
-					<p>TBD</p>
-					<p class="more2">
-						<a class="sfunctionAnchor" href="#"> More... </a>
-					</p>
+				<div class="row" id="searchResults">
+					<div class="span12">
+						<h3>Search results</h3>
+					</div>
 				</div>
 			</div>
 			<div class="row">
