@@ -47,6 +47,8 @@ public class PortalApplication
 
 	private URL sparqlEndpointURL;
 
+	private URL searchEndpointURL;
+
 
 	/**
 	 * @see org.apache.wicket.Application#getHomePage()
@@ -82,7 +84,7 @@ public class PortalApplication
 
 		loadTokens("tokens.properties");
 		loadProperties("portal.properties");
-		
+
 		Locale.setDefault(Locale.ENGLISH);
 	}
 
@@ -100,11 +102,13 @@ public class PortalApplication
 		try {
 			props.load(getClass().getClassLoader().getResourceAsStream(propertiesFile));
 			sparqlEndpointURL = new URL(props.getProperty("sparqlEndpointURL"));
+			searchEndpointURL = new URL(props.getProperty("searchEndpointURL"));
 		}
 		catch (Exception e) {
 			log.error("Failed to load properties: " + e.getMessage());
 		}
 	}
+
 
 	private void loadTokens(String propertiesFile)
 	{
@@ -191,6 +195,25 @@ public class PortalApplication
 	public void setSparqlEndpointURL(URL sparqlEndpoint)
 	{
 		this.sparqlEndpointURL = sparqlEndpoint;
+	}
+
+
+	/**
+	 * @return the searchEndpointURL
+	 */
+	public URL getSearchEndpointURL()
+	{
+		return searchEndpointURL;
+	}
+
+
+	/**
+	 * @param searchEndpointURL
+	 *            the searchEndpointURL to set
+	 */
+	public void setSearchEndpointURL(URL searchEndpointURL)
+	{
+		this.searchEndpointURL = searchEndpointURL;
 	}
 
 }

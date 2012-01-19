@@ -98,22 +98,36 @@
 		<div class="span12">
 			<div class="row">
 				<div class="span10 offset1">
-					<form id="smallsearch" method="get" action="#" onsubmit="#">
+					<form wicket:id="searchForm">
 						<p>
-							<input class="span8" autocomplete="off" name="query" id="query"
+							<input class="span8" autocomplete="off" wicket:id="keywords"
 								type="text" /> <input class="btn danger" value="Search"
-								id="search" type="submit" />
+								wicket:id="searchButton" type="submit" />
 						</p>
 						<!-- 						<p>
 							<a href="#"> Advanced search.. </a>
 						</p> -->
 					</form>
+					<div class="alert-message block-message success">
+						<p>
+							<strong>Search works now.</strong> Keywords are looked for in
+							annotations describing the RO (not its resources). If you don't
+							see you RO in the results, try adding any annotation to the RO
+							itself. If it still doesn't appear, please send an email to Piotr
+							with the RO URI. Enjoy!
+						</p>
+						<p>Note: due to a still unresolved bug, you may need to switch
+							to Main View and again to Search Results to refresh search
+							results.</p>
+					</div>
 				</div>
 			</div>
 
 			<ul class="tabs">
-				<li class="active"><a href="#mainView">Main view</a></li>
-				<li><a href="#searchResults">Search results</a></li>
+				<li class="active"><a id="mainViewLink" href="#mainView">Main
+						view</a></li>
+				<li><a id="searchResultsLink" href="#searchResults">Search
+						results</a></li>
 			</ul>
 			<div class="tab-content">
 				<div class="row active" id="mainView">
@@ -122,25 +136,41 @@
 						<ol>
 							<li wicket:id="10recentROsListView"><a wicket:id="link"><span
 									wicket:id="name">[uri]</span></a> <br /> <span
-								style="font-size: x-small">by <span wicket:id="author"></span>,
-									<span wicket:id="createdFormatted"></span></span>
+								style="font-size: x-small">by <span wicket:id="creator"></span>,
+									<span wicket:id="createdAgoFormatted"></span></span>
 								<hr class="listLine" /></li>
 						</ol>
 						<p class="more2" style="margin-top: 1em;">
-							<a class="sfunctionAnchor" href="#"> More... </a>
+							<a href="#"> More... </a>
 						</p>
 					</div>
 					<div class="span6">
 						<h3>Recommended Research Objects</h3>
 						<p>TBD</p>
 						<p class="more2">
-							<a class="sfunctionAnchor" href="#"> More... </a>
+							<a href="#"> More... </a>
 						</p>
 					</div>
 				</div>
-				<div class="row" id="searchResults">
+				<div class="row" id="searchResults" wicket:id="searchResultsDiv">
 					<div class="span12">
 						<h3>Search results</h3>
+						<ol style="margin-right: 40px;">
+							<li wicket:id="searchResultsListView"><a wicket:id="link"><span
+									wicket:id="researchObject.name">[uri]</span></a>&nbsp;<span
+								wicket:id="researchObject.title">[title]</span> <br /> <span
+								style="font-size: x-small">by <span
+									wicket:id="researchObject.creator"></span>, <span
+									wicket:id="researchObject.createdAgoFormatted"></span></span>
+
+								<div style="float: right; width: 80px;">
+									Score: <span wicket:id="scoreInPercent">[score]</span>%
+									<div class="meter">
+										<span style="width: 25%"></span>
+									</div>
+								</div> <br />
+								<hr class="listLine" /></li>
+						</ol>
 					</div>
 				</div>
 			</div>

@@ -8,14 +8,15 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.jdom.Element;
 
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
+import pl.psnc.dl.wf4ever.portal.model.SearchResult;
 
 import com.sun.jersey.api.uri.UriBuilderImpl;
 import com.sun.syndication.feed.synd.SyndEntry;
@@ -39,7 +40,7 @@ public class SearchService
 
 
 	@SuppressWarnings("unchecked")
-	public static LinkedHashMap<ResearchObject, Double> findByKeywords(URI baseURI, String keywords)
+	public static List<SearchResult> findByKeywords(URI baseURI, String keywords)
 		throws IllegalArgumentException, MalformedURLException, FeedException, IOException
 	{
 		URI queryURI = new UriBuilderImpl().uri(baseURI).queryParam("searchTerms", keywords)
@@ -49,7 +50,7 @@ public class SearchService
 		SyndFeed feed = input.build(new XmlReader(queryURI.toURL()));
 
 		List<SyndEntry> entries = feed.getEntries();
-		LinkedHashMap<ResearchObject, Double> ros = new LinkedHashMap<>();
+		List<SearchResult> ros = new ArrayList<>();
 		for (SyndEntry entry : entries) {
 			URI researchObjectURI = null;
 			Calendar created = null;
@@ -92,7 +93,7 @@ public class SearchService
 			if (researchObjectURI != null && score != -1) {
 				ResearchObject ro = new ResearchObject(researchObjectURI, created, creator);
 				ro.setTitle(title);
-				ros.put(ro, score);
+				ros.add(new SearchResult(ro, score));
 			}
 		}
 

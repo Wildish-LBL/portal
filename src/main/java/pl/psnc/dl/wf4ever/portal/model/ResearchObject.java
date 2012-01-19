@@ -6,9 +6,11 @@ package pl.psnc.dl.wf4ever.portal.model;
 import java.net.URI;
 import java.util.Calendar;
 
+import com.ocpsoft.pretty.time.PrettyTime;
+
 /**
  * @author piotrhol
- *
+ * 
  */
 public class ResearchObject
 	extends AggregatedResource
@@ -50,5 +52,21 @@ public class ResearchObject
 	public URI getDownloadURI()
 	{
 		return getURI();
+	}
+
+
+	/**
+	 * @return the created
+	 */
+	public String getCreatedAgoFormatted()
+	{
+		return new PrettyTime().format(getCreated().getTime());
+	}
+
+
+	@Override
+	public String getName()
+	{
+		return getURI().resolve("..").relativize(getURI()).toString();
 	}
 }
