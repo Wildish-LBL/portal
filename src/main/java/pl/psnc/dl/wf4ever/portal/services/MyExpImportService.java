@@ -182,7 +182,7 @@ public class MyExpImportService
 		{
 			model.setMessage(String.format("Creating a Research Object \"%s\"", roId));
 			ClientResponse r = ROSRService.createResearchObject(roId, dLibraToken);
-			if (r.getStatus() != HttpServletResponse.SC_CREATED && r.getStatus() != HttpServletResponse.SC_CONFLICT) {
+			if (r.getStatus() != HttpServletResponse.SC_CREATED) {
 				throw new Exception("Error: " + r.getClientResponseStatus());
 			}
 			incrementStepsComplete();
