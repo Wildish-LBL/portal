@@ -180,7 +180,6 @@ public class HomePage
 		add(new BookmarkablePageLink<Void>("faq", HelpPage.class));
 		add(new BookmarkablePageLink<Void>("contact", ContactPage.class));
 
-		//		add(new Label("roCnt", "" + uris.size()));
 		// FIXME does the below really work?
 		add(new Label("usersOnlineCnt", "" + (getRequestLogger().getLiveSessions().length + 1)));
 
