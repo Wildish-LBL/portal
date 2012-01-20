@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
+import org.apache.wicket.request.UrlEncoder;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
@@ -39,7 +40,7 @@ public class ROSRService
 
 	private static final Logger log = Logger.getLogger(ROSRService.class);
 
-	private static final URI baseURI = URI.create("http://sandbox.wf4ever-project.org/rosrs5");
+	private static final URI baseURI = URI.create("http://sandbox.wf4ever-project.org/rosrs5/");
 
 
 	public static ClientResponse createResearchObject(String roId, Token dLibraToken)
@@ -248,5 +249,22 @@ public class ROSRService
 		WebResource webResource = client.resource(baseURI.toString()).path("whoami");
 		return webResource.header("Authorization", "Bearer " + dLibraToken.getToken()).get(String.class)
 				.split("[\\r\\n]+");
+	}
+
+
+	/**
+	 * Checks if it is possible to create an RO with workspace "default" and version "v1"
+	 * 
+	 * @param roId
+	 * @return
+	 * @throws Exception
+	 */
+	public static boolean isRoIdFree(String roId)
+		throws Exception
+	{
+		//FIXME there should be a way to implement this without getting the list of all URIs
+		List<URI> ros = getROList();
+		URI ro = baseURI.resolve("ROs/" + UrlEncoder.PATH_INSTANCE.encode(roId, "UTF-8") + "/");
+		return !ros.contains(ro);
 	}
 }

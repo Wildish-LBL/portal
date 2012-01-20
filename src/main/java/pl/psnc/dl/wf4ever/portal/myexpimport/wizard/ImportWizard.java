@@ -4,10 +4,12 @@ import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.extensions.wizard.Wizard;
 import org.apache.wicket.extensions.wizard.WizardModel;
+import org.apache.wicket.feedback.ContainerFeedbackMessageFilter;
 import org.apache.wicket.model.CompoundPropertyModel;
 
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.User;
 import pl.psnc.dl.wf4ever.portal.pages.MyRosPage;
+import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 
 public class ImportWizard
 	extends Wizard
@@ -48,6 +50,13 @@ public class ImportWizard
 	protected Component newButtonBar(String id)
 	{
 		return new ImportButtonBar(id, this);
+	}
+
+
+	@Override
+	protected Component newFeedbackPanel(String id)
+	{
+		return new MyFeedbackPanel(id, new ContainerFeedbackMessageFilter(this));
 	}
 
 }

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.basic.Label;
@@ -21,7 +22,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.UrlEncoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.validation.validator.PatternValidator;
+import org.apache.wicket.validation.IValidatable;
+import org.apache.wicket.validation.IValidator;
+import org.apache.wicket.validation.ValidationError;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
@@ -40,6 +43,8 @@ public class MyRosPage
 {
 
 	private static final long serialVersionUID = 1L;
+
+	private static final Logger log = Logger.getLogger(MyRosPage.class);
 
 	final List<ResearchObject> selectedResearchObjects = new ArrayList<ResearchObject>();
 
@@ -110,7 +115,23 @@ public class MyRosPage
 
 		final Form< ? > addForm = new Form<Void>("addForm");
 		RequiredTextField<String> name = new RequiredTextField<String>("roId", new PropertyModel<String>(this, "roId"));
-		name.add(new PatternValidator("[\\w]+"));
+		name.add(new IValidator<String>() {
+
+			@Override
+			public void validate(IValidatable<String> validatable)
+			{
+				try {
+					if (!ROSRService.isRoIdFree(validatable.getValue())) {
+						validatable.error(new ValidationError().setMessage("This ID is already in use"));
+					}
+				}
+				catch (Exception e) {
+					log.error(e);
+					// assume it's ok
+				}
+			}
+
+		});
 		addForm.add(name);
 		add(addForm);
 
