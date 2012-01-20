@@ -73,7 +73,10 @@ public abstract class AggregatedResource
 	 */
 	public String getCreatedFormatted()
 	{
-		return SDF.format(getCreated().getTime());
+		if (getCreated() != null)
+			return SDF.format(getCreated().getTime());
+		else
+			return null;
 	}
 
 

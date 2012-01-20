@@ -60,7 +60,10 @@ public class ResearchObject
 	 */
 	public String getCreatedAgoFormatted()
 	{
-		return new PrettyTime().format(getCreated().getTime());
+		if (getCreated() != null)
+			return new PrettyTime().format(getCreated().getTime());
+		else
+			return null;
 	}
 
 
