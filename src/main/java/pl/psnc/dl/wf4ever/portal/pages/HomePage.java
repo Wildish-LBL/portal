@@ -168,7 +168,7 @@ public class HomePage
 					public void onComponentTag(final Component component, final ComponentTag tag)
 					{
 						super.onComponentTag(component, tag);
-						tag.put("style", "width: " + result.getScoreInPercent() + "%");
+						tag.put("style", "width: " + Math.min(100, result.getScoreInPercent()) + "%");
 					}
 				});
 				item.add(bar);
