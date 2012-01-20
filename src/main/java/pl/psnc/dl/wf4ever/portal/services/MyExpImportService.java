@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -46,6 +47,7 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.DCTerms;
+import com.sun.jersey.api.client.ClientResponse;
 
 /**
  * @author Piotr Hołubowicz
@@ -179,9 +181,12 @@ public class MyExpImportService
 			throws Exception
 		{
 			model.setMessage(String.format("Creating a Research Object \"%s\"", roId));
-			URI roURI = ROSRService.createResearchObject(roId, dLibraToken).getLocation();
+			ClientResponse r = ROSRService.createResearchObject(roId, dLibraToken);
+			if (r.getStatus() != HttpServletResponse.SC_CREATED && r.getStatus() != HttpServletResponse.SC_CONFLICT) {
+				throw new Exception("Error: " + r.getClientResponseStatus());
+			}
 			incrementStepsComplete();
-			return roURI;
+			return r.getLocation();
 		}
 
 

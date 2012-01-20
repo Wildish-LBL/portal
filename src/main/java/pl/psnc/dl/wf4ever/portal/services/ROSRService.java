@@ -194,6 +194,8 @@ public class ROSRService
 		agent.setOntClass(RoFactory.foafAgent);
 		agent.addProperty(RoFactory.foafName, username);
 		ann.addProperty(DCTerms.creator, agent);
+		Individual ro = manifest.createResource(researchObjectURI.toString()).as(Individual.class);
+		ro.addProperty(RoFactory.aggregates, ann);
 	}
 
 
