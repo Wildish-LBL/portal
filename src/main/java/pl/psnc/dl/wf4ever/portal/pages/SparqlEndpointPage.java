@@ -21,6 +21,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyComponentFeedbackPanel;
+import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;

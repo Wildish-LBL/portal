@@ -10,7 +10,10 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.Application;
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.behavior.Behavior;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -31,6 +34,7 @@ import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.model.SearchResult;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
+import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.services.MyQueryFactory;
 import pl.psnc.dl.wf4ever.portal.services.SearchService;
 
@@ -66,6 +70,10 @@ public class HomePage
 	{
 		super(parameters);
 		setDefaultModel(new CompoundPropertyModel<HomePage>(this));
+
+		final MyFeedbackPanel feedbackPanel = new MyFeedbackPanel("feedbackPanel");
+		feedbackPanel.setOutputMarkupId(true);
+		add(feedbackPanel);
 
 		QueryExecution x = QueryExecutionFactory.sparqlService(((PortalApplication) getApplication())
 				.getSparqlEndpointURL().toString(), MyQueryFactory.getxMostRecentROs(10));
@@ -127,13 +135,23 @@ public class HomePage
 		searchResultsDiv.setOutputMarkupId(true);
 		add(searchResultsDiv);
 
+		final WebMarkupContainer noResults = new WebMarkupContainer("noResults") {
+
+			@Override
+			public boolean isVisible()
+			{
+				return super.isVisible() && (getSearchResults() == null || getSearchResults().isEmpty());
+			}
+		};
+		searchResultsDiv.add(noResults);
+
 		ListView<SearchResult> searchResultsList = new PropertyListView<SearchResult>("searchResultsListView",
 				new PropertyModel<List<SearchResult>>(this, "searchResults")) {
 
 			@Override
 			protected void populateItem(ListItem<SearchResult> item)
 			{
-				SearchResult result = item.getModelObject();
+				final SearchResult result = item.getModelObject();
 				BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);
 				link.getPageParameters().add("ro",
 					UrlEncoder.QUERY_INSTANCE.encode(result.getResearchObject().getURI().toString(), "UTF-8"));
@@ -143,6 +161,17 @@ public class HomePage
 				item.add(new Label("scoreInPercent"));
 				item.add(new Label("researchObject.creator"));
 				item.add(new Label("researchObject.createdAgoFormatted"));
+				Label bar = new Label("percentBar", "");
+				bar.add(new Behavior() {
+
+					@Override
+					public void onComponentTag(final Component component, final ComponentTag tag)
+					{
+						super.onComponentTag(component, tag);
+						tag.put("style", "width: " + result.getScoreInPercent() + "%");
+					}
+				});
+				item.add(bar);
 			}
 		};
 		searchResultsList.setReuseItems(true);
@@ -170,19 +199,21 @@ public class HomePage
 						List<SearchResult> results = SearchService.findByKeywords(searchEndpoint.toURI(),
 							getSearchKeywords());
 						setSearchResults(results);
+						getSession().cleanupFeedbackMessages();
 						target.add(searchResultsDiv);
 						target.appendJavaScript("$('#searchResultsLink').click();");
 					}
 					catch (IllegalArgumentException | FeedException | IOException | URISyntaxException e) {
 						logger.error(e);
+						error(e.getMessage());
 					}
+					target.add(feedbackPanel);
 				}
 			}
 
 		});
 
 		searchForm.add(new RequiredTextField<String>("keywords", new PropertyModel<String>(this, "searchKeywords")));
-
 	}
 
 
