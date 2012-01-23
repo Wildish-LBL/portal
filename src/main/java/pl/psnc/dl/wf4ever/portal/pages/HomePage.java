@@ -19,6 +19,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.RequiredTextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.list.PropertyListView;
@@ -31,11 +32,13 @@ import org.apache.wicket.request.UrlEncoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
+import pl.psnc.dl.wf4ever.portal.model.Recommendation;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.model.SearchResult;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.services.MyQueryFactory;
+import pl.psnc.dl.wf4ever.portal.services.RecommenderService;
 import pl.psnc.dl.wf4ever.portal.services.SearchService;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
@@ -61,7 +64,11 @@ public class HomePage
 
 	private List<SearchResult> searchResults;
 
+	private List<Recommendation> recommendations;
+
 	private String searchKeywords;
+
+	private String myExpId;
 
 
 	@SuppressWarnings("serial")
@@ -135,14 +142,7 @@ public class HomePage
 		searchResultsDiv.setOutputMarkupId(true);
 		add(searchResultsDiv);
 
-		final WebMarkupContainer noResults = new WebMarkupContainer("noResults") {
-
-			@Override
-			public boolean isVisible()
-			{
-				return super.isVisible() && (getSearchResults() == null || getSearchResults().isEmpty());
-			}
-		};
+		final WebMarkupContainer noResults = new WebMarkupContainer("noResults");
 		searchResultsDiv.add(noResults);
 
 		ListView<SearchResult> searchResultsList = new PropertyListView<SearchResult>("searchResultsListView",
@@ -199,6 +199,7 @@ public class HomePage
 							getSearchKeywords());
 						setSearchResults(results);
 						getSession().cleanupFeedbackMessages();
+						noResults.setVisible(results == null || results.isEmpty());
 						target.add(searchResultsDiv);
 						target.appendJavaScript("$('#searchResultsLink').click();");
 					}
@@ -209,10 +210,65 @@ public class HomePage
 					target.add(feedbackPanel);
 				}
 			}
-
 		});
 
 		searchForm.add(new RequiredTextField<String>("keywords", new PropertyModel<String>(this, "searchKeywords")));
+
+		final WebMarkupContainer recommendationsDiv = new WebMarkupContainer("recommendationsDiv");
+		recommendationsDiv.setOutputMarkupId(true);
+		add(recommendationsDiv);
+
+		final WebMarkupContainer noRecommendations = new WebMarkupContainer("noRecommendations");
+		recommendationsDiv.add(noRecommendations);
+
+		ListView<Recommendation> recommendationsList = new PropertyListView<Recommendation>("recommendationsList",
+				new PropertyModel<List<Recommendation>>(this, "recommendations")) {
+
+			@Override
+			protected void populateItem(ListItem<Recommendation> item)
+			{
+				final Recommendation rec = item.getModelObject();
+				item.add(new ExternalLink("link", new PropertyModel<String>(rec, "itemURI.toString"),
+						new PropertyModel<String>(rec, "itemURI.toString")));
+				item.add(new Label("strength"));
+			}
+		};
+		recommendationsList.setReuseItems(true);
+		recommendationsDiv.add(recommendationsList);
+
+		final Form< ? > recommenderForm = new Form<Void>("recommenderForm");
+		recommenderForm.setOutputMarkupId(true);
+		recommendationsDiv.add(recommenderForm);
+
+		recommenderForm.add(new RequiredTextField<String>("myExpId", new PropertyModel<String>(this, "myExpId")));
+		recommenderForm.add(new MyAjaxButton("confirmMyExpId", recommenderForm) {
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+			{
+				super.onSubmit(target, form);
+				if (myExpId != null) {
+					try {
+						URI baseURI = ((PortalApplication) getApplication()).getRecommenderEndpointURL().toURI();
+						List<Recommendation> recs = RecommenderService.getRecommendations(baseURI, myExpId, 10);
+						setRecommendations(recs);
+						getSession().cleanupFeedbackMessages();
+						recommenderForm.setVisible(recs == null || recs.isEmpty());
+						noRecommendations.setVisible(recs == null || recs.isEmpty());
+						target.add(recommendationsDiv);
+					}
+					catch (Exception e) {
+						logger.error(e);
+						error(e.getMessage());
+					}
+				}
+				else {
+					error("myExperiment ID cannot be empty");
+				}
+				target.add(feedbackPanel);
+			}
+		});
+
 	}
 
 
@@ -319,5 +375,43 @@ public class HomePage
 	public void setSearchKeywords(String searchKeywords)
 	{
 		this.searchKeywords = searchKeywords;
+	}
+
+
+	/**
+	 * @return the myExpId
+	 */
+	public String getMyExpId()
+	{
+		return myExpId;
+	}
+
+
+	/**
+	 * @param myExpId
+	 *            the myExpId to set
+	 */
+	public void setMyExpId(String myExpId)
+	{
+		this.myExpId = myExpId;
+	}
+
+
+	/**
+	 * @return the recommendations
+	 */
+	public List<Recommendation> getRecommendations()
+	{
+		return recommendations;
+	}
+
+
+	/**
+	 * @param recommendations
+	 *            the recommendations to set
+	 */
+	public void setRecommendations(List<Recommendation> recommendations)
+	{
+		this.recommendations = recommendations;
 	}
 }

@@ -143,9 +143,29 @@
 							<a href="#"> More... </a>
 						</p>
 					</div>
-					<div class="span6">
+					<div class="span6" wicket:id="recommendationsDiv">
 						<h3>Recommended Research Objects</h3>
-						<p>TBD</p>
+						<form wicket:id="recommenderForm">
+							<fieldset>
+								<label for="myExpId">Your myExperiment ID</label>
+								<div class="input">
+									<input type="text" class="span2" id="myExpId"
+										wicket:id="myExpId" />
+										<span class="help-block">Try out: 2</span>
+								</div>
+							</fieldset>
+							<div class="actions">
+								<a class="btn primary" wicket:id="confirmMyExpId" type="submit">OK</a>
+							</div>
+						</form>
+						<ol>
+							<li wicket:id="recommendationsList"><a wicket:id="link">[uri]</a>
+								<br /> <span style="font-size: x-small">Strength: <span
+									wicket:id="strength">[strength]</span></span>
+								<hr class="listLine" /></li>
+						</ol>
+						<p wicket:id="noRecommendations">There are no recommendations
+							for you.</p>
 						<p class="more2">
 							<a href="#"> More... </a>
 						</p>
