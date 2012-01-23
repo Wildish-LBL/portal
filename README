@@ -4,5 +4,10 @@ This service is running at http://sandbox.wf4ever-project.org/portal.
 
 Changelog:
 
+0.1.1:
+- search works
+- new RO identifiers validation improved, can contain spaces
+- deployed in deployment mode (works faster) 
+
 0.1.0:
 - can add and delete resources to RO
