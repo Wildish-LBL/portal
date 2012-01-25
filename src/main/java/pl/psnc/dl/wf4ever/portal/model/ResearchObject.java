@@ -6,6 +6,8 @@ package pl.psnc.dl.wf4ever.portal.model;
 import java.net.URI;
 import java.util.Calendar;
 
+import org.apache.wicket.request.UrlDecoder;
+
 /**
  * @author piotrhol
  * 
@@ -22,7 +24,8 @@ public class ResearchObject
 
 	public ResearchObject(URI researchObjectURI, Calendar created, String creator)
 	{
-		super(researchObjectURI, created, creator, "RO", 0);
+		super(researchObjectURI, created, creator, UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.resolve("..")
+				.relativize(researchObjectURI).toString(), "UTF-8"), 0);
 	}
 
 
@@ -52,10 +55,4 @@ public class ResearchObject
 		return getURI();
 	}
 
-
-	@Override
-	public String getName()
-	{
-		return getURI().resolve("..").relativize(getURI()).toString();
-	}
 }
