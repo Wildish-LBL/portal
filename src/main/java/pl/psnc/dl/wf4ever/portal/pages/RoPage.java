@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
@@ -21,7 +23,9 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.tree.Tree;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Check;
 import org.apache.wicket.markup.html.form.CheckBox;
+import org.apache.wicket.markup.html.form.CheckGroup;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
@@ -30,8 +34,9 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.markup.html.link.ExternalLink;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.PropertyListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
@@ -50,11 +55,12 @@ import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.model.Statement;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.RoTree;
-import pl.psnc.dl.wf4ever.portal.pages.util.SelectableRefreshableView;
 import pl.psnc.dl.wf4ever.portal.pages.util.URIConverter;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
+
+import com.sun.jersey.api.client.ClientResponse;
 
 public class RoPage
 	extends TemplatePage
@@ -69,8 +75,6 @@ public class RoPage
 	private final RoViewerBox roViewerBox;
 
 	private final AnnotatingBox annotatingBox;
-
-	private final StatementEditForm stmtEditForm;
 
 	private transient RoFactory roFactory;
 
@@ -101,10 +105,7 @@ public class RoPage
 		add(roViewerBox);
 		annotatingBox = new AnnotatingBox(itemModel);
 		add(annotatingBox);
-		annotatingBox.setAnnotationSelection(ro.getAnnotations().isEmpty() ? null : ro.getAnnotations().get(0));
-		stmtEditForm = new StatementEditForm(new CompoundPropertyModel<Statement>(new PropertyModel<Statement>(
-				annotatingBox.entriesList, "selectedObject")));
-		add(stmtEditForm);
+		annotatingBox.selectedStatements.clear();
 		add(new ChooseRdfFormat());
 		add(new UploadResourceForm());
 	}
@@ -138,8 +139,7 @@ public class RoPage
 				{
 					AggregatedResource res = (AggregatedResource) ((DefaultMutableTreeNode) node).getUserObject();
 					itemModel.setObject(res);
-					annotatingBox.setAnnotationSelection(res.getAnnotations().isEmpty() ? null : res.getAnnotations()
-							.get(0));
+					annotatingBox.selectedStatements.clear();
 					target.add(actionButtons);
 					target.add(itemInfo);
 					target.add(annotatingBox);
@@ -228,7 +228,6 @@ public class RoPage
 			itemInfo.add(new Label("createdFormatted"));
 			itemInfo.add(new Label("sizeFormatted"));
 			itemInfo.add(new Label("annotations.size"));
-
 		}
 	}
 
@@ -237,13 +236,19 @@ public class RoPage
 		extends WebMarkupContainer
 	{
 
-		final WebMarkupContainer entriesDiv;
-
 		final WebMarkupContainer annotationsDiv;
 
-		final SelectableRefreshableView<Annotation> annList;
+		final PropertyListView<Annotation> annList;
 
-		final SelectableRefreshableView<Statement> entriesList;
+		final List<Statement> selectedStatements = new ArrayList<Statement>();
+
+		private final StatementEditForm stmtEditForm;
+
+
+		public AggregatedResource getModelObject()
+		{
+			return (AggregatedResource) getDefaultModelObject();
+		}
 
 
 		public AnnotatingBox(final CompoundPropertyModel<AggregatedResource> itemModel)
@@ -256,50 +261,78 @@ public class RoPage
 			annotationsDiv = new WebMarkupContainer("annotationsDiv");
 			annotationsDiv.setOutputMarkupId(true);
 			add(annotationsDiv);
-			annList = new SelectableRefreshableView<Annotation>("annsListView", new PropertyModel<List<Annotation>>(
+
+			Form< ? > annForm = new Form<Void>("annotationsForm");
+			annotationsDiv.add(annForm);
+			CheckGroup<Statement> group = new CheckGroup<Statement>("group", selectedStatements);
+			annForm.add(group);
+
+			annList = new PropertyListView<Annotation>("annotationsList", new PropertyModel<List<Annotation>>(
 					itemModel, "annotations")) {
 
 				@Override
-				protected void populateItem(Item<Annotation> item)
+				protected void populateItem(ListItem<Annotation> item)
 				{
-					super.populateItem(item);
-					item.add(new Label("createdFormatted"));
+					final Annotation annotation = item.getModelObject();
+					item.add(new AttributeAppender("title", new PropertyModel<URI>(annotation, "URI")));
+					PropertyListView<Statement> statementsList = new PropertyListView<Statement>("statementsList",
+							new PropertyModel<List<Statement>>(annotation, "body")) {
+
+						@Override
+						protected void populateItem(final ListItem<Statement> item)
+						{
+							final Statement statement = item.getModelObject();
+							item.add(new Check<Statement>("checkbox", item.getModel()));
+							item.add(new Label("propertyLocalName"));
+							if (statement.isObjectURIResource()) {
+								item.add(new ExternalLinkFragment("object", "externalLinkFragment", RoPage.this,
+										(CompoundPropertyModel<Statement>) item.getModel()));
+							}
+							else {
+								item.add(new Label("object", ((CompoundPropertyModel<Statement>) item.getModel())
+										.<String> bind("objectValue")).setEscapeModelStrings(false));
+							}
+							if (canEdit) {
+								item.add(new EditLinkFragment("edit", "editLinkFragment", RoPage.this,
+										new AjaxFallbackLink<String>("link") {
+
+											@Override
+											public void onClick(AjaxRequestTarget target)
+											{
+												stmtEditForm.setModelObject(statement);
+												stmtEditForm.setTitle("Edit statement");
+												target.add(stmtEditForm);
+												target.appendJavaScript("showStmtEdit('"
+														+ StringEscapeUtils.escapeEcmaScript(statement.getObjectValue())
+														+ "');");
+											}
+										}));
+							}
+							else {
+								item.add(new Label("edit", "Edit"));
+							}
+						}
+					};
+					item.add(statementsList);
 					item.add(new Label("creator"));
-					item.add(new AttributeAppender("title", new PropertyModel<URI>(item.getModel(), "URI")));
-					item.setOutputMarkupId(true);
+					item.add(new Label("createdAgoFormatted"));
 				}
-
-
-				@Override
-				public void onSelectItem(AjaxRequestTarget target, Item<Annotation> item)
-				{
-					target.add(annotationsDiv);
-					target.add(entriesDiv);
-				}
-
 			};
-			annotationsDiv.add(annList);
+			group.add(annList);
 
-			Form< ? > annForm = new Form<Void>("annForm");
-			annotationsDiv.add(annForm);
-
-			AjaxButton addAnnotation = new MyAjaxButton("addAnnotation", annForm) {
+			AjaxButton addStatement = new MyAjaxButton("addAnnotation", annForm) {
 
 				@Override
 				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 				{
 					super.onSubmit(target, form);
 					try {
-						ROSRService.addAnnotation(roURI, itemModel.getObject().getURI(),
-							getSession().getUsername("Unknown"), getSession().getdLibraAccessToken());
-						RoFactory factory = new RoFactory(roURI);
-						itemModel.getObject().setAnnotations(factory.createAnnotations(itemModel.getObject().getURI()));
-						annList.setSelectedObject(itemModel.getObject().getAnnotations()
-								.get(itemModel.getObject().getAnnotations().size() - 1));
-						target.add(annotationsDiv);
-						target.add(roViewerBox.itemInfo);
+						stmtEditForm.setModelObject(new Statement(itemModel.getObject().getURI(), null));
+						stmtEditForm.setTitle("Add statement");
+						target.add(stmtEditForm);
+						target.appendJavaScript("showStmtEdit('');");
 					}
-					catch (OAuthException | URISyntaxException e) {
+					catch (Exception e) {
 						error(e.getMessage());
 					}
 				}
@@ -311,155 +344,238 @@ public class RoPage
 					return super.isEnabled() && canEdit;
 				}
 			};
-			annForm.add(addAnnotation);
+			annForm.add(addStatement);
 
-			AjaxButton deleteAnnotation = new MyAjaxButton("deleteAnnotation", annForm) {
-
-				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-				{
-					super.onSubmit(target, form);
-					try {
-						try {
-							ROSRService.deleteAnnotation(roURI, annList.getSelectedObject().getURI(), getSession()
-									.getdLibraAccessToken());
-						}
-						catch (IllegalArgumentException e) {
-						}
-						RoFactory factory = new RoFactory(roURI);
-						itemModel.getObject().setAnnotations(factory.createAnnotations(itemModel.getObject().getURI()));
-						annList.setSelectedObject(null);
-						target.add(annotationsDiv);
-						target.add(entriesDiv);
-						target.add(roViewerBox.itemInfo);
-					}
-					catch (OAuthException | URISyntaxException e) {
-						error(e.getMessage());
-					}
-				}
-
-
-				@Override
-				public boolean isEnabled()
-				{
-					return super.isEnabled() && canEdit && annList.getSelectedObject() != null;
-				}
-			};
-			annForm.add(deleteAnnotation);
-
-			entriesDiv = new WebMarkupContainer("entriesDiv");
-			entriesDiv.setOutputMarkupId(true);
-			add(entriesDiv);
-			entriesList = new SelectableRefreshableView<Statement>("entriesListView",
-					new PropertyModel<List<Statement>>(annList, "selectedObject.body")) {
-
-				private static final long serialVersionUID = -6310254217773728128L;
-
-
-				@Override
-				protected void populateItem(final Item<Statement> item)
-				{
-					super.populateItem(item);
-					item.add(new Label("propertyLocalName"));
-					if (item.getModelObject().isObjectURIResource()) {
-						item.add(new ExternalLinkFragment("object", "externalLinkFragment", RoPage.this,
-								(CompoundPropertyModel<Statement>) item.getModel()));
-					}
-					else {
-						item.add(new Label("object", ((CompoundPropertyModel<Statement>) item.getModel())
-								.<String> bind("objectValue")).setEscapeModelStrings(false));
-					}
-					if (canEdit) {
-						item.add(new EditLinkFragment("edit", "editLinkFragment", RoPage.this,
-								new AjaxFallbackLink<String>("link") {
-
-									@Override
-									public void onClick(AjaxRequestTarget target)
-									{
-										stmtEditForm.setModelObject(item.getModelObject());
-										stmtEditForm.setTitle("Edit statement");
-										target.add(stmtEditForm);
-										target.appendJavaScript("showStmtEdit('"
-												+ StringEscapeUtils.escapeEcmaScript(item.getModelObject()
-														.getObjectValue()) + "');");
-									}
-								}));
-					}
-					else {
-						item.add(new Label("edit", "Edit"));
-					}
-				}
-
-
-				@Override
-				public void onSelectItem(AjaxRequestTarget target, Item<Statement> item)
-				{
-					target.add(entriesDiv);
-				}
-
-			};
-			entriesDiv.add(entriesList);
-
-			Form< ? > stmtForm = new Form<Void>("stmtForm");
-			entriesDiv.add(stmtForm);
-
-			AjaxButton addStatement = new MyAjaxButton("addStatement", stmtForm) {
-
-				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-				{
-					super.onSubmit(target, form);
-					try {
-						stmtEditForm.setModelObject(new Statement(itemModel.getObject().getURI(), annList
-								.getSelectedObject()));
-						stmtEditForm.setTitle("Add statement");
-						target.add(stmtEditForm);
-						target.appendJavaScript("showStmtEdit('');");
-					}
-					catch (URISyntaxException e) {
-						error("Error when adding preparing statement: " + e.getMessage());
-					}
-				}
-
-
-				@Override
-				public boolean isEnabled()
-				{
-					return super.isEnabled() && canEdit && annList.getSelectedObject() != null;
-				}
-			};
-			stmtForm.add(addStatement);
-
-			AjaxButton deleteStatement = new MyAjaxButton("deleteStatement", stmtForm) {
+			AjaxButton deleteStatement = new MyAjaxButton("deleteAnnotation", annForm) {
 
 				@Override
 				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 				{
 					super.onSubmit(target, form);
 					Token dLibraToken = getSession().getdLibraAccessToken();
-					Annotation ann = annList.getSelectedObject();
-					ann.getBody().remove(entriesList.getSelectedObject());
-					ROSRService.sendResource(ann.getBodyURI(), RoFactory.wrapAnnotationBody(ann.getBody()),
-						"application/rdf+xml", dLibraToken);
-					entriesList.setSelectedObject(null);
-					target.add(annotatingBox.entriesDiv);
+					List<Annotation> annotations = new ArrayList<Annotation>();
+					for (Statement statement : selectedStatements) {
+						statement.getAnnotation().getBody().remove(statement);
+						annotations.add(statement.getAnnotation());
+					}
+					for (Annotation annotation : annotations) {
+						try {
+							if (annotation.getBody().isEmpty()) {
+								ROSRService.deleteResource(annotation.getBodyURI(), dLibraToken);
+								ROSRService.deleteAnnotation(roURI, annotation.getURI(), dLibraToken);
+							}
+							else {
+								ROSRService.sendResource(annotation.getBodyURI(),
+									RoFactory.wrapAnnotationBody(annotation.getBody()), "application/rdf+xml",
+									dLibraToken);
+							}
+						}
+						catch (Exception e) {
+							error(e);
+						}
+					}
+					roFactory.reload();
+					AnnotatingBox.this.getModelObject().setAnnotations(
+						roFactory.createAnnotations(AnnotatingBox.this.getModelObject().getURI()));
+					selectedStatements.clear();
+					target.add(annotatingBox.annotationsDiv);
+					target.add(roViewerBox.itemInfo);
 				}
 
 
 				@Override
 				public boolean isEnabled()
 				{
-					return super.isEnabled() && canEdit && entriesList.getSelectedObject() != null;
+					return super.isEnabled() && canEdit /*
+														 * &&
+														 * !selectedStatements.isEmpty()
+														 */;
 				}
 			};
-			stmtForm.add(deleteStatement);
+			annForm.add(deleteStatement);
+
+			stmtEditForm = new StatementEditForm(new CompoundPropertyModel<Statement>((Statement) null));
+			add(stmtEditForm);
 		}
 
-
-		public void setAnnotationSelection(Annotation ann)
+		class StatementEditForm
+			extends Form<Statement>
 		{
-			annList.setSelectedObject(ann);
-			entriesList.setSelectedObject(null);
+
+			private final TextArea<String> value;
+
+			private final TextField<URI> objectURI;
+
+			private final TextField<URI> propertyURI;
+
+			private URI selectedProperty;
+
+			private String title;
+
+
+			public StatementEditForm(CompoundPropertyModel<Statement> model)
+			{
+				super("stmtEditForm", model);
+
+				add(new Label("title", new PropertyModel<String>(this, "title")));
+
+				List<URI> choices = Arrays.asList(RoFactory.defaultProperties);
+				DropDownChoice<URI> properties = new DropDownChoice<URI>("propertyURI", new PropertyModel<URI>(this,
+						"selectedProperty"), choices);
+				properties.setNullValid(true);
+				add(properties);
+
+				final WebMarkupContainer propertyURIDiv = new WebMarkupContainer("customPropertyURIDiv");
+				add(propertyURIDiv);
+
+				propertyURI = new TextField<URI>("customPropertyURI", new PropertyModel<URI>(this, "customProperty"),
+						URI.class) {
+
+					@SuppressWarnings("unchecked")
+					@Override
+					public <C> IConverter<C> getConverter(Class<C> type)
+					{
+						return (IConverter<C>) new URIConverter();
+					}
+				};
+				propertyURIDiv.add(propertyURI);
+
+				final WebMarkupContainer uriDiv = new WebMarkupContainer("objectURIDiv");
+				add(uriDiv);
+
+				objectURI = new TextField<URI>("objectURI", URI.class) {
+
+					@SuppressWarnings("unchecked")
+					@Override
+					public <C> IConverter<C> getConverter(Class<C> type)
+					{
+						return (IConverter<C>) new URIConverter();
+					}
+				};
+				uriDiv.add(objectURI);
+
+				final WebMarkupContainer valueDiv = new WebMarkupContainer("objectValueDiv");
+				add(valueDiv);
+
+				value = new TextArea<String>("objectValue");
+				value.setEscapeModelStrings(false);
+				valueDiv.add(value);
+
+				CheckBox objectType = new CheckBox("objectURIResource");
+				add(objectType);
+
+				add(new MyAjaxButton("save", this) {
+
+					@Override
+					protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+					{
+						super.onSubmit(target, form);
+						Token dLibraToken = getSession().getdLibraAccessToken();
+						Statement statement = StatementEditForm.this.getModelObject();
+						try {
+							if (statement.getAnnotation() == null) {
+								ClientResponse res = ROSRService.addAnnotation(roURI, statement.getSubjectURI(),
+									getSession().getUsername("Unknown"), statement, dLibraToken);
+								if (res.getStatus() != HttpServletResponse.SC_OK) {
+									throw new Exception("Error when adding annotation: "
+											+ res.getClientResponseStatus());
+								}
+							}
+							else {
+								Annotation ann = statement.getAnnotation();
+								ClientResponse res = ROSRService.sendResource(ann.getBodyURI(),
+									RoFactory.wrapAnnotationBody(ann.getBody()), "application/rdf+xml", dLibraToken);
+								if (res.getStatus() != HttpServletResponse.SC_OK) {
+									throw new Exception("Error when adding statement: " + res.getClientResponseStatus());
+								}
+							}
+							roFactory.reload();
+							AnnotatingBox.this.getModelObject().setAnnotations(
+								roFactory.createAnnotations(AnnotatingBox.this.getModelObject().getURI()));
+							target.add(form);
+							target.add(roViewerBox.itemInfo);
+							target.add(annotatingBox.annotationsDiv);
+							target.appendJavaScript("$('#edit-ann-modal').modal('hide')");
+						}
+						catch (Exception e) {
+							error("" + e.getMessage());
+						}
+					}
+				});
+				add(new MyAjaxButton("cancel", this) {
+
+					@Override
+					protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+					{
+						super.onSubmit(target, form);
+						target.appendJavaScript("$('#edit-ann-modal').modal('hide')");
+					}
+				}.setDefaultFormProcessing(false));
+			}
+
+
+			/**
+			 * @return the selectedProperty
+			 */
+			public URI getSelectedProperty()
+			{
+				if (selectedProperty == null && getModelObject() != null)
+					return getModelObject().getPropertyURI();
+				return selectedProperty;
+			}
+
+
+			/**
+			 * @param selectedProperty
+			 *            the selectedProperty to set
+			 */
+			public void setSelectedProperty(URI selectedProperty)
+			{
+				this.selectedProperty = selectedProperty;
+				if (selectedProperty != null)
+					getModelObject().setPropertyURI(selectedProperty);
+			}
+
+
+			/**
+			 * @return the selectedProperty
+			 */
+			public URI getCustomProperty()
+			{
+				if (getModelObject() != null)
+					return getModelObject().getPropertyURI();
+				return null;
+			}
+
+
+			/**
+			 * @param selectedProperty
+			 *            the selectedProperty to set
+			 */
+			public void setCustomProperty(URI customProperty)
+			{
+				if (selectedProperty == null && customProperty != null)
+					getModelObject().setPropertyURI(customProperty);
+			}
+
+
+			/**
+			 * @return the title
+			 */
+			public String getTitle()
+			{
+				return title;
+			}
+
+
+			/**
+			 * @param title
+			 *            the title to set
+			 */
+			public void setTitle(String title)
+			{
+				this.title = title;
+			}
 		}
 	}
 
@@ -579,174 +695,7 @@ public class RoPage
 				}
 			}.setDefaultFormProcessing(false));
 		}
-	}
 
-	@SuppressWarnings("serial")
-	class StatementEditForm
-		extends Form<Statement>
-	{
-
-		private final TextArea<String> value;
-
-		private final TextField<URI> objectURI;
-
-		private final TextField<URI> propertyURI;
-
-		private URI selectedProperty;
-
-		private String title;
-
-
-		public StatementEditForm(CompoundPropertyModel<Statement> model)
-		{
-			super("stmtEditForm", model);
-
-			add(new Label("title", new PropertyModel<String>(this, "title")));
-
-			List<URI> choices = Arrays.asList(RoFactory.defaultProperties);
-			DropDownChoice<URI> properties = new DropDownChoice<URI>("propertyURI", new PropertyModel<URI>(this,
-					"selectedProperty"), choices);
-			properties.setNullValid(true);
-			add(properties);
-
-			final WebMarkupContainer propertyURIDiv = new WebMarkupContainer("customPropertyURIDiv");
-			add(propertyURIDiv);
-
-			propertyURI = new TextField<URI>("customPropertyURI", new PropertyModel<URI>(this, "customProperty"),
-					URI.class) {
-
-				@SuppressWarnings("unchecked")
-				@Override
-				public <C> IConverter<C> getConverter(Class<C> type)
-				{
-					return (IConverter<C>) new URIConverter();
-				}
-			};
-			propertyURIDiv.add(propertyURI);
-
-			final WebMarkupContainer uriDiv = new WebMarkupContainer("objectURIDiv");
-			add(uriDiv);
-
-			objectURI = new TextField<URI>("objectURI", URI.class) {
-
-				@SuppressWarnings("unchecked")
-				@Override
-				public <C> IConverter<C> getConverter(Class<C> type)
-				{
-					return (IConverter<C>) new URIConverter();
-				}
-			};
-			uriDiv.add(objectURI);
-
-			final WebMarkupContainer valueDiv = new WebMarkupContainer("objectValueDiv");
-			add(valueDiv);
-
-			value = new TextArea<String>("objectValue");
-			value.setEscapeModelStrings(false);
-			valueDiv.add(value);
-
-			CheckBox objectType = new CheckBox("objectURIResource");
-			add(objectType);
-
-			add(new MyAjaxButton("save", this) {
-
-				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-				{
-					super.onSubmit(target, form);
-					Token dLibraToken = getSession().getdLibraAccessToken();
-					Annotation ann = StatementEditForm.this.getModelObject().getAnnotation();
-					boolean isNew = !ann.getBody().contains(StatementEditForm.this.getModelObject());
-					try {
-						if (isNew)
-							ann.getBody().add(StatementEditForm.this.getModelObject());
-						ROSRService.sendResource(ann.getBodyURI(), RoFactory.wrapAnnotationBody(ann.getBody()),
-							"application/rdf+xml", dLibraToken);
-						target.add(form);
-						target.add(annotatingBox.entriesDiv);
-						target.appendJavaScript("$('#edit-ann-modal').modal('hide')");
-					}
-					catch (Exception e) {
-						error("Could not update annotation (" + e.getMessage() + ")");
-						if (isNew)
-							ann.getBody().remove(StatementEditForm.this.getModelObject());
-					}
-				}
-			});
-			add(new MyAjaxButton("cancel", this) {
-
-				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-				{
-					super.onSubmit(target, form);
-					target.appendJavaScript("$('#edit-ann-modal').modal('hide')");
-				}
-			}.setDefaultFormProcessing(false));
-		}
-
-
-		/**
-		 * @return the selectedProperty
-		 */
-		public URI getSelectedProperty()
-		{
-			if (selectedProperty == null && getModelObject() != null)
-				return getModelObject().getPropertyURI();
-			return selectedProperty;
-		}
-
-
-		/**
-		 * @param selectedProperty
-		 *            the selectedProperty to set
-		 */
-		public void setSelectedProperty(URI selectedProperty)
-		{
-			this.selectedProperty = selectedProperty;
-			if (selectedProperty != null)
-				getModelObject().setPropertyURI(selectedProperty);
-		}
-
-
-		/**
-		 * @return the selectedProperty
-		 */
-		public URI getCustomProperty()
-		{
-			if (getModelObject() != null)
-				return getModelObject().getPropertyURI();
-			return null;
-		}
-
-
-		/**
-		 * @param selectedProperty
-		 *            the selectedProperty to set
-		 */
-		public void setCustomProperty(URI customProperty)
-		{
-			if (selectedProperty == null && customProperty != null)
-				getModelObject().setPropertyURI(customProperty);
-		}
-
-
-		/**
-		 * @return the title
-		 */
-		public String getTitle()
-		{
-			return title;
-		}
-
-
-		/**
-		 * @param title
-		 *            the title to set
-		 */
-		public void setTitle(String title)
-		{
-			this.title = title;
-		}
 	}
 
 	@SuppressWarnings("serial")

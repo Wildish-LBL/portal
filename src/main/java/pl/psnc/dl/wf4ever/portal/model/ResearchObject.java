@@ -6,8 +6,6 @@ package pl.psnc.dl.wf4ever.portal.model;
 import java.net.URI;
 import java.util.Calendar;
 
-import com.ocpsoft.pretty.time.PrettyTime;
-
 /**
  * @author piotrhol
  * 
@@ -52,18 +50,6 @@ public class ResearchObject
 	public URI getDownloadURI()
 	{
 		return getURI();
-	}
-
-
-	/**
-	 * @return the created
-	 */
-	public String getCreatedAgoFormatted()
-	{
-		if (getCreated() != null)
-			return new PrettyTime().format(getCreated().getTime());
-		else
-			return null;
 	}
 
 

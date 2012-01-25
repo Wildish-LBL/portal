@@ -19,6 +19,7 @@ import org.apache.wicket.request.UrlEncoder;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
+import pl.psnc.dl.wf4ever.portal.model.Statement;
 
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
@@ -115,6 +116,13 @@ public class ROSRService
 	}
 
 
+	public static ClientResponse addAnnotation(URI researchObjectURI, URI targetURI, String username, Token dLibraToken)
+		throws URISyntaxException
+	{
+		return addAnnotation(researchObjectURI, targetURI, username, null, dLibraToken);
+	}
+
+
 	/**
 	 * Creates an annotation and an empty annotation body in ROSRS
 	 * 
@@ -125,7 +133,8 @@ public class ROSRService
 	 * @throws OAuthException
 	 * @throws URISyntaxException
 	 */
-	public static ClientResponse addAnnotation(URI researchObjectURI, URI targetURI, String username, Token dLibraToken)
+	public static ClientResponse addAnnotation(URI researchObjectURI, URI targetURI, String username,
+			Statement statement, Token dLibraToken)
 		throws URISyntaxException
 	{
 		InputStream is = ROSRService.getResource(researchObjectURI.resolve(".ro/manifest"));
@@ -141,6 +150,9 @@ public class ROSRService
 
 		OntModel body = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 		ByteArrayOutputStream out2 = new ByteArrayOutputStream();
+		if (statement != null) {
+			body.add(statement.createJenaStatement());
+		}
 		body.write(out2);
 		return sendResource(bodyURI, new ByteArrayInputStream(out2.toByteArray()), "application/rdf+xml", dLibraToken);
 	}
@@ -267,4 +279,5 @@ public class ROSRService
 		URI ro = baseURI.resolve("ROs/" + UrlEncoder.PATH_INSTANCE.encode(roId, "UTF-8") + "/");
 		return !ros.contains(ro);
 	}
+
 }

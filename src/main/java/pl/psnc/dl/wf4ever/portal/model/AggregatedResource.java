@@ -6,6 +6,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
+import com.ocpsoft.pretty.time.PrettyTime;
+
 public abstract class AggregatedResource
 	implements Serializable
 {
@@ -75,6 +77,18 @@ public abstract class AggregatedResource
 	{
 		if (getCreated() != null)
 			return SDF.format(getCreated().getTime());
+		else
+			return null;
+	}
+
+
+	/**
+	 * @return the created
+	 */
+	public String getCreatedAgoFormatted()
+	{
+		if (getCreated() != null)
+			return new PrettyTime().format(getCreated().getTime());
 		else
 			return null;
 	}

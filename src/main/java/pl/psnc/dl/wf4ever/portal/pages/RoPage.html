@@ -25,7 +25,7 @@
 						<div wicket:id="treeTable" class="my-tree"></div>
 						<form class="form-stacked" wicket:id="roForm">
 							<div class="actions" wicket:id="actionButtons">
-<!-- 								<button class="btn success" type="submit" wicket:id="addFolder">Add
+								<!-- 								<button class="btn success" type="submit" wicket:id="addFolder">Add
 									folder</button> -->
 								<button class="btn success" type="submit"
 									wicket:id="addResource">Add resource</button>
@@ -74,7 +74,7 @@
 						class="sh_button" src="images/l_open.gif">
 				</h3>
 				<div class="row">
-					<div wicket:id="annotationsDiv"
+					<!-- 					<div wicket:id="annotationsDiv"
 						class="span6 annotations-list separated">
 						<table class="bordered-table zebra-striped" style="width: 95%">
 							<thead>
@@ -97,95 +97,105 @@
 									type="submit">Delete annotation</button>
 							</div>
 						</form>
-					</div>
-					<div wicket:id="entriesDiv" class="span9 entries-list">
-						<table class="bordered-table zebra-striped" style="width: 95%">
-							<thead>
-								<tr>
-									<th colspan=2>Statements</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr wicket:id="entriesListView">
-									<td><span class="label" wicket:id="propertyLocalName">[Property]</span>
-										<span wicket:id="object">[object]</span></td>
-									<td><span wicket:id="edit"></span></td>
-								</tr>
-							</tbody>
-						</table>
-						<form wicket:id="stmtForm" class="form-stacked">
+					</div> -->
+					<div wicket:id="annotationsDiv" class="span15 entries-list">
+						<form wicket:id="annotationsForm" class="form-stacked">
+							<section wicket:id="group">
+								<div class="row" style="margin-bottom: 20px;"
+									wicket:id="annotationsList">
+									<div class="span15">
+										<table class="bordered-table zebra-striped"
+											style="width: 95%; margin-bottom: 5px;">
+											<tbody>
+												<tr wicket:id="statementsList">
+													<td style="width: 30px;"><input type="checkbox" wicket:id="checkbox" /></td>
+													<td><span class="label" wicket:id="propertyLocalName">[Property]</span>
+														<span wicket:id="object">[object]</span></td>
+													<td style="width: 40px;"><span wicket:id="edit"></span></td>
+												</tr>
+											</tbody>
+										</table>
+										<p>
+											<span style="font-size: x-small;">by <span
+												wicket:id="creator"></span>, <span
+												wicket:id="createdAgoFormatted"></span></span>
+										</p>
+									</div>
+								</div>
+							</section>
 							<div class="actions">
-								<button wicket:id="addStatement" class="btn success"
-									type="submit">Add statement</button>
-								<button wicket:id="deleteStatement" class="btn danger"
-									type="submit">Delete statement</button>
+								<button wicket:id="addAnnotation" class="btn success"
+									type="submit">Add annotation</button>
+								<button wicket:id="deleteAnnotation" class="btn danger"
+									type="submit">Delete selected annotations</button>
 							</div>
 						</form>
 					</div>
 				</div>
-			</section>
-		</div>
-	</div>
-	<div id="edit-ann-modal" class="modal hide">
-		<form wicket:id="stmtEditForm">
-			<div class="modal-header">
-				<h3>
-					<span wicket:id="title">[title]</span>
-				</h3>
-			</div>
-			<div class="modal-body">
-				<fieldset>
-					<div class="clearfix">
-						<label for="propertyURI">What kind of statement is this?</label>
-						<div class="input">
-							<select name="propertyURI" id="propertyURI"
-								wicket:id="propertyURI">
-							</select>
+				<div id="edit-ann-modal" class="modal hide">
+					<form wicket:id="stmtEditForm">
+						<div class="modal-header">
+							<h3>
+								<span wicket:id="title">[title]</span>
+							</h3>
 						</div>
-					</div>
-					<div class="clearfix" id="customPropertyURIDiv"
-						wicket:id="customPropertyURIDiv">
-						<label for="objectURI">Custom property URI</label>
-						<div class="input">
-							<input type="text" class="xlarge" id="customPropertyURI"
-								wicket:id="customPropertyURI" />
-						</div>
-					</div>
-					<div class="clearfix">
-						<label for="objectType">Statement object type</label>
-						<div class="input">
-							<div class="inputs-list">
-								<label><input type="checkbox" value="objectResource"
-									id="objectType" wicket:id="objectURIResource" /><span>Statement
-										object is a resource</span> </label>
-							</div>
-						</div>
-					</div>
-					<div class="clearfix" id="objectURIDiv" wicket:id="objectURIDiv">
-						<label for="objectURI">Resource URI</label>
-						<div class="input">
-							<input type="text" class="xlarge" id="objectURI"
-								wicket:id="objectURI" />
-						</div>
-					</div>
-					<div class="clearfix" id="objectValueDiv"
-						wicket:id="objectValueDiv">
-						<label for="objectValue">Value for the statement</label>
-						<div class="input">
-							<textarea class="large" id="objectValue" name="objectValue"
-								style="width: 90%; height: 18em;" wicket:id="objectValue">
+						<div class="modal-body">
+							<fieldset>
+								<div class="clearfix">
+									<label for="propertyURI">What kind of statement is
+										this?</label>
+									<div class="input">
+										<select name="propertyURI" id="propertyURI"
+											wicket:id="propertyURI">
+										</select>
+									</div>
+								</div>
+								<div class="clearfix" id="customPropertyURIDiv"
+									wicket:id="customPropertyURIDiv">
+									<label for="objectURI">Custom property URI</label>
+									<div class="input">
+										<input type="text" class="xlarge" id="customPropertyURI"
+											wicket:id="customPropertyURI" />
+									</div>
+								</div>
+								<div class="clearfix">
+									<label for="objectType">Statement object type</label>
+									<div class="input">
+										<div class="inputs-list">
+											<label><input type="checkbox" value="objectResource"
+												id="objectType" wicket:id="objectURIResource" /><span>Statement
+													object is a resource</span> </label>
+										</div>
+									</div>
+								</div>
+								<div class="clearfix" id="objectURIDiv" wicket:id="objectURIDiv">
+									<label for="objectURI">Resource URI</label>
+									<div class="input">
+										<input type="text" class="xlarge" id="objectURI"
+											wicket:id="objectURI" />
+									</div>
+								</div>
+								<div class="clearfix" id="objectValueDiv"
+									wicket:id="objectValueDiv">
+									<label for="objectValue">Value for the statement</label>
+									<div class="input">
+										<textarea class="large" id="objectValue" name="objectValue"
+											style="width: 90%; height: 18em;" wicket:id="objectValue">
 [Statement body]
                       </textarea>
+									</div>
+								</div>
+							</fieldset>
 						</div>
-					</div>
-				</fieldset>
-			</div>
-			<div class="modal-footer">
-				<button type="submit" class="btn primary" wicket:id="save">Save
-					Changes</button>
-				<button type="submit" class="btn" wicket:id="cancel">Cancel</button>
-			</div>
-		</form>
+						<div class="modal-footer">
+							<button type="submit" class="btn primary" wicket:id="save">Save
+								Changes</button>
+							<button type="submit" class="btn" wicket:id="cancel">Cancel</button>
+						</div>
+					</form>
+				</div>
+			</section>
+		</div>
 	</div>
 	<div id="download-metadata-modal" class="modal hide">
 		<form wicket:id="downloadMetadataForm">
@@ -219,8 +229,7 @@
 				<fieldset>
 					<label for="fileUpload">File to upload</label>
 					<div class="input">
-						<input wicket:id="fileUpload" id="fileUpload" 
-							type="file" />
+						<input wicket:id="fileUpload" id="fileUpload" type="file" />
 					</div>
 				</fieldset>
 			</div>

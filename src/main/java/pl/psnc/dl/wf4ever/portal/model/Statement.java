@@ -16,7 +16,7 @@ import com.hp.hpl.jena.vocabulary.DCTerms;
 
 /**
  * @author piotrhol
- *
+ * 
  */
 public class Statement
 	implements Serializable
@@ -128,7 +128,8 @@ public class Statement
 
 
 	/**
-	 * @param propertyURI the propertyURI to set
+	 * @param propertyURI
+	 *            the propertyURI to set
 	 */
 	public void setPropertyURI(URI propertyURI)
 	{
@@ -141,7 +142,8 @@ public class Statement
 
 
 	/**
-	 * @param isObjectURIResource the isObjectURIResource to set
+	 * @param isObjectURIResource
+	 *            the isObjectURIResource to set
 	 */
 	public void setObjectURIResource(boolean isObjectURIResource)
 	{
@@ -150,7 +152,8 @@ public class Statement
 
 
 	/**
-	 * @param objectValue the objectValue to set
+	 * @param objectValue
+	 *            the objectValue to set
 	 */
 	public void setObjectValue(String objectValue)
 	{
@@ -159,11 +162,21 @@ public class Statement
 
 
 	/**
-	 * @param objectURI the objectURI to set
+	 * @param objectURI
+	 *            the objectURI to set
 	 */
 	public void setObjectURI(URI objectURI)
 	{
 		this.objectURI = subjectURI.resolve(objectURI);
+	}
+
+
+	/**
+	 * @return the subjectURI
+	 */
+	public URI getSubjectURI()
+	{
+		return subjectURI;
 	}
 
 
