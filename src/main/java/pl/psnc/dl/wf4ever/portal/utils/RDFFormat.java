@@ -94,7 +94,7 @@ public class RDFFormat
 	/**
 	 * The file format's (default) charset.
 	 */
-	private Charset charset;
+	private String charset;
 
 	/**
 	 * The file format's file extensions. The first item in the list is interpreted as the
@@ -145,7 +145,7 @@ public class RDFFormat
 
 		this.name = name;
 		this.mimeTypes.addAll(mimeTypes);
-		this.charset = charset;
+		this.charset = charset.name();
 		this.fileExtensions.addAll(fileExtensions);
 		this.supportsNamespaces = supportsNamespaces;
 		this.supportsContexts = supportsContexts;
@@ -350,7 +350,7 @@ public class RDFFormat
 	 */
 	public Charset getCharset()
 	{
-		return charset;
+		return Charset.forName(charset);
 	}
 
 
@@ -778,7 +778,7 @@ public class RDFFormat
 	 */
 	public void setCharset(Charset charset)
 	{
-		this.charset = charset;
+		this.charset = charset.name();
 	}
 
 

@@ -6,6 +6,7 @@ package pl.psnc.dl.wf4ever.portal.model;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 
 import org.apache.log4j.Logger;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.UrlDecoder;
 
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
@@ -41,7 +43,13 @@ import com.hp.hpl.jena.vocabulary.DCTerms;
  * 
  */
 public class RoFactory
+	implements Serializable
 {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3146046178402825339L;
 
 	private static final Logger log = Logger.getLogger(RoFactory.class);
 
@@ -49,13 +57,24 @@ public class RoFactory
 
 	private static final String AO_NAMESPACE = "http://purl.org/ao/";
 
-	private final OntModel model;
+	@SuppressWarnings("serial")
+	private final LoadableDetachableModel<OntModel> model = new LoadableDetachableModel<OntModel>() {
+
+		@Override
+		protected OntModel load()
+		{
+			if (manifestURI != null) {
+				OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
+				model.read(manifestURI.toString());
+				return model;
+			}
+			return null;
+		}
+	};
 
 	private final URI manifestURI;
 
 	private final URI researchObjectURI;
-
-	private final Individual ro;
 
 	private TreeModel aggregatedResourcesTree;
 
@@ -94,21 +113,18 @@ public class RoFactory
 	public RoFactory(URI baseURI)
 		throws OAuthException, URISyntaxException
 	{
-		model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
 
 		manifestURI = baseURI.resolve(".ro/manifest");
-		model.read(manifestURI.toString());
 
-		Individual manifest = model.getIndividual(manifestURI.toString());
-		ro = manifest.getPropertyResourceValue(model.createProperty(ORE_NAMESPACE + "describes")).as(Individual.class);
-		researchObjectURI = new URI(ro.getURI());
+		Individual manifest = model.getObject().getIndividual(manifestURI.toString());
+		researchObjectURI = new URI(manifest.getPropertyResourceValue(
+			model.getObject().createProperty(ORE_NAMESPACE + "describes")).getURI());
 	}
 
 
 	public void reload()
 	{
-		model.removeAll();
-		model.read(manifestURI.toString());
+		model.detach();
 
 		aggregatedResourcesTree = null;
 	}
@@ -120,6 +136,7 @@ public class RoFactory
 
 		Calendar created = null;
 		String creator = null;
+		Individual ro = model.getObject().getIndividual(researchObjectURI.toString());
 		try {
 			created = ((XSDDateTime) ro.getPropertyValue(DCTerms.created).asLiteral().getValue()).asCalendar();
 		}
@@ -133,11 +150,11 @@ public class RoFactory
 		catch (Exception e) {
 			log.warn("RO " + researchObjectURI + " does not define a creator");
 		}
-		ResearchObject ro = new ResearchObject(researchObjectURI, created, creator);
+		ResearchObject researchObject = new ResearchObject(researchObjectURI, created, creator);
 		if (includeAnnotations) {
-			ro.setAnnotations(createAnnotations(researchObjectURI));
+			researchObject.setAnnotations(createAnnotations(researchObjectURI));
 		}
-		return ro;
+		return researchObject;
 	}
 
 
@@ -158,7 +175,8 @@ public class RoFactory
 		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(researchObject);
 
 		// TODO take care of proxies & folders
-		NodeIterator it = model.listObjectsOfProperty(ro, aggregates);
+		Individual ro = model.getObject().getIndividual(researchObjectURI.toString());
+		NodeIterator it = model.getObject().listObjectsOfProperty(ro, aggregates);
 		while (it.hasNext()) {
 			Individual res = it.next().as(Individual.class);
 			if (res.hasRDFType(roResource)) {
@@ -175,7 +193,7 @@ public class RoFactory
 	 */
 	public AggregatedResource createResource(URI resourceURI, boolean includeAnnotations)
 	{
-		Individual res = model.getIndividual(resourceURI.toString());
+		Individual res = model.getObject().getIndividual(resourceURI.toString());
 		Calendar created = null;
 		String creator = null;
 		long size = 0;
@@ -210,8 +228,8 @@ public class RoFactory
 	{
 		List<Annotation> anns = new ArrayList<>();
 
-		Individual res = model.getIndividual(resourceURI.toString());
-		ResIterator it = model.listSubjectsWithProperty(annotatesResource, res);
+		Individual res = model.getObject().getIndividual(resourceURI.toString());
+		ResIterator it = model.getObject().listSubjectsWithProperty(annotatesResource, res);
 		while (it.hasNext()) {
 			Individual ann = it.next().as(Individual.class);
 			try {
