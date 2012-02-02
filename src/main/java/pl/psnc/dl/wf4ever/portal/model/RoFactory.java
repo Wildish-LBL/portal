@@ -13,7 +13,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -25,6 +28,7 @@ import org.apache.wicket.request.UrlDecoder;
 
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 
+import com.google.common.collect.Multimap;
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
@@ -56,21 +60,6 @@ public class RoFactory
 	private static final String ORE_NAMESPACE = "http://www.openarchives.org/ore/terms/";
 
 	private static final String AO_NAMESPACE = "http://purl.org/ao/";
-
-	@SuppressWarnings("serial")
-	private final LoadableDetachableModel<OntModel> model = new LoadableDetachableModel<OntModel>() {
-
-		@Override
-		protected OntModel load()
-		{
-			if (manifestURI != null) {
-				OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
-				model.read(manifestURI.toString());
-				return model;
-			}
-			return null;
-		}
-	};
 
 	private final URI manifestURI;
 
@@ -109,10 +98,28 @@ public class RoFactory
 
 	public static final Property aoBody = ModelFactory.createDefaultModel().createProperty(AO_NAMESPACE + "body");
 
+	@SuppressWarnings("serial")
+	private final LoadableDetachableModel<OntModel> model = new LoadableDetachableModel<OntModel>() {
 
-	public RoFactory(URI baseURI)
+		@Override
+		protected OntModel load()
+		{
+			if (manifestURI != null) {
+				OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
+				model.read(manifestURI.toString());
+				return model;
+			}
+			return null;
+		}
+	};
+
+	private final Multimap<String, URI> resourceGroups;
+
+
+	public RoFactory(URI baseURI, Multimap<String, URI> resourceGroups)
 		throws OAuthException, URISyntaxException
 	{
+		this.resourceGroups = resourceGroups;
 
 		manifestURI = baseURI.resolve(".ro/manifest");
 
@@ -162,17 +169,19 @@ public class RoFactory
 		throws URISyntaxException
 	{
 		if (aggregatedResourcesTree == null) {
-			aggregatedResourcesTree = createAggregatedResourcesTree();
+			aggregatedResourcesTree = createAggregatedResourcesTree(resourceGroups);
 		}
 		return aggregatedResourcesTree;
 	}
 
 
-	public TreeModel createAggregatedResourcesTree()
+	public TreeModel createAggregatedResourcesTree(Multimap<String, URI> resourceGroups)
 		throws URISyntaxException
 	{
 		ResearchObject researchObject = createResearchObject(true);
 		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(researchObject);
+
+		Map<String, DefaultMutableTreeNode> groupNodes = new HashMap<>();
 
 		// TODO take care of proxies & folders
 		Individual ro = model.getObject().getIndividual(researchObjectURI.toString());
@@ -180,8 +189,28 @@ public class RoFactory
 		while (it.hasNext()) {
 			Individual res = it.next().as(Individual.class);
 			if (res.hasRDFType(roResource)) {
-				rootNode.add(new DefaultMutableTreeNode(createResource(new URI(res.getURI()), true)));
+				AggregatedResource resource = createResource(new URI(res.getURI()), true);
+				boolean foundGroup = false;
+				for (String group : resourceGroups.keySet()) {
+					for (URI classURI : resourceGroups.get(group)) {
+						if (res.hasRDFType(classURI.toString())) {
+							foundGroup = true;
+							if (!groupNodes.containsKey(group)) {
+								groupNodes.put(group, new DefaultMutableTreeNode(group));
+							}
+							groupNodes.get(group).add(new DefaultMutableTreeNode(resource));
+							break;
+						}
+					}
+				}
+				if (!foundGroup) {
+					rootNode.add(new DefaultMutableTreeNode(resource));
+				}
 			}
+		}
+		int i = 0;
+		for (Entry<String, DefaultMutableTreeNode> e : groupNodes.entrySet()) {
+			rootNode.insert(e.getValue(), i++);
 		}
 		return new DefaultTreeModel(rootNode);
 	}

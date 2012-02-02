@@ -1,8 +1,10 @@
 package pl.psnc.dl.wf4ever.portal;
 
+import java.net.URI;
 import java.net.URL;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.Session;
@@ -24,6 +26,9 @@ import pl.psnc.dl.wf4ever.portal.pages.OAuthPage;
 import pl.psnc.dl.wf4ever.portal.pages.RoPage;
 import pl.psnc.dl.wf4ever.portal.pages.SparqlEndpointPage;
 import pl.psnc.dl.wf4ever.portal.services.DlibraApi;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 /**
  * Application object for your web application. If you want to run this application
@@ -50,6 +55,8 @@ public class PortalApplication
 	private URL searchEndpointURL;
 
 	private URL recommenderEndpointURL;
+
+	private final Multimap<String, URI> resourceGroups = HashMultimap.create();
 
 
 	/**
@@ -86,6 +93,7 @@ public class PortalApplication
 
 		loadTokens("tokens.properties");
 		loadProperties("portal.properties");
+		loadResourceGroups("resourceGroups.properties");
 
 		Locale.setDefault(Locale.ENGLISH);
 	}
@@ -128,6 +136,30 @@ public class PortalApplication
 		}
 		catch (Exception e) {
 			log.error("Failed to load tokens: " + e.getMessage());
+		}
+	}
+
+
+	private void loadResourceGroups(String propertiesFile)
+	{
+		Properties props = new Properties();
+		try {
+			props.load(getClass().getClassLoader().getResourceAsStream(propertiesFile));
+			Set<String> groups = props.stringPropertyNames();
+			for (String group : groups) {
+				String[] classes = props.getProperty(group, "").split(",");
+				for (String clazz : classes) {
+					if (!clazz.trim().isEmpty()) {
+						URI classURI = URI.create(clazz.trim());
+						if (classURI != null) {
+							resourceGroups.put(group, classURI);
+						}
+					}
+				}
+			}
+		}
+		catch (Exception e) {
+			log.error("Failed to load resourceGroups: " + e.getMessage());
 		}
 	}
 
@@ -236,6 +268,15 @@ public class PortalApplication
 	public void setRecommenderEndpointURL(URL recommenderEndpointURL)
 	{
 		this.recommenderEndpointURL = recommenderEndpointURL;
+	}
+
+
+	/**
+	 * @return the resourceGroups
+	 */
+	public Multimap<String, URI> getResourceGroups()
+	{
+		return resourceGroups;
 	}
 
 }

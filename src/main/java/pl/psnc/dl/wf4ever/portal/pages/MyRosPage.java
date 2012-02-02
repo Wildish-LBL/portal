@@ -28,6 +28,7 @@ import org.apache.wicket.validation.ValidationError;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
+import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
@@ -61,7 +62,8 @@ public class MyRosPage
 		final List<ResearchObject> researchObjects = new ArrayList<ResearchObject>();
 		for (URI uri : uris) {
 			try {
-				researchObjects.add(new RoFactory(uri).createResearchObject(false));
+				researchObjects.add(new RoFactory(uri, ((PortalApplication) getApplication()).getResourceGroups())
+						.createResearchObject(false));
 			}
 			catch (Exception e) {
 				error("Could not get manifest for: " + uri + " (" + e.getMessage() + ")");
@@ -201,7 +203,8 @@ public class MyRosPage
 				Token dLibraToken = MySession.get().getdLibraAccessToken();
 				try {
 					URI researchObjectURI = ROSRService.createResearchObject(roId, dLibraToken).getLocation();
-					researchObjects.add(new RoFactory(researchObjectURI).createResearchObject(false));
+					researchObjects.add(new RoFactory(researchObjectURI, ((PortalApplication) getApplication())
+							.getResourceGroups()).createResearchObject(false));
 				}
 				catch (OAuthException | URISyntaxException e) {
 					error("Could not add Research Object: " + roId + " (" + e.getMessage() + ")");

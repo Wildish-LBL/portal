@@ -50,6 +50,7 @@ import org.apache.wicket.util.lang.Bytes;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
+import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.Annotation;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
@@ -88,7 +89,7 @@ public class RoPage
 		ResearchObject ro = null;
 		if (!parameters.get("ro").isEmpty()) {
 			roURI = new URI(UrlDecoder.QUERY_INSTANCE.decode(parameters.get("ro").toString(), "UTF-8"));
-			roFactory = new RoFactory(roURI);
+			roFactory = new RoFactory(roURI, ((PortalApplication) getApplication()).getResourceGroups());
 			ro = roFactory.createResearchObject(true);
 		}
 		else {
