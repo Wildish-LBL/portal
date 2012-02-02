@@ -38,6 +38,7 @@ import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PropertyListView;
 import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -54,6 +55,7 @@ import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.Annotation;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
+import pl.psnc.dl.wf4ever.portal.model.ResourceGroup;
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.model.Statement;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
@@ -90,11 +92,12 @@ public class RoPage
 		OntModel model = null;
 		ResearchObject ro = null;
 		if (!parameters.get("ro").isEmpty()) {
+			PortalApplication app = ((PortalApplication) getApplication());
 			roURI = new URI(UrlDecoder.QUERY_INSTANCE.decode(parameters.get("ro").toString(), "UTF-8"));
 			model = RoFactory.createManifestAndAnnotationsModel(roURI);
 			ro = RoFactory.createResearchObject(model, roURI, true);
-			setAggregatedResourcesTree(RoFactory.createAggregatedResourcesTree(model, roURI,
-				((PortalApplication) getApplication()).getResourceGroups()));
+			setAggregatedResourcesTree(RoFactory.createAggregatedResourcesTree(model, roURI, app.getResourceGroups(),
+				app.getResourceGroupDescriptions()));
 		}
 		else {
 			throw new RestartResponseException(ErrorPage.class, new PageParameters().add("message",
@@ -126,8 +129,9 @@ public class RoPage
 		throws URISyntaxException
 	{
 		if (aggregatedResourcesTree == null) {
-			aggregatedResourcesTree = RoFactory.createAggregatedResourcesTree(roURI,
-				((PortalApplication) getApplication()).getResourceGroups());
+			PortalApplication app = ((PortalApplication) getApplication());
+			aggregatedResourcesTree = RoFactory.createAggregatedResourcesTree(roURI, app.getResourceGroups(),
+				app.getResourceGroupDescriptions());
 		}
 		return aggregatedResourcesTree;
 	}
@@ -149,7 +153,11 @@ public class RoPage
 
 		final Tree tree;
 
-		final WebMarkupContainer itemInfo;
+		Panel infoPanel;
+
+		private final ItemInfoPanel itemInfo;
+
+		private final InfoPanel resourceGroupInfo;
 
 		final WebMarkupContainer actionButtons;
 
@@ -161,6 +169,13 @@ public class RoPage
 			setOutputMarkupId(true);
 			add(new Label("title", roURI.toString()));
 
+			final CompoundPropertyModel<ResourceGroup> resourceGroupModel = new CompoundPropertyModel<ResourceGroup>(
+					(ResourceGroup) null);
+			itemInfo = new ItemInfoPanel("itemInfo", itemModel);
+			resourceGroupInfo = new InfoPanel("itemInfo", resourceGroupModel);
+			infoPanel = itemInfo;
+			add(infoPanel);
+
 			tree = new RoTree("treeTable", treeModel) {
 
 				private static final long serialVersionUID = -7512570425701073804L;
@@ -169,15 +184,31 @@ public class RoPage
 				@Override
 				protected void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node)
 				{
-					AggregatedResource res = (AggregatedResource) ((DefaultMutableTreeNode) node).getUserObject();
-					itemModel.setObject(res);
+					Object object = ((DefaultMutableTreeNode) node).getUserObject();
+					if (object instanceof AggregatedResource) {
+						AggregatedResource res = (AggregatedResource) object;
+						itemModel.setObject(res);
+						if (infoPanel != itemInfo) {
+							infoPanel.replaceWith(itemInfo);
+							infoPanel = itemInfo;
+						}
+					}
+					else if (object instanceof ResourceGroup) {
+						ResourceGroup res = (ResourceGroup) object;
+						resourceGroupModel.setObject(res);
+						if (infoPanel != resourceGroupInfo) {
+							infoPanel.replaceWith(resourceGroupInfo);
+							infoPanel = resourceGroupInfo;
+						}
+					}
 					annotatingBox.selectedStatements.clear();
 					target.add(actionButtons);
-					target.add(itemInfo);
+					target.add(infoPanel);
 					target.add(annotatingBox);
 				}
 			};
-			tree.getTreeState().expandAll();
+			tree.getTreeState().collapseAll();
+			tree.getTreeState().expandNode(treeModel.getObject().getRoot());
 			tree.getTreeState().selectNode(treeModel.getObject().getRoot(), true);
 			add(tree);
 
@@ -228,11 +259,13 @@ public class RoPage
 				@Override
 				public boolean isEnabled()
 				{
-					return super.isEnabled()
-							&& canEdit
-							&& !tree.getTreeState().getSelectedNodes().isEmpty()
-							&& !((AggregatedResource) ((DefaultMutableTreeNode) tree.getTreeState().getSelectedNodes()
-									.iterator().next()).getUserObject()).getURI().equals(roURI);
+					if (super.isEnabled() && canEdit && !tree.getTreeState().getSelectedNodes().isEmpty()) {
+						Object object = ((DefaultMutableTreeNode) tree.getTreeState().getSelectedNodes().iterator()
+								.next()).getUserObject();
+						return object instanceof AggregatedResource
+								&& !((AggregatedResource) object).getURI().equals(roURI);
+					}
+					return false;
 				}
 			};
 			actionButtons.add(deleteResource);
@@ -248,9 +281,6 @@ public class RoPage
 
 			};
 			roForm.add(downloadMetadata);
-
-			itemInfo = new ItemInfoPanel("itemInfo", itemModel);
-			add(itemInfo);
 		}
 	}
 
@@ -416,7 +446,7 @@ public class RoPage
 						RoFactory.createAnnotations(roURI, AnnotatingBox.this.getModelObject().getURI()));
 					selectedStatements.clear();
 					target.add(annotatingBox.annotationsDiv);
-					target.add(roViewerBox.itemInfo);
+					target.add(roViewerBox.infoPanel);
 				}
 
 
@@ -530,7 +560,7 @@ public class RoPage
 							AnnotatingBox.this.getModelObject().setAnnotations(
 								RoFactory.createAnnotations(roURI, AnnotatingBox.this.getModelObject().getURI()));
 							target.add(form);
-							target.add(roViewerBox.itemInfo);
+							target.add(roViewerBox.infoPanel);
 							target.add(annotatingBox.annotationsDiv);
 							target.appendJavaScript("$('#edit-ann-modal').modal('hide')");
 						}

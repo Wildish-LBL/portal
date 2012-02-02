@@ -121,16 +121,17 @@ public class RoFactory
 	}
 
 
-	public static TreeModel createAggregatedResourcesTree(URI researchObjectURI, Multimap<String, URI> resourceGroups)
+	public static TreeModel createAggregatedResourcesTree(URI researchObjectURI, Multimap<String, URI> resourceGroups,
+			Map<String, String> resourceGroupDescriptions)
 		throws URISyntaxException
 	{
 		OntModel model = createManifestAndAnnotationsModel(researchObjectURI);
-		return createAggregatedResourcesTree(model, researchObjectURI, resourceGroups);
+		return createAggregatedResourcesTree(model, researchObjectURI, resourceGroups, resourceGroupDescriptions);
 	}
 
 
 	public static TreeModel createAggregatedResourcesTree(OntModel model, URI researchObjectURI,
-			Multimap<String, URI> resourceGroups)
+			Multimap<String, URI> resourceGroups, Map<String, String> resourceGroupDescriptions)
 		throws URISyntaxException
 	{
 		ResearchObject researchObject = createResearchObject(researchObjectURI, true);
@@ -151,7 +152,8 @@ public class RoFactory
 						if (res.hasRDFType(classURI.toString())) {
 							foundGroup = true;
 							if (!groupNodes.containsKey(group)) {
-								groupNodes.put(group, new DefaultMutableTreeNode(group));
+								ResourceGroup resGroup = new ResourceGroup(group, resourceGroupDescriptions.get(group));
+								groupNodes.put(group, new DefaultMutableTreeNode(resGroup));
 							}
 							groupNodes.get(group).add(new DefaultMutableTreeNode(resource));
 							break;

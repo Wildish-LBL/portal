@@ -2,7 +2,9 @@ package pl.psnc.dl.wf4ever.portal;
 
 import java.net.URI;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -57,6 +59,8 @@ public class PortalApplication
 	private URL recommenderEndpointURL;
 
 	private final Multimap<String, URI> resourceGroups = HashMultimap.create();
+
+	private final Map<String, String> resourceGroupDescriptions = new HashMap<>();
 
 
 	/**
@@ -147,14 +151,25 @@ public class PortalApplication
 			props.load(getClass().getClassLoader().getResourceAsStream(propertiesFile));
 			Set<String> groups = props.stringPropertyNames();
 			for (String group : groups) {
-				String[] classes = props.getProperty(group, "").split(",");
-				for (String clazz : classes) {
-					if (!clazz.trim().isEmpty()) {
-						URI classURI = URI.create(clazz.trim());
-						if (classURI != null) {
-							resourceGroups.put(group, classURI);
+				if (group.endsWith(".classes")) {
+					String[] classes = props.getProperty(group, "").split(",");
+					for (String clazz : classes) {
+						if (!clazz.trim().isEmpty()) {
+							URI classURI = URI.create(clazz.trim());
+							if (classURI != null) {
+								String key = group.substring(0, group.length() - ".classes".length());
+								resourceGroups.put(key, classURI);
+							}
 						}
 					}
+					if (!resourceGroupDescriptions.containsKey(group)) {
+						resourceGroupDescriptions.put(group, "");
+					}
+				}
+				else if (group.endsWith(".description")) {
+					String desc = props.getProperty(group, "");
+					String key = group.substring(0, group.length() - ".description".length());
+					resourceGroupDescriptions.put(key, desc);
 				}
 			}
 		}
@@ -277,6 +292,15 @@ public class PortalApplication
 	public Multimap<String, URI> getResourceGroups()
 	{
 		return resourceGroups;
+	}
+
+
+	/**
+	 * @return the resourceGroupDescriptions
+	 */
+	public Map<String, String> getResourceGroupDescriptions()
+	{
+		return resourceGroupDescriptions;
 	}
 
 }
