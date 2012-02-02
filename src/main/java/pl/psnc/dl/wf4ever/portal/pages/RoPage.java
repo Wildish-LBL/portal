@@ -18,6 +18,7 @@ import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.tree.Tree;
@@ -39,6 +40,7 @@ import org.apache.wicket.markup.html.list.PropertyListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.UrlDecoder;
 import org.apache.wicket.request.UrlEncoder;
@@ -283,10 +285,24 @@ public class RoPage
 						{
 							final Statement statement = item.getModelObject();
 							item.add(new Check<Statement>("checkbox", item.getModel()));
+							if (statement.isSubjectURIResource()) {
+								if (statement.isSubjectPartOfRo(roURI)) {
+									item.add(new InternalLinkFragment("subject", "internalLinkFragment", RoPage.this,
+											statement));
+								}
+								else {
+									item.add(new ExternalLinkFragment("subject", "externalLinkFragment", RoPage.this,
+											(CompoundPropertyModel<Statement>) item.getModel(), "subjectURI"));
+								}
+							}
+							else {
+								item.add(new Label("subject", ((CompoundPropertyModel<Statement>) item.getModel())
+										.<String> bind("subjectValue")).setEscapeModelStrings(false));
+							}
 							item.add(new Label("propertyLocalNameNice"));
 							if (statement.isObjectURIResource()) {
 								item.add(new ExternalLinkFragment("object", "externalLinkFragment", RoPage.this,
-										(CompoundPropertyModel<Statement>) item.getModel()));
+										(CompoundPropertyModel<Statement>) item.getModel(), "objectURI"));
 							}
 							else {
 								item.add(new Label("object", ((CompoundPropertyModel<Statement>) item.getModel())
@@ -704,10 +720,31 @@ public class RoPage
 	{
 
 		public ExternalLinkFragment(String id, String markupId, MarkupContainer markupProvider,
-				CompoundPropertyModel<Statement> model)
+				CompoundPropertyModel<Statement> model, String property)
 		{
 			super(id, markupId, markupProvider, model);
-			add(new ExternalLink("link", model.<String> bind("objectURI"), model.<String> bind("objectURI")));
+			add(new ExternalLink("link", model.<String> bind(property), model.<String> bind(property)));
+		}
+	}
+
+	@SuppressWarnings("serial")
+	class InternalLinkFragment
+		extends Fragment
+	{
+
+		public InternalLinkFragment(String id, String markupId, MarkupContainer markupProvider, Statement statement)
+		{
+			super(id, markupId, markupProvider);
+			URI internalName = roURI.relativize(statement.getSubjectURI());
+			add(new AjaxLink<URI>("link", new Model<URI>(internalName)) {
+
+				@Override
+				public void onClick(AjaxRequestTarget target)
+				{
+					// TODO Auto-generated method stub
+
+				}
+			}.add(new Label("name", internalName.toString())));
 		}
 	}
 

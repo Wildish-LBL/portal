@@ -27,6 +27,10 @@ public class Statement
 	 */
 	private static final long serialVersionUID = 1704407898614509230L;
 
+	private final boolean isSubjectURIResource;
+
+	private final String subjectValue;
+
 	private final URI subjectURI;
 
 	private URI propertyURI;
@@ -45,11 +49,14 @@ public class Statement
 	public Statement(com.hp.hpl.jena.rdf.model.Statement original, Annotation annotation)
 		throws URISyntaxException
 	{
-		if (original.getSubject().isURIResource()) {
+		isSubjectURIResource = original.getSubject().isURIResource();
+		if (isSubjectURIResource) {
 			subjectURI = new URI(original.getSubject().getURI());
+			subjectValue = original.getSubject().getURI();
 		}
 		else {
 			subjectURI = null;
+			subjectValue = original.getSubject().asResource().getId().getLabelString();
 		}
 		setPropertyURI(new URI(original.getPredicate().getURI()));
 		RDFNode node = original.getObject();
@@ -74,6 +81,8 @@ public class Statement
 		throws URISyntaxException
 	{
 		this.subjectURI = subjectURI;
+		subjectValue = "";
+		isSubjectURIResource = false;
 		setPropertyURI(new URI(DCTerms.title.getURI()));
 		isObjectURIResource = false;
 		objectURI = null;
@@ -195,6 +204,24 @@ public class Statement
 	}
 
 
+	/**
+	 * @return the subjectValue
+	 */
+	public String getSubjectValue()
+	{
+		return subjectValue;
+	}
+
+
+	/**
+	 * @return the isSubjectURIResource
+	 */
+	public boolean isSubjectURIResource()
+	{
+		return isSubjectURIResource;
+	}
+
+
 	public com.hp.hpl.jena.rdf.model.Statement createJenaStatement()
 	{
 		Model model = ModelFactory.createDefaultModel();
@@ -221,6 +248,12 @@ public class Statement
 		return s.replaceAll(
 			String.format("%s|%s|%s", "(?<=[A-Z])(?=[A-Z][a-z])", "(?<=[^A-Z])(?=[A-Z])", "(?<=[A-Za-z])(?=[^A-Za-z])"),
 			" ");
+	}
+
+
+	public boolean isSubjectPartOfRo(URI roURI)
+	{
+		return subjectURI != null && subjectURI.normalize().toString().startsWith(roURI.normalize().toString());
 	}
 
 }

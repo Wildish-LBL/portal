@@ -111,14 +111,25 @@
 									wicket:id="annotationsList">
 									<div class="span15">
 										<table class="bordered-table zebra-striped"
-											style="width: 95%; margin-bottom: 5px;">
+											style="width: 95%; margin-bottom: 5px; table-layout: fixed;">
+											<thead>
+												<tr>
+													<th style="width: 30px;"></th>
+													<th style="width: 100px;">Subject</th>
+													<th>Value</th>
+													<th style="width: 40px;">Action</th>
+												</tr>
+											</thead>
 											<tbody>
 												<tr wicket:id="statementsList">
-													<td style="width: 30px;"><input type="checkbox"
+													<td><input type="checkbox"
 														wicket:id="checkbox" /></td>
-													<td><span class="label" wicket:id="propertyLocalNameNice">[Property]</span>
-														<span wicket:id="object">[object]</span></td>
-													<td style="width: 40px;"><span wicket:id="edit"></span></td>
+													<td><div wicket:id="subject"
+															style="overflow: hidden">[subject]</div></td>
+													<td><span class="label"
+														wicket:id="propertyLocalNameNice">[Property]</span> <span
+														wicket:id="object">[object]</span></td>
+													<td><span wicket:id="edit"></span></td>
 												</tr>
 											</tbody>
 										</table>
@@ -249,6 +260,9 @@
 	</div>
 	<wicket:fragment wicket:id="externalLinkFragment">
 		<a wicket:id="link"></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="internalLinkFragment">
+		<a wicket:id="link"><span wicket:id="name">[internal]</span></a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="editLinkFragment">
 		<a wicket:id="link">Edit</a>
