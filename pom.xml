@@ -177,6 +177,11 @@
 			<artifactId>guava</artifactId>
 			<version>11.0.1</version>
 		</dependency>
+		<dependency>
+			<groupId>de.fuberlin.wiwss.ng4j</groupId>
+			<artifactId>ng4j</artifactId>
+			<version>0.9.4-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>portal</finalName>

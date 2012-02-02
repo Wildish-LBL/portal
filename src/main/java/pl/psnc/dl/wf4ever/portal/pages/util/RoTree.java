@@ -50,9 +50,12 @@ public class RoTree
 	@Override
 	protected ResourceReference getNodeIcon(TreeNode node)
 	{
-		AggregatedResource res = (AggregatedResource) ((DefaultMutableTreeNode) node).getUserObject();
-		if (res.isWorkflow()) {
-			return WORKFLOW;
+		Object object = ((DefaultMutableTreeNode) node).getUserObject();
+		if (object instanceof AggregatedResource) {
+			AggregatedResource res = (AggregatedResource) object;
+			if (res.isWorkflow()) {
+				return WORKFLOW;
+			}
 		}
 		return super.getNodeIcon(node);
 	}

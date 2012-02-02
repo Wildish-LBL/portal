@@ -38,6 +38,9 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 
+import de.fuberlin.wiwiss.ng4j.NamedGraphSet;
+import de.fuberlin.wiwiss.ng4j.impl.NamedGraphSetImpl;
+
 /**
  * @author piotrhol
  * 
@@ -316,11 +319,13 @@ public class RoFactory
 	 */
 	public static OntModel createManifestAndAnnotationsModel(URI researchObjectURI)
 	{
-		//TODO use NG
 		URI manifestURI = researchObjectURI.resolve(".ro/manifest");
-		OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
-		model.read(manifestURI.toString());
-		return model;
+
+		NamedGraphSet graphset = new NamedGraphSetImpl();
+		graphset.read(manifestURI.toString() + ".trig", "TRIG");
+		OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM,
+			graphset.asJenaModel(manifestURI.toString()));
+		return ontModel;
 	}
 
 }
