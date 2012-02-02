@@ -283,7 +283,7 @@ public class RoPage
 						{
 							final Statement statement = item.getModelObject();
 							item.add(new Check<Statement>("checkbox", item.getModel()));
-							item.add(new Label("propertyLocalName"));
+							item.add(new Label("propertyLocalNameNice"));
 							if (statement.isObjectURIResource()) {
 								item.add(new ExternalLinkFragment("object", "externalLinkFragment", RoPage.this,
 										(CompoundPropertyModel<Statement>) item.getModel()));

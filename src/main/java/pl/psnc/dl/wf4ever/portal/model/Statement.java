@@ -45,13 +45,22 @@ public class Statement
 	public Statement(com.hp.hpl.jena.rdf.model.Statement original, Annotation annotation)
 		throws URISyntaxException
 	{
-		subjectURI = new URI(original.getSubject().getURI());
+		if (original.getSubject().isURIResource()) {
+			subjectURI = new URI(original.getSubject().getURI());
+		}
+		else {
+			subjectURI = null;
+		}
 		setPropertyURI(new URI(original.getPredicate().getURI()));
 		RDFNode node = original.getObject();
 		isObjectURIResource = node.isURIResource();
 		if (isObjectURIResource) {
 			objectURI = new URI(node.asResource().getURI());
 			objectValue = node.asResource().toString();
+		}
+		else if (node.isResource()) {
+			objectURI = null;
+			objectValue = original.getObject().asResource().getId().getLabelString();
 		}
 		else {
 			objectURI = null;
@@ -97,6 +106,12 @@ public class Statement
 	public String getPropertyLocalName()
 	{
 		return propertyLocalName;
+	}
+
+
+	public String getPropertyLocalNameNice()
+	{
+		return splitCamelCase(getPropertyLocalName());
 	}
 
 
@@ -193,6 +208,19 @@ public class Statement
 			object = model.createTypedLiteral(objectValue);
 		}
 		return model.createStatement(subject, property, object);
+	}
+
+
+	/*
+	 * from
+	 * http://stackoverflow.com/questions/2559759/how-do-i-convert-camelcase-into-human
+	 * -readable-names-in-java
+	 */
+	static String splitCamelCase(String s)
+	{
+		return s.replaceAll(
+			String.format("%s|%s|%s", "(?<=[A-Z])(?=[A-Z][a-z])", "(?<=[^A-Z])(?=[A-Z])", "(?<=[A-Za-z])(?=[^A-Za-z])"),
+			" ");
 	}
 
 }
