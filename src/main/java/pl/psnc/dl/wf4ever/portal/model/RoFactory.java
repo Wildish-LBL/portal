@@ -6,7 +6,6 @@ package pl.psnc.dl.wf4ever.portal.model;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -23,10 +22,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 
 import org.apache.log4j.Logger;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.UrlDecoder;
-
-import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 
 import com.google.common.collect.Multimap;
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
@@ -47,25 +43,13 @@ import com.hp.hpl.jena.vocabulary.DCTerms;
  * 
  */
 public class RoFactory
-	implements Serializable
 {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 3146046178402825339L;
 
 	private static final Logger log = Logger.getLogger(RoFactory.class);
 
 	private static final String ORE_NAMESPACE = "http://www.openarchives.org/ore/terms/";
 
 	private static final String AO_NAMESPACE = "http://purl.org/ao/";
-
-	private final URI manifestURI;
-
-	private final URI researchObjectURI;
-
-	private TreeModel aggregatedResourcesTree;
 
 	public static final URI[] defaultProperties = { URI.create(DCTerms.type.getURI()),
 			URI.create(DCTerms.subject.getURI()), URI.create(DCTerms.description.getURI()),
@@ -98,57 +82,26 @@ public class RoFactory
 
 	public static final Property aoBody = ModelFactory.createDefaultModel().createProperty(AO_NAMESPACE + "body");
 
-	@SuppressWarnings("serial")
-	private final LoadableDetachableModel<OntModel> model = new LoadableDetachableModel<OntModel>() {
 
-		@Override
-		protected OntModel load()
-		{
-			if (manifestURI != null) {
-				OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
-				model.read(manifestURI.toString());
-				return model;
-			}
-			return null;
-		}
-	};
-
-	private final Multimap<String, URI> resourceGroups;
-
-
-	public RoFactory(URI baseURI, Multimap<String, URI> resourceGroups)
-		throws OAuthException, URISyntaxException
-	{
-		this.resourceGroups = resourceGroups;
-
-		manifestURI = baseURI.resolve(".ro/manifest");
-
-		Individual manifest = model.getObject().getIndividual(manifestURI.toString());
-		researchObjectURI = new URI(manifest.getPropertyResourceValue(
-			model.getObject().createProperty(ORE_NAMESPACE + "describes")).getURI());
-	}
-
-
-	public void reload()
-	{
-		model.detach();
-
-		aggregatedResourcesTree = null;
-	}
-
-
-	public ResearchObject createResearchObject(boolean includeAnnotations)
+	public static ResearchObject createResearchObject(URI researchObjectURI, boolean includeAnnotations)
 		throws URISyntaxException
 	{
+		OntModel model = createManifestModel(researchObjectURI);
+		return createResearchObject(model, researchObjectURI, includeAnnotations);
+	}
 
+
+	public static ResearchObject createResearchObject(OntModel model, URI researchObjectURI, boolean includeAnnotations)
+		throws URISyntaxException
+	{
 		Calendar created = null;
 		String creator = null;
-		Individual ro = model.getObject().getIndividual(researchObjectURI.toString());
+		Individual ro = model.getIndividual(researchObjectURI.toString());
 		try {
 			created = ((XSDDateTime) ro.getPropertyValue(DCTerms.created).asLiteral().getValue()).asCalendar();
 		}
 		catch (Exception e) {
-			log.warn("RO " + researchObjectURI + " does not define a creator");
+			log.warn("RO " + researchObjectURI + " does not define created");
 		}
 		try {
 			creator = ro.getPropertyResourceValue(DCTerms.creator).as(Individual.class).getPropertyValue(foafName)
@@ -159,37 +112,36 @@ public class RoFactory
 		}
 		ResearchObject researchObject = new ResearchObject(researchObjectURI, created, creator);
 		if (includeAnnotations) {
-			researchObject.setAnnotations(createAnnotations(researchObjectURI));
+			researchObject.setAnnotations(createAnnotations(model, researchObjectURI, researchObjectURI));
 		}
 		return researchObject;
 	}
 
 
-	public TreeModel getAggregatedResourcesTree()
+	public static TreeModel createAggregatedResourcesTree(URI researchObjectURI, Multimap<String, URI> resourceGroups)
 		throws URISyntaxException
 	{
-		if (aggregatedResourcesTree == null) {
-			aggregatedResourcesTree = createAggregatedResourcesTree(resourceGroups);
-		}
-		return aggregatedResourcesTree;
+		OntModel model = createManifestAndAnnotationsModel(researchObjectURI);
+		return createAggregatedResourcesTree(model, researchObjectURI, resourceGroups);
 	}
 
 
-	public TreeModel createAggregatedResourcesTree(Multimap<String, URI> resourceGroups)
+	public static TreeModel createAggregatedResourcesTree(OntModel model, URI researchObjectURI,
+			Multimap<String, URI> resourceGroups)
 		throws URISyntaxException
 	{
-		ResearchObject researchObject = createResearchObject(true);
+		ResearchObject researchObject = createResearchObject(researchObjectURI, true);
 		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(researchObject);
 
 		Map<String, DefaultMutableTreeNode> groupNodes = new HashMap<>();
 
 		// TODO take care of proxies & folders
-		Individual ro = model.getObject().getIndividual(researchObjectURI.toString());
-		NodeIterator it = model.getObject().listObjectsOfProperty(ro, aggregates);
+		Individual ro = model.getIndividual(researchObjectURI.toString());
+		NodeIterator it = model.listObjectsOfProperty(ro, aggregates);
 		while (it.hasNext()) {
 			Individual res = it.next().as(Individual.class);
 			if (res.hasRDFType(roResource)) {
-				AggregatedResource resource = createResource(new URI(res.getURI()), true);
+				AggregatedResource resource = createResource(model, researchObjectURI, new URI(res.getURI()), true);
 				boolean foundGroup = false;
 				for (String group : resourceGroups.keySet()) {
 					for (URI classURI : resourceGroups.get(group)) {
@@ -216,13 +168,23 @@ public class RoFactory
 	}
 
 
+	public static AggregatedResource createResource(URI researchObjectURI, URI resourceURI, boolean includeAnnotations)
+	{
+		OntModel model = createManifestModel(researchObjectURI);
+
+		return createResource(model, researchObjectURI, resourceURI, includeAnnotations);
+	}
+
+
 	/**
 	 * @param rootNode
 	 * @param resourceURI
 	 */
-	public AggregatedResource createResource(URI resourceURI, boolean includeAnnotations)
+	public static AggregatedResource createResource(OntModel model, URI researchObjectURI, URI resourceURI,
+			boolean includeAnnotations)
 	{
-		Individual res = model.getObject().getIndividual(resourceURI.toString());
+
+		Individual res = model.getIndividual(resourceURI.toString());
 		Calendar created = null;
 		String creator = null;
 		long size = 0;
@@ -247,18 +209,26 @@ public class RoFactory
 		String name = UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.relativize(resourceURI).toString(), "UTF-8");
 		AggregatedResource resource = new RoResource(resourceURI, created, creator, name, size);
 		if (includeAnnotations) {
-			resource.setAnnotations(createAnnotations(resourceURI));
+			resource.setAnnotations(createAnnotations(model, researchObjectURI, resourceURI));
 		}
 		return resource;
 	}
 
 
-	public List<Annotation> createAnnotations(URI resourceURI)
+	public static List<Annotation> createAnnotations(URI researchObjectURI, URI resourceURI)
+	{
+		OntModel model = createManifestModel(researchObjectURI);
+
+		return createAnnotations(model, researchObjectURI, resourceURI);
+	}
+
+
+	public static List<Annotation> createAnnotations(OntModel model, URI researchObjectURI, URI resourceURI)
 	{
 		List<Annotation> anns = new ArrayList<>();
 
-		Individual res = model.getObject().getIndividual(resourceURI.toString());
-		ResIterator it = model.getObject().listSubjectsWithProperty(annotatesResource, res);
+		Individual res = model.getIndividual(resourceURI.toString());
+		ResIterator it = model.listSubjectsWithProperty(annotatesResource, res);
 		while (it.hasNext()) {
 			Individual ann = it.next().as(Individual.class);
 			try {
@@ -324,6 +294,33 @@ public class RoFactory
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		body.write(out);
 		return new ByteArrayInputStream(out.toByteArray());
+	}
+
+
+	/**
+	 * @param researchObjectURI
+	 * @return
+	 */
+	public static OntModel createManifestModel(URI researchObjectURI)
+	{
+		URI manifestURI = researchObjectURI.resolve(".ro/manifest");
+		OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
+		model.read(manifestURI.toString());
+		return model;
+	}
+
+
+	/**
+	 * @param researchObjectURI
+	 * @return
+	 */
+	public static OntModel createManifestAndAnnotationsModel(URI researchObjectURI)
+	{
+		//TODO use NG
+		URI manifestURI = researchObjectURI.resolve(".ro/manifest");
+		OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
+		model.read(manifestURI.toString());
+		return model;
 	}
 
 }

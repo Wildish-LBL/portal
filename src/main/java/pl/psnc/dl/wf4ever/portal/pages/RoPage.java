@@ -63,6 +63,7 @@ import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
+import com.hp.hpl.jena.ontology.OntModel;
 import com.sun.jersey.api.client.ClientResponse;
 
 public class RoPage
@@ -79,18 +80,21 @@ public class RoPage
 
 	private final AnnotatingBox annotatingBox;
 
-	private transient RoFactory roFactory;
+	private TreeModel aggregatedResourcesTree;
 
 
 	public RoPage(final PageParameters parameters)
 		throws URISyntaxException, MalformedURLException, OAuthException
 	{
 		super(parameters);
+		OntModel model = null;
 		ResearchObject ro = null;
 		if (!parameters.get("ro").isEmpty()) {
 			roURI = new URI(UrlDecoder.QUERY_INSTANCE.decode(parameters.get("ro").toString(), "UTF-8"));
-			roFactory = new RoFactory(roURI, ((PortalApplication) getApplication()).getResourceGroups());
-			ro = roFactory.createResearchObject(true);
+			model = RoFactory.createManifestAndAnnotationsModel(roURI);
+			ro = RoFactory.createResearchObject(model, roURI, true);
+			setAggregatedResourcesTree(RoFactory.createAggregatedResourcesTree(model, roURI,
+				((PortalApplication) getApplication()).getResourceGroups()));
 		}
 		else {
 			throw new RestartResponseException(ErrorPage.class, new PageParameters().add("message",
@@ -104,13 +108,38 @@ public class RoPage
 		add(new Label("title", ro.getURI().toString()));
 
 		final CompoundPropertyModel<AggregatedResource> itemModel = new CompoundPropertyModel<AggregatedResource>(ro);
-		roViewerBox = new RoViewerBox(itemModel, new PropertyModel<TreeModel>(roFactory, "aggregatedResourcesTree"));
+		roViewerBox = new RoViewerBox(itemModel, new PropertyModel<TreeModel>(this, "aggregatedResourcesTree"));
 		add(roViewerBox);
 		annotatingBox = new AnnotatingBox(itemModel);
 		add(annotatingBox);
 		annotatingBox.selectedStatements.clear();
 		add(new ChooseRdfFormat());
 		add(new UploadResourceForm());
+	}
+
+
+	/**
+	 * @return the aggregatedResourcesTree
+	 * @throws URISyntaxException
+	 */
+	public TreeModel getAggregatedResourcesTree()
+		throws URISyntaxException
+	{
+		if (aggregatedResourcesTree == null) {
+			aggregatedResourcesTree = RoFactory.createAggregatedResourcesTree(roURI,
+				((PortalApplication) getApplication()).getResourceGroups());
+		}
+		return aggregatedResourcesTree;
+	}
+
+
+	/**
+	 * @param aggregatedResourcesTree
+	 *            the aggregatedResourcesTree to set
+	 */
+	public void setAggregatedResourcesTree(TreeModel aggregatedResourcesTree)
+	{
+		this.aggregatedResourcesTree = aggregatedResourcesTree;
 	}
 
 	@SuppressWarnings("serial")
@@ -187,7 +216,7 @@ public class RoPage
 							.getSelectedNodes().iterator().next()).getUserObject();
 					try {
 						ROSRService.deleteResource(res.getURI(), MySession.get().getdLibraAccessToken());
-						roFactory.reload();
+						setAggregatedResourcesTree(null);
 						target.add(RoViewerBox.this);
 					}
 					catch (Exception e) {
@@ -391,9 +420,9 @@ public class RoPage
 							error(e);
 						}
 					}
-					roFactory.reload();
+					//					roFactory.reload();
 					AnnotatingBox.this.getModelObject().setAnnotations(
-						roFactory.createAnnotations(AnnotatingBox.this.getModelObject().getURI()));
+						RoFactory.createAnnotations(roURI, AnnotatingBox.this.getModelObject().getURI()));
 					selectedStatements.clear();
 					target.add(annotatingBox.annotationsDiv);
 					target.add(roViewerBox.itemInfo);
@@ -506,9 +535,9 @@ public class RoPage
 									throw new Exception("Error when adding statement: " + res.getClientResponseStatus());
 								}
 							}
-							roFactory.reload();
+							//							roFactory.reload();
 							AnnotatingBox.this.getModelObject().setAnnotations(
-								roFactory.createAnnotations(AnnotatingBox.this.getModelObject().getURI()));
+								RoFactory.createAnnotations(roURI, AnnotatingBox.this.getModelObject().getURI()));
 							target.add(form);
 							target.add(roViewerBox.itemInfo);
 							target.add(annotatingBox.annotationsDiv);
@@ -692,7 +721,7 @@ public class RoPage
 						try {
 							ROSRService.sendResource(resourceURI, uploadedFile.getInputStream(),
 								uploadedFile.getContentType(), MySession.get().getdLibraAccessToken());
-							roFactory.reload();
+							setAggregatedResourcesTree(null);
 							target.appendJavaScript("$('#upload-resource-modal').modal('hide')");
 							target.add(roViewerBox);
 						}

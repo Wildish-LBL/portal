@@ -28,14 +28,12 @@ import org.apache.wicket.validation.ValidationError;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
-import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.pages.util.ModelIteratorAdapter;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
-import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 
 @AuthorizeInstantiation("USER")
@@ -62,8 +60,7 @@ public class MyRosPage
 		final List<ResearchObject> researchObjects = new ArrayList<ResearchObject>();
 		for (URI uri : uris) {
 			try {
-				researchObjects.add(new RoFactory(uri, ((PortalApplication) getApplication()).getResourceGroups())
-						.createResearchObject(false));
+				researchObjects.add(RoFactory.createResearchObject(uri, false));
 			}
 			catch (Exception e) {
 				error("Could not get manifest for: " + uri + " (" + e.getMessage() + ")");
@@ -203,10 +200,9 @@ public class MyRosPage
 				Token dLibraToken = MySession.get().getdLibraAccessToken();
 				try {
 					URI researchObjectURI = ROSRService.createResearchObject(roId, dLibraToken).getLocation();
-					researchObjects.add(new RoFactory(researchObjectURI, ((PortalApplication) getApplication())
-							.getResourceGroups()).createResearchObject(false));
+					researchObjects.add(RoFactory.createResearchObject(researchObjectURI, false));
 				}
-				catch (OAuthException | URISyntaxException e) {
+				catch (URISyntaxException e) {
 					error("Could not add Research Object: " + roId + " (" + e.getMessage() + ")");
 				}
 				target.add(form);
