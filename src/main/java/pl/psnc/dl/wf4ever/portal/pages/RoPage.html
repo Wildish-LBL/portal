@@ -40,32 +40,6 @@
 						</form>
 					</div>
 					<div class="span7" wicket:id="itemInfo" style="overflow: hidden">
-						<h4>Item info</h4>
-						<p>
-							<strong>Resource URI:</strong> <a wicket:id="resourceURI">[uri]</a>
-						</p>
-						<p>
-							<strong>Download URI:</strong> <a wicket:id="downloadURI">[uri]</a>
-						</p>
-						<p>
-							<strong>Created by:</strong> <span wicket:id="creator">[creator]</span>
-						</p>
-						<p>
-							<strong>Created on:</strong> <span wicket:id="createdFormatted">[created]</span>
-						</p>
-						<p>
-							<strong>File size:</strong> <span wicket:id="sizeFormatted">[filesize]</span>
-						</p>
-						<p>
-							<strong>Number of annotations:</strong> <span
-								wicket:id="annotations.size">[annotationsCnt]</span>
-						</p>
-						<p>
-							<strong>Input in:</strong>
-						<ul>
-							<li><a href="#">Some workflow</a></li>
-						</ul>
-						</p>
 					</div>
 				</div>
 			</section>
@@ -80,30 +54,6 @@
 						class="sh_button" src="images/l_open.gif">
 				</h3>
 				<div class="row">
-					<!-- 					<div wicket:id="annotationsDiv"
-						class="span6 annotations-list separated">
-						<table class="bordered-table zebra-striped" style="width: 95%">
-							<thead>
-								<tr>
-									<th colspan=2>Annotations</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr wicket:id="annsListView">
-									<td><span wicket:id="createdFormatted">[created]</span></td>
-									<td><span wicket:id="creator">[creator]</span></td>
-								</tr>
-							</tbody>
-						</table>
-						<form wicket:id="annForm" class="form-stacked">
-							<div class="actions">
-								<button wicket:id="addAnnotation" class="btn success"
-									type="submit">Add annotation</button>
-								<button wicket:id="deleteAnnotation" class="btn danger"
-									type="submit">Delete annotation</button>
-							</div>
-						</form>
-					</div> -->
 					<div wicket:id="annotationsDiv" class="span15 entries-list">
 						<form wicket:id="annotationsForm" class="form-stacked">
 							<section wicket:id="group">
@@ -122,10 +72,8 @@
 											</thead>
 											<tbody>
 												<tr wicket:id="statementsList">
-													<td><input type="checkbox"
-														wicket:id="checkbox" /></td>
-													<td><div wicket:id="subject"
-															style="overflow: hidden">[subject]</div></td>
+													<td><input type="checkbox" wicket:id="checkbox" /></td>
+													<td><div wicket:id="subject" style="overflow: hidden">[subject]</div></td>
 													<td><span class="label"
 														wicket:id="propertyLocalNameNice">[Property]</span> <span
 														wicket:id="object">[object]</span></td>

@@ -249,17 +249,8 @@ public class RoPage
 			};
 			roForm.add(downloadMetadata);
 
-			itemInfo = new WebMarkupContainer("itemInfo", itemModel);
-			itemInfo.setOutputMarkupId(true);
+			itemInfo = new ItemInfoPanel("itemInfo", itemModel);
 			add(itemInfo);
-			itemInfo.add(new ExternalLink("resourceURI", itemModel.<String> bind("URI.toString"), itemModel
-					.<URI> bind("URI")));
-			itemInfo.add(new ExternalLink("downloadURI", itemModel.<String> bind("downloadURI.toString"), itemModel
-					.<URI> bind("downloadURI")));
-			itemInfo.add(new Label("creator"));
-			itemInfo.add(new Label("createdFormatted"));
-			itemInfo.add(new Label("sizeFormatted"));
-			itemInfo.add(new Label("annotations.size"));
 		}
 	}
 
