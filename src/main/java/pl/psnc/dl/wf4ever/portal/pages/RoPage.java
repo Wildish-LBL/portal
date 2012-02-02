@@ -765,8 +765,11 @@ public class RoPage
 		public InternalLinkFragment(String id, String markupId, MarkupContainer markupProvider, Statement statement)
 		{
 			super(id, markupId, markupProvider);
-			URI internalName = roURI.relativize(statement.getSubjectURI());
-			add(new AjaxLink<URI>("link", new Model<URI>(internalName)) {
+			String internalName = roURI.relativize(statement.getSubjectURI()).toString();
+			if (internalName.isEmpty()) {
+				internalName = "This RO";
+			}
+			add(new AjaxLink<String>("link", new Model<String>(internalName)) {
 
 				@Override
 				public void onClick(AjaxRequestTarget target)
