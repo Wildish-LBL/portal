@@ -339,8 +339,13 @@ public class RoPage
 							item.add(new Check<Statement>("checkbox", item.getModel()));
 							if (statement.isSubjectURIResource()) {
 								if (statement.isSubjectPartOfRo(roURI)) {
-									item.add(new InternalLinkFragment("subject", "internalLinkFragment", RoPage.this,
-											statement));
+									if (statement.getSubjectURI().equals(itemModel.getObject().getURI())) {
+										item.add(new Label("subject", "[This item]"));
+									}
+									else {
+										item.add(new InternalLinkFragment("subject", "internalLinkFragment",
+												RoPage.this, statement));
+									}
 								}
 								else {
 									item.add(new ExternalLinkFragment("subject", "externalLinkFragment", RoPage.this,
@@ -789,10 +794,7 @@ public class RoPage
 		public InternalLinkFragment(String id, String markupId, MarkupContainer markupProvider, Statement statement)
 		{
 			super(id, markupId, markupProvider);
-			String internalName = roURI.relativize(statement.getSubjectURI()).toString();
-			if (internalName.isEmpty()) {
-				internalName = "This RO";
-			}
+			String internalName = "./" + roURI.relativize(statement.getSubjectURI()).toString();
 			add(new AjaxLink<String>("link", new Model<String>(internalName)) {
 
 				@Override
