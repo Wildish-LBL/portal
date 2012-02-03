@@ -20,9 +20,9 @@ public class WebService
 	private static final long serialVersionUID = -7357223157435615080L;
 
 
-	public WebService(URI uri, Calendar created, String creator, String name, long size, Type type)
+	public WebService(URI uri, Calendar created, String creator, String name, long size)
 	{
-		super(uri, created, creator, name, size, type);
+		super(uri, created, creator, name, size, Type.WEB_SERVICE);
 	}
 
 

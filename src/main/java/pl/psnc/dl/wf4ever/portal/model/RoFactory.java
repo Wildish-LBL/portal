@@ -97,27 +97,7 @@ public class RoFactory
 	public static ResearchObject createResearchObject(OntModel model, URI researchObjectURI, boolean includeAnnotations)
 		throws URISyntaxException
 	{
-		Calendar created = null;
-		String creator = null;
-		Individual ro = model.getIndividual(researchObjectURI.toString());
-		try {
-			created = ((XSDDateTime) ro.getPropertyValue(DCTerms.created).asLiteral().getValue()).asCalendar();
-		}
-		catch (Exception e) {
-			log.warn("RO " + researchObjectURI + " does not define created");
-		}
-		try {
-			creator = ro.getPropertyResourceValue(DCTerms.creator).as(Individual.class).getPropertyValue(foafName)
-					.asLiteral().getString();
-		}
-		catch (Exception e) {
-			log.warn("RO " + researchObjectURI + " does not define a creator");
-		}
-		ResearchObject researchObject = new ResearchObject(researchObjectURI, created, creator);
-		if (includeAnnotations) {
-			researchObject.setAnnotations(createAnnotations(model, researchObjectURI, researchObjectURI));
-		}
-		return researchObject;
+		return (ResearchObject) createResource(model, researchObjectURI, researchObjectURI, includeAnnotations);
 	}
 
 
@@ -213,11 +193,14 @@ public class RoFactory
 
 		String name = UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.relativize(resourceURI).toString(), "UTF-8");
 		AggregatedResource resource;
-		if (resourceURI.getPath().endsWith(".t2flow") || res.hasRDFType("http://purl.org/wf4ever/wfdesc#Workflow")) {
+		if (res.hasRDFType("http://purl.org/wf4ever/ro#ResearchObject")) {
+			resource = new ResearchObject(resourceURI, created, creator);
+		}
+		else if (resourceURI.getPath().endsWith(".t2flow") || res.hasRDFType("http://purl.org/wf4ever/wfdesc#Workflow")) {
 			resource = new InternalResource(resourceURI, created, creator, name, size, Type.WORKFLOW);
 		}
 		else if (res.hasRDFType("http://purl.org/wf4ever/wf4ever#WebServiceProcess")) {
-			resource = new WebService(resourceURI, created, creator, name, size, Type.WEB_SERVICE);
+			resource = new WebService(resourceURI, created, creator, name, size);
 		}
 		else {
 			resource = new InternalResource(resourceURI, created, creator, name, size, Type.OTHER);

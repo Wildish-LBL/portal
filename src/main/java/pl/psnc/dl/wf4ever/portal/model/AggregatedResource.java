@@ -6,6 +6,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.ocpsoft.pretty.time.PrettyTime;
 
 public abstract class AggregatedResource
@@ -35,6 +37,8 @@ public abstract class AggregatedResource
 	private List<Annotation> annotations;
 
 	private Type type = Type.OTHER;
+
+	private Multimap<String, AggregatedResource> relations = HashMultimap.create();
 
 
 	public AggregatedResource(URI uri, Calendar created, String creator, String name, long size, Type type)
@@ -206,6 +210,25 @@ public abstract class AggregatedResource
 	public void setType(Type type)
 	{
 		this.type = type;
+	}
+
+
+	/**
+	 * @return the relations
+	 */
+	public Multimap<String, AggregatedResource> getRelations()
+	{
+		return relations;
+	}
+
+
+	/**
+	 * @param relations
+	 *            the relations to set
+	 */
+	public void setRelations(Multimap<String, AggregatedResource> relations)
+	{
+		this.relations = relations;
 	}
 
 }
