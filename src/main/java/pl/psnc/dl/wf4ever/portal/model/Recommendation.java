@@ -23,11 +23,13 @@ public class Recommendation
 
 	private int itemID;
 
-	private URI itemURI;
+	private URI resource;
 
 	private double strength;
 
 	private URI userURI;
+
+	private String title;
 
 
 	/**
@@ -54,9 +56,9 @@ public class Recommendation
 	 * @return the itemURI
 	 */
 	@XmlElement
-	public URI getItemURI()
+	public URI getResource()
 	{
-		return itemURI;
+		return resource;
 	}
 
 
@@ -64,9 +66,9 @@ public class Recommendation
 	 * @param itemURI
 	 *            the itemURI to set
 	 */
-	public void setItemURI(URI itemURI)
+	public void setResource(URI itemURI)
 	{
-		this.itemURI = itemURI;
+		this.resource = itemURI;
 	}
 
 
@@ -107,6 +109,26 @@ public class Recommendation
 	public void setUserURI(URI userURI)
 	{
 		this.userURI = userURI;
+	}
+
+
+	/**
+	 * @return the title
+	 */
+	@XmlElement
+	public String getTitle()
+	{
+		return title;
+	}
+
+
+	/**
+	 * @param title
+	 *            the title to set
+	 */
+	public void setTitle(String title)
+	{
+		this.title = title;
 	}
 
 }

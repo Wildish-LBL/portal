@@ -228,8 +228,8 @@ public class HomePage
 			protected void populateItem(ListItem<Recommendation> item)
 			{
 				final Recommendation rec = item.getModelObject();
-				item.add(new ExternalLink("link", new PropertyModel<String>(rec, "itemURI.toString"),
-						new PropertyModel<String>(rec, "itemURI.toString")));
+				item.add(new ExternalLink("link", new PropertyModel<String>(rec, "resource.toString"),
+						new PropertyModel<String>(rec, "title")));
 				item.add(new Label("strength"));
 			}
 		};
