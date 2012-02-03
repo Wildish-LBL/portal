@@ -13,6 +13,7 @@ import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
+import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 
 /**
  * @author piotrhol
@@ -36,7 +37,13 @@ public class RoTree
 	public RoTree(String id, IModel< ? extends TreeModel> model)
 	{
 		super(id, model);
-		// TODO Auto-generated constructor stub
+	}
+
+
+	@Override
+	public RoTreeModel getModelObject()
+	{
+		return (RoTreeModel) super.getModelObject();
 	}
 
 

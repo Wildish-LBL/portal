@@ -21,7 +21,6 @@ import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.extensions.markup.html.tree.Tree;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Check;
@@ -57,6 +56,7 @@ import pl.psnc.dl.wf4ever.portal.model.Annotation;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.model.ResourceGroup;
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
+import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 import pl.psnc.dl.wf4ever.portal.model.Statement;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.RoTree;
@@ -82,7 +82,7 @@ public class RoPage
 
 	private final AnnotatingBox annotatingBox;
 
-	private TreeModel aggregatedResourcesTree;
+	private RoTreeModel aggregatedResourcesTree;
 
 
 	public RoPage(final PageParameters parameters)
@@ -125,7 +125,7 @@ public class RoPage
 	 * @return the aggregatedResourcesTree
 	 * @throws URISyntaxException
 	 */
-	public TreeModel getAggregatedResourcesTree()
+	public RoTreeModel getAggregatedResourcesTree()
 		throws URISyntaxException
 	{
 		if (aggregatedResourcesTree == null) {
@@ -141,7 +141,7 @@ public class RoPage
 	 * @param aggregatedResourcesTree
 	 *            the aggregatedResourcesTree to set
 	 */
-	public void setAggregatedResourcesTree(TreeModel aggregatedResourcesTree)
+	public void setAggregatedResourcesTree(RoTreeModel aggregatedResourcesTree)
 	{
 		this.aggregatedResourcesTree = aggregatedResourcesTree;
 	}
@@ -151,7 +151,7 @@ public class RoPage
 		extends WebMarkupContainer
 	{
 
-		final Tree tree;
+		RoTree tree;
 
 		Panel infoPanel;
 
@@ -247,7 +247,8 @@ public class RoPage
 							.getSelectedNodes().iterator().next()).getUserObject();
 					try {
 						ROSRService.deleteResource(res.getURI(), MySession.get().getdLibraAccessToken());
-						setAggregatedResourcesTree(null);
+						getAggregatedResourcesTree().removeAggregatedResource(res);
+						tree.invalidateAll();
 						target.add(RoViewerBox.this);
 					}
 					catch (Exception e) {
@@ -742,11 +743,13 @@ public class RoPage
 						try {
 							ROSRService.sendResource(resourceURI, uploadedFile.getInputStream(),
 								uploadedFile.getContentType(), MySession.get().getdLibraAccessToken());
-							setAggregatedResourcesTree(null);
+							AggregatedResource resource = RoFactory.createResource(roURI, resourceURI, true);
+							getAggregatedResourcesTree().addAggregatedResource(resource);
+							roViewerBox.tree.invalidateAll();
 							target.appendJavaScript("$('#upload-resource-modal').modal('hide')");
 							target.add(roViewerBox);
 						}
-						catch (IOException e) {
+						catch (IOException | URISyntaxException e) {
 							error(e);
 						}
 					}

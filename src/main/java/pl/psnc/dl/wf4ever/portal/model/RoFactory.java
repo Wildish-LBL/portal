@@ -18,8 +18,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeModel;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.request.UrlDecoder;
@@ -121,8 +119,8 @@ public class RoFactory
 	}
 
 
-	public static TreeModel createAggregatedResourcesTree(URI researchObjectURI, Multimap<String, URI> resourceGroups,
-			Map<String, String> resourceGroupDescriptions)
+	public static RoTreeModel createAggregatedResourcesTree(URI researchObjectURI,
+			Multimap<String, URI> resourceGroups, Map<String, String> resourceGroupDescriptions)
 		throws URISyntaxException
 	{
 		OntModel model = createManifestAndAnnotationsModel(researchObjectURI);
@@ -130,7 +128,7 @@ public class RoFactory
 	}
 
 
-	public static TreeModel createAggregatedResourcesTree(OntModel model, URI researchObjectURI,
+	public static RoTreeModel createAggregatedResourcesTree(OntModel model, URI researchObjectURI,
 			Multimap<String, URI> resourceGroups, Map<String, String> resourceGroupDescriptions)
 		throws URISyntaxException
 	{
@@ -169,7 +167,7 @@ public class RoFactory
 		for (Entry<String, DefaultMutableTreeNode> e : groupNodes.entrySet()) {
 			rootNode.insert(e.getValue(), i++);
 		}
-		return new DefaultTreeModel(rootNode);
+		return new RoTreeModel(rootNode);
 	}
 
 
