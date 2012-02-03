@@ -25,7 +25,7 @@ public class ResearchObject
 	public ResearchObject(URI researchObjectURI, Calendar created, String creator)
 	{
 		super(researchObjectURI, created, creator, UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.resolve("..")
-				.relativize(researchObjectURI).toString(), "UTF-8"), 0);
+				.relativize(researchObjectURI).toString(), "UTF-8"), 0, Type.RESEARCH_OBJECT);
 	}
 
 
@@ -36,16 +36,9 @@ public class ResearchObject
 
 
 	@Override
-	public boolean isWorkflow()
-	{
-		return false;
-	}
-
-
-	@Override
 	public String getSizeFormatted()
 	{
-		return "--";
+		return null;
 	}
 
 

@@ -13,6 +13,7 @@ import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
+import pl.psnc.dl.wf4ever.portal.model.AggregatedResource.Type;
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 
 /**
@@ -32,6 +33,8 @@ public class RoTree
 
 	/** Reference to the icon of tree item (not a folder) */
 	private static final ResourceReference WORKFLOW = new PackageResourceReference(RoTree.class, "res/workflow.png");
+
+	private static final ResourceReference EXTERNAL = new PackageResourceReference(RoTree.class, "res/external.png");
 
 
 	public RoTree(String id, IModel< ? extends TreeModel> model)
@@ -60,8 +63,11 @@ public class RoTree
 		Object object = ((DefaultMutableTreeNode) node).getUserObject();
 		if (object instanceof AggregatedResource) {
 			AggregatedResource res = (AggregatedResource) object;
-			if (res.isWorkflow()) {
+			if (res.getType() == Type.WORKFLOW) {
 				return WORKFLOW;
+			}
+			if (res.getType() == Type.WEB_SERVICE) {
+				return EXTERNAL;
 			}
 		}
 		return super.getNodeIcon(node);

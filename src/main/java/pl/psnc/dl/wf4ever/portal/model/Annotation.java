@@ -13,7 +13,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 /**
  * @author piotrhol
- *
+ * 
  */
 public class Annotation
 	extends AggregatedResource
@@ -31,7 +31,7 @@ public class Annotation
 
 	public Annotation(URI uri, Calendar created, String creator, String name, URI bodyURI)
 	{
-		super(uri, created, creator, name, 0);
+		super(uri, created, creator, name, 0, Type.ANNOTATION);
 		this.bodyURI = bodyURI;
 
 		bodyModel = new LoadableDetachableModel<List<Statement>>() {
@@ -69,23 +69,15 @@ public class Annotation
 	}
 
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see pl.psnc.dl.wf4ever.portal.model.AggregatedResource#getDownloadURI()
 	 */
 	@Override
 	public URI getDownloadURI()
 	{
 		return getURI();
-	}
-
-
-	/* (non-Javadoc)
-	 * @see pl.psnc.dl.wf4ever.portal.model.AggregatedResource#isWorkflow()
-	 */
-	@Override
-	public boolean isWorkflow()
-	{
-		return false;
 	}
 
 

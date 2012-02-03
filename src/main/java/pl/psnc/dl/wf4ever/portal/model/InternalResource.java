@@ -8,9 +8,9 @@ import java.util.Calendar;
 
 /**
  * @author piotrhol
- *
+ * 
  */
-public class RoResource
+public class InternalResource
 	extends AggregatedResource
 {
 
@@ -27,26 +27,15 @@ public class RoResource
 	 * @param created
 	 * @param rSize
 	 */
-	public RoResource(URI uri, Calendar created, String creator, String name, long size)
+	public InternalResource(URI uri, Calendar created, String creator, String name, long size, Type type)
 	{
-		super(uri, created, creator, name, size);
+		super(uri, created, creator, name, size, type);
 	}
 
 
-	public RoResource()
+	public InternalResource()
 	{
 		super();
-	}
-
-
-	/* (non-Javadoc)
-	 * @see pl.psnc.dl.wf4ever.portal.model.AggregatedResource#isWorkflow()
-	 */
-	@Override
-	public boolean isWorkflow()
-	{
-		//FIXME should rely on RO ontology
-		return uri.getPath().endsWith(".t2flow");
 	}
 
 

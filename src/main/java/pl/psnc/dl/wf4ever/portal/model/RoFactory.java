@@ -22,6 +22,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import org.apache.log4j.Logger;
 import org.apache.wicket.request.UrlDecoder;
 
+import pl.psnc.dl.wf4ever.portal.model.AggregatedResource.Type;
+
 import com.google.common.collect.Multimap;
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.ontology.Individual;
@@ -210,7 +212,16 @@ public class RoFactory
 		}
 
 		String name = UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.relativize(resourceURI).toString(), "UTF-8");
-		AggregatedResource resource = new RoResource(resourceURI, created, creator, name, size);
+		AggregatedResource resource;
+		if (resourceURI.getPath().endsWith(".t2flow") || res.hasRDFType("http://purl.org/wf4ever/wfdesc#Workflow")) {
+			resource = new InternalResource(resourceURI, created, creator, name, size, Type.WORKFLOW);
+		}
+		else if (res.hasRDFType("http://purl.org/wf4ever/wf4ever#WebServiceProcess")) {
+			resource = new WebService(resourceURI, created, creator, name, size, Type.WEB_SERVICE);
+		}
+		else {
+			resource = new InternalResource(resourceURI, created, creator, name, size, Type.OTHER);
+		}
 		if (includeAnnotations) {
 			resource.setAnnotations(createAnnotations(model, researchObjectURI, resourceURI));
 		}

@@ -12,6 +12,10 @@ public abstract class AggregatedResource
 	implements Serializable
 {
 
+	public enum Type {
+		WORKFLOW, WEB_SERVICE, OTHER, RESEARCH_OBJECT, ANNOTATION
+	};
+
 	private static final long serialVersionUID = -472666872267555742L;
 
 	public static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z");
@@ -30,14 +34,17 @@ public abstract class AggregatedResource
 
 	private List<Annotation> annotations;
 
+	private Type type = Type.OTHER;
 
-	public AggregatedResource(URI uri, Calendar created, String creator, String name, long size)
+
+	public AggregatedResource(URI uri, Calendar created, String creator, String name, long size, Type type)
 	{
 		this.uri = uri;
 		this.created = created;
 		this.creator = creator;
 		this.name = name;
 		this.size = size;
+		this.setType(type);
 	}
 
 
@@ -107,14 +114,6 @@ public abstract class AggregatedResource
 	{
 		return name;
 	}
-
-
-	/**
-	 * TODO change to resource classes
-	 * 
-	 * @return
-	 */
-	public abstract boolean isWorkflow();
 
 
 	@Override
@@ -188,6 +187,25 @@ public abstract class AggregatedResource
 			return bytes + " B";
 		int exp = (int) (Math.log(bytes) / Math.log(unit));
 		return String.format("%.1f %cB", bytes / Math.pow(unit, exp), "KMGTPE".charAt(exp - 1));
+	}
+
+
+	/**
+	 * @return the type
+	 */
+	public Type getType()
+	{
+		return type;
+	}
+
+
+	/**
+	 * @param type
+	 *            the type to set
+	 */
+	public void setType(Type type)
+	{
+		this.type = type;
 	}
 
 }
