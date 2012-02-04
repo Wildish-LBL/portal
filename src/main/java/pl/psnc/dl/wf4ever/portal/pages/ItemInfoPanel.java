@@ -5,9 +5,7 @@ package pl.psnc.dl.wf4ever.portal.pages;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -43,7 +41,7 @@ public class ItemInfoPanel
 
 
 	@SuppressWarnings("serial")
-	public ItemInfoPanel(String id, CompoundPropertyModel<AggregatedResource> itemModel)
+	public ItemInfoPanel(String id, final CompoundPropertyModel<AggregatedResource> itemModel)
 	{
 		super(id, itemModel);
 		setOutputMarkupId(true);
@@ -63,16 +61,16 @@ public class ItemInfoPanel
 		sizeSection.add(new Label("sizeFormatted"));
 		add(new Label("annotations.size"));
 
-		ListView<Entry<String, Collection<AggregatedResource>>> relationsGroup = new ListView<Entry<String, Collection<AggregatedResource>>>(
-				"relationsGroup", new PropertyModel<List<Entry<String, Collection<AggregatedResource>>>>(itemModel,
-						"relationGroups")) {
+		ListView<String> relationsGroup = new ListView<String>("relationsGroup", new PropertyModel<List<String>>(
+				itemModel, "relationsKeyList")) {
 
 			@Override
-			protected void populateItem(ListItem<Entry<String, Collection<AggregatedResource>>> item)
+			protected void populateItem(ListItem<String> item)
 			{
-				Entry<String, Collection<AggregatedResource>> entry = item.getModelObject();
-				item.add(new Label("relationType", new PropertyModel<String>(entry, "key")));
-				List<AggregatedResource> targets = new ArrayList<AggregatedResource>(entry.getValue());
+				String key = item.getModelObject();
+				item.add(new Label("relationType", key));
+				List<AggregatedResource> targets = new ArrayList<AggregatedResource>(itemModel.getObject()
+						.getRelations().get(key));
 				ListView<AggregatedResource> targetList = new ListView<AggregatedResource>("relationTarget", targets) {
 
 					@Override
