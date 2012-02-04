@@ -4,13 +4,22 @@
 package pl.psnc.dl.wf4ever.portal.pages;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map.Entry;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.ExternalLink;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.model.PropertyModel;
 
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 
@@ -33,6 +42,7 @@ public class ItemInfoPanel
 	private final WebMarkupContainer sizeSection;
 
 
+	@SuppressWarnings("serial")
 	public ItemInfoPanel(String id, CompoundPropertyModel<AggregatedResource> itemModel)
 	{
 		super(id, itemModel);
@@ -52,6 +62,43 @@ public class ItemInfoPanel
 		add(sizeSection);
 		sizeSection.add(new Label("sizeFormatted"));
 		add(new Label("annotations.size"));
+
+		ListView<Entry<String, Collection<AggregatedResource>>> relationsGroup = new ListView<Entry<String, Collection<AggregatedResource>>>(
+				"relationsGroup", new PropertyModel<List<Entry<String, Collection<AggregatedResource>>>>(itemModel,
+						"relationGroups")) {
+
+			@Override
+			protected void populateItem(ListItem<Entry<String, Collection<AggregatedResource>>> item)
+			{
+				Entry<String, Collection<AggregatedResource>> entry = item.getModelObject();
+				item.add(new Label("relationType", new PropertyModel<String>(entry, "key")));
+				List<AggregatedResource> targets = new ArrayList<AggregatedResource>(entry.getValue());
+				ListView<AggregatedResource> targetList = new ListView<AggregatedResource>("relationTarget", targets) {
+
+					@Override
+					protected void populateItem(ListItem<AggregatedResource> item)
+					{
+						AggregatedResource resource = item.getModelObject();
+						AjaxLink<String> link = new AjaxLink<String>("targetLink") {
+
+							@Override
+							public void onClick(AjaxRequestTarget target)
+							{
+								// TODO Auto-generated method stub
+
+							}
+
+						};
+						item.add(link);
+						link.add(new Label("targetLabel", new PropertyModel<String>(resource, "name")));
+					}
+
+				};
+				item.add(targetList);
+			}
+
+		};
+		add(relationsGroup);
 	}
 
 

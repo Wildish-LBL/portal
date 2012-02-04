@@ -3,8 +3,11 @@ package pl.psnc.dl.wf4ever.portal.model;
 import java.io.Serializable;
 import java.net.URI;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -231,4 +234,9 @@ public abstract class AggregatedResource
 		this.relations = relations;
 	}
 
+
+	public List<Map.Entry<String, Collection<AggregatedResource>>> getRelationGroups()
+	{
+		return new ArrayList<Map.Entry<String, Collection<AggregatedResource>>>(relations.asMap().entrySet());
+	}
 }

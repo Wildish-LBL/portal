@@ -24,6 +24,7 @@ import org.apache.wicket.request.UrlDecoder;
 
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource.Type;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.ontology.Individual;
@@ -53,6 +54,12 @@ public class RoFactory
 	private static final String ORE_NAMESPACE = "http://www.openarchives.org/ore/terms/";
 
 	private static final String AO_NAMESPACE = "http://purl.org/ao/";
+
+	private static final String WFPROV_NAMESPACE = "http://purl.org/wf4ever/wfprov#";
+
+	private static final String WFDESC_NAMESPACE = "http://purl.org/wf4ever/wfdesc#";
+
+	private static final String WF4EVER_NAMESPACE = "http://purl.org/wf4ever/wf4ever#";
 
 	public static final URI[] defaultProperties = { URI.create(DCTerms.type.getURI()),
 			URI.create(DCTerms.subject.getURI()), URI.create(DCTerms.description.getURI()),
@@ -84,6 +91,9 @@ public class RoFactory
 		AO_NAMESPACE + "annotatesResource");
 
 	public static final Property aoBody = ModelFactory.createDefaultModel().createProperty(AO_NAMESPACE + "body");
+
+	public static final Property hasSubProcess = ModelFactory.createDefaultModel().createProperty(
+		WFDESC_NAMESPACE + "hasSubProcess");
 
 
 	public static ResearchObject createResearchObject(URI researchObjectURI, boolean includeAnnotations)
@@ -118,6 +128,8 @@ public class RoFactory
 		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(researchObject);
 
 		Map<String, DefaultMutableTreeNode> groupNodes = new HashMap<>();
+		Map<URI, AggregatedResource> resources = new HashMap<URI, AggregatedResource>();
+		resources.put(researchObjectURI, researchObject);
 
 		// TODO take care of proxies & folders
 		Individual ro = model.getIndividual(researchObjectURI.toString());
@@ -126,6 +138,7 @@ public class RoFactory
 			Individual res = it.next().as(Individual.class);
 			if (res.hasRDFType(roResource)) {
 				AggregatedResource resource = createResource(model, researchObjectURI, new URI(res.getURI()), true);
+				resources.put(resource.getURI(), resource);
 				boolean foundGroup = false;
 				for (String group : resourceGroups.keySet()) {
 					for (URI classURI : resourceGroups.get(group)) {
@@ -148,6 +161,10 @@ public class RoFactory
 		int i = 0;
 		for (Entry<String, DefaultMutableTreeNode> e : groupNodes.entrySet()) {
 			rootNode.insert(e.getValue(), i++);
+		}
+
+		for (AggregatedResource resource : resources.values()) {
+			resource.setRelations(createRelations(model, researchObjectURI, resource, resources));
 		}
 		return new RoTreeModel(rootNode);
 	}
@@ -209,6 +226,29 @@ public class RoFactory
 			resource.setAnnotations(createAnnotations(model, researchObjectURI, resourceURI));
 		}
 		return resource;
+	}
+
+
+	private static Multimap<String, AggregatedResource> createRelations(OntModel model, URI researchObjectURI,
+			AggregatedResource resourceAR, Map<URI, AggregatedResource> resources)
+	{
+		// FIXME this is too specific, a more universal method would be better
+		Multimap<String, AggregatedResource> relations = HashMultimap.create();
+		Individual resource = model.getIndividual(resourceAR.getURI().toString());
+		StmtIterator it;
+
+		// sub process
+		it = model.listStatements(resource, hasSubProcess, (Resource) null);
+		while (it.hasNext()) {
+			Resource object = it.next().getObject().asResource();
+			if (object.isURIResource()) {
+				URI objectURI = URI.create(object.getURI());
+				if (resources.containsKey(objectURI)) {
+					relations.put("Has subprocess", resources.get(objectURI));
+				}
+			}
+		}
+		return relations;
 	}
 
 

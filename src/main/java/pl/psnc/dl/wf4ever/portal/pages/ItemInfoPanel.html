@@ -20,10 +20,13 @@
 		<strong>Number of annotations:</strong> <span
 			wicket:id="annotations.size">[annotationsCnt]</span>
 	</p>
-	<p>
-		<strong>Input in:</strong>
-	</p>
-	<ul>
-		<li><a href="#">Some workflow</a></li>
-	</ul>
+	<div wicket:id="relationsGroup">
+		<p>
+			<strong><span wicket:id="relationType">[type]</span>:</strong>
+		</p>
+		<ul>
+			<li wicket:id="relationTarget"><a wicket:id="targetLink"><span
+					wicket:id="targetLabel">[target]</span></a></li>
+		</ul>
+	</div>
 </wicket:panel>
