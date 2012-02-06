@@ -23,6 +23,10 @@ public class MyQueryFactory
 
 	private static String resourcesCount = null;
 
+	private static String workflowOutputs = null;
+
+	private static String workflowInputs = null;
+
 
 	/**
 	 * @return the xMostRecentROs
@@ -51,6 +55,24 @@ public class MyQueryFactory
 		if (resourcesCount == null)
 			resourcesCount = loadQuery("resourcesCount.sparql");
 		return QueryFactory.create(String.format(resourcesCount, resourceClass), Syntax.syntaxARQ);
+	}
+
+
+	public static Query getWorkflowOutputs(String researchObject)
+		throws IOException
+	{
+		if (workflowOutputs == null)
+			workflowOutputs = loadQuery("workflowOutputs.sparql");
+		return QueryFactory.create(String.format(workflowOutputs, researchObject), Syntax.syntaxARQ);
+	}
+
+
+	public static Query getWorkflowInputs(String researchObject)
+		throws IOException
+	{
+		if (workflowInputs == null)
+			workflowInputs = loadQuery("workflowInputs.sparql");
+		return QueryFactory.create(String.format(workflowInputs, researchObject), Syntax.syntaxARQ);
 	}
 
 

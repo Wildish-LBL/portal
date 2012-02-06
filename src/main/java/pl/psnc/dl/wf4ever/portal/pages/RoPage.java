@@ -53,7 +53,6 @@ import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.Annotation;
-import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.model.ResourceGroup;
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
@@ -65,7 +64,6 @@ import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
-import com.hp.hpl.jena.ontology.OntModel;
 import com.sun.jersey.api.client.ClientResponse;
 
 public class RoPage
@@ -89,14 +87,10 @@ public class RoPage
 		throws URISyntaxException, MalformedURLException, OAuthException
 	{
 		super(parameters);
-		OntModel model = null;
-		ResearchObject ro = null;
 		if (!parameters.get("ro").isEmpty()) {
 			PortalApplication app = ((PortalApplication) getApplication());
 			roURI = new URI(UrlDecoder.QUERY_INSTANCE.decode(parameters.get("ro").toString(), "UTF-8"));
-			model = RoFactory.createManifestAndAnnotationsModel(roURI);
-			ro = RoFactory.createResearchObject(model, roURI, true);
-			setAggregatedResourcesTree(RoFactory.createAggregatedResourcesTree(model, roURI, app.getResourceGroups(),
+			setAggregatedResourcesTree(RoFactory.createAggregatedResourcesTree(roURI, app.getResourceGroups(),
 				app.getResourceGroupDescriptions()));
 		}
 		else {
@@ -106,11 +100,12 @@ public class RoPage
 
 		if (MySession.get().isSignedIn()) {
 			List<URI> uris = ROSRService.getROList(MySession.get().getdLibraAccessToken());
-			canEdit = uris.contains(ro.getURI());
+			canEdit = uris.contains(roURI);
 		}
-		add(new Label("title", ro.getURI().toString()));
+		add(new Label("title", roURI.toString()));
 
-		final CompoundPropertyModel<AggregatedResource> itemModel = new CompoundPropertyModel<AggregatedResource>(ro);
+		final CompoundPropertyModel<AggregatedResource> itemModel = new CompoundPropertyModel<AggregatedResource>(
+				(AggregatedResource) ((DefaultMutableTreeNode) getAggregatedResourcesTree().getRoot()).getUserObject());
 		roViewerBox = new RoViewerBox(itemModel, new PropertyModel<TreeModel>(this, "aggregatedResourcesTree"));
 		add(roViewerBox);
 		annotatingBox = new AnnotatingBox(itemModel);
