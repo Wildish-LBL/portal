@@ -125,15 +125,17 @@ public class RoPage
 			@Override
 			protected void respond(AjaxRequestTarget target)
 			{
-				PortalApplication app = ((PortalApplication) getApplication());
 				try {
-					setAggregatedResourcesTree(RoFactory.createAggregatedResourcesTree(roURI, app.getResourceGroups(),
-						app.getResourceGroupDescriptions()));
-					itemModel.setObject((AggregatedResource) ((DefaultMutableTreeNode) getAggregatedResourcesTree()
-							.getRoot()).getUserObject());
-					replacement.replaceWith(roViewerBox.tree);
-					target.add(roViewerBox);
-					target.add(annotatingBox);
+					if (getAggregatedResourcesTree() == null) {
+						PortalApplication app = ((PortalApplication) getApplication());
+						setAggregatedResourcesTree(RoFactory.createAggregatedResourcesTree(roURI,
+							app.getResourceGroups(), app.getResourceGroupDescriptions()));
+						itemModel.setObject((AggregatedResource) ((DefaultMutableTreeNode) getAggregatedResourcesTree()
+								.getRoot()).getUserObject());
+						replacement.replaceWith(roViewerBox.tree);
+						target.add(roViewerBox);
+						target.add(annotatingBox);
+					}
 				}
 				catch (URISyntaxException e) {
 					log.error(e);
