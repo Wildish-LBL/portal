@@ -4,6 +4,12 @@ This service is running at http://sandbox.wf4ever-project.org/portal.
 
 Changelog:
 
+0.1.2:
+- resources are grouped conceptually
+- relations among resources are displayed
+- RO page loads lazily
+- a number of small bug fixes
+
 0.1.1:
 - search works
 - new RO identifiers validation improved, can contain spaces
