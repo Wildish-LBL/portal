@@ -57,6 +57,8 @@ public class RoFactory
 
 	private static final Logger log = Logger.getLogger(RoFactory.class);
 
+	private static final String RO_NAMESPACE = "http://purl.org/wf4ever/ro#";
+
 	private static final String ORE_NAMESPACE = "http://www.openarchives.org/ore/terms/";
 
 	private static final String AO_NAMESPACE = "http://purl.org/ao/";
@@ -95,8 +97,8 @@ public class RoFactory
 	public static final Property aggregates = ModelFactory.createDefaultModel().createProperty(
 		ORE_NAMESPACE + "aggregates");
 
-	public static final Property annotatesResource = ModelFactory.createDefaultModel().createProperty(
-		AO_NAMESPACE + "annotatesResource");
+	public static final Property annotatesAggregatedResource = ModelFactory.createDefaultModel().createProperty(
+		RO_NAMESPACE + "annotatesAggregatedResource");
 
 	public static final Property aoBody = ModelFactory.createDefaultModel().createProperty(AO_NAMESPACE + "body");
 
@@ -324,7 +326,7 @@ public class RoFactory
 		List<Annotation> anns = new ArrayList<>();
 
 		Individual res = model.getIndividual(resourceURI.toString());
-		ResIterator it = model.listSubjectsWithProperty(annotatesResource, res);
+		ResIterator it = model.listSubjectsWithProperty(annotatesAggregatedResource, res);
 		while (it.hasNext()) {
 			Individual ann = it.next().as(Individual.class);
 			try {
