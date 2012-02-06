@@ -14,13 +14,17 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.log4j.Logger;
+import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Check;
@@ -72,6 +76,8 @@ public class RoPage
 
 	private static final long serialVersionUID = 1L;
 
+	private static final Logger log = Logger.getLogger(RoPage.class);
+
 	private URI roURI;
 
 	private boolean canEdit = false;
@@ -83,15 +89,13 @@ public class RoPage
 	private RoTreeModel aggregatedResourcesTree;
 
 
+	@SuppressWarnings("serial")
 	public RoPage(final PageParameters parameters)
 		throws URISyntaxException, MalformedURLException, OAuthException
 	{
 		super(parameters);
 		if (!parameters.get("ro").isEmpty()) {
-			PortalApplication app = ((PortalApplication) getApplication());
 			roURI = new URI(UrlDecoder.QUERY_INSTANCE.decode(parameters.get("ro").toString(), "UTF-8"));
-			setAggregatedResourcesTree(RoFactory.createAggregatedResourcesTree(roURI, app.getResourceGroups(),
-				app.getResourceGroupDescriptions()));
 		}
 		else {
 			throw new RestartResponseException(ErrorPage.class, new PageParameters().add("message",
@@ -105,7 +109,7 @@ public class RoPage
 		add(new Label("title", roURI.toString()));
 
 		final CompoundPropertyModel<AggregatedResource> itemModel = new CompoundPropertyModel<AggregatedResource>(
-				(AggregatedResource) ((DefaultMutableTreeNode) getAggregatedResourcesTree().getRoot()).getUserObject());
+				(AggregatedResource) null);
 		roViewerBox = new RoViewerBox(itemModel, new PropertyModel<TreeModel>(this, "aggregatedResourcesTree"));
 		add(roViewerBox);
 		annotatingBox = new AnnotatingBox(itemModel);
@@ -113,6 +117,38 @@ public class RoPage
 		annotatingBox.selectedStatements.clear();
 		add(new ChooseRdfFormat());
 		add(new UploadResourceForm());
+
+		final Component replacement = new Fragment("treeTable", "loadingROFragment", this);
+		roViewerBox.tree.replaceWith(replacement);
+		add(new AbstractDefaultAjaxBehavior() {
+
+			@Override
+			protected void respond(AjaxRequestTarget target)
+			{
+				PortalApplication app = ((PortalApplication) getApplication());
+				try {
+					setAggregatedResourcesTree(RoFactory.createAggregatedResourcesTree(roURI, app.getResourceGroups(),
+						app.getResourceGroupDescriptions()));
+					itemModel.setObject((AggregatedResource) ((DefaultMutableTreeNode) getAggregatedResourcesTree()
+							.getRoot()).getUserObject());
+					replacement.replaceWith(roViewerBox.tree);
+					target.add(roViewerBox);
+					target.add(annotatingBox);
+				}
+				catch (URISyntaxException e) {
+					log.error(e);
+				}
+			}
+
+
+			@Override
+			public void renderHead(final Component component, final IHeaderResponse response)
+			{
+				super.renderHead(component, response);
+				response.renderOnDomReadyJavaScript(getCallbackScript().toString());
+			}
+
+		});
 	}
 
 
@@ -123,11 +159,6 @@ public class RoPage
 	public RoTreeModel getAggregatedResourcesTree()
 		throws URISyntaxException
 	{
-		if (aggregatedResourcesTree == null) {
-			PortalApplication app = ((PortalApplication) getApplication());
-			aggregatedResourcesTree = RoFactory.createAggregatedResourcesTree(roURI, app.getResourceGroups(),
-				app.getResourceGroupDescriptions());
-		}
 		return aggregatedResourcesTree;
 	}
 
@@ -173,9 +204,6 @@ public class RoPage
 
 			tree = new RoTree("treeTable", treeModel) {
 
-				private static final long serialVersionUID = -7512570425701073804L;
-
-
 				@Override
 				protected void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node)
 				{
@@ -202,9 +230,6 @@ public class RoPage
 					target.add(annotatingBox);
 				}
 			};
-			tree.getTreeState().collapseAll();
-			tree.getTreeState().expandNode(treeModel.getObject().getRoot());
-			tree.getTreeState().selectNode(treeModel.getObject().getRoot(), true);
 			add(tree);
 
 			Form< ? > roForm = new Form<Void>("roForm");

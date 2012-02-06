@@ -73,4 +73,16 @@ public class RoTree
 		return super.getNodeIcon(node);
 	}
 
+
+	@Override
+	protected void onConfigure()
+	{
+		super.onConfigure();
+		getTreeState().collapseAll();
+		if (getModelObject() != null) {
+			getTreeState().expandNode(getModelObject().getRoot());
+			getTreeState().selectNode(getModelObject().getRoot(), true);
+		}
+	}
+
 }

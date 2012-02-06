@@ -39,13 +39,20 @@ public class ItemInfoPanel
 
 	private final WebMarkupContainer sizeSection;
 
+	private final WebMarkupContainer resourceURISection;
+
+	private final WebMarkupContainer annotationsCntSection;
+
 
 	@SuppressWarnings("serial")
 	public ItemInfoPanel(String id, final CompoundPropertyModel<AggregatedResource> itemModel)
 	{
 		super(id, itemModel);
 		setOutputMarkupId(true);
-		add(new ExternalLink("resourceURI", itemModel.<String> bind("URI.toString"), itemModel.<URI> bind("URI")));
+		resourceURISection = new WebMarkupContainer("resourceURISection", new Model<>());
+		add(resourceURISection);
+		resourceURISection.add(new ExternalLink("resourceURI", itemModel.<String> bind("URI.toString"), itemModel
+				.<URI> bind("URI")));
 		downloadURISection = new WebMarkupContainer("downloadURISection", new Model<>());
 		add(downloadURISection);
 		downloadURISection.add(new ExternalLink("downloadURI", itemModel.<String> bind("downloadURI.toString"),
@@ -59,7 +66,9 @@ public class ItemInfoPanel
 		sizeSection = new WebMarkupContainer("sizeSection", new Model<>());
 		add(sizeSection);
 		sizeSection.add(new Label("sizeFormatted"));
-		add(new Label("annotations.size"));
+		annotationsCntSection = new WebMarkupContainer("annotationsCntSection", new Model<>());
+		add(annotationsCntSection);
+		annotationsCntSection.add(new Label("annotations.size"));
 
 		ListView<String> relationsGroup = new ListView<String>("relationsGroup", new PropertyModel<List<String>>(
 				itemModel, "relationsKeyList")) {
@@ -104,10 +113,22 @@ public class ItemInfoPanel
 	protected void onConfigure()
 	{
 		AggregatedResource resource = (AggregatedResource) getDefaultModelObject();
-		downloadURISection.setVisible(resource.getDownloadURI() != null);
-		creatorSection.setVisible(resource.getCreator() != null);
-		createdSection.setVisible(resource.getCreated() != null);
-		sizeSection.setVisible(resource.getSizeFormatted() != null);
+		if (resource != null) {
+			resourceURISection.setVisible(true);
+			downloadURISection.setVisible(resource.getDownloadURI() != null);
+			creatorSection.setVisible(resource.getCreator() != null);
+			createdSection.setVisible(resource.getCreated() != null);
+			sizeSection.setVisible(resource.getSizeFormatted() != null);
+			annotationsCntSection.setVisible(true);
+		}
+		else {
+			resourceURISection.setVisible(false);
+			downloadURISection.setVisible(false);
+			creatorSection.setVisible(false);
+			createdSection.setVisible(false);
+			sizeSection.setVisible(false);
+			annotationsCntSection.setVisible(false);
+		}
 	}
 
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <wicket:panel xmlns:wicket="http://wicket.apache.org">
 	<h4>Item info</h4>
-	<p>
+	<p wicket:id="resourceURISection">
 		<strong>Resource URI:</strong> <a wicket:id="resourceURI">[uri]</a>
 	</p>
 	<p wicket:id="downloadURISection">
@@ -16,7 +16,7 @@
 	<p wicket:id="sizeSection">
 		<strong>File size:</strong> <span wicket:id="sizeFormatted">[filesize]</span>
 	</p>
-	<p>
+	<p wicket:id="annotationsCntSection">
 		<strong>Number of annotations:</strong> <span
 			wicket:id="annotations.size">[annotationsCnt]</span>
 	</p>

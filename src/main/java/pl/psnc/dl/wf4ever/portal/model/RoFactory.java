@@ -245,8 +245,8 @@ public class RoFactory
 						Property property = statement.getPredicate();
 						AggregatedResource objectAR = resources.get(objectURI);
 						if (property.equals(DCTerms.source)) {
-							resourceAR.getRelations().put("Has source", objectAR);
-							objectAR.getRelations().put("Is source of", resourceAR);
+							resourceAR.getRelations().put("Has sources", objectAR);
+							objectAR.getRelations().put("Is the source of", resourceAR);
 						}
 						if (property.equals(DCTerms.relation)) {
 							resourceAR.getRelations().put("Is related to", objectAR);
@@ -257,8 +257,8 @@ public class RoFactory
 							objectAR.getRelations().put("References", resourceAR);
 						}
 						if (property.equals(hasSubProcess)) {
-							resourceAR.getRelations().put("Has subprocess", objectAR);
-							objectAR.getRelations().put("Is subprocess of", resourceAR);
+							resourceAR.getRelations().put("Has subprocesses", objectAR);
+							objectAR.getRelations().put("Is a subprocess of", resourceAR);
 						}
 					}
 				}
@@ -277,7 +277,7 @@ public class RoFactory
 					AggregatedResource outputAR = resources.get(URI.create(output.getURI()));
 					if (workflowAR != null && outputAR != null) {
 						workflowAR.getRelations().put("Generated as output", outputAR);
-						outputAR.getRelations().put("Is output of", workflowAR);
+						outputAR.getRelations().put("Is an output of", workflowAR);
 					}
 				}
 			}
