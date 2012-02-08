@@ -27,6 +27,8 @@ public class MyQueryFactory
 
 	private static String workflowInputs = null;
 
+	private static String provenanceTraces;
+
 
 	/**
 	 * @return the xMostRecentROs
@@ -73,6 +75,15 @@ public class MyQueryFactory
 		if (workflowInputs == null)
 			workflowInputs = loadQuery("workflowInputs.sparql");
 		return QueryFactory.create(String.format(workflowInputs, researchObject), Syntax.syntaxARQ);
+	}
+
+
+	public static Query getProvenanceTraces(String researchObject)
+		throws IOException
+	{
+		if (provenanceTraces == null)
+			provenanceTraces = loadQuery("provenanceTraces.sparql");
+		return QueryFactory.create(String.format(provenanceTraces, researchObject), Syntax.syntaxARQ);
 	}
 
 

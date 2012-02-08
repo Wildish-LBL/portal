@@ -58,6 +58,8 @@ public class PortalApplication
 
 	private URL recommenderEndpointURL;
 
+	private URL stabilityEndpointURL;
+
 	private final Multimap<String, URI> resourceGroups = HashMultimap.create();
 
 	private final Map<String, String> resourceGroupDescriptions = new HashMap<>();
@@ -118,6 +120,7 @@ public class PortalApplication
 			sparqlEndpointURL = new URL(props.getProperty("sparqlEndpointURL"));
 			searchEndpointURL = new URL(props.getProperty("searchEndpointURL"));
 			recommenderEndpointURL = new URL(props.getProperty("recommenderEndpointURL"));
+			stabilityEndpointURL = new URL(props.getProperty("stabilityEndpointURL"));
 		}
 		catch (Exception e) {
 			log.error("Failed to load properties: " + e.getMessage());
@@ -301,6 +304,25 @@ public class PortalApplication
 	public Map<String, String> getResourceGroupDescriptions()
 	{
 		return resourceGroupDescriptions;
+	}
+
+
+	/**
+	 * @return the stabilityEndpointURL
+	 */
+	public URL getStabilityEndpointURL()
+	{
+		return stabilityEndpointURL;
+	}
+
+
+	/**
+	 * @param stabilityEndpointURL
+	 *            the stabilityEndpointURL to set
+	 */
+	public void setStabilityEndpointURL(URL stabilityEndpointURL)
+	{
+		this.stabilityEndpointURL = stabilityEndpointURL;
 	}
 
 }

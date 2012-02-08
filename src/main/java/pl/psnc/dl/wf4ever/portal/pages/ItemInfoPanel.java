@@ -7,6 +7,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -19,7 +20,9 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 
+import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
+import pl.psnc.dl.wf4ever.portal.services.StabilityService;
 
 /**
  * @author Piotr Hołubowicz
@@ -30,6 +33,8 @@ public class ItemInfoPanel
 {
 
 	private static final long serialVersionUID = -3775797988389365540L;
+
+	private static final Logger log = Logger.getLogger(ItemInfoPanel.class);
 
 	private final WebMarkupContainer downloadURISection;
 
@@ -42,6 +47,8 @@ public class ItemInfoPanel
 	private final WebMarkupContainer resourceURISection;
 
 	private final WebMarkupContainer annotationsCntSection;
+
+	private final WebMarkupContainer stabilitySection;
 
 
 	@SuppressWarnings("serial")
@@ -69,6 +76,28 @@ public class ItemInfoPanel
 		annotationsCntSection = new WebMarkupContainer("annotationsCntSection", new Model<>());
 		add(annotationsCntSection);
 		annotationsCntSection.add(new Label("annotations.size"));
+		stabilitySection = new WebMarkupContainer("stabilitySection", new Model<>());
+		stabilitySection.setOutputMarkupId(true);
+		add(stabilitySection);
+		stabilitySection.add(new Label("stability"));
+		stabilitySection.add(new AjaxLink<String>("recalculateStability") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target)
+			{
+				try {
+					PortalApplication app = (PortalApplication) getApplication();
+					double score = StabilityService.calculateStability(app.getStabilityEndpointURL().toURI(), itemModel
+							.getObject().getProvenanceTraceURI());
+					itemModel.getObject().setStability(score);
+					target.add(stabilitySection);
+				}
+				catch (Exception e) {
+					log.error(e);
+				}
+			}
+
+		});
 
 		ListView<String> relationsGroup = new ListView<String>("relationsGroup", new PropertyModel<List<String>>(
 				itemModel, "relationsKeyList")) {
@@ -119,6 +148,7 @@ public class ItemInfoPanel
 			creatorSection.setVisible(resource.getCreator() != null);
 			createdSection.setVisible(resource.getCreated() != null);
 			sizeSection.setVisible(resource.getSizeFormatted() != null);
+			stabilitySection.setVisible(resource.getStability() >= 0);
 			annotationsCntSection.setVisible(true);
 		}
 		else {
@@ -127,6 +157,7 @@ public class ItemInfoPanel
 			creatorSection.setVisible(false);
 			createdSection.setVisible(false);
 			sizeSection.setVisible(false);
+			stabilitySection.setVisible(false);
 			annotationsCntSection.setVisible(false);
 		}
 	}

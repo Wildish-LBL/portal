@@ -21,10 +21,13 @@ import java.util.Map.Entry;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.apache.log4j.Logger;
+import org.apache.wicket.Application;
 import org.apache.wicket.request.UrlDecoder;
 
+import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource.Type;
 import pl.psnc.dl.wf4ever.portal.services.MyQueryFactory;
+import pl.psnc.dl.wf4ever.portal.services.StabilityService;
 
 import com.google.common.collect.Multimap;
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
@@ -169,6 +172,7 @@ public class RoFactory
 		}
 
 		createRelations(graphset, model, researchObjectURI, resources);
+		createStabilities(model, researchObjectURI, resources);
 		return new RoTreeModel(rootNode);
 	}
 
@@ -229,6 +233,41 @@ public class RoFactory
 			resource.setAnnotations(createAnnotations(model, researchObjectURI, resourceURI));
 		}
 		return resource;
+	}
+
+
+	private static void createStabilities(OntModel model, URI researchObjectURI, Map<URI, AggregatedResource> resources)
+	{
+		PortalApplication app = (PortalApplication) Application.get();
+		try {
+			QueryExecution qexec = QueryExecutionFactory.create(
+				MyQueryFactory.getProvenanceTraces(researchObjectURI.toString()), model);
+			ResultSet result = qexec.execSelect();
+			while (result.hasNext()) {
+				QuerySolution solution = result.next();
+				Resource resource = solution.get("resource").asResource();
+				Resource trace = solution.get("trace").asResource();
+				if (resource.isURIResource() && trace.isURIResource()) {
+					AggregatedResource resourceAR = resources.get(URI.create(resource.getURI()));
+					if (resourceAR != null) {
+						try {
+							double score = StabilityService.calculateStability(app.getStabilityEndpointURL().toURI(),
+								URI.create(trace.getURI()));
+							resourceAR.setStability(score);
+							resourceAR.setProvenanceTraceURI(URI.create(trace.getURI()));
+						}
+						catch (Exception e) {
+							log.error(e);
+							resourceAR.setStability(-1);
+						}
+					}
+				}
+			}
+			qexec.close();
+		}
+		catch (IOException e) {
+			log.error(e.getMessage());
+		}
 	}
 
 
@@ -329,6 +368,8 @@ public class RoFactory
 		ResIterator it = model.listSubjectsWithProperty(annotatesAggregatedResource, res);
 		while (it.hasNext()) {
 			Individual ann = it.next().as(Individual.class);
+			if (!ann.hasRDFType(aggregatedAnnotation))
+				continue;
 			try {
 				Calendar created = ((XSDDateTime) ann.getPropertyValue(DCTerms.created).asLiteral().getValue())
 						.asCalendar();

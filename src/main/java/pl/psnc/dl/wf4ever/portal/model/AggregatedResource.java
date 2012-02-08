@@ -41,6 +41,10 @@ public abstract class AggregatedResource
 
 	private Multimap<String, AggregatedResource> relations = HashMultimap.create();
 
+	private double stability = -1;
+
+	private URI provenanceTraceURI;
+
 
 	public AggregatedResource(URI uri, Calendar created, String creator, String name, long size, Type type)
 	{
@@ -236,5 +240,39 @@ public abstract class AggregatedResource
 	public List<String> getRelationsKeyList()
 	{
 		return new ArrayList<String>(relations.keySet());
+	}
+
+
+	/**
+	 * @return the stability
+	 */
+	public double getStability()
+	{
+		return stability;
+	}
+
+
+	/**
+	 * @param stability
+	 *            the stability to set
+	 */
+	public void setStability(double stability)
+	{
+		this.stability = stability;
+	}
+
+
+	public void setProvenanceTraceURI(URI provenanceTraceURI)
+	{
+		this.provenanceTraceURI = provenanceTraceURI;
+	}
+
+
+	/**
+	 * @return the provenanceTraceURI
+	 */
+	public URI getProvenanceTraceURI()
+	{
+		return provenanceTraceURI;
 	}
 }
