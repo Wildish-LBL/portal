@@ -248,7 +248,7 @@ public abstract class AggregatedResource
 	 */
 	public double getStability()
 	{
-		return stability;
+		return Math.round(stability);
 	}
 
 
