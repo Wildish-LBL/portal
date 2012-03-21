@@ -218,8 +218,8 @@ public class ROSRService
 	 * @param manifest
 	 * @param researchObjectURI
 	 * @return i.e.
-	 *         http://sandbox.wf4ever-project.org/rosrs5/ROs/ann217/52a272f1-864f-4a42
-	 *         -89ff-2501a739d6f0
+	 *         http://sandbox.wf4ever-project.org/rosrs5/ROs/.ro/manifest#ann217/52a272f1
+	 *         -864f-4a42 -89ff-2501a739d6f0
 	 */
 	private static URI createAnnotationURI(OntModel manifest, URI researchObjectURI)
 	{
