@@ -27,6 +27,7 @@ import org.apache.wicket.request.UrlDecoder;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource.Type;
 import pl.psnc.dl.wf4ever.portal.services.MyQueryFactory;
+import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 import pl.psnc.dl.wf4ever.portal.services.StabilityService;
 
 import com.google.common.collect.Multimap;
@@ -109,26 +110,30 @@ public class RoFactory
 		WFDESC_NAMESPACE + "hasSubProcess");
 
 
-	public static ResearchObject createResearchObject(URI researchObjectURI, boolean includeAnnotations)
+	public static ResearchObject createResearchObject(URI researchObjectURI, boolean includeAnnotations,
+			Map<URI, String> usernames)
 		throws URISyntaxException
 	{
 		OntModel model = createManifestModel(researchObjectURI);
-		return createResearchObject(model, researchObjectURI, includeAnnotations);
+		return createResearchObject(model, researchObjectURI, includeAnnotations, usernames);
 	}
 
 
-	public static ResearchObject createResearchObject(OntModel model, URI researchObjectURI, boolean includeAnnotations)
+	public static ResearchObject createResearchObject(OntModel model, URI researchObjectURI,
+			boolean includeAnnotations, Map<URI, String> usernames)
 		throws URISyntaxException
 	{
-		return (ResearchObject) createResource(model, researchObjectURI, researchObjectURI, includeAnnotations);
+		return (ResearchObject) createResource(model, researchObjectURI, researchObjectURI, includeAnnotations,
+			usernames);
 	}
 
 
 	public static RoTreeModel createAggregatedResourcesTree(URI researchObjectURI,
-			Multimap<String, URI> resourceGroups, Map<String, String> resourceGroupDescriptions)
+			Multimap<String, URI> resourceGroups, Map<String, String> resourceGroupDescriptions,
+			Map<URI, String> usernames)
 		throws URISyntaxException
 	{
-		ResearchObject researchObject = createResearchObject(researchObjectURI, true);
+		ResearchObject researchObject = createResearchObject(researchObjectURI, true, usernames);
 		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(researchObject);
 
 		Map<String, DefaultMutableTreeNode> groupNodes = new HashMap<>();
@@ -145,7 +150,8 @@ public class RoFactory
 		while (it.hasNext()) {
 			Individual res = it.next().as(Individual.class);
 			if (res.hasRDFType(roResource)) {
-				AggregatedResource resource = createResource(model, researchObjectURI, new URI(res.getURI()), true);
+				AggregatedResource resource = createResource(model, researchObjectURI, new URI(res.getURI()), true,
+					usernames);
 				resources.put(resource.getURI(), resource);
 				boolean foundGroup = false;
 				for (String group : resourceGroups.keySet()) {
@@ -177,11 +183,12 @@ public class RoFactory
 	}
 
 
-	public static AggregatedResource createResource(URI researchObjectURI, URI resourceURI, boolean includeAnnotations)
+	public static AggregatedResource createResource(URI researchObjectURI, URI resourceURI, boolean includeAnnotations,
+			Map<URI, String> usernames)
 	{
 		OntModel model = createManifestModel(researchObjectURI);
 
-		return createResource(model, researchObjectURI, resourceURI, includeAnnotations);
+		return createResource(model, researchObjectURI, resourceURI, includeAnnotations, usernames);
 	}
 
 
@@ -190,7 +197,7 @@ public class RoFactory
 	 * @param resourceURI
 	 */
 	public static AggregatedResource createResource(OntModel model, URI researchObjectURI, URI resourceURI,
-			boolean includeAnnotations)
+			boolean includeAnnotations, Map<URI, String> usernames)
 	{
 
 		Individual res = model.getIndividual(resourceURI.toString());
@@ -204,8 +211,8 @@ public class RoFactory
 		catch (Exception e) {
 		}
 		try {
-			creator = res.getPropertyResourceValue(DCTerms.creator).as(Individual.class).getPropertyValue(foafName)
-					.asLiteral().getString();
+			Resource r = res.getPropertyResourceValue(DCTerms.creator);
+			creator = getUserName(usernames, r);
 		}
 		catch (Exception e) {
 		}
@@ -230,9 +237,40 @@ public class RoFactory
 			resource = new InternalResource(resourceURI, created, creator, name, size, Type.OTHER);
 		}
 		if (includeAnnotations) {
-			resource.setAnnotations(createAnnotations(model, researchObjectURI, resourceURI));
+			resource.setAnnotations(createAnnotations(model, researchObjectURI, resourceURI, usernames));
 		}
 		return resource;
+	}
+
+
+	/**
+	 * @param usernames
+	 * @param username
+	 * @param creator
+	 * @return
+	 */
+	private static String getUserName(Map<URI, String> usernames, Resource creator)
+	{
+		String username = null;
+		URI uri = URI.create(creator.getURI());
+		if (usernames.containsKey(uri)) {
+			username = usernames.get(uri);
+		}
+		else if (creator.hasProperty(foafName)) {
+			username = creator.as(Individual.class).getPropertyValue(foafName).asLiteral().getString();
+		}
+		else {
+			OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
+			userModel.read(ROSRService.getUser(uri), null);
+			Resource r2 = userModel.createResource(uri.toString());
+			if (r2 != null && r2.hasProperty(foafName)) {
+				username = r2.as(Individual.class).getPropertyValue(foafName).asLiteral().getString();
+			}
+		}
+		if (username != null) {
+			usernames.put(uri, username);
+		}
+		return username;
 	}
 
 
@@ -352,15 +390,16 @@ public class RoFactory
 	}
 
 
-	public static List<Annotation> createAnnotations(URI researchObjectURI, URI resourceURI)
+	public static List<Annotation> createAnnotations(URI researchObjectURI, URI resourceURI, Map<URI, String> usernames)
 	{
 		OntModel model = createManifestModel(researchObjectURI);
 
-		return createAnnotations(model, researchObjectURI, resourceURI);
+		return createAnnotations(model, researchObjectURI, resourceURI, usernames);
 	}
 
 
-	public static List<Annotation> createAnnotations(OntModel model, URI researchObjectURI, URI resourceURI)
+	public static List<Annotation> createAnnotations(OntModel model, URI researchObjectURI, URI resourceURI,
+			Map<URI, String> usernames)
 	{
 		List<Annotation> anns = new ArrayList<>();
 
@@ -373,8 +412,7 @@ public class RoFactory
 			try {
 				Calendar created = ((XSDDateTime) ann.getPropertyValue(DCTerms.created).asLiteral().getValue())
 						.asCalendar();
-				String creator = ann.getPropertyResourceValue(DCTerms.creator).as(Individual.class)
-						.getPropertyValue(foafName).asLiteral().getString();
+				String creator = getUserName(usernames, ann.getPropertyResourceValue(DCTerms.creator));
 				Resource body = ann.getPropertyResourceValue(aoBody);
 				String name = UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.relativize(new URI(ann.getURI()))
 						.toString(), "UTF-8");

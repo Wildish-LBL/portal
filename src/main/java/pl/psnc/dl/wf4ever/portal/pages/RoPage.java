@@ -128,8 +128,9 @@ public class RoPage
 				try {
 					if (getAggregatedResourcesTree() == null) {
 						PortalApplication app = ((PortalApplication) getApplication());
-						setAggregatedResourcesTree(RoFactory.createAggregatedResourcesTree(roURI,
-							app.getResourceGroups(), app.getResourceGroupDescriptions()));
+						setAggregatedResourcesTree(RoFactory
+								.createAggregatedResourcesTree(roURI, app.getResourceGroups(),
+									app.getResourceGroupDescriptions(), MySession.get().getUsernames()));
 						itemModel.setObject((AggregatedResource) ((DefaultMutableTreeNode) getAggregatedResourcesTree()
 								.getRoot()).getUserObject());
 						replacement.replaceWith(roViewerBox.tree);
@@ -471,7 +472,8 @@ public class RoPage
 					}
 					//					roFactory.reload();
 					AnnotatingBox.this.getModelObject().setAnnotations(
-						RoFactory.createAnnotations(roURI, AnnotatingBox.this.getModelObject().getURI()));
+						RoFactory.createAnnotations(roURI, AnnotatingBox.this.getModelObject().getURI(), MySession
+								.get().getUsernames()));
 					selectedStatements.clear();
 					target.add(annotatingBox.annotationsDiv);
 					target.add(roViewerBox.infoPanel);
@@ -570,7 +572,7 @@ public class RoPage
 						try {
 							if (statement.getAnnotation() == null) {
 								ClientResponse res = ROSRService.addAnnotation(roURI, statement.getSubjectURI(),
-									getSession().getUsername("Unknown"), statement, dLibraToken);
+									getSession().getUserURI(), statement, dLibraToken);
 								if (res.getStatus() != HttpServletResponse.SC_OK) {
 									throw new Exception("Error when adding annotation: "
 											+ res.getClientResponseStatus());
@@ -586,7 +588,8 @@ public class RoPage
 							}
 							//							roFactory.reload();
 							AnnotatingBox.this.getModelObject().setAnnotations(
-								RoFactory.createAnnotations(roURI, AnnotatingBox.this.getModelObject().getURI()));
+								RoFactory.createAnnotations(roURI, AnnotatingBox.this.getModelObject().getURI(),
+									MySession.get().getUsernames()));
 							target.add(form);
 							target.add(roViewerBox.infoPanel);
 							target.add(annotatingBox.annotationsDiv);
@@ -770,7 +773,8 @@ public class RoPage
 						try {
 							ROSRService.sendResource(resourceURI, uploadedFile.getInputStream(),
 								uploadedFile.getContentType(), MySession.get().getdLibraAccessToken());
-							AggregatedResource resource = RoFactory.createResource(roURI, resourceURI, true);
+							AggregatedResource resource = RoFactory.createResource(roURI, resourceURI, true, MySession
+									.get().getUsernames());
 							getAggregatedResourcesTree().addAggregatedResource(resource);
 							roViewerBox.tree.invalidateAll();
 							target.appendJavaScript("$('#upload-resource-modal').modal('hide')");

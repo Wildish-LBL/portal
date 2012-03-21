@@ -16,6 +16,7 @@ import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.request.UrlEncoder;
+import org.apache.wicket.util.crypt.Base64;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
@@ -56,6 +57,15 @@ public class ROSRService
 	{
 		Client client = Client.create();
 		WebResource webResource = client.resource(resourceURI.toString());
+		return webResource.get(InputStream.class);
+	}
+
+
+	public static InputStream getUser(URI userURI)
+	{
+		Client client = Client.create();
+		WebResource webResource = client.resource(baseURI.toString()).path("users")
+				.path(Base64.encodeBase64URLSafeString(userURI.toString().getBytes()));
 		return webResource.get(InputStream.class);
 	}
 
@@ -115,10 +125,10 @@ public class ROSRService
 	}
 
 
-	public static ClientResponse addAnnotation(URI researchObjectURI, URI targetURI, String username, Token dLibraToken)
+	public static ClientResponse addAnnotation(URI researchObjectURI, URI targetURI, URI userURI, Token dLibraToken)
 		throws URISyntaxException
 	{
-		return addAnnotation(researchObjectURI, targetURI, username, null, dLibraToken);
+		return addAnnotation(researchObjectURI, targetURI, userURI, null, dLibraToken);
 	}
 
 
@@ -127,13 +137,13 @@ public class ROSRService
 	 * 
 	 * @param researchObjectURI
 	 * @param targetURI
-	 * @param username
+	 * @param userURI
 	 * @param dLibraToken
 	 * @throws OAuthException
 	 * @throws URISyntaxException
 	 */
-	public static ClientResponse addAnnotation(URI researchObjectURI, URI targetURI, String username,
-			Statement statement, Token dLibraToken)
+	public static ClientResponse addAnnotation(URI researchObjectURI, URI targetURI, URI userURI, Statement statement,
+			Token dLibraToken)
 		throws URISyntaxException
 	{
 		InputStream is = ROSRService.getResource(researchObjectURI.resolve(".ro/manifest"));
@@ -141,7 +151,7 @@ public class ROSRService
 		manifest.read(is, null);
 
 		URI bodyURI = ROSRService.createAnnotationBodyURI(researchObjectURI, targetURI);
-		addAnnotation(manifest, researchObjectURI, targetURI, bodyURI, username);
+		addAnnotation(manifest, researchObjectURI, targetURI, bodyURI, userURI);
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		manifest.write(out);
 		sendResource(researchObjectURI.resolve(".ro/manifest"), new ByteArrayInputStream(out.toByteArray()),
@@ -193,8 +203,7 @@ public class ROSRService
 	 * @param bodyURI
 	 * @throws URISyntaxException
 	 */
-	public static void addAnnotation(OntModel manifest, URI researchObjectURI, URI targetURI, URI bodyURI,
-			String username)
+	public static void addAnnotation(OntModel manifest, URI researchObjectURI, URI targetURI, URI bodyURI, URI userURI)
 		throws URISyntaxException
 	{
 		Individual ann = manifest.createIndividual(createAnnotationURI(manifest, researchObjectURI).toString(),
@@ -202,11 +211,7 @@ public class ROSRService
 		ann.addProperty(RoFactory.annotatesAggregatedResource, manifest.createResource(targetURI.toString()));
 		ann.addProperty(RoFactory.aoBody, manifest.createResource(bodyURI.toString()));
 		ann.addProperty(DCTerms.created, manifest.createTypedLiteral(Calendar.getInstance()));
-		//FIXME this should use the user URI
-		String uri = researchObjectURI.resolve(".ro/manifest#" + username.replaceAll("\\W", "")).toString();
-		Individual agent = manifest.createResource(uri).as(Individual.class);
-		agent.setOntClass(RoFactory.foafAgent);
-		agent.addProperty(RoFactory.foafName, username);
+		Resource agent = manifest.createResource(userURI.toString());
 		ann.addProperty(DCTerms.creator, agent);
 		Individual ro = manifest.createResource(researchObjectURI.toString()).as(Individual.class);
 		ro.addProperty(RoFactory.aggregates, ann);
@@ -255,13 +260,12 @@ public class ROSRService
 	}
 
 
-	public static String[] getWhoAmi(Token dLibraToken)
+	public static InputStream getWhoAmi(Token dLibraToken)
 		throws URISyntaxException
 	{
 		Client client = Client.create();
 		WebResource webResource = client.resource(baseURI.toString()).path("whoami");
-		return webResource.header("Authorization", "Bearer " + dLibraToken.getToken()).get(String.class)
-				.split("[\\r\\n]+");
+		return webResource.header("Authorization", "Bearer " + dLibraToken.getToken()).get(InputStream.class);
 	}
 
 

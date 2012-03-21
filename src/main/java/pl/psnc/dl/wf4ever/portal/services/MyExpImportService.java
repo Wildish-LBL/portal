@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -129,7 +130,7 @@ public class MyExpImportService
 		/**
 		 * targetURI, creator name
 		 */
-		private final Map<URI, String> creators = new HashMap<>();
+		private final Map<URI, URI> creators = new HashMap<>();
 
 
 		public ImportThread(ImportModel importModel, Token myExpAccessToken, Token dLibraToken, String consumerKey,
@@ -413,8 +414,8 @@ public class MyExpImportService
 	}
 
 
-	static String getResourceAuthor(String myExperimentRDF)
-		throws UnsupportedEncodingException
+	static URI getResourceAuthor(String myExperimentRDF)
+		throws UnsupportedEncodingException, URISyntaxException
 	{
 		OntModel me = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 		me.read(new ByteArrayInputStream(myExperimentRDF.getBytes("UTF-8")), null);
@@ -425,9 +426,7 @@ public class MyExpImportService
 		Property owner = me.createProperty("http://rdfs.org/sioc/ns#has_owner");
 		if (source.hasProperty(owner)) {
 			Resource user = source.getPropertyResourceValue(owner);
-			Property name = me.createProperty("http://xmlns.com/foaf/0.1/name");
-			if (user.hasProperty(name))
-				return user.getProperty(name).getLiteral().getString();
+			return new URI(user.getURI());
 		}
 		return null;
 	}

@@ -3,6 +3,10 @@
  */
 package pl.psnc.dl.wf4ever.portal;
 
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.apache.wicket.Session;
 import org.apache.wicket.authroles.authentication.AbstractAuthenticatedWebSession;
@@ -11,7 +15,14 @@ import org.apache.wicket.request.Request;
 import org.apache.wicket.util.cookies.CookieUtils;
 import org.scribe.model.Token;
 
+import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.services.ROSRService;
+
+import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.ontology.OntModelSpec;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
 /**
  * @author piotrhol
@@ -38,6 +49,8 @@ public class MySession
 
 	private Token requestToken;
 
+	private URI userURI;
+
 	private String username;
 
 	private final static String DLIBRA_KEY = "dlibra";
@@ -45,6 +58,8 @@ public class MySession
 	private final static String MYEXP_KEY_TOKEN = "myexp1";
 
 	private final static String MYEXP_KEY_SECRET = "myexp2";
+
+	private final Map<URI, String> usernames = new HashMap<URI, String>();
 
 
 	public MySession(Request request)
@@ -81,7 +96,7 @@ public class MySession
 	public void setdLibraAccessToken(Token dLibraAccessToken)
 	{
 		this.dLibraAccessToken = dLibraAccessToken;
-		this.username = fetchUsername();
+		fetchUserData();
 		dirtydLibra = true;
 	}
 
@@ -178,6 +193,15 @@ public class MySession
 
 
 	/**
+	 * @return the userURI
+	 */
+	public URI getUserURI()
+	{
+		return userURI;
+	}
+
+
+	/**
 	 * @return the username
 	 */
 	public String getUsername(String defaultValue)
@@ -188,30 +212,30 @@ public class MySession
 	}
 
 
-	/**
-	 * @param username
-	 *            the username to set
-	 */
-	public void setUsername(String username)
+	private void fetchUserData()
 	{
-		this.username = username;
+		try {
+			OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
+			userModel.read(ROSRService.getWhoAmi(getdLibraAccessToken()), null);
+			ExtendedIterator<Individual> it = userModel.listIndividuals(RoFactory.foafAgent);
+			Individual user = it.next();
+			if (user != null && user.hasProperty(RoFactory.foafName)) {
+				userURI = new URI(user.getURI());
+				username = user.as(Individual.class).getPropertyValue(RoFactory.foafName).asLiteral().getString();
+			}
+		}
+		catch (Exception e) {
+			log.error("Error when retrieving user data: " + e.getMessage());
+		}
 	}
 
 
-	private String fetchUsername()
+	/**
+	 * @return the usernames
+	 */
+	public Map<URI, String> getUsernames()
 	{
-		try {
-			String[] data = ROSRService.getWhoAmi(getdLibraAccessToken());
-			if (data.length >= 2)
-				return data[1];
-			if (data.length >= 1)
-				return data[0];
-			return null;
-		}
-		catch (Exception e) {
-			log.error("Error when retrieving username: " + e.getMessage());
-			return null;
-		}
+		return usernames;
 	}
 
 }

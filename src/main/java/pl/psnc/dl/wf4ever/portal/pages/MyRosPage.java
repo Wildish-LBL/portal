@@ -60,7 +60,7 @@ public class MyRosPage
 		final List<ResearchObject> researchObjects = new ArrayList<ResearchObject>();
 		for (URI uri : uris) {
 			try {
-				researchObjects.add(RoFactory.createResearchObject(uri, false));
+				researchObjects.add(RoFactory.createResearchObject(uri, false, MySession.get().getUsernames()));
 			}
 			catch (Exception e) {
 				error("Could not get manifest for: " + uri + " (" + e.getMessage() + ")");
@@ -200,7 +200,8 @@ public class MyRosPage
 				Token dLibraToken = MySession.get().getdLibraAccessToken();
 				try {
 					URI researchObjectURI = ROSRService.createResearchObject(roId, dLibraToken).getLocation();
-					researchObjects.add(RoFactory.createResearchObject(researchObjectURI, false));
+					researchObjects.add(RoFactory.createResearchObject(researchObjectURI, false, MySession.get()
+							.getUsernames()));
 				}
 				catch (URISyntaxException e) {
 					error("Could not add Research Object: " + roId + " (" + e.getMessage() + ")");
