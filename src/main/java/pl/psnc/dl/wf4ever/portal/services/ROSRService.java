@@ -202,6 +202,7 @@ public class ROSRService
 		ann.addProperty(RoFactory.annotatesAggregatedResource, manifest.createResource(targetURI.toString()));
 		ann.addProperty(RoFactory.aoBody, manifest.createResource(bodyURI.toString()));
 		ann.addProperty(DCTerms.created, manifest.createTypedLiteral(Calendar.getInstance()));
+		//FIXME this should use the user URI
 		String uri = researchObjectURI.resolve(".ro/manifest#" + username.replaceAll("\\W", "")).toString();
 		Individual agent = manifest.createResource(uri).as(Individual.class);
 		agent.setOntClass(RoFactory.foafAgent);
@@ -224,7 +225,7 @@ public class ROSRService
 	{
 		URI ann = null;
 		do {
-			ann = researchObjectURI.resolve(UUID.randomUUID().toString());
+			ann = researchObjectURI.resolve(".ro/manifest#" + UUID.randomUUID().toString());
 		}
 		while (manifest.containsResource(manifest.createResource(ann.toString())));
 		return ann;
