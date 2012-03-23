@@ -54,7 +54,8 @@ public class SearchService
 		for (SyndEntry entry : entries) {
 			URI researchObjectURI = null;
 			Calendar created = null;
-			String creator = null, title = null;
+			String title = null;
+			List<String> creators = new ArrayList<>();
 			double score = -1;
 			List<Element> dlMarkup = (List<Element>) entry.getForeignMarkup();
 			for (Element element : dlMarkup) {
@@ -67,7 +68,7 @@ public class SearchService
 								researchObjectURI = URI.create(element.getValue());
 								break;
 							case "Creator":
-								creator = element.getValue();
+								creators.add(element.getValue());
 								break;
 							case "Created":
 								try {
@@ -91,7 +92,7 @@ public class SearchService
 			}
 
 			if (researchObjectURI != null && score != -1) {
-				ResearchObject ro = new ResearchObject(researchObjectURI, created, creator);
+				ResearchObject ro = new ResearchObject(researchObjectURI, created, creators);
 				ro.setTitle(title);
 				ros.add(new SearchResult(ro, score));
 			}

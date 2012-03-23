@@ -5,6 +5,7 @@ package pl.psnc.dl.wf4ever.portal.model;
 
 import java.net.URI;
 import java.util.Calendar;
+import java.util.List;
 
 import org.apache.wicket.request.UrlDecoder;
 
@@ -22,9 +23,9 @@ public class ResearchObject
 	private static final long serialVersionUID = 6525552866849376681L;
 
 
-	public ResearchObject(URI researchObjectURI, Calendar created, String creator)
+	public ResearchObject(URI researchObjectURI, Calendar created, List<String> creators)
 	{
-		super(researchObjectURI, created, creator, UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.resolve("..")
+		super(researchObjectURI, created, creators, UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.resolve("..")
 				.relativize(researchObjectURI).toString(), "UTF-8"), 0, Type.RESEARCH_OBJECT);
 	}
 

@@ -5,6 +5,7 @@ package pl.psnc.dl.wf4ever.portal.model;
 
 import java.net.URI;
 import java.util.Calendar;
+import java.util.List;
 
 /**
  * @author piotrhol
@@ -23,13 +24,13 @@ public class InternalResource
 	/**
 	 * @param uri
 	 * @param name
-	 * @param creator
+	 * @param creators
 	 * @param created
 	 * @param rSize
 	 */
-	public InternalResource(URI uri, Calendar created, String creator, String name, long size, Type type)
+	public InternalResource(URI uri, Calendar created, List<String> creators, String name, long size, Type type)
 	{
-		super(uri, created, creator, name, size, type);
+		super(uri, created, creators, name, size, type);
 	}
 
 

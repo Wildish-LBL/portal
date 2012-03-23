@@ -66,7 +66,7 @@ public class ItemInfoPanel
 				itemModel.<URI> bind("downloadURI")));
 		creatorSection = new WebMarkupContainer("creatorSection", new Model<>());
 		add(creatorSection);
-		creatorSection.add(new Label("creator"));
+		creatorSection.add(new Label("creator").setEscapeModelStrings(false));
 		createdSection = new WebMarkupContainer("createdSection", new Model<>());
 		add(createdSection);
 		createdSection.add(new Label("createdFormatted"));

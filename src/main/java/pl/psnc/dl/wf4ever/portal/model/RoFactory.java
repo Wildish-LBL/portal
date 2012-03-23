@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -43,6 +44,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.NodeIterator;
 import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
@@ -202,7 +204,7 @@ public class RoFactory
 
 		Individual res = model.getIndividual(resourceURI.toString());
 		Calendar created = null;
-		String creator = null;
+		List<String> creators = new ArrayList<>();
 		long size = 0;
 
 		try {
@@ -211,8 +213,16 @@ public class RoFactory
 		catch (Exception e) {
 		}
 		try {
-			Resource r = res.getPropertyResourceValue(DCTerms.creator);
-			creator = getUserName(usernames, r);
+			NodeIterator it = res.listPropertyValues(DCTerms.creator);
+			while (it.hasNext()) {
+				RDFNode node = it.next();
+				if (node.isResource()) {
+					creators.add(getUserName(usernames, node.asResource()));
+				}
+				else {
+					creators.add(node.asLiteral().getString());
+				}
+			}
 		}
 		catch (Exception e) {
 		}
@@ -225,16 +235,16 @@ public class RoFactory
 		String name = UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.relativize(resourceURI).toString(), "UTF-8");
 		AggregatedResource resource;
 		if (res.hasRDFType("http://purl.org/wf4ever/ro#ResearchObject")) {
-			resource = new ResearchObject(resourceURI, created, creator);
+			resource = new ResearchObject(resourceURI, created, creators);
 		}
 		else if (resourceURI.getPath().endsWith(".t2flow") || res.hasRDFType("http://purl.org/wf4ever/wfdesc#Workflow")) {
-			resource = new InternalResource(resourceURI, created, creator, name, size, Type.WORKFLOW);
+			resource = new InternalResource(resourceURI, created, creators, name, size, Type.WORKFLOW);
 		}
 		else if (res.hasRDFType("http://purl.org/wf4ever/wf4ever#WebServiceProcess")) {
-			resource = new WebService(resourceURI, created, creator, name, size);
+			resource = new WebService(resourceURI, created, creators, name, size);
 		}
 		else {
-			resource = new InternalResource(resourceURI, created, creator, name, size, Type.OTHER);
+			resource = new InternalResource(resourceURI, created, creators, name, size, Type.OTHER);
 		}
 		if (includeAnnotations) {
 			resource.setAnnotations(createAnnotations(model, researchObjectURI, resourceURI, usernames));
@@ -439,7 +449,8 @@ public class RoFactory
 				Resource body = ann.getPropertyResourceValue(aoBody);
 				String name = UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.relativize(new URI(ann.getURI()))
 						.toString(), "UTF-8");
-				anns.add(new Annotation(new URI(ann.getURI()), created, creator, name, new URI(body.getURI())));
+				anns.add(new Annotation(new URI(ann.getURI()), created, Arrays.asList(creator), name, new URI(body
+						.getURI())));
 			}
 			catch (Exception e) {
 				log.warn("Could not add annotation " + ann.getURI() + ": " + e.getMessage());

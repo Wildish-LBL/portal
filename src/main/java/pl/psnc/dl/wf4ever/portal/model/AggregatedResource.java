@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.ocpsoft.pretty.time.PrettyTime;
@@ -27,7 +29,7 @@ public abstract class AggregatedResource
 
 	protected Calendar created;
 
-	protected String creator;
+	protected List<String> creators;
 
 	protected String name;
 
@@ -46,11 +48,11 @@ public abstract class AggregatedResource
 	private URI provenanceTraceURI;
 
 
-	public AggregatedResource(URI uri, Calendar created, String creator, String name, long size, Type type)
+	public AggregatedResource(URI uri, Calendar created, List<String> creators, String name, long size, Type type)
 	{
 		this.uri = uri;
 		this.created = created;
-		this.creator = creator;
+		this.creators = creators;
 		this.name = name;
 		this.size = size;
 		this.setType(type);
@@ -112,7 +114,7 @@ public abstract class AggregatedResource
 
 	public String getCreator()
 	{
-		return creator;
+		return StringUtils.join(creators, ", ");
 	}
 
 

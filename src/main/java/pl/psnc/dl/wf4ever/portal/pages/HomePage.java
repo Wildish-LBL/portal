@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
@@ -91,7 +92,7 @@ public class HomePage
 			URI uri = new URI(solution.getResource("resource").getURI());
 			String author = solution.getLiteral("creator").getString();
 			Calendar created = ((XSDDateTime) solution.getLiteral("created").getValue()).asCalendar();
-			roHeaders.add(new ResearchObject(uri, created, author));
+			roHeaders.add(new ResearchObject(uri, created, Arrays.asList(author)));
 		}
 
 		results = QueryExecutionFactory.sparqlService(
