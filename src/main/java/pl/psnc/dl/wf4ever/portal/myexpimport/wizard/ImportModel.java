@@ -24,7 +24,7 @@ public class ImportModel
 {
 
 	public enum ImportStatus {
-		NOT_STARTED, RUNNING, FINISHED
+		NOT_STARTED, RUNNING, FINISHED, FAILED
 	}
 
 	public enum WorkspaceType {

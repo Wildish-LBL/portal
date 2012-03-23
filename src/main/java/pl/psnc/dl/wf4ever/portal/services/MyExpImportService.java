@@ -117,6 +117,8 @@ public class MyExpImportService
 
 		private OntModel manifest;
 
+		private final List<String> errors = new ArrayList<>();
+
 		/**
 		 * bodyURI, bodyRDF
 		 */
@@ -150,31 +152,58 @@ public class MyExpImportService
 			model.setStatus(ImportStatus.RUNNING);
 			model.setMessage("Preparing the data");
 
-			try {
-				List<Pack> packs = getPacks(model.getSelectedPacks());
-				if (model.getCustomPackId() != null) {
+			//			try {
+			List<Pack> packs = getPacks(model.getSelectedPacks());
+			if (model.getCustomPackId() != null) {
+				try {
 					packs.add(getPack(model.getCustomPackId()));
 				}
-				int simpleResourcesCnt = model.getSelectedFiles().size() + model.getSelectedWorkflows().size();
-				for (Pack pack : packs) {
-					simpleResourcesCnt += pack.getResources().size();
+				catch (Exception e) {
+					log.error("Preparing packs", e);
+					errors.add(String.format("When fetching pack with ID %s: %s", model.getCustomPackId(),
+						e.getMessage()));
 				}
-				stepsTotal = simpleResourcesCnt * 4 + packs.size() * 2 + 3;
+			}
+			int simpleResourcesCnt = model.getSelectedFiles().size() + model.getSelectedWorkflows().size();
+			for (Pack pack : packs) {
+				simpleResourcesCnt += pack.getResources().size();
+			}
+			stepsTotal = simpleResourcesCnt * 4 + packs.size() * 2 + 3;
 
+			try {
 				researchObjectURI = createRO(model.getRoId());
+			}
+			catch (Exception e) {
+				log.error("Creating RO", e);
+				errors.add(String.format("When creating RO: %s", e.getMessage()));
+				model.setProgressInPercent(100);
+				model.setStatus(ImportStatus.FAILED);
+			}
+			if (researchObjectURI != null) {
 				importSimpleResources(model.getSelectedFiles());
 				importSimpleResources(model.getSelectedWorkflows());
 				importPacks(packs);
 				manifest = getManifest();
 				updateManifest();
 				uploadAnnotations();
-				model.setMessage("Finished");
+				model.setProgressInPercent(100);
+				model.setStatus(ImportStatus.FINISHED);
 			}
-			catch (Exception e) {
-				log.error("Error during import", e);
-				model.setMessage("Error during import: " + e.getMessage());
+			String finalMessage;
+			if (model.getStatus() == ImportStatus.FINISHED) {
+				finalMessage = "Import finished successfully!";
 			}
-			model.setStatus(ImportStatus.FINISHED);
+			else {
+				finalMessage = "Import failed.";
+			}
+			if (!errors.isEmpty()) {
+				finalMessage = finalMessage.concat("<br/>Some errors occurred:<br/><ul>");
+				for (String error : errors) {
+					finalMessage = finalMessage.concat("<br/><li>").concat(error).concat("</li>");
+				}
+				finalMessage = finalMessage.concat("</ul>");
+			}
+			model.setMessage(finalMessage);
 		}
 
 
@@ -192,7 +221,6 @@ public class MyExpImportService
 
 
 		private OntModel getManifest()
-			throws OAuthException
 		{
 			model.setMessage("Downloading the manifest");
 			InputStream is = ROSRService.getResource(researchObjectURI.resolve(".ro/manifest"));
@@ -204,12 +232,17 @@ public class MyExpImportService
 
 
 		private void updateManifest()
-			throws Exception
 		{
 			model.setMessage("Updating the manifest");
 			for (Entry<URI, URI> e : annotations.entrySet()) {
-				ROSRService.addAnnotation(manifest, researchObjectURI, e.getKey(), e.getValue(),
-					creators.get(e.getKey()));
+				try {
+					ROSRService.addAnnotation(manifest, researchObjectURI, e.getKey(), e.getValue(),
+						creators.get(e.getKey()));
+				}
+				catch (Exception ex) {
+					log.error("When adding annotation", ex);
+					errors.add(String.format("When adding annotation for %s: %s", e.getKey(), ex.getMessage()));
+				}
 			}
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			manifest.write(out);
@@ -220,7 +253,6 @@ public class MyExpImportService
 
 
 		private void uploadAnnotations()
-			throws Exception
 		{
 			for (Entry<URI, Model> e : annBodies.entrySet()) {
 				model.setMessage(String.format("Uploading annotation body %s", e.getKey()));
@@ -235,21 +267,32 @@ public class MyExpImportService
 
 
 		private void importSimpleResources(List< ? extends SimpleResourceHeader> resourceHeaders)
-			throws JAXBException, Exception
 		{
 			for (SimpleResourceHeader header : resourceHeaders) {
-				SimpleResource r = importSimpleResource(header, header.getResourceClass());
-				downloadResourceMetadata(r);
+				try {
+					SimpleResource r = importSimpleResource(header, header.getResourceClass());
+					downloadResourceMetadata(r);
+				}
+				catch (Exception e) {
+					log.error("When importing simple resource " + header.getResource(), e);
+					errors.add(String.format("When importing %s: %s", header.getResource(), e.getMessage()));
+				}
 			}
 		}
 
 
 		private List<Pack> getPacks(List<PackHeader> packHeaders)
-			throws OAuthException, JAXBException
 		{
 			List<Pack> packs = new ArrayList<Pack>();
 			for (PackHeader packHeader : packHeaders) {
-				packs.add((Pack) getResource(packHeader, Pack.class));
+				try {
+					packs.add((Pack) getResource(packHeader, Pack.class));
+				}
+				catch (Exception e) {
+					log.error("Preparing packs", e);
+					errors.add(String.format("When fetching pack %s: %s", packHeader.getResource().toString(),
+						e.getMessage()));
+				}
 			}
 			return packs;
 		}
@@ -275,13 +318,25 @@ public class MyExpImportService
 		 * @throws Exception
 		 */
 		private void importPacks(List<Pack> packs)
-			throws JAXBException, Exception
 		{
 			for (Pack pack : packs) {
-				downloadResourceMetadata(pack);
+				try {
+					downloadResourceMetadata(pack);
 
-				for (InternalPackItemHeader packItemHeader : pack.getResources()) {
-					importInternalPackItem(pack, packItemHeader);
+					for (InternalPackItemHeader packItemHeader : pack.getResources()) {
+						try {
+							importInternalPackItem(pack, packItemHeader);
+						}
+						catch (Exception e) {
+							log.error("When importing internal pack item " + packItemHeader.getResource(), e);
+							errors.add(String.format("When importing %s: %s", packItemHeader.getResource(),
+								e.getMessage()));
+						}
+					}
+				}
+				catch (Exception e) {
+					log.error("When importing pack metadata " + pack.getResource(), e);
+					errors.add(String.format("When importing %s metadata: %s", pack.getResource(), e.getMessage()));
 				}
 			}
 		}

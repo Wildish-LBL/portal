@@ -18,7 +18,7 @@ import pl.psnc.dl.wf4ever.portal.services.MyExpImportService;
 
 /**
  * @author Piotr Hołubowicz
- *
+ * 
  */
 public class ImportDataStep
 	extends AbstractImportStep
@@ -36,6 +36,7 @@ public class ImportDataStep
 		setOutputMarkupId(true);
 		final Label importStatus = new Label("message", new PropertyModel<String>(model, "message"));
 		importStatus.setOutputMarkupId(true);
+		importStatus.setEscapeModelStrings(false);
 		add(importStatus);
 		setComplete(false);
 
@@ -48,7 +49,7 @@ public class ImportDataStep
 				target.appendJavaScript("$(\"#progressbar\").progressbar(\"value\", " + model.getProgressInPercent()
 						+ ");");
 
-				if (model.getStatus() == ImportStatus.FINISHED) {
+				if (model.getStatus() == ImportStatus.FINISHED || model.getStatus() == ImportStatus.FAILED) {
 					stop();
 					importStatus.remove(this);
 					setComplete(true);

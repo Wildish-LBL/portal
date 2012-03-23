@@ -253,23 +253,46 @@ public class RoFactory
 	{
 		String username = null;
 		URI uri = URI.create(creator.getURI());
-		if (usernames.containsKey(uri)) {
-			username = usernames.get(uri);
-		}
-		else if (creator.hasProperty(foafName)) {
-			username = creator.as(Individual.class).getPropertyValue(foafName).asLiteral().getString();
-		}
-		else {
-			OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
-			userModel.read(ROSRService.getUser(uri), null);
-			Resource r2 = userModel.createResource(uri.toString());
-			if (r2 != null && r2.hasProperty(foafName)) {
-				username = r2.as(Individual.class).getPropertyValue(foafName).asLiteral().getString();
+		try {
+			// 1. already fetched
+			if (usernames.containsKey(uri)) {
+				username = usernames.get(uri);
+			}
+			// 2. FOAF data defined inline
+			else if (creator.hasProperty(foafName)) {
+				username = creator.as(Individual.class).getPropertyValue(foafName).asLiteral().getString();
+			}
+			else {
+				try {
+					// 3. FOAF data under user URI
+					OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
+					userModel.read(uri.toString(), null);
+					Resource r2 = userModel.createResource(uri.toString());
+					if (r2 != null && r2.hasProperty(foafName)) {
+						username = r2.as(Individual.class).getPropertyValue(foafName).asLiteral().getString();
+					}
+				}
+				catch (Exception e) {
+					log.debug("No FOAF data under user URI", e);
+				}
+				if (username == null) {
+					// 4. FOAF data in RODL
+					OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
+					userModel.read(ROSRService.getUser(uri), null);
+					Resource r2 = userModel.createResource(uri.toString());
+					if (r2 != null && r2.hasProperty(foafName)) {
+						username = r2.as(Individual.class).getPropertyValue(foafName).asLiteral().getString();
+					}
+				}
 			}
 		}
-		if (username != null) {
-			usernames.put(uri, username);
+		catch (Exception e) {
+			log.error("Error when getting username", e);
 		}
+		if (username == null) {
+			username = uri.toString();
+		}
+		usernames.put(uri, username);
 		return username;
 	}
 
