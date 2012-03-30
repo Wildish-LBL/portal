@@ -31,7 +31,6 @@
 
 .mainMenuListList {
 	margin-left: -39px;
-	font-weight: bold;
 	float: left;
 	list-style-type: none;
 }
@@ -237,17 +236,17 @@ table.resourceList td.link {
 }
 /* left side
    --------- */
-.inspan4 {
+.inspan3 {
 	width: 205px;
 	margin-left: 10px;
 }
 
-.inspan12 {
+.inspan9 {
 	width: 680px;
 	margin-left: 10px;
 }
 
-.inspan16 {
+.inspan12 {
 	width: 920px;
 	margin-left: 10px;
 }

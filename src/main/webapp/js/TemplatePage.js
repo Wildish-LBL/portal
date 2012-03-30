@@ -1,6 +1,7 @@
 $(document).ready(function() {
 	$('#busy-modal').modal({
-		backdrop : 'static'
+		backdrop : 'static',
+		show : false
 	})
 });
 
@@ -13,5 +14,5 @@ function hideBusy() {
 }
 
 $(document).ready(function() {
-	$('#signedInAs').twipsy();
+	$('#signedInAs').tooltip();
 });

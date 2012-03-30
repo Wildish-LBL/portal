@@ -1,16 +1,20 @@
 <?xml version="1.0"?>
 <wicket:extend xmlns:wicket="http://wicket.apache.org">
-	<div class="inspan12">
+	<div class="inspan9" style="margin-top: 30px;">
 		<p>Please select the resources that you want to import.</p>
 		<div wicket:id="filesDiv"></div>
 		<div wicket:id="workflowsDiv"></div>
 		<div wicket:id="packsDiv"></div>
-		<p><strong>Any public pack</strong></p>
+		<p>
+			<strong>Any public pack</strong>
+		</p>
 		<form wicket:id="form">
 			<fieldset>
-				<label for="customPackId">Pack ID</label>
-				<div class="input">
-					<input type="text" id="customPackId" wicket:id="customPackId"/>
+				<div class="control-group">
+					<label class="control-label" for="customPackId">Pack ID</label>
+					<div class="controls">
+						<input type="text" id="customPackId" wicket:id="customPackId" />
+					</div>
 				</div>
 			</fieldset>
 		</form>

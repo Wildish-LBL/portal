@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <wicket:extend xmlns:wicket="http://wicket.apache.org">
-	<div class="inspan12">
+	<div class="inspan9" style="margin-top: 30px;">
 		<p>
 			Press <i>Start</i> to start copying the resources. The process should
 			take not longer then a few minutes, depending on the amount and size
-			of your data. 
+			of your data.
 		</p>
 		<script>
 			$(function() {
@@ -16,7 +16,9 @@
 			<p wicket:id="message"></p>
 		</div>
 		<p>
-			<input class="btn primary" type="button" wicket:id="go" value="Start" />
+			<button class="btn btn-primary" type="button" wicket:id="go">
+				<i class="icon-play icon-white"></i> Start
+			</button>
 		</p>
 	</div>
 </wicket:extend>

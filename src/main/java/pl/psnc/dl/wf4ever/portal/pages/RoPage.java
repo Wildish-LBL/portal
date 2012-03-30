@@ -5,7 +5,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -28,12 +27,8 @@ import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Check;
-import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.CheckGroup;
-import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextArea;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -47,7 +42,6 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.UrlDecoder;
 import org.apache.wicket.request.UrlEncoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.util.convert.IConverter;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
@@ -60,7 +54,6 @@ import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 import pl.psnc.dl.wf4ever.portal.model.Statement;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.RoTree;
-import pl.psnc.dl.wf4ever.portal.pages.util.URIConverter;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
@@ -81,9 +74,11 @@ public class RoPage
 
 	final RoViewerBox roViewerBox;
 
-	private final AnnotatingBox annotatingBox;
+	final AnnotatingBox annotatingBox;
 
 	private RoTreeModel aggregatedResourcesTree;
+
+	private final StatementEditModal stmtEditForm;
 
 
 	@SuppressWarnings("serial")
@@ -114,6 +109,9 @@ public class RoPage
 		annotatingBox.selectedStatements.clear();
 		add(new DownloadMetadataModal("downloadMetadataModal", this));
 		add(new UploadResourceModal("uploadResourceModal", this));
+		stmtEditForm = new StatementEditModal("statementEditModal", RoPage.this, new CompoundPropertyModel<Statement>(
+				(Statement) null));
+		add(stmtEditForm);
 
 		final Component replacement = new Fragment("treeTable", "loadingROFragment", this);
 		roViewerBox.tree.replaceWith(replacement);
@@ -301,7 +299,7 @@ public class RoPage
 				}
 
 			};
-			roForm.add(downloadMetadata);
+			actionButtons.add(downloadMetadata);
 		}
 	}
 
@@ -315,8 +313,6 @@ public class RoPage
 		final PropertyListView<Annotation> annList;
 
 		final List<Statement> selectedStatements = new ArrayList<Statement>();
-
-		private final StatementEditForm stmtEditForm;
 
 
 		public AggregatedResource getModelObject()
@@ -421,7 +417,7 @@ public class RoPage
 					super.onSubmit(target, form);
 					try {
 						stmtEditForm.setModelObject(new Statement(itemModel.getObject().getURI(), null));
-						stmtEditForm.setTitle("Add statement");
+						stmtEditForm.setTitle("Add annotation");
 						target.add(stmtEditForm);
 						target.appendJavaScript("showStmtEdit('');");
 					}
@@ -488,189 +484,6 @@ public class RoPage
 			};
 			annForm.add(deleteStatement);
 
-			stmtEditForm = new StatementEditForm(new CompoundPropertyModel<Statement>((Statement) null));
-			add(stmtEditForm);
-		}
-
-		class StatementEditForm
-			extends Form<Statement>
-		{
-
-			private final TextArea<String> value;
-
-			private final TextField<URI> objectURI;
-
-			private final TextField<URI> propertyURI;
-
-			private URI selectedProperty;
-
-			private String title;
-
-
-			public StatementEditForm(CompoundPropertyModel<Statement> model)
-			{
-				super("stmtEditForm", model);
-
-				add(new Label("title", new PropertyModel<String>(this, "title")));
-
-				List<URI> choices = Arrays.asList(RoFactory.defaultProperties);
-				DropDownChoice<URI> properties = new DropDownChoice<URI>("propertyURI", new PropertyModel<URI>(this,
-						"selectedProperty"), choices);
-				properties.setNullValid(true);
-				add(properties);
-
-				final WebMarkupContainer propertyURIDiv = new WebMarkupContainer("customPropertyURIDiv");
-				add(propertyURIDiv);
-
-				propertyURI = new TextField<URI>("customPropertyURI", new PropertyModel<URI>(this, "customProperty"),
-						URI.class) {
-
-					@SuppressWarnings("unchecked")
-					@Override
-					public <C> IConverter<C> getConverter(Class<C> type)
-					{
-						return (IConverter<C>) new URIConverter();
-					}
-				};
-				propertyURIDiv.add(propertyURI);
-
-				final WebMarkupContainer uriDiv = new WebMarkupContainer("objectURIDiv");
-				add(uriDiv);
-
-				objectURI = new TextField<URI>("objectURI", URI.class) {
-
-					@SuppressWarnings("unchecked")
-					@Override
-					public <C> IConverter<C> getConverter(Class<C> type)
-					{
-						return (IConverter<C>) new URIConverter();
-					}
-				};
-				uriDiv.add(objectURI);
-
-				final WebMarkupContainer valueDiv = new WebMarkupContainer("objectValueDiv");
-				add(valueDiv);
-
-				value = new TextArea<String>("objectValue");
-				value.setEscapeModelStrings(false);
-				valueDiv.add(value);
-
-				CheckBox objectType = new CheckBox("objectURIResource");
-				add(objectType);
-
-				add(new MyAjaxButton("save", this) {
-
-					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-					{
-						super.onSubmit(target, form);
-						Token dLibraToken = getSession().getdLibraAccessToken();
-						Statement statement = StatementEditForm.this.getModelObject();
-						try {
-							if (statement.getAnnotation() == null) {
-								ClientResponse res = ROSRService.addAnnotation(roURI, statement.getSubjectURI(),
-									getSession().getUserURI(), statement, dLibraToken);
-								if (res.getStatus() != HttpServletResponse.SC_OK) {
-									throw new Exception("Error when adding annotation: "
-											+ res.getClientResponseStatus());
-								}
-							}
-							else {
-								Annotation ann = statement.getAnnotation();
-								ClientResponse res = ROSRService.sendResource(ann.getBodyURI(),
-									RoFactory.wrapAnnotationBody(ann.getBody()), "application/rdf+xml", dLibraToken);
-								if (res.getStatus() != HttpServletResponse.SC_OK) {
-									throw new Exception("Error when adding statement: " + res.getClientResponseStatus());
-								}
-							}
-							//							roFactory.reload();
-							AnnotatingBox.this.getModelObject().setAnnotations(
-								RoFactory.createAnnotations(roURI, AnnotatingBox.this.getModelObject().getURI(),
-									MySession.get().getUsernames()));
-							target.add(form);
-							target.add(roViewerBox.infoPanel);
-							target.add(annotatingBox.annotationsDiv);
-							target.appendJavaScript("$('#edit-ann-modal').modal('hide')");
-						}
-						catch (Exception e) {
-							error("" + e.getMessage());
-						}
-					}
-				});
-				add(new MyAjaxButton("cancel", this) {
-
-					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-					{
-						super.onSubmit(target, form);
-						target.appendJavaScript("$('#edit-ann-modal').modal('hide')");
-					}
-				}.setDefaultFormProcessing(false));
-			}
-
-
-			/**
-			 * @return the selectedProperty
-			 */
-			public URI getSelectedProperty()
-			{
-				if (selectedProperty == null && getModelObject() != null)
-					return getModelObject().getPropertyURI();
-				return selectedProperty;
-			}
-
-
-			/**
-			 * @param selectedProperty
-			 *            the selectedProperty to set
-			 */
-			public void setSelectedProperty(URI selectedProperty)
-			{
-				this.selectedProperty = selectedProperty;
-				if (selectedProperty != null)
-					getModelObject().setPropertyURI(selectedProperty);
-			}
-
-
-			/**
-			 * @return the selectedProperty
-			 */
-			public URI getCustomProperty()
-			{
-				if (getModelObject() != null)
-					return getModelObject().getPropertyURI();
-				return null;
-			}
-
-
-			/**
-			 * @param selectedProperty
-			 *            the selectedProperty to set
-			 */
-			public void setCustomProperty(URI customProperty)
-			{
-				if (selectedProperty == null && customProperty != null)
-					getModelObject().setPropertyURI(customProperty);
-			}
-
-
-			/**
-			 * @return the title
-			 */
-			public String getTitle()
-			{
-				return title;
-			}
-
-
-			/**
-			 * @param title
-			 *            the title to set
-			 */
-			public void setTitle(String title)
-			{
-				this.title = title;
-			}
 		}
 	}
 
@@ -749,5 +562,54 @@ public class RoPage
 	{
 		throw new RestartResponseException(RoPage.class, getPageParameters().add("redirectTo",
 			roURI.resolve(".ro/manifest." + format.getDefaultFileExtension()).toString()).add("redirectDelay", 1));
+	}
+
+
+	/**
+	 * @param statement
+	 * @throws URISyntaxException
+	 * @throws Exception
+	 */
+	void onStatementAdd(Statement statement)
+		throws URISyntaxException, Exception
+	{
+		Token dLibraToken = MySession.get().getdLibraAccessToken();
+		ClientResponse res = ROSRService.addAnnotation(roURI, statement.getSubjectURI(), MySession.get().getUserURI(),
+			statement, dLibraToken);
+		if (res.getStatus() != HttpServletResponse.SC_OK) {
+			throw new Exception("Error when adding annotation: " + res.getClientResponseStatus());
+		}
+	}
+
+
+	/**
+	 * @param statement
+	 * @throws Exception
+	 */
+	void onStatementEdit(Statement statement)
+		throws Exception
+	{
+		Token dLibraToken = MySession.get().getdLibraAccessToken();
+		Annotation ann = statement.getAnnotation();
+		ClientResponse res = ROSRService.sendResource(ann.getBodyURI(), RoFactory.wrapAnnotationBody(ann.getBody()),
+			"application/rdf+xml", dLibraToken);
+		if (res.getStatus() != HttpServletResponse.SC_OK) {
+			throw new Exception("Error when adding statement: " + res.getClientResponseStatus());
+		}
+	}
+
+
+	/**
+	 * @param target
+	 * @param form
+	 */
+	void onStatementAddedEdited(AjaxRequestTarget target)
+	{
+		//							roFactory.reload();
+		this.annotatingBox.getModelObject().setAnnotations(
+			RoFactory.createAnnotations(roURI, this.annotatingBox.getModelObject().getURI(), MySession.get()
+					.getUsernames()));
+		target.add(roViewerBox.infoPanel);
+		target.add(annotatingBox.annotationsDiv);
 	}
 }

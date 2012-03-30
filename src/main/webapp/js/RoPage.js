@@ -1,28 +1,30 @@
 $(document).ready(function() {
 	$('#upload-resource-modal').modal({
-		backdrop : 'static'
+		backdrop : 'static',
+		show : false
 	})
 });
 
 $(document).ready(function() {
 	$('#download-metadata-modal').modal({
-		backdrop : 'static'
+		backdrop : 'static',
+		show : false
 	})
 });
 
 $(document).ready(function() {
 	$('#edit-ann-modal').modal({
-		backdrop : 'static'
+		backdrop : 'static',
+		show : false
 	})
 });
 
 function showStmtEdit(content) {
 	$('#objectValue').wysiwyg('destroy');
 	$('#edit-ann-modal').modal('show');
-	$('#objectValue').wysiwyg(
-					{
-						css : 'http://twitter.github.com/bootstrap/assets/css/bootstrap-1.2.0.min.css'
-					}).wysiwyg('setContent', content);
+	$('#objectValue').wysiwyg({
+		css : 'css/bootstrap.min.css'
+	}).wysiwyg('setContent', content);
 	document.getElementById('propertyURI').onchange = checkStmtPropertyType;
 	document.getElementById('objectType').onclick = checkStmtEditType;
 	checkStmtPropertyType();

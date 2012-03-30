@@ -1,13 +1,15 @@
 <?xml version="1.0"?>
 <wicket:extend xmlns:wicket="http://wicket.apache.org">
-	<div class="inspan12">
+	<div class="inspan9" style="margin-top: 30px;">
 		<p>Please check the default Research Object identifier provided
 			below.</p>
-		<form wicket:id="form">
+		<form class="form-horizontal" wicket:id="form">
 			<fieldset>
-				<label for="roId">RO identifier</label>
-				<div class="input">
-					<input type="text" id="roId" wicket:id="roId" />
+				<div class="control-group">
+					<label class="control-label" for="roId">RO identifier</label>
+					<div class="controls">
+						<input type="text" id="roId" wicket:id="roId" />
+					</div>
 				</div>
 			</fieldset>
 		</form>
