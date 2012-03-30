@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<wicket:panel xmlns:wicket="http://wicket.apache.org">
+	<div id="download-metadata-modal" class="modal hide">
+		<form wicket:id="downloadMetadataForm">
+			<div class="modal-header">
+				<a class="close" href="#">×</a>
+				<h3>Choose format</h3>
+			</div>
+			<div class="modal-body">
+				<fieldset>
+					<label for="rdfFormat">RDF format</label>
+					<div class="input">
+						<select name="rdfFormat" id="rdfFormat" wicket:id="rdfFormat">
+						</select>
+					</div>
+				</fieldset>
+			</div>
+			<div class="modal-footer">
+				<a class="btn primary" wicket:id="confirmDownloadMetadata"
+					type="submit">OK</a> <a class="btn secondary"
+					wicket:id="cancelDownloadMetadata">Cancel</a>
+			</div>
+		</form>
+	</div>
+</wicket:panel>

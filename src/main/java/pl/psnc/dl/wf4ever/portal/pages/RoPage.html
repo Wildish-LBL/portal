@@ -163,49 +163,8 @@
 			</section>
 		</div>
 	</div>
-	<div id="download-metadata-modal" class="modal hide">
-		<form wicket:id="downloadMetadataForm">
-			<div class="modal-header">
-				<a class="close" href="#">×</a>
-				<h3>Choose format</h3>
-			</div>
-			<div class="modal-body">
-				<fieldset>
-					<label for="rdfFormat">RDF format</label>
-					<div class="input">
-						<select name="rdfFormat" id="rdfFormat" wicket:id="rdfFormat">
-						</select>
-					</div>
-				</fieldset>
-			</div>
-			<div class="modal-footer">
-				<a class="btn primary" wicket:id="confirmDownloadMetadata"
-					type="submit">OK</a> <a class="btn secondary"
-					wicket:id="cancelDownloadMetadata">Cancel</a>
-			</div>
-		</form>
-	</div>
-	<div id="upload-resource-modal" class="modal hide">
-		<form wicket:id="uploadResourceForm">
-			<div class="modal-header">
-				<a class="close" href="#">×</a>
-				<h3>Choose file</h3>
-			</div>
-			<div class="modal-body">
-				<fieldset>
-					<label for="fileUpload">File to upload</label>
-					<div class="input">
-						<input wicket:id="fileUpload" id="fileUpload" type="file" />
-					</div>
-				</fieldset>
-			</div>
-			<div class="modal-footer">
-				<a class="btn primary" wicket:id="confirmUploadResource"
-					type="submit">OK</a> <a class="btn secondary"
-					wicket:id="cancelUploadResource">Cancel</a>
-			</div>
-		</form>
-	</div>
+	<div wicket:id="downloadMetadataModal"></div>
+	<div wicket:id="uploadResourceModal"></div>
 	<wicket:fragment wicket:id="externalLinkFragment">
 		<a wicket:id="link"></a>
 	</wicket:fragment>

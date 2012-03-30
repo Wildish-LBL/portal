@@ -32,11 +32,9 @@ import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.CheckGroup;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
-import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PropertyListView;
@@ -50,7 +48,6 @@ import org.apache.wicket.request.UrlDecoder;
 import org.apache.wicket.request.UrlEncoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.convert.IConverter;
-import org.apache.wicket.util.lang.Bytes;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
@@ -78,11 +75,11 @@ public class RoPage
 
 	private static final Logger log = Logger.getLogger(RoPage.class);
 
-	private URI roURI;
+	URI roURI;
 
 	private boolean canEdit = false;
 
-	private final RoViewerBox roViewerBox;
+	final RoViewerBox roViewerBox;
 
 	private final AnnotatingBox annotatingBox;
 
@@ -115,8 +112,8 @@ public class RoPage
 		annotatingBox = new AnnotatingBox(itemModel);
 		add(annotatingBox);
 		annotatingBox.selectedStatements.clear();
-		add(new ChooseRdfFormat());
-		add(new UploadResourceForm());
+		add(new DownloadMetadataModal("downloadMetadataModal", this));
+		add(new UploadResourceModal("uploadResourceModal", this));
 
 		final Component replacement = new Fragment("treeTable", "loadingROFragment", this);
 		roViewerBox.tree.replaceWith(replacement);
@@ -678,128 +675,6 @@ public class RoPage
 	}
 
 	@SuppressWarnings("serial")
-	class ChooseRdfFormat
-		extends Form<Void>
-	{
-
-		private RDFFormat format = RDFFormat.RDFXML;
-
-
-		public ChooseRdfFormat()
-		{
-			super("downloadMetadataForm");
-			List<RDFFormat> formats = Arrays.asList(RDFFormat.RDFXML, RDFFormat.TURTLE, RDFFormat.TRIG, RDFFormat.TRIX,
-				RDFFormat.N3);
-			DropDownChoice<RDFFormat> formatDropDown = new DropDownChoice<RDFFormat>("rdfFormat",
-					new PropertyModel<RDFFormat>(this, "format"), formats, new IChoiceRenderer<RDFFormat>() {
-
-						@Override
-						public Object getDisplayValue(RDFFormat format)
-						{
-							return format.getName();
-						}
-
-
-						@Override
-						public String getIdValue(RDFFormat format, int index)
-						{
-							return "" + index;
-						}
-					});
-			add(formatDropDown);
-			add(new MyAjaxButton("confirmDownloadMetadata", this) {
-
-				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-				{
-					super.onSubmit(target, form);
-					throw new RestartResponseException(RoPage.class, RoPage.this
-							.getPageParameters()
-							.add("redirectTo",
-								roURI.resolve(".ro/manifest." + getFormat().getDefaultFileExtension()).toString())
-							.add("redirectDelay", 1));
-				}
-			});
-			add(new MyAjaxButton("cancelDownloadMetadata", this) {
-
-				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-				{
-					super.onSubmit(target, form);
-					target.appendJavaScript("$('#download-metadata-modal').modal('hide')");
-				}
-			}.setDefaultFormProcessing(false));
-		}
-
-
-		public RDFFormat getFormat()
-		{
-			return format;
-		}
-
-
-		public void setFormat(RDFFormat format)
-		{
-			this.format = format;
-		}
-	}
-
-	@SuppressWarnings("serial")
-	class UploadResourceForm
-		extends Form<Void>
-	{
-
-		public UploadResourceForm()
-		{
-			super("uploadResourceForm");
-
-			// Enable multipart mode (need for uploads file)
-			setMultiPart(true);
-
-			// max upload size, 10k
-			setMaxSize(Bytes.megabytes(10));
-			final FileUploadField fileUpload = new FileUploadField("fileUpload");
-			add(fileUpload);
-			add(new MyAjaxButton("confirmUploadResource", this) {
-
-				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-				{
-					super.onSubmit(target, form);
-					final FileUpload uploadedFile = fileUpload.getFileUpload();
-					if (uploadedFile != null) {
-						URI resourceURI = roURI.resolve(UrlEncoder.PATH_INSTANCE.encode(
-							uploadedFile.getClientFileName(), "UTF-8"));
-						try {
-							ROSRService.sendResource(resourceURI, uploadedFile.getInputStream(),
-								uploadedFile.getContentType(), MySession.get().getdLibraAccessToken());
-							AggregatedResource resource = RoFactory.createResource(roURI, resourceURI, true, MySession
-									.get().getUsernames());
-							getAggregatedResourcesTree().addAggregatedResource(resource);
-							roViewerBox.tree.invalidateAll();
-							target.appendJavaScript("$('#upload-resource-modal').modal('hide')");
-							target.add(roViewerBox);
-						}
-						catch (IOException | URISyntaxException e) {
-							error(e);
-						}
-					}
-				}
-			});
-			add(new MyAjaxButton("cancelUploadResource", this) {
-
-				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-				{
-					super.onSubmit(target, form);
-					target.appendJavaScript("$('#upload-resource-modal').modal('hide')");
-				}
-			}.setDefaultFormProcessing(false));
-		}
-
-	}
-
-	@SuppressWarnings("serial")
 	class ExternalLinkFragment
 		extends Fragment
 	{
@@ -846,4 +721,33 @@ public class RoPage
 		}
 	}
 
+
+	/**
+	 * @param target
+	 * @param uploadedFile
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 */
+	void onFileUploaded(AjaxRequestTarget target, final FileUpload uploadedFile)
+		throws IOException, URISyntaxException
+	{
+		URI resourceURI = roURI.resolve(UrlEncoder.PATH_INSTANCE.encode(uploadedFile.getClientFileName(), "UTF-8"));
+		ROSRService.sendResource(resourceURI, uploadedFile.getInputStream(), uploadedFile.getContentType(), MySession
+				.get().getdLibraAccessToken());
+		AggregatedResource resource = RoFactory
+				.createResource(roURI, resourceURI, true, MySession.get().getUsernames());
+		getAggregatedResourcesTree().addAggregatedResource(resource);
+		roViewerBox.tree.invalidateAll();
+		target.add(roViewerBox);
+	}
+
+
+	/**
+	 * @param roPage
+	 */
+	void onMetadataDownload(RDFFormat format)
+	{
+		throw new RestartResponseException(RoPage.class, getPageParameters().add("redirectTo",
+			roURI.resolve(".ro/manifest." + format.getDefaultFileExtension()).toString()).add("redirectDelay", 1));
+	}
 }
