@@ -108,7 +108,8 @@ public class RoPage
 		add(annotatingBox);
 		annotatingBox.selectedStatements.clear();
 		add(new DownloadMetadataModal("downloadMetadataModal", this));
-		add(new UploadResourceModal("uploadResourceModal", this));
+		add(new UploadResourceModal("uploadResourceModal", this,
+				((PortalApplication) getApplication()).getResourceGroups()));
 		stmtEditForm = new StatementEditModal("statementEditModal", RoPage.this, new CompoundPropertyModel<Statement>(
 				(Statement) null));
 		add(stmtEditForm);
@@ -538,10 +539,11 @@ public class RoPage
 	/**
 	 * @param target
 	 * @param uploadedFile
+	 * @param selectedTypes
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 */
-	void onFileUploaded(AjaxRequestTarget target, final FileUpload uploadedFile)
+	void onFileUploaded(AjaxRequestTarget target, final FileUpload uploadedFile, List<String> selectedTypes)
 		throws IOException, URISyntaxException
 	{
 		URI resourceURI = roURI.resolve(UrlEncoder.PATH_INSTANCE.encode(uploadedFile.getClientFileName(), "UTF-8"));
