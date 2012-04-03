@@ -4,6 +4,8 @@
 package pl.psnc.dl.wf4ever.portal.model;
 
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -38,6 +40,39 @@ public class RoTreeModel
 	{
 		DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.getRoot();
 		root.add(new DefaultMutableTreeNode(resource));
+	}
+
+
+	/**
+	 * Adds the resource grouping it to all matching folders. If no folders is matched, it
+	 * is added directly to root node.
+	 * 
+	 * @param resource
+	 */
+	public void addAggregatedResource(AggregatedResource resource, Set<ResourceGroup> resourceGroups)
+	{
+		if (resourceGroups.isEmpty()) {
+			addAggregatedResource(resource);
+			return;
+		}
+
+		DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.getRoot();
+		Set<ResourceGroup> notFound = new HashSet<>(resourceGroups);
+		@SuppressWarnings("unchecked")
+		Enumeration<DefaultMutableTreeNode> e = root.breadthFirstEnumeration();
+		while (e.hasMoreElements()) {
+			DefaultMutableTreeNode node = e.nextElement();
+			if (node.getUserObject() instanceof ResourceGroup && resourceGroups.contains(node.getUserObject())) {
+				node.add(new DefaultMutableTreeNode(resource));
+				notFound.remove(node.getUserObject());
+			}
+		}
+
+		for (ResourceGroup resourceGroup : notFound) {
+			DefaultMutableTreeNode node = new DefaultMutableTreeNode(resourceGroup);
+			node.add(new DefaultMutableTreeNode(resource));
+			root.insert(node, 0);
+		}
 	}
 
 

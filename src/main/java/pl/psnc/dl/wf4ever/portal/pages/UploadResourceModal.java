@@ -1,10 +1,11 @@
 package pl.psnc.dl.wf4ever.portal.pages;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -20,16 +21,15 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.lang.Bytes;
 
+import pl.psnc.dl.wf4ever.portal.model.ResourceGroup;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
-
-import com.google.common.collect.Multimap;
 
 @SuppressWarnings("serial")
 class UploadResourceModal
 	extends Panel
 {
 
-	public UploadResourceModal(String id, final RoPage roPage, final Multimap<String, URI> resourceGroups)
+	public UploadResourceModal(String id, final RoPage roPage, final Set<ResourceGroup> set)
 	{
 		super(id);
 		Form< ? > form = new Form<Void>("uploadResourceForm");
@@ -43,21 +43,21 @@ class UploadResourceModal
 		final FileUploadField fileUpload = new FileUploadField("fileUpload");
 		form.add(fileUpload);
 
-		List<String> types = new ArrayList<>(resourceGroups.keySet());
+		List<ResourceGroup> types = new ArrayList<>(set);
 
-		final List<String> selectedTypes = new ArrayList<>();
-		CheckGroup<String> group = new CheckGroup<String>("group", selectedTypes);
+		final Set<ResourceGroup> selectedTypes = new HashSet<>();
+		CheckGroup<ResourceGroup> group = new CheckGroup<ResourceGroup>("group", selectedTypes);
 		form.add(group);
-		ListView<String> list = new ListView<String>("resourceTypes", types) {
+		ListView<ResourceGroup> list = new ListView<ResourceGroup>("resourceTypes", types) {
 
 			@Override
-			protected void populateItem(ListItem<String> item)
+			protected void populateItem(ListItem<ResourceGroup> item)
 			{
-				Check<String> check = new Check<String>("checkbox", item.getModel());
+				Check<ResourceGroup> check = new Check<ResourceGroup>("checkbox", item.getModel());
 				item.add(check);
 				item.add(new AttributeModifier("for", new Model<String>(check.getMarkupId())));
 				item.setEscapeModelStrings(false);
-				item.add(new Label("title", item.getModelObject()));
+				item.add(new Label("title", item.getModelObject().getTitle()));
 			}
 		};
 		list.setReuseItems(true);

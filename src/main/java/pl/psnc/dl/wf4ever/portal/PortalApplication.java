@@ -3,6 +3,7 @@ package pl.psnc.dl.wf4ever.portal;
 import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -17,6 +18,7 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
 
+import pl.psnc.dl.wf4ever.portal.model.ResourceGroup;
 import pl.psnc.dl.wf4ever.portal.pages.AuthenticatePage;
 import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
@@ -28,9 +30,6 @@ import pl.psnc.dl.wf4ever.portal.pages.OAuthPage;
 import pl.psnc.dl.wf4ever.portal.pages.RoPage;
 import pl.psnc.dl.wf4ever.portal.pages.SparqlEndpointPage;
 import pl.psnc.dl.wf4ever.portal.services.DlibraApi;
-
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 
 /**
  * Application object for your web application. If you want to run this application
@@ -60,9 +59,7 @@ public class PortalApplication
 
 	private URL stabilityEndpointURL;
 
-	private final Multimap<String, URI> resourceGroups = HashMultimap.create();
-
-	private final Map<String, String> resourceGroupDescriptions = new HashMap<>();
+	private final Set<ResourceGroup> resourceGroups = new HashSet<>();
 
 
 	/**
@@ -152,29 +149,34 @@ public class PortalApplication
 		Properties props = new Properties();
 		try {
 			props.load(getClass().getClassLoader().getResourceAsStream(propertiesFile));
-			Set<String> groups = props.stringPropertyNames();
-			for (String group : groups) {
-				if (group.endsWith(".classes")) {
-					String[] classes = props.getProperty(group, "").split(",");
+			Set<String> entries = props.stringPropertyNames();
+			Map<String, ResourceGroup> groups = new HashMap<>();
+			for (String entry : entries) {
+				if (entry.endsWith(".classes")) {
+					String[] classes = props.getProperty(entry, "").split(",");
 					for (String clazz : classes) {
 						if (!clazz.trim().isEmpty()) {
 							URI classURI = URI.create(clazz.trim());
 							if (classURI != null) {
-								String key = group.substring(0, group.length() - ".classes".length());
-								resourceGroups.put(key, classURI);
+								String key = entry.substring(0, entry.length() - ".classes".length());
+								if (!groups.containsKey(key)) {
+									groups.put(key, new ResourceGroup(key));
+								}
+								groups.get(key).getRdfClasses().add(classURI);
 							}
 						}
 					}
-					if (!resourceGroupDescriptions.containsKey(group)) {
-						resourceGroupDescriptions.put(group, "");
-					}
 				}
-				else if (group.endsWith(".description")) {
-					String desc = props.getProperty(group, "");
-					String key = group.substring(0, group.length() - ".description".length());
-					resourceGroupDescriptions.put(key, desc);
+				else if (entry.endsWith(".description")) {
+					String desc = props.getProperty(entry, "");
+					String key = entry.substring(0, entry.length() - ".description".length());
+					if (!groups.containsKey(key)) {
+						groups.put(key, new ResourceGroup(key));
+					}
+					groups.get(key).setDescription(desc);
 				}
 			}
+			resourceGroups.addAll(groups.values());
 		}
 		catch (Exception e) {
 			log.error("Failed to load resourceGroups: " + e.getMessage());
@@ -292,18 +294,9 @@ public class PortalApplication
 	/**
 	 * @return the resourceGroups
 	 */
-	public Multimap<String, URI> getResourceGroups()
+	public Set<ResourceGroup> getResourceGroups()
 	{
 		return resourceGroups;
-	}
-
-
-	/**
-	 * @return the resourceGroupDescriptions
-	 */
-	public Map<String, String> getResourceGroupDescriptions()
-	{
-		return resourceGroupDescriptions;
 	}
 
 

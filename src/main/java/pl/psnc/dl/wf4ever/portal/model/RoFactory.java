@@ -15,9 +15,10 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -31,7 +32,6 @@ import pl.psnc.dl.wf4ever.portal.services.MyQueryFactory;
 import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 import pl.psnc.dl.wf4ever.portal.services.StabilityService;
 
-import com.google.common.collect.Multimap;
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
@@ -130,15 +130,15 @@ public class RoFactory
 	}
 
 
-	public static RoTreeModel createAggregatedResourcesTree(URI researchObjectURI,
-			Multimap<String, URI> resourceGroups, Map<String, String> resourceGroupDescriptions,
+	public static RoTreeModel createAggregatedResourcesTree(URI researchObjectURI, Set<ResourceGroup> resourceGroups,
 			Map<URI, String> usernames)
 		throws URISyntaxException
 	{
 		ResearchObject researchObject = createResearchObject(researchObjectURI, true, usernames);
 		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(researchObject);
+		RoTreeModel treeModel = new RoTreeModel(rootNode);
 
-		Map<String, DefaultMutableTreeNode> groupNodes = new HashMap<>();
+		//		Map<String, DefaultMutableTreeNode> groupNodes = new HashMap<>();
 		Map<URI, AggregatedResource> resources = new HashMap<URI, AggregatedResource>();
 		resources.put(researchObjectURI, researchObject);
 
@@ -155,33 +155,22 @@ public class RoFactory
 				AggregatedResource resource = createResource(model, researchObjectURI, new URI(res.getURI()), true,
 					usernames);
 				resources.put(resource.getURI(), resource);
-				boolean foundGroup = false;
-				for (String group : resourceGroups.keySet()) {
-					for (URI classURI : resourceGroups.get(group)) {
+				Set<ResourceGroup> matchingGroups = new HashSet<>();
+				for (ResourceGroup resourceGroup : resourceGroups) {
+					for (URI classURI : resourceGroup.getRdfClasses()) {
 						if (res.hasRDFType(classURI.toString())) {
-							foundGroup = true;
-							if (!groupNodes.containsKey(group)) {
-								ResourceGroup resGroup = new ResourceGroup(group, resourceGroupDescriptions.get(group));
-								groupNodes.put(group, new DefaultMutableTreeNode(resGroup));
-							}
-							groupNodes.get(group).add(new DefaultMutableTreeNode(resource));
+							matchingGroups.add(resourceGroup);
 							break;
 						}
 					}
 				}
-				if (!foundGroup) {
-					rootNode.add(new DefaultMutableTreeNode(resource));
-				}
+				treeModel.addAggregatedResource(resource, matchingGroups);
 			}
-		}
-		int i = 0;
-		for (Entry<String, DefaultMutableTreeNode> e : groupNodes.entrySet()) {
-			rootNode.insert(e.getValue(), i++);
 		}
 
 		createRelations(graphset, model, researchObjectURI, resources);
 		createStabilities(model, researchObjectURI, resources);
-		return new RoTreeModel(rootNode);
+		return treeModel;
 	}
 
 

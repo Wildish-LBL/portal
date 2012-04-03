@@ -1,11 +1,14 @@
 package pl.psnc.dl.wf4ever.portal.pages;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -58,6 +61,8 @@ import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
+import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.ontology.OntModel;
 import com.sun.jersey.api.client.ClientResponse;
 
 public class RoPage
@@ -124,9 +129,8 @@ public class RoPage
 				try {
 					if (getAggregatedResourcesTree() == null) {
 						PortalApplication app = ((PortalApplication) getApplication());
-						setAggregatedResourcesTree(RoFactory
-								.createAggregatedResourcesTree(roURI, app.getResourceGroups(),
-									app.getResourceGroupDescriptions(), MySession.get().getUsernames()));
+						setAggregatedResourcesTree(RoFactory.createAggregatedResourcesTree(roURI,
+							app.getResourceGroups(), MySession.get().getUsernames()));
 						itemModel.setObject((AggregatedResource) ((DefaultMutableTreeNode) getAggregatedResourcesTree()
 								.getRoot()).getUserObject());
 						replacement.replaceWith(roViewerBox.tree);
@@ -539,19 +543,31 @@ public class RoPage
 	/**
 	 * @param target
 	 * @param uploadedFile
-	 * @param selectedTypes
+	 * @param selectedResourceGroups
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 */
-	void onFileUploaded(AjaxRequestTarget target, final FileUpload uploadedFile, List<String> selectedTypes)
+	void onFileUploaded(AjaxRequestTarget target, final FileUpload uploadedFile,
+			Set<ResourceGroup> selectedResourceGroups)
 		throws IOException, URISyntaxException
 	{
 		URI resourceURI = roURI.resolve(UrlEncoder.PATH_INSTANCE.encode(uploadedFile.getClientFileName(), "UTF-8"));
 		ROSRService.sendResource(resourceURI, uploadedFile.getInputStream(), uploadedFile.getContentType(), MySession
 				.get().getdLibraAccessToken());
+		OntModel manifestModel = RoFactory.createManifestModel(roURI);
+		Individual individual = manifestModel.createResource(resourceURI.toString()).as(Individual.class);
+		for (ResourceGroup resourceGroup : selectedResourceGroups) {
+			individual.addRDFType(manifestModel.createResource(resourceGroup.getRdfClasses().iterator().next()
+					.toString()));
+		}
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		manifestModel.write(out);
+		ROSRService.sendResource(roURI.resolve(".ro/manifest"), new ByteArrayInputStream(out.toByteArray()),
+			"application/rdf+xml", MySession.get().getdLibraAccessToken());
+
 		AggregatedResource resource = RoFactory
 				.createResource(roURI, resourceURI, true, MySession.get().getUsernames());
-		getAggregatedResourcesTree().addAggregatedResource(resource);
+		getAggregatedResourcesTree().addAggregatedResource(resource, selectedResourceGroups);
 		roViewerBox.tree.invalidateAll();
 		target.add(roViewerBox);
 	}

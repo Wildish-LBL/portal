@@ -26,7 +26,7 @@ public class TestRecommender
 		throws Exception
 	{
 		List<Recommendation> recs = RecommenderService.getRecommendations(
-			URI.create("http://sandbox.wf4ever-project.org/recommendations/"), "2", 2);
+			URI.create("http://sandbox.wf4ever-project.org/epnoiServer/rest/recommendations/"), "2", 2);
 		assertNotNull(recs);
 	}
 }

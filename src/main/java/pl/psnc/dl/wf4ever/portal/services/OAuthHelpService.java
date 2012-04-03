@@ -15,7 +15,7 @@ import org.scribe.oauth.OAuthService;
 
 /**
  * @author Piotr Hołubowicz
- *
+ * 
  */
 public class OAuthHelpService
 {
@@ -25,6 +25,7 @@ public class OAuthHelpService
 
 	/**
 	 * Sends an unsigned request with no body.
+	 * 
 	 * @param service
 	 * @param verb
 	 * @param url
@@ -44,6 +45,7 @@ public class OAuthHelpService
 
 	/**
 	 * Executes a request with no body.
+	 * 
 	 * @param service
 	 * @param verb
 	 * @param url
@@ -63,7 +65,9 @@ public class OAuthHelpService
 
 
 	/**
-	 * Executes a request with no body but with content negotiation. Makes sense to use only with GET.
+	 * Executes a request with no body but with content negotiation. Makes sense to use
+	 * only with GET.
+	 * 
 	 * @param service
 	 * @param verb
 	 * @param url
@@ -89,6 +93,7 @@ public class OAuthHelpService
 
 	/**
 	 * Executes a request with body, content type must also be specified.
+	 * 
 	 * @param service
 	 * @param verb
 	 * @param url
@@ -140,6 +145,8 @@ public class OAuthHelpService
 				if (response.getCode() != HttpURLConnection.HTTP_NO_CONTENT) {
 					throw prepareException(response);
 				}
+				break;
+			default:
 				break;
 		}
 	}
