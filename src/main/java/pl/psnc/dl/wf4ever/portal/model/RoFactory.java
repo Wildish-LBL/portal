@@ -144,7 +144,7 @@ public class RoFactory
 
 		NamedGraphSet graphset = createManifestAndAnnotationsModel(researchObjectURI);
 		OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM,
-			graphset.asJenaModel(researchObjectURI.resolve(".ro/manifest").toString()));
+			graphset.asJenaModel(researchObjectURI.resolve(".ro/manifest.rdf").toString()));
 
 		// TODO take care of proxies & folders
 		Individual ro = model.getIndividual(researchObjectURI.toString());
@@ -503,9 +503,14 @@ public class RoFactory
 	 */
 	public static OntModel createManifestModel(URI researchObjectURI)
 	{
-		URI manifestURI = researchObjectURI.resolve(".ro/manifest");
+		URI manifestURI = researchObjectURI.resolve(".ro/manifest.rdf");
 		OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
 		model.read(manifestURI.toString());
+		if (model.isEmpty()) {
+			// HACK for old ROs
+			manifestURI = researchObjectURI.resolve(".ro/manifest");
+			model.read(manifestURI.toString());
+		}
 		return model;
 	}
 
@@ -516,10 +521,13 @@ public class RoFactory
 	 */
 	public static NamedGraphSet createManifestAndAnnotationsModel(URI researchObjectURI)
 	{
-		URI manifestURI = researchObjectURI.resolve(".ro/manifest");
-
+		URI manifestURI = researchObjectURI.resolve(".ro/manifest.trig");
 		NamedGraphSet graphset = new NamedGraphSetImpl();
-		graphset.read(manifestURI.toString() + ".trig", "TRIG");
+		graphset.read(manifestURI.toString() + "?original=manifest.rdf", "TRIG");
+		if (graphset.countQuads() == 0) {
+			// HACK for old ROs
+			graphset.read(manifestURI.toString() + "?original=manifest", "TRIG");
+		}
 		return graphset;
 	}
 

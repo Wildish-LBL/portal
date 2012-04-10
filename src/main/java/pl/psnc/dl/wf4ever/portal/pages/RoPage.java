@@ -562,7 +562,7 @@ public class RoPage
 		}
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		manifestModel.write(out);
-		ROSRService.sendResource(roURI.resolve(".ro/manifest"), new ByteArrayInputStream(out.toByteArray()),
+		ROSRService.sendResource(roURI.resolve(".ro/manifest.rdf"), new ByteArrayInputStream(out.toByteArray()),
 			"application/rdf+xml", MySession.get().getdLibraAccessToken());
 
 		AggregatedResource resource = RoFactory
@@ -579,7 +579,8 @@ public class RoPage
 	void onMetadataDownload(RDFFormat format)
 	{
 		throw new RestartResponseException(RoPage.class, getPageParameters().add("redirectTo",
-			roURI.resolve(".ro/manifest." + format.getDefaultFileExtension()).toString()).add("redirectDelay", 1));
+			roURI.resolve(".ro/manifest." + format.getDefaultFileExtension() + "?original=manifest.rdf").toString())
+				.add("redirectDelay", 1));
 	}
 
 

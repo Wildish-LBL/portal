@@ -146,7 +146,7 @@ public class ROSRService
 			Token dLibraToken)
 		throws URISyntaxException
 	{
-		InputStream is = ROSRService.getResource(researchObjectURI.resolve(".ro/manifest"));
+		InputStream is = ROSRService.getResource(researchObjectURI.resolve(".ro/manifest.rdf"));
 		OntModel manifest = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 		manifest.read(is, null);
 
@@ -154,7 +154,7 @@ public class ROSRService
 		addAnnotation(manifest, researchObjectURI, targetURI, bodyURI, userURI);
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		manifest.write(out);
-		sendResource(researchObjectURI.resolve(".ro/manifest"), new ByteArrayInputStream(out.toByteArray()),
+		sendResource(researchObjectURI.resolve(".ro/manifest.rdf"), new ByteArrayInputStream(out.toByteArray()),
 			"application/rdf+xml", dLibraToken);
 
 		OntModel body = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
@@ -170,7 +170,7 @@ public class ROSRService
 	public static ClientResponse deleteAnnotation(URI researchObjectURI, URI annURI, Token dLibraToken)
 		throws IllegalArgumentException, URISyntaxException
 	{
-		InputStream is = ROSRService.getResource(researchObjectURI.resolve(".ro/manifest"));
+		InputStream is = ROSRService.getResource(researchObjectURI.resolve(".ro/manifest.rdf"));
 		OntModel manifest = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 		manifest.read(is, null);
 
@@ -189,7 +189,7 @@ public class ROSRService
 		manifest.removeAll(ann, null, null);
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		manifest.write(out);
-		return sendResource(researchObjectURI.resolve(".ro/manifest"), new ByteArrayInputStream(out.toByteArray()),
+		return sendResource(researchObjectURI.resolve(".ro/manifest.rdf"), new ByteArrayInputStream(out.toByteArray()),
 			"application/rdf+xml", dLibraToken);
 	}
 
@@ -223,14 +223,14 @@ public class ROSRService
 	 * @param manifest
 	 * @param researchObjectURI
 	 * @return i.e.
-	 *         http://sandbox.wf4ever-project.org/rosrs5/ROs/.ro/manifest#ann217/52a272f1
-	 *         -864f-4a42 -89ff-2501a739d6f0
+	 *         http://sandbox.wf4ever-project.org/rosrs5/ROs/.ro/manifest.rdf#ann217/52
+	 *         a272f1 -864f-4a42 -89ff-2501a739d6f0
 	 */
 	private static URI createAnnotationURI(OntModel manifest, URI researchObjectURI)
 	{
 		URI ann = null;
 		do {
-			ann = researchObjectURI.resolve(".ro/manifest#" + UUID.randomUUID().toString());
+			ann = researchObjectURI.resolve(".ro/manifest.rdf#" + UUID.randomUUID().toString());
 		}
 		while (manifest.containsResource(manifest.createResource(ann.toString())));
 		return ann;
@@ -256,7 +256,7 @@ public class ROSRService
 			targetName = targetURI.resolve(".").relativize(targetURI).toString();
 		String randomBit = "" + Math.abs(UUID.randomUUID().getLeastSignificantBits());
 
-		return researchObjectURI.resolve(".ro/" + targetName + "-" + randomBit);
+		return researchObjectURI.resolve(".ro/" + targetName + "-" + randomBit + ".rdf");
 	}
 
 

@@ -223,7 +223,7 @@ public class MyExpImportService
 		private OntModel getManifest()
 		{
 			model.setMessage("Downloading the manifest");
-			InputStream is = ROSRService.getResource(researchObjectURI.resolve(".ro/manifest"));
+			InputStream is = ROSRService.getResource(researchObjectURI.resolve(".ro/manifest.rdf"));
 			OntModel manifest = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 			manifest.read(is, null);
 			incrementStepsComplete();
@@ -246,7 +246,7 @@ public class MyExpImportService
 			}
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			manifest.write(out);
-			ROSRService.sendResource(researchObjectURI.resolve(".ro/manifest"),
+			ROSRService.sendResource(researchObjectURI.resolve(".ro/manifest.rdf"),
 				new ByteArrayInputStream(out.toByteArray()), "application/rdf+xml", dLibraToken);
 			incrementStepsComplete();
 		}
