@@ -48,6 +48,7 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
+import com.hp.hpl.jena.shared.DoesNotExistException;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 
 import de.fuberlin.wiwiss.ng4j.NamedGraphSet;
@@ -272,7 +273,7 @@ public class RoFactory
 					}
 				}
 				catch (Exception e) {
-					log.debug("No FOAF data under user URI", e);
+					log.debug("No FOAF data under user URI: " + e.getMessage());
 				}
 				if (username == null) {
 					// 4. FOAF data in RODL
@@ -505,7 +506,12 @@ public class RoFactory
 	{
 		URI manifestURI = researchObjectURI.resolve(".ro/manifest.rdf");
 		OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
-		model.read(manifestURI.toString());
+		try {
+			model.read(manifestURI.toString());
+		}
+		catch (DoesNotExistException e) {
+			// do nothing, model will be empty
+		}
 		if (model.isEmpty()) {
 			// HACK for old ROs
 			manifestURI = researchObjectURI.resolve(".ro/manifest");
