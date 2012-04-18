@@ -99,12 +99,13 @@ class RelationEditModal
 			public void validate(Form< ? > form)
 			{
 				if (tree.getTreeState().getSelectedNodes().isEmpty()) {
-					error("You have to select one resource");
+					form.error("You have to select one resource");
+					return;
 				}
 				DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getTreeState().getSelectedNodes()
 						.iterator().next();
 				if (!(node.getUserObject() instanceof AggregatedResource)) {
-					error("You must select a resource");
+					form.error("You must select a resource");
 				}
 			}
 
@@ -122,7 +123,6 @@ class RelationEditModal
 			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 			{
 				super.onSubmit(target, form);
-				//TODO call form.validate
 				Statement statement = RelationEditModal.this.getModelObject();
 				AggregatedResource res = (AggregatedResource) ((DefaultMutableTreeNode) tree.getTreeState()
 						.getSelectedNodes().iterator().next()).getUserObject();
