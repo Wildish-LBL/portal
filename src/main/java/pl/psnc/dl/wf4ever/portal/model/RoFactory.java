@@ -83,6 +83,11 @@ public class RoFactory
 			URI.create(DCTerms.format.getURI()), URI.create(DCTerms.title.getURI()),
 			URI.create(DCTerms.created.getURI())};
 
+	public static final URI[] defaultRelations = { URI.create(DCTerms.source.getURI()),
+			URI.create(DCTerms.references.getURI()), URI.create(DCTerms.relation.getURI()),
+			URI.create(DCTerms.hasVersion.getURI()), URI.create(DCTerms.isFormatOf.getURI()),
+			URI.create(DCTerms.isReferencedBy.getURI())};
+
 	public static final Resource roResource = ModelFactory.createDefaultModel().createResource(
 		"http://purl.org/wf4ever/ro#Resource");
 

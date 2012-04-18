@@ -85,6 +85,8 @@ public class RoPage
 
 	private final StatementEditModal stmtEditForm;
 
+	private final RelationEditModal relEditForm;
+
 
 	@SuppressWarnings("serial")
 	public RoPage(final PageParameters parameters)
@@ -107,7 +109,8 @@ public class RoPage
 
 		final CompoundPropertyModel<AggregatedResource> itemModel = new CompoundPropertyModel<AggregatedResource>(
 				(AggregatedResource) null);
-		roViewerBox = new RoViewerBox(itemModel, new PropertyModel<TreeModel>(this, "aggregatedResourcesTree"));
+		roViewerBox = new RoViewerBox(itemModel, new PropertyModel<TreeModel>(this, "aggregatedResourcesTree"),
+				"loadingROFragment");
 		add(roViewerBox);
 		annotatingBox = new AnnotatingBox(itemModel);
 		add(annotatingBox);
@@ -118,9 +121,10 @@ public class RoPage
 		stmtEditForm = new StatementEditModal("statementEditModal", RoPage.this, new CompoundPropertyModel<Statement>(
 				(Statement) null));
 		add(stmtEditForm);
+		relEditForm = new RelationEditModal("relationEditModal", RoPage.this, new CompoundPropertyModel<Statement>(
+				(Statement) null), "loadingROFragment");
+		add(relEditForm);
 
-		final Component replacement = new Fragment("treeTable", "loadingROFragment", this);
-		roViewerBox.tree.replaceWith(replacement);
 		add(new AbstractDefaultAjaxBehavior() {
 
 			@Override
@@ -133,9 +137,11 @@ public class RoPage
 							app.getResourceGroups(), MySession.get().getUsernames()));
 						itemModel.setObject((AggregatedResource) ((DefaultMutableTreeNode) getAggregatedResourcesTree()
 								.getRoot()).getUserObject());
-						replacement.replaceWith(roViewerBox.tree);
+						roViewerBox.onRoTreeLoaded();
+						relEditForm.onRoTreeLoaded();
 						target.add(roViewerBox);
 						target.add(annotatingBox);
+						target.add(relEditForm);
 					}
 				}
 				catch (URISyntaxException e) {
@@ -190,9 +196,11 @@ public class RoPage
 
 		final WebMarkupContainer actionButtons;
 
+		private Fragment treeLoading;
+
 
 		public RoViewerBox(final CompoundPropertyModel<AggregatedResource> itemModel,
-				IModel< ? extends TreeModel> treeModel)
+				IModel< ? extends TreeModel> treeModel, String tempRoTreeId)
 		{
 			super("roViewerBox", itemModel);
 			setOutputMarkupId(true);
@@ -205,6 +213,7 @@ public class RoPage
 			infoPanel = itemInfo;
 			add(infoPanel);
 
+			treeLoading = new Fragment("treeTable", tempRoTreeId, RoPage.this);
 			tree = new RoTree("treeTable", treeModel) {
 
 				@Override
@@ -233,7 +242,7 @@ public class RoPage
 					target.add(annotatingBox);
 				}
 			};
-			add(tree);
+			add(treeLoading);
 
 			Form< ? > roForm = new Form<Void>("roForm");
 			add(roForm);
@@ -305,6 +314,12 @@ public class RoPage
 
 			};
 			actionButtons.add(downloadMetadata);
+		}
+
+
+		public void onRoTreeLoaded()
+		{
+			treeLoading.replaceWith(tree);
 		}
 	}
 
@@ -489,6 +504,31 @@ public class RoPage
 			};
 			annForm.add(deleteStatement);
 
+			AjaxButton addRelation = new MyAjaxButton("addRelation", annForm) {
+
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+				{
+					super.onSubmit(target, form);
+					try {
+						relEditForm.setModelObject(new Statement(itemModel.getObject().getURI(), null));
+						relEditForm.setTitle("Add relation");
+						target.add(relEditForm);
+						target.appendJavaScript("showRelEdit();");
+					}
+					catch (Exception e) {
+						error(e.getMessage());
+					}
+				}
+
+
+				@Override
+				public boolean isEnabled()
+				{
+					return super.isEnabled() && canEdit;
+				}
+			};
+			annForm.add(addRelation);
 		}
 	}
 
@@ -624,6 +664,22 @@ public class RoPage
 	 */
 	void onStatementAddedEdited(AjaxRequestTarget target)
 	{
+		//							roFactory.reload();
+		this.annotatingBox.getModelObject().setAnnotations(
+			RoFactory.createAnnotations(roURI, this.annotatingBox.getModelObject().getURI(), MySession.get()
+					.getUsernames()));
+		target.add(roViewerBox.infoPanel);
+		target.add(annotatingBox.annotationsDiv);
+	}
+
+
+	/**
+	 * @param target
+	 * @param form
+	 */
+	void onRelationAddedEdited(AjaxRequestTarget target)
+	{
+		//TODO
 		//							roFactory.reload();
 		this.annotatingBox.getModelObject().setAnnotations(
 			RoFactory.createAnnotations(roURI, this.annotatingBox.getModelObject().getURI(), MySession.get()

@@ -103,6 +103,10 @@
 									<button wicket:id="deleteAnnotation" class="btn"
 										type="submit"><i class="icon-trash"></i> Delete selected annotations</button>
 								</div>
+								<div class="btn-group">
+									<button wicket:id="addRelation" class="btn"
+										type="submit"><i class="icon-retweet"></i> Add relation</button>
+								</div>
 							</div>
 						</form>
 					</div>
@@ -111,6 +115,7 @@
 		</div>
 	</div>
 	<div wicket:id="statementEditModal"></div>
+	<div wicket:id="relationEditModal"></div>
 	<div wicket:id="downloadMetadataModal"></div>
 	<div wicket:id="uploadResourceModal"></div>
 	<wicket:fragment wicket:id="externalLinkFragment">

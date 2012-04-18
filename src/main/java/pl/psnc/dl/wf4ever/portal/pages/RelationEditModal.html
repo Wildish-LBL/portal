@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<wicket:panel xmlns:wicket="http://wicket.apache.org">
+	<div id="edit-rel-modal" class="modal hide" style="width: 700px;">
+		<form class="form-horizontal" wicket:id="relEditForm">
+			<div class="modal-header">
+				<h3>
+					<span wicket:id="title">[title]</span>
+				</h3>
+			</div>
+			<div class="modal-body" style="max-height: 480px;">
+				<fieldset>
+					<div class="control-group">
+						<label class="control-label" for="subjectURI">First
+							resource</label>
+						<div class="controls">
+							<input type="text" class="span6" name="subjectURI"
+								id="subjectURI" wicket:id="subjectURI" />
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label" for="relationURI">Relation</label>
+						<div class="controls">
+							<select class="span6" name="relationURI" id="relationURI"
+								wicket:id="relationURI">
+							</select>
+						</div>
+					</div>
+					<div class="control-group" id="customRelationURIDiv"
+						wicket:id="customRelationURIDiv">
+						<label class="control-label" for="customRelationURI">Custom
+							relation URI</label>
+						<div class="controls">
+							<input type="text" class="span6" id="customRelationURI"
+								wicket:id="customRelationURI" />
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label" for="objectURI">Second
+							resource</label>
+						<div class="controls">
+							<div class="span6" id="objectURI" wicket:id="objectTree"></div>
+						</div>
+					</div>
+				</fieldset>
+			</div>
+			<div class="modal-footer">
+				<button type="submit" class="btn btn-primary" wicket:id="save">Save
+					Changes</button>
+				<button type="submit" class="btn" wicket:id="cancel">Cancel</button>
+			</div>
+		</form>
+	</div>
+</wicket:panel>

@@ -37,8 +37,6 @@ public class Statement
 
 	private String propertyLocalName;
 
-	private boolean isObjectURIResource;
-
 	private final Annotation annotation;
 
 	private String objectValue;
@@ -60,8 +58,7 @@ public class Statement
 		}
 		setPropertyURI(new URI(original.getPredicate().getURI()));
 		RDFNode node = original.getObject();
-		isObjectURIResource = node.isURIResource();
-		if (isObjectURIResource) {
+		if (node.isURIResource()) {
 			objectURI = new URI(node.asResource().getURI());
 			objectValue = node.asResource().toString();
 		}
@@ -83,8 +80,7 @@ public class Statement
 		this.subjectURI = subjectURI;
 		subjectValue = "";
 		isSubjectURIResource = false;
-		setPropertyURI(new URI(DCTerms.title.getURI()));
-		isObjectURIResource = false;
+		setPropertyURI(new URI(DCTerms.source.getURI()));
 		objectURI = null;
 		objectValue = "";
 		this.annotation = annotation;
@@ -147,7 +143,7 @@ public class Statement
 	 */
 	public boolean isObjectURIResource()
 	{
-		return isObjectURIResource;
+		return this.objectURI != null;
 	}
 
 
@@ -171,7 +167,14 @@ public class Statement
 	 */
 	public void setObjectURIResource(boolean isObjectURIResource)
 	{
-		this.isObjectURIResource = isObjectURIResource;
+		if (isObjectURIResource) {
+			this.objectURI = URI.create("");
+			this.objectValue = null;
+		}
+		else {
+			this.objectURI = null;
+			this.objectValue = "";
+		}
 	}
 
 

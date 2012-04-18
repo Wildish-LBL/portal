@@ -90,7 +90,8 @@ public abstract class MyAjaxButton
 			}
 		};
 	}
-	
+
+
 	@Override
 	public MySession getSession()
 	{

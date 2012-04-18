@@ -19,6 +19,13 @@ $(document).ready(function() {
 	})
 });
 
+$(document).ready(function() {
+	$('#edit-rel-modal').modal({
+		backdrop : 'static',
+		show : false
+	})
+});
+
 function showStmtEdit(content) {
 	$('#objectValue').wysiwyg('destroy');
 	$('#edit-ann-modal').modal('show');
@@ -51,3 +58,20 @@ function checkStmtPropertyType() {
 		document.getElementById('customPropertyURI').value = "";
 	}
 }
+
+function showRelEdit() {
+	$('#edit-rel-modal').modal('show');
+	document.getElementById('relationURI').onchange = checkStmtRelationType;
+	checkStmtRelationType();
+}
+
+function checkStmtRelationType() {
+	var type = document.getElementById('relationURI');
+	if (type.value == "") {
+		document.getElementById('customRelationURIDiv').style.display = "";
+	} else {
+		document.getElementById('customRelationURIDiv').style.display = "none";
+		document.getElementById('customRelationURI').value = "";
+	}
+}
+
