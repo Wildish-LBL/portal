@@ -135,7 +135,7 @@ class RelationEditModal
 					else {
 						roPage.onStatementEdit(statement);
 					}
-					roPage.onRelationAddedEdited(target);
+					roPage.onRelationAddedEdited(statement, target);
 					target.add(form);
 					target.appendJavaScript("$('#edit-rel-modal').modal('hide')");
 				}

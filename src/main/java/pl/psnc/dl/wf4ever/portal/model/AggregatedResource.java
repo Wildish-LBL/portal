@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -239,9 +240,9 @@ public abstract class AggregatedResource
 	}
 
 
-	public List<String> getRelationsKeyList()
+	public ArrayList<Entry<String, AggregatedResource>> getRelationsEntries()
 	{
-		return new ArrayList<String>(relations.keySet());
+		return new ArrayList<Entry<String, AggregatedResource>>(relations.entries());
 	}
 
 

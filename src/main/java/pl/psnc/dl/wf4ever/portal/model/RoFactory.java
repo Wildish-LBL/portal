@@ -53,7 +53,6 @@ import com.hp.hpl.jena.vocabulary.DCTerms;
 
 import de.fuberlin.wiwiss.ng4j.NamedGraphSet;
 import de.fuberlin.wiwiss.ng4j.impl.NamedGraphSetImpl;
-import de.fuberlin.wiwiss.ng4j.sparql.NamedGraphDataset;
 
 /**
  * @author piotrhol
@@ -89,7 +88,10 @@ public class RoFactory
 			URI.create(DCTerms.isReplacedBy.getURI()), URI.create(DCTerms.replaces.getURI()),
 			URI.create(DCTerms.isFormatOf.getURI()), URI.create(DCTerms.hasFormat.getURI()),
 			URI.create(DCTerms.isRequiredBy.getURI()), URI.create(DCTerms.requires.getURI()),
-			URI.create(DCTerms.hasPart.getURI()), URI.create(DCTerms.isPartOf.getURI())};
+			URI.create(DCTerms.hasPart.getURI()), URI.create(DCTerms.isPartOf.getURI()),
+			URI.create("http://purl.org/wf4ever/wfprov#describedByWorkflow"),
+			URI.create("http://purl.org/wf4ever/wfprov#wasOutputFrom"),
+			URI.create("http://purl.org/wf4ever/wfprov#usedInput")};
 
 	public static final Resource roResource = ModelFactory.createDefaultModel().createResource(
 		"http://purl.org/wf4ever/ro#Resource");
@@ -139,23 +141,13 @@ public class RoFactory
 	}
 
 
-	public static RoTreeModel createAggregatedResourcesTree(URI researchObjectURI, Set<ResourceGroup> resourceGroups,
+	public static Map<URI, AggregatedResource> getAggregatedResources(OntModel model, URI researchObjectURI,
 			Map<URI, String> usernames)
 		throws URISyntaxException
 	{
-		ResearchObject researchObject = createResearchObject(researchObjectURI, true, usernames);
-		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(researchObject);
-		RoTreeModel treeModel = new RoTreeModel(rootNode);
-
-		//		Map<String, DefaultMutableTreeNode> groupNodes = new HashMap<>();
 		Map<URI, AggregatedResource> resources = new HashMap<URI, AggregatedResource>();
+		ResearchObject researchObject = createResearchObject(model, researchObjectURI, true, usernames);
 		resources.put(researchObjectURI, researchObject);
-
-		NamedGraphSet graphset = createManifestAndAnnotationsModel(researchObjectURI);
-		OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM,
-			graphset.asJenaModel(researchObjectURI.resolve(".ro/manifest.rdf").toString()));
-
-		// TODO take care of proxies & folders
 		Individual ro = model.getIndividual(researchObjectURI.toString());
 		NodeIterator it = model.listObjectsOfProperty(ro, aggregates);
 		while (it.hasNext()) {
@@ -164,21 +156,52 @@ public class RoFactory
 				AggregatedResource resource = createResource(model, researchObjectURI, new URI(res.getURI()), true,
 					usernames);
 				resources.put(resource.getURI(), resource);
-				Set<ResourceGroup> matchingGroups = new HashSet<>();
-				for (ResourceGroup resourceGroup : resourceGroups) {
-					for (URI classURI : resourceGroup.getRdfClasses()) {
-						if (res.hasRDFType(classURI.toString())) {
-							matchingGroups.add(resourceGroup);
-							break;
-						}
-					}
-				}
-				treeModel.addAggregatedResource(resource, matchingGroups);
 			}
 		}
+		return resources;
+	}
 
-		createRelations(graphset, model, researchObjectURI, resources);
-		createStabilities(model, researchObjectURI, resources);
+
+	public static RoTreeModel createConceptualResourcesTree(OntModel model, URI researchObjectURI,
+			Set<ResourceGroup> resourceGroups, Map<URI, AggregatedResource> resources, Map<URI, String> usernames)
+		throws URISyntaxException
+	{
+		ResearchObject ro = (ResearchObject) resources.get(researchObjectURI);
+		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(ro);
+		RoTreeModel treeModel = new RoTreeModel(rootNode);
+
+		// TODO take care of proxies
+		for (AggregatedResource resource : resources.values()) {
+			if (resource.equals(ro)) {
+				continue;
+			}
+			Individual res = model.getIndividual(resource.getURI().toString());
+			Set<ResourceGroup> matchingGroups = new HashSet<>();
+			for (ResourceGroup resourceGroup : resourceGroups) {
+				for (URI classURI : resourceGroup.getRdfClasses()) {
+					if (res.hasRDFType(classURI.toString())) {
+						matchingGroups.add(resourceGroup);
+						break;
+					}
+				}
+			}
+			treeModel.addAggregatedResource(resource, matchingGroups);
+		}
+		return treeModel;
+	}
+
+
+	public static RoTreeModel createPhysicalResourcesTree(OntModel model, URI researchObjectURI,
+			Map<URI, AggregatedResource> resources, Map<URI, String> usernames)
+		throws URISyntaxException
+	{
+		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(resources.get(researchObjectURI));
+		RoTreeModel treeModel = new RoTreeModel(rootNode);
+
+		// TODO take care of proxies & folders
+		for (AggregatedResource resource : resources.values()) {
+			treeModel.addAggregatedResource(resource);
+		}
 		return treeModel;
 	}
 
@@ -305,7 +328,7 @@ public class RoFactory
 	}
 
 
-	private static void createStabilities(OntModel model, URI researchObjectURI, Map<URI, AggregatedResource> resources)
+	public static void createStabilities(OntModel model, URI researchObjectURI, Map<URI, AggregatedResource> resources)
 	{
 		PortalApplication app = (PortalApplication) Application.get();
 		try {
@@ -340,9 +363,7 @@ public class RoFactory
 	}
 
 
-	// FIXME this is too specific, a more universal method would be better
-	private static void createRelations(NamedGraphSet graphset, OntModel model, URI researchObjectURI,
-			Map<URI, AggregatedResource> resources)
+	public static void createRelations(OntModel model, URI researchObjectURI, Map<URI, AggregatedResource> resources)
 	{
 		for (AggregatedResource resourceAR : resources.values()) {
 			Individual resource = model.getIndividual(resourceAR.getURI().toString());
@@ -352,71 +373,13 @@ public class RoFactory
 				if (statement.getObject().isURIResource()) {
 					URI objectURI = URI.create(statement.getObject().asResource().getURI());
 					if (resources.containsKey(objectURI)) {
-						Property property = statement.getPredicate();
 						AggregatedResource objectAR = resources.get(objectURI);
-						if (property.equals(DCTerms.source)) {
-							resourceAR.getRelations().put("Has sources", objectAR);
-							objectAR.getRelations().put("Is the source of", resourceAR);
-						}
-						if (property.equals(DCTerms.relation)) {
-							resourceAR.getRelations().put("Is related to", objectAR);
-							objectAR.getRelations().put("Is related to", resourceAR);
-						}
-						if (property.equals(DCTerms.isReferencedBy)) {
-							resourceAR.getRelations().put("Is referenced by", objectAR);
-							objectAR.getRelations().put("References", resourceAR);
-						}
-						if (property.equals(hasSubProcess)) {
-							resourceAR.getRelations().put("Has subprocesses", objectAR);
-							objectAR.getRelations().put("Is a subprocess of", resourceAR);
-						}
+						Property property = statement.getPredicate();
+						resourceAR.getRelations().put(Statement.splitCamelCase(property.getLocalName()).toLowerCase(),
+							objectAR);
 					}
 				}
 			}
-		}
-		try {
-			QueryExecution qexec = QueryExecutionFactory.create(
-				MyQueryFactory.getWorkflowOutputs(researchObjectURI.toString()), new NamedGraphDataset(graphset));
-			ResultSet result = qexec.execSelect();
-			while (result.hasNext()) {
-				QuerySolution solution = result.next();
-				Resource workflow = solution.get("workflow").asResource();
-				Resource output = solution.get("resource").asResource();
-				if (workflow.isURIResource() && output.isURIResource()) {
-					AggregatedResource workflowAR = resources.get(URI.create(workflow.getURI()));
-					AggregatedResource outputAR = resources.get(URI.create(output.getURI()));
-					if (workflowAR != null && outputAR != null) {
-						workflowAR.getRelations().put("Generated as output", outputAR);
-						outputAR.getRelations().put("Is an output of", workflowAR);
-					}
-				}
-			}
-			qexec.close();
-		}
-		catch (IOException e) {
-			log.error(e.getMessage());
-		}
-		try {
-			QueryExecution qexec = QueryExecutionFactory.create(
-				MyQueryFactory.getWorkflowInputs(researchObjectURI.toString()), new NamedGraphDataset(graphset));
-			ResultSet result = qexec.execSelect();
-			while (result.hasNext()) {
-				QuerySolution solution = result.next();
-				Resource workflow = solution.get("workflow").asResource();
-				Resource input = solution.get("resource").asResource();
-				if (workflow.isURIResource() && input.isURIResource()) {
-					AggregatedResource workflowAR = resources.get(URI.create(workflow.getURI()));
-					AggregatedResource inputAR = resources.get(URI.create(input.getURI()));
-					if (workflowAR != null && inputAR != null) {
-						workflowAR.getRelations().put("Used as input", inputAR);
-						inputAR.getRelations().put("Is input to", workflowAR);
-					}
-				}
-			}
-			qexec.close();
-		}
-		catch (IOException e) {
-			log.error(e.getMessage());
 		}
 	}
 
@@ -533,7 +496,7 @@ public class RoFactory
 	 * @param researchObjectURI
 	 * @return
 	 */
-	public static NamedGraphSet createManifestAndAnnotationsModel(URI researchObjectURI)
+	public static OntModel createManifestAndAnnotationsModel(URI researchObjectURI)
 	{
 		URI manifestURI = researchObjectURI.resolve(".ro/manifest.trig");
 		NamedGraphSet graphset = new NamedGraphSetImpl();
@@ -542,7 +505,9 @@ public class RoFactory
 			// HACK for old ROs
 			graphset.read(manifestURI.toString() + "?original=manifest", "TRIG");
 		}
-		return graphset;
+		OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM,
+			graphset.asJenaModel(researchObjectURI.resolve(".ro/manifest.rdf").toString()));
+		return model;
 	}
 
 }

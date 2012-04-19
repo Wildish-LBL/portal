@@ -8,6 +8,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
@@ -75,6 +76,8 @@ public class RoPage
 
 	URI roURI;
 
+	private Map<URI, AggregatedResource> resources;
+
 	private boolean canEdit = false;
 
 	final RoViewerBox roViewerBox;
@@ -133,8 +136,15 @@ public class RoPage
 				try {
 					if (getAggregatedResourcesTree() == null) {
 						PortalApplication app = ((PortalApplication) getApplication());
-						setAggregatedResourcesTree(RoFactory.createAggregatedResourcesTree(roURI,
-							app.getResourceGroups(), MySession.get().getUsernames()));
+						Map<URI, String> usernames = MySession.get().getUsernames();
+						OntModel model = RoFactory.createManifestAndAnnotationsModel(roURI);
+						resources = RoFactory.getAggregatedResources(model, roURI, usernames);
+						setAggregatedResourcesTree(RoFactory.createConceptualResourcesTree(model, roURI,
+							app.getResourceGroups(), resources, usernames));
+
+						RoFactory.createRelations(model, roURI, resources);
+						RoFactory.createStabilities(model, roURI, resources);
+
 						itemModel.setObject((AggregatedResource) ((DefaultMutableTreeNode) getAggregatedResourcesTree()
 								.getRoot()).getUserObject());
 						roViewerBox.onRoTreeLoaded();
@@ -466,6 +476,11 @@ public class RoPage
 					for (Statement statement : selectedStatements) {
 						statement.getAnnotation().getBody().remove(statement);
 						annotations.add(statement.getAnnotation());
+						AggregatedResource subjectAR = resources.get(statement.getSubjectURI());
+						AggregatedResource objectAR = resources.get(statement.getObjectURI());
+						if (subjectAR != null && objectAR != null) {
+							subjectAR.getRelations().remove(statement.getPropertyLocalNameNice(), objectAR);
+						}
 					}
 					for (Annotation annotation : annotations) {
 						try {
@@ -664,7 +679,6 @@ public class RoPage
 	 */
 	void onStatementAddedEdited(AjaxRequestTarget target)
 	{
-		//							roFactory.reload();
 		this.annotatingBox.getModelObject().setAnnotations(
 			RoFactory.createAnnotations(roURI, this.annotatingBox.getModelObject().getURI(), MySession.get()
 					.getUsernames()));
@@ -674,16 +688,18 @@ public class RoPage
 
 
 	/**
+	 * @param statement
 	 * @param target
 	 * @param form
 	 */
-	void onRelationAddedEdited(AjaxRequestTarget target)
+	void onRelationAddedEdited(Statement statement, AjaxRequestTarget target)
 	{
-		//TODO
-		//							roFactory.reload();
 		this.annotatingBox.getModelObject().setAnnotations(
 			RoFactory.createAnnotations(roURI, this.annotatingBox.getModelObject().getURI(), MySession.get()
 					.getUsernames()));
+		AggregatedResource subjectAR = resources.get(statement.getSubjectURI());
+		AggregatedResource objectAR = resources.get(statement.getObjectURI());
+		subjectAR.getRelations().put(statement.getPropertyLocalNameNice(), objectAR);
 		target.add(roViewerBox.infoPanel);
 		target.add(annotatingBox.annotationsDiv);
 	}

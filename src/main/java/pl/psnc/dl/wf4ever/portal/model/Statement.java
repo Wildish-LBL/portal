@@ -116,7 +116,7 @@ public class Statement
 
 	public String getPropertyLocalNameNice()
 	{
-		return splitCamelCase(getPropertyLocalName());
+		return splitCamelCase(getPropertyLocalName()).toLowerCase();
 	}
 
 

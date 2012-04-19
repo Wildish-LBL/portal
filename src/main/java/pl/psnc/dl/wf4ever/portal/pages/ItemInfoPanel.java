@@ -4,8 +4,8 @@
 package pl.psnc.dl.wf4ever.portal.pages;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -49,6 +49,8 @@ public class ItemInfoPanel
 	private final WebMarkupContainer annotationsCntSection;
 
 	private final WebMarkupContainer stabilitySection;
+
+	private final WebMarkupContainer relationsSection;
 
 
 	@SuppressWarnings("serial")
@@ -99,42 +101,33 @@ public class ItemInfoPanel
 
 		});
 
-		ListView<String> relationsGroup = new ListView<String>("relationsGroup", new PropertyModel<List<String>>(
-				itemModel, "relationsKeyList")) {
+		relationsSection = new WebMarkupContainer("relationsSection", new Model<>());
+		add(relationsSection);
+		ListView<Entry<String, AggregatedResource>> relationsGroup = new ListView<Entry<String, AggregatedResource>>(
+				"relationTarget", new PropertyModel<List<Entry<String, AggregatedResource>>>(itemModel,
+						"relationsEntries")) {
 
 			@Override
-			protected void populateItem(ListItem<String> item)
+			protected void populateItem(ListItem<Entry<String, AggregatedResource>> item)
 			{
-				String key = item.getModelObject();
-				item.add(new Label("relationType", key));
-				List<AggregatedResource> targets = new ArrayList<AggregatedResource>(itemModel.getObject()
-						.getRelations().get(key));
-				ListView<AggregatedResource> targetList = new ListView<AggregatedResource>("relationTarget", targets) {
+				Entry<String, AggregatedResource> entry = item.getModelObject();
+				item.add(new Label("relationType", entry.getKey()));
+				AjaxLink<String> link = new AjaxLink<String>("targetLink") {
 
 					@Override
-					protected void populateItem(ListItem<AggregatedResource> item)
+					public void onClick(AjaxRequestTarget target)
 					{
-						AggregatedResource resource = item.getModelObject();
-						AjaxLink<String> link = new AjaxLink<String>("targetLink") {
+						// TODO Auto-generated method stub
 
-							@Override
-							public void onClick(AjaxRequestTarget target)
-							{
-								// TODO Auto-generated method stub
-
-							}
-
-						};
-						item.add(link);
-						link.add(new Label("targetLabel", new PropertyModel<String>(resource, "name")));
 					}
 
 				};
-				item.add(targetList);
+				item.add(link);
+				link.add(new Label("targetLabel", new PropertyModel<String>(entry.getValue(), "name")));
 			}
 
 		};
-		add(relationsGroup);
+		relationsSection.add(relationsGroup);
 	}
 
 
@@ -150,6 +143,7 @@ public class ItemInfoPanel
 			sizeSection.setVisible(resource.getSizeFormatted() != null);
 			stabilitySection.setVisible(resource.getStability() >= 0);
 			annotationsCntSection.setVisible(true);
+			relationsSection.setVisible(!resource.getRelations().isEmpty());
 		}
 		else {
 			resourceURISection.setVisible(false);
@@ -159,6 +153,7 @@ public class ItemInfoPanel
 			sizeSection.setVisible(false);
 			stabilitySection.setVisible(false);
 			annotationsCntSection.setVisible(false);
+			relationsSection.setVisible(false);
 		}
 	}
 
