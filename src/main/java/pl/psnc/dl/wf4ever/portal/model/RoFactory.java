@@ -200,7 +200,9 @@ public class RoFactory
 
 		// TODO take care of proxies & folders
 		for (AggregatedResource resource : resources.values()) {
-			treeModel.addAggregatedResource(resource);
+			if (isResourceInternal(researchObjectURI, resource.getURI())) {
+				treeModel.addAggregatedResource(resource);
+			}
 		}
 		return treeModel;
 	}
@@ -375,7 +377,7 @@ public class RoFactory
 					if (resources.containsKey(objectURI)) {
 						AggregatedResource objectAR = resources.get(objectURI);
 						Property property = statement.getPredicate();
-						resourceAR.getRelations().put(Statement.splitCamelCase(property.getLocalName()).toLowerCase(),
+						resourceAR.getRelations().put(RoFactory.splitCamelCase(property.getLocalName()).toLowerCase(),
 							objectAR);
 					}
 				}
@@ -510,4 +512,22 @@ public class RoFactory
 		return model;
 	}
 
+
+	/*
+	 * from
+	 * http://stackoverflow.com/questions/2559759/how-do-i-convert-camelcase-into-human
+	 * -readable-names-in-java
+	 */
+	public static String splitCamelCase(String s)
+	{
+		return s.replaceAll(
+			String.format("%s|%s|%s", "(?<=[A-Z])(?=[A-Z][a-z])", "(?<=[^A-Z])(?=[A-Z])", "(?<=[A-Za-z])(?=[^A-Za-z])"),
+			" ");
+	}
+
+
+	public static boolean isResourceInternal(URI roURI, URI resourceURI)
+	{
+		return resourceURI != null && resourceURI.normalize().toString().startsWith(roURI.normalize().toString());
+	}
 }

@@ -89,7 +89,7 @@ class RelationEditModal
 		};
 		relationURIDiv.add(relationURI);
 
-		tree = new RoTree("objectTree", new PropertyModel<TreeModel>(roPage, "aggregatedResourcesTree"));
+		tree = new RoTree("objectTree", new PropertyModel<TreeModel>(roPage, "conceptualResourcesTree"));
 		treeLoading = new Fragment("objectTree", tempRoTreeId, roPage);
 		form.add(treeLoading);
 

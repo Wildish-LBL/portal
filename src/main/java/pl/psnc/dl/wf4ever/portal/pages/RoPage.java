@@ -84,7 +84,9 @@ public class RoPage
 
 	final AnnotatingBox annotatingBox;
 
-	private RoTreeModel aggregatedResourcesTree;
+	private RoTreeModel conceptualResourcesTree;
+
+	private RoTreeModel physicalResourcesTree;
 
 	private final StatementEditModal stmtEditForm;
 
@@ -112,8 +114,8 @@ public class RoPage
 
 		final CompoundPropertyModel<AggregatedResource> itemModel = new CompoundPropertyModel<AggregatedResource>(
 				(AggregatedResource) null);
-		roViewerBox = new RoViewerBox(itemModel, new PropertyModel<TreeModel>(this, "aggregatedResourcesTree"),
-				"loadingROFragment");
+		roViewerBox = new RoViewerBox(itemModel, new PropertyModel<TreeModel>(this, "conceptualResourcesTree"),
+				new PropertyModel<TreeModel>(this, "physicalResourcesTree"), "loadingROFragment");
 		add(roViewerBox);
 		annotatingBox = new AnnotatingBox(itemModel);
 		add(annotatingBox);
@@ -134,18 +136,20 @@ public class RoPage
 			protected void respond(AjaxRequestTarget target)
 			{
 				try {
-					if (getAggregatedResourcesTree() == null) {
+					if (getConceptualResourcesTree() == null) {
 						PortalApplication app = ((PortalApplication) getApplication());
 						Map<URI, String> usernames = MySession.get().getUsernames();
 						OntModel model = RoFactory.createManifestAndAnnotationsModel(roURI);
 						resources = RoFactory.getAggregatedResources(model, roURI, usernames);
-						setAggregatedResourcesTree(RoFactory.createConceptualResourcesTree(model, roURI,
+						setConceptualResourcesTree(RoFactory.createConceptualResourcesTree(model, roURI,
 							app.getResourceGroups(), resources, usernames));
+						setPhysicalResourcesTree(RoFactory.createPhysicalResourcesTree(model, roURI, resources,
+							usernames));
 
 						RoFactory.createRelations(model, roURI, resources);
 						RoFactory.createStabilities(model, roURI, resources);
 
-						itemModel.setObject((AggregatedResource) ((DefaultMutableTreeNode) getAggregatedResourcesTree()
+						itemModel.setObject((AggregatedResource) ((DefaultMutableTreeNode) getConceptualResourcesTree()
 								.getRoot()).getUserObject());
 						roViewerBox.onRoTreeLoaded();
 						relEditForm.onRoTreeLoaded();
@@ -172,23 +176,35 @@ public class RoPage
 
 
 	/**
-	 * @return the aggregatedResourcesTree
+	 * @return the conceptualResourcesTree
 	 * @throws URISyntaxException
 	 */
-	public RoTreeModel getAggregatedResourcesTree()
+	public RoTreeModel getConceptualResourcesTree()
 		throws URISyntaxException
 	{
-		return aggregatedResourcesTree;
+		return conceptualResourcesTree;
 	}
 
 
 	/**
-	 * @param aggregatedResourcesTree
-	 *            the aggregatedResourcesTree to set
+	 * @param conceptualResourcesTree
+	 *            the conceptualResourcesTree to set
 	 */
-	public void setAggregatedResourcesTree(RoTreeModel aggregatedResourcesTree)
+	public void setConceptualResourcesTree(RoTreeModel conceptualResourcesTree)
 	{
-		this.aggregatedResourcesTree = aggregatedResourcesTree;
+		this.conceptualResourcesTree = conceptualResourcesTree;
+	}
+
+
+	public RoTreeModel getPhysicalResourcesTree()
+	{
+		return physicalResourcesTree;
+	}
+
+
+	public void setPhysicalResourcesTree(RoTreeModel physicalResourcesTree)
+	{
+		this.physicalResourcesTree = physicalResourcesTree;
 	}
 
 	@SuppressWarnings("serial")
@@ -196,7 +212,9 @@ public class RoPage
 		extends WebMarkupContainer
 	{
 
-		RoTree tree;
+		RoTree conceptualTree;
+
+		RoTree physicalTree;
 
 		Panel infoPanel;
 
@@ -206,11 +224,14 @@ public class RoPage
 
 		final WebMarkupContainer actionButtons;
 
-		private Fragment treeLoading;
+		private Fragment conceptualTreeLoading;
+
+		private Fragment physicalTreeLoading;
 
 
 		public RoViewerBox(final CompoundPropertyModel<AggregatedResource> itemModel,
-				IModel< ? extends TreeModel> treeModel, String tempRoTreeId)
+				IModel< ? extends TreeModel> conceptualTreeModel, PropertyModel<TreeModel> physicalTreeModel,
+				String tempRoTreeId)
 		{
 			super("roViewerBox", itemModel);
 			setOutputMarkupId(true);
@@ -223,8 +244,8 @@ public class RoPage
 			infoPanel = itemInfo;
 			add(infoPanel);
 
-			treeLoading = new Fragment("treeTable", tempRoTreeId, RoPage.this);
-			tree = new RoTree("treeTable", treeModel) {
+			conceptualTreeLoading = new Fragment("treeTable", tempRoTreeId, RoPage.this);
+			conceptualTree = new RoTree("treeTable", conceptualTreeModel) {
 
 				@Override
 				protected void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node)
@@ -252,7 +273,30 @@ public class RoPage
 					target.add(annotatingBox);
 				}
 			};
-			add(treeLoading);
+			add(conceptualTreeLoading);
+
+			physicalTreeLoading = new Fragment("physicalTreeTable", tempRoTreeId, RoPage.this);
+			physicalTree = new RoTree("physicalTreeTable", physicalTreeModel) {
+
+				@Override
+				protected void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node)
+				{
+					Object object = ((DefaultMutableTreeNode) node).getUserObject();
+					if (object instanceof AggregatedResource) {
+						AggregatedResource res = (AggregatedResource) object;
+						itemModel.setObject(res);
+						if (infoPanel != itemInfo) {
+							infoPanel.replaceWith(itemInfo);
+							infoPanel = itemInfo;
+						}
+					}
+					annotatingBox.selectedStatements.clear();
+					target.add(actionButtons);
+					target.add(infoPanel);
+					target.add(annotatingBox);
+				}
+			};
+			add(physicalTreeLoading);
 
 			Form< ? > roForm = new Form<Void>("roForm");
 			add(roForm);
@@ -285,12 +329,12 @@ public class RoPage
 				protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 				{
 					super.onSubmit(target, form);
-					AggregatedResource res = (AggregatedResource) ((DefaultMutableTreeNode) tree.getTreeState()
-							.getSelectedNodes().iterator().next()).getUserObject();
+					AggregatedResource res = (AggregatedResource) ((DefaultMutableTreeNode) conceptualTree
+							.getTreeState().getSelectedNodes().iterator().next()).getUserObject();
 					try {
 						ROSRService.deleteResource(res.getURI(), MySession.get().getdLibraAccessToken());
-						getAggregatedResourcesTree().removeAggregatedResource(res);
-						tree.invalidateAll();
+						getConceptualResourcesTree().removeAggregatedResource(res);
+						conceptualTree.invalidateAll();
 						target.add(RoViewerBox.this);
 					}
 					catch (Exception e) {
@@ -302,9 +346,9 @@ public class RoPage
 				@Override
 				public boolean isEnabled()
 				{
-					if (super.isEnabled() && canEdit && !tree.getTreeState().getSelectedNodes().isEmpty()) {
-						Object object = ((DefaultMutableTreeNode) tree.getTreeState().getSelectedNodes().iterator()
-								.next()).getUserObject();
+					if (super.isEnabled() && canEdit && !conceptualTree.getTreeState().getSelectedNodes().isEmpty()) {
+						Object object = ((DefaultMutableTreeNode) conceptualTree.getTreeState().getSelectedNodes()
+								.iterator().next()).getUserObject();
 						return object instanceof AggregatedResource
 								&& !((AggregatedResource) object).getURI().equals(roURI);
 					}
@@ -329,7 +373,8 @@ public class RoPage
 
 		public void onRoTreeLoaded()
 		{
-			treeLoading.replaceWith(tree);
+			conceptualTreeLoading.replaceWith(conceptualTree);
+			physicalTreeLoading.replaceWith(physicalTree);
 		}
 	}
 
@@ -384,7 +429,7 @@ public class RoPage
 							final Statement statement = item.getModelObject();
 							item.add(new Check<Statement>("checkbox", item.getModel()));
 							if (statement.isSubjectURIResource()) {
-								if (statement.isSubjectPartOfRo(roURI)) {
+								if (RoFactory.isResourceInternal(roURI, statement.getSubjectURI())) {
 									if (statement.getSubjectURI().equals(itemModel.getObject().getURI())) {
 										item.add(new Label("subject", "[This item]"));
 									}
@@ -622,8 +667,8 @@ public class RoPage
 
 		AggregatedResource resource = RoFactory
 				.createResource(roURI, resourceURI, true, MySession.get().getUsernames());
-		getAggregatedResourcesTree().addAggregatedResource(resource, selectedResourceGroups);
-		roViewerBox.tree.invalidateAll();
+		getConceptualResourcesTree().addAggregatedResource(resource, selectedResourceGroups);
+		roViewerBox.conceptualTree.invalidateAll();
 		target.add(roViewerBox);
 	}
 

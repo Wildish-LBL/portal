@@ -116,7 +116,7 @@ public class Statement
 
 	public String getPropertyLocalNameNice()
 	{
-		return splitCamelCase(getPropertyLocalName()).toLowerCase();
+		return RoFactory.splitCamelCase(getPropertyLocalName()).toLowerCase();
 	}
 
 
@@ -238,25 +238,6 @@ public class Statement
 			object = model.createTypedLiteral(objectValue);
 		}
 		return model.createStatement(subject, property, object);
-	}
-
-
-	/*
-	 * from
-	 * http://stackoverflow.com/questions/2559759/how-do-i-convert-camelcase-into-human
-	 * -readable-names-in-java
-	 */
-	static String splitCamelCase(String s)
-	{
-		return s.replaceAll(
-			String.format("%s|%s|%s", "(?<=[A-Z])(?=[A-Z][a-z])", "(?<=[^A-Z])(?=[A-Z])", "(?<=[A-Za-z])(?=[^A-Za-z])"),
-			" ");
-	}
-
-
-	public boolean isSubjectPartOfRo(URI roURI)
-	{
-		return subjectURI != null && subjectURI.normalize().toString().startsWith(roURI.normalize().toString());
 	}
 
 }
