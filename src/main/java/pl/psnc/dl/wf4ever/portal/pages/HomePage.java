@@ -32,10 +32,14 @@ import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.UrlEncoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
+import pl.psnc.dl.wf4ever.portal.model.Creator;
 import pl.psnc.dl.wf4ever.portal.model.Recommendation;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
+import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.model.SearchResult;
+import pl.psnc.dl.wf4ever.portal.pages.util.CreatorsPanel;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.services.MyQueryFactory;
@@ -90,7 +94,7 @@ public class HomePage
 		while (results.hasNext()) {
 			QuerySolution solution = results.next();
 			URI uri = new URI(solution.getResource("resource").getURI());
-			String author = solution.getLiteral("creator").getString();
+			Creator author = RoFactory.getCreator(MySession.get().getUsernames(), solution.get("creator"));
 			Calendar created = ((XSDDateTime) solution.getLiteral("created").getValue()).asCalendar();
 			roHeaders.add(new ResearchObject(uri, created, Arrays.asList(author)));
 		}
@@ -132,7 +136,7 @@ public class HomePage
 				link.getPageParameters().add("ro", UrlEncoder.QUERY_INSTANCE.encode(ro.getURI().toString(), "UTF-8"));
 				link.add(new Label("name"));
 				item.add(link);
-				item.add(new Label("creator"));
+				item.add(new CreatorsPanel("creator", new PropertyModel<List<Creator>>(ro, "creators")));
 				item.add(new Label("createdAgoFormatted"));
 			}
 		};
@@ -160,7 +164,8 @@ public class HomePage
 				item.add(link);
 				item.add(new Label("researchObject.title"));
 				item.add(new Label("scoreInPercent"));
-				item.add(new Label("researchObject.creator"));
+				item.add(new CreatorsPanel("researchObject.creator", new PropertyModel<List<Creator>>(result,
+						"researchObject.creators")));
 				item.add(new Label("researchObject.createdAgoFormatted"));
 				Label bar = new Label("percentBar", "");
 				bar.add(new Behavior() {

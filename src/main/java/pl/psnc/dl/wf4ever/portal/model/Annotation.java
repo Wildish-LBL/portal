@@ -29,7 +29,7 @@ public class Annotation
 	private LoadableDetachableModel<List<Statement>> bodyModel;
 
 
-	public Annotation(URI uri, Calendar created, List<String> creators, String name, URI bodyURI)
+	public Annotation(URI uri, Calendar created, List<Creator> creators, String name, URI bodyURI)
 	{
 		super(uri, created, creators, name, 0, Type.ANNOTATION);
 		this.bodyURI = bodyURI;

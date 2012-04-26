@@ -28,7 +28,7 @@ public class InternalResource
 	 * @param created
 	 * @param rSize
 	 */
-	public InternalResource(URI uri, Calendar created, List<String> creators, String name, long size, Type type)
+	public InternalResource(URI uri, Calendar created, List<Creator> creators, String name, long size, Type type)
 	{
 		super(uri, created, creators, name, size, type);
 	}

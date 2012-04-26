@@ -5,10 +5,10 @@ import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
-
-import org.apache.commons.lang3.StringUtils;
+import java.util.Set;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -30,7 +30,7 @@ public abstract class AggregatedResource
 
 	protected Calendar created;
 
-	protected List<String> creators;
+	protected List<Creator> creators;
 
 	protected String name;
 
@@ -48,8 +48,10 @@ public abstract class AggregatedResource
 
 	private URI provenanceTraceURI;
 
+	private Set<ResourceGroup> matchingGroups = new HashSet<>();
 
-	public AggregatedResource(URI uri, Calendar created, List<String> creators, String name, long size, Type type)
+
+	public AggregatedResource(URI uri, Calendar created, List<Creator> creators, String name, long size, Type type)
 	{
 		this.uri = uri;
 		this.created = created;
@@ -113,9 +115,9 @@ public abstract class AggregatedResource
 	}
 
 
-	public String getCreator()
+	public List<Creator> getCreators()
 	{
-		return StringUtils.join(creators, ", ");
+		return creators;
 	}
 
 
@@ -278,4 +280,11 @@ public abstract class AggregatedResource
 	{
 		return provenanceTraceURI;
 	}
+
+
+	public Set<ResourceGroup> getMatchingGroups()
+	{
+		return matchingGroups;
+	}
+
 }

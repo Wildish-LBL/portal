@@ -15,6 +15,7 @@ import org.apache.wicket.request.Request;
 import org.apache.wicket.util.cookies.CookieUtils;
 import org.scribe.model.Token;
 
+import pl.psnc.dl.wf4ever.portal.model.Creator;
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 
@@ -59,7 +60,7 @@ public class MySession
 
 	private final static String MYEXP_KEY_SECRET = "myexp2";
 
-	private final Map<URI, String> usernames = new HashMap<URI, String>();
+	private final Map<URI, Creator> usernames = new HashMap<>();
 
 
 	public MySession(Request request)
@@ -233,7 +234,7 @@ public class MySession
 	/**
 	 * @return the usernames
 	 */
-	public Map<URI, String> getUsernames()
+	public Map<URI, Creator> getUsernames()
 	{
 		return usernames;
 	}

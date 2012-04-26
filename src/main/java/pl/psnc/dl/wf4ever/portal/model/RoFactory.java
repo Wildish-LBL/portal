@@ -15,21 +15,23 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.wicket.Application;
 import org.apache.wicket.request.UrlDecoder;
+import org.apache.wicket.util.crypt.Base64;
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonGenerator;
 
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource.Type;
 import pl.psnc.dl.wf4ever.portal.services.MyQueryFactory;
-import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 import pl.psnc.dl.wf4ever.portal.services.StabilityService;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
@@ -124,7 +126,7 @@ public class RoFactory
 
 
 	public static ResearchObject createResearchObject(URI researchObjectURI, boolean includeAnnotations,
-			Map<URI, String> usernames)
+			Map<URI, Creator> usernames)
 		throws URISyntaxException
 	{
 		OntModel model = createManifestModel(researchObjectURI);
@@ -133,7 +135,7 @@ public class RoFactory
 
 
 	public static ResearchObject createResearchObject(OntModel model, URI researchObjectURI,
-			boolean includeAnnotations, Map<URI, String> usernames)
+			boolean includeAnnotations, Map<URI, Creator> usernames)
 		throws URISyntaxException
 	{
 		return (ResearchObject) createResource(model, researchObjectURI, researchObjectURI, includeAnnotations,
@@ -142,7 +144,7 @@ public class RoFactory
 
 
 	public static Map<URI, AggregatedResource> getAggregatedResources(OntModel model, URI researchObjectURI,
-			Map<URI, String> usernames)
+			Map<URI, Creator> usernames)
 		throws URISyntaxException
 	{
 		Map<URI, AggregatedResource> resources = new HashMap<URI, AggregatedResource>();
@@ -162,8 +164,31 @@ public class RoFactory
 	}
 
 
+	public static void assignResourceGroupsToResources(OntModel model, URI researchObjectURI,
+			Set<ResourceGroup> resourceGroups, Map<URI, AggregatedResource> resources)
+	{
+		ResearchObject ro = (ResearchObject) resources.get(researchObjectURI);
+
+		// TODO take care of proxies
+		for (AggregatedResource resource : resources.values()) {
+			if (resource.equals(ro)) {
+				continue;
+			}
+			Individual res = model.getIndividual(resource.getURI().toString());
+			for (ResourceGroup resourceGroup : resourceGroups) {
+				for (URI classURI : resourceGroup.getRdfClasses()) {
+					if (res.hasRDFType(classURI.toString())) {
+						resource.getMatchingGroups().add(resourceGroup);
+						break;
+					}
+				}
+			}
+		}
+	}
+
+
 	public static RoTreeModel createConceptualResourcesTree(OntModel model, URI researchObjectURI,
-			Set<ResourceGroup> resourceGroups, Map<URI, AggregatedResource> resources, Map<URI, String> usernames)
+			Map<URI, AggregatedResource> resources)
 		throws URISyntaxException
 	{
 		ResearchObject ro = (ResearchObject) resources.get(researchObjectURI);
@@ -175,24 +200,14 @@ public class RoFactory
 			if (resource.equals(ro)) {
 				continue;
 			}
-			Individual res = model.getIndividual(resource.getURI().toString());
-			Set<ResourceGroup> matchingGroups = new HashSet<>();
-			for (ResourceGroup resourceGroup : resourceGroups) {
-				for (URI classURI : resourceGroup.getRdfClasses()) {
-					if (res.hasRDFType(classURI.toString())) {
-						matchingGroups.add(resourceGroup);
-						break;
-					}
-				}
-			}
-			treeModel.addAggregatedResource(resource, matchingGroups);
+			treeModel.addAggregatedResource(resource, true);
 		}
 		return treeModel;
 	}
 
 
 	public static RoTreeModel createPhysicalResourcesTree(OntModel model, URI researchObjectURI,
-			Map<URI, AggregatedResource> resources, Map<URI, String> usernames)
+			Map<URI, AggregatedResource> resources, Map<URI, Creator> usernames)
 		throws URISyntaxException
 	{
 		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(resources.get(researchObjectURI));
@@ -201,15 +216,51 @@ public class RoFactory
 		// TODO take care of proxies & folders
 		for (AggregatedResource resource : resources.values()) {
 			if (isResourceInternal(researchObjectURI, resource.getURI())) {
-				treeModel.addAggregatedResource(resource);
+				treeModel.addAggregatedResource(resource, false);
 			}
 		}
 		return treeModel;
 	}
 
 
+	public static String createRoJSON(Map<URI, AggregatedResource> resources, String[] colors)
+		throws IOException
+	{
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		JsonFactory jsonFactory = new JsonFactory();
+		JsonGenerator jg = jsonFactory.createJsonGenerator(out);
+		jg.writeStartArray();
+		for (AggregatedResource resource : resources.values()) {
+			int rdfClassHashCode = 0;
+			for (ResourceGroup g : resource.getMatchingGroups()) {
+				rdfClassHashCode += g.hashCode();
+			}
+			String color = colors[Math.abs(rdfClassHashCode) % colors.length];
+			String tooltip = resource instanceof ResearchObject ? "Research Object" : StringUtils.join(
+				resource.getMatchingGroups(), ", ");
+
+			jg.writeStartObject();
+			jg.writeStringField("id", Base64.encodeBase64URLSafeString(resource.getURI().toString().getBytes()));
+			jg.writeStringField("name", resource.getName());
+			jg.writeObjectFieldStart("data");
+			jg.writeStringField("$color", color);
+			jg.writeStringField("tooltip", tooltip);
+			jg.writeEndObject();
+			jg.writeArrayFieldStart("adjacencies");
+			for (AggregatedResource adjacency : resource.getRelations().values()) {
+				jg.writeString(Base64.encodeBase64URLSafeString(adjacency.getURI().toString().getBytes()));
+			}
+			jg.writeEndArray();
+			jg.writeEndObject();
+		}
+		jg.writeEndArray();
+		jg.close(); // important: will force flushing of output, close underlying output stream
+		return out.toString();
+	}
+
+
 	public static AggregatedResource createResource(URI researchObjectURI, URI resourceURI, boolean includeAnnotations,
-			Map<URI, String> usernames)
+			Map<URI, Creator> usernames)
 	{
 		OntModel model = createManifestModel(researchObjectURI);
 
@@ -222,12 +273,12 @@ public class RoFactory
 	 * @param resourceURI
 	 */
 	public static AggregatedResource createResource(OntModel model, URI researchObjectURI, URI resourceURI,
-			boolean includeAnnotations, Map<URI, String> usernames)
+			boolean includeAnnotations, Map<URI, Creator> usernames)
 	{
 
 		Individual res = model.getIndividual(resourceURI.toString());
 		Calendar created = null;
-		List<String> creators = new ArrayList<>();
+		List<Creator> creators = new ArrayList<>();
 		long size = 0;
 
 		try {
@@ -239,12 +290,7 @@ public class RoFactory
 			NodeIterator it = res.listPropertyValues(DCTerms.creator);
 			while (it.hasNext()) {
 				RDFNode node = it.next();
-				if (node.isResource()) {
-					creators.add(getUserName(usernames, node.asResource()));
-				}
-				else {
-					creators.add(node.asLiteral().getString());
-				}
+				creators.add(getCreator(usernames, node));
 			}
 		}
 		catch (Exception e) {
@@ -257,6 +303,7 @@ public class RoFactory
 
 		String name = UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.relativize(resourceURI).toString(), "UTF-8");
 		AggregatedResource resource;
+		//FIXME this looks like a hack
 		if (res.hasRDFType("http://purl.org/wf4ever/ro#ResearchObject")) {
 			resource = new ResearchObject(resourceURI, created, creators);
 		}
@@ -282,51 +329,58 @@ public class RoFactory
 	 * @param creator
 	 * @return
 	 */
-	private static String getUserName(Map<URI, String> usernames, Resource creator)
+	public static Creator getCreator(final Map<URI, Creator> usernames, RDFNode creator)
 	{
-		String username = null;
-		URI uri = URI.create(creator.getURI());
+		if (creator.isURIResource()) {
+			final URI uri = URI.create(creator.asResource().getURI());
+			try {
+				// 1. already fetched
+				if (usernames.containsKey(uri)) {
+				}
+				// 2. FOAF data defined inline
+				else if (creator.asResource().hasProperty(foafName)) {
+					usernames.put(uri, new Creator(creator.as(Individual.class).getPropertyValue(foafName).asLiteral()
+							.getString()));
+				}
+				else {
+					//3. load in a separate thread
+					usernames.put(uri, new Creator(uri));
+				}
+			}
+			catch (Exception e) {
+				log.error("Error when getting username", e);
+				usernames.put(uri, new Creator(uri.toString()));
+			}
+			return usernames.get(uri);
+		}
+		else if (creator.isResource()) {
+			return new Creator(creator.asResource().getId().toString());
+		}
+		else {
+			return new Creator(creator.asLiteral().getString());
+		}
+	}
+
+
+	/**
+	 * @param usernames
+	 * @param username
+	 * @param creator
+	 * @return
+	 */
+	public static Creator getCreator(final Map<URI, Creator> usernames, final String nameOrUri)
+	{
 		try {
-			// 1. already fetched
-			if (usernames.containsKey(uri)) {
-				username = usernames.get(uri);
+			URI uri = new URI(nameOrUri);
+			if (!usernames.containsKey(uri)) {
+				//2. load in a separate thread
+				usernames.put(uri, new Creator(uri));
 			}
-			// 2. FOAF data defined inline
-			else if (creator.hasProperty(foafName)) {
-				username = creator.as(Individual.class).getPropertyValue(foafName).asLiteral().getString();
-			}
-			else {
-				try {
-					// 3. FOAF data under user URI
-					OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
-					userModel.read(uri.toString(), null);
-					Resource r2 = userModel.createResource(uri.toString());
-					if (r2 != null && r2.hasProperty(foafName)) {
-						username = r2.as(Individual.class).getPropertyValue(foafName).asLiteral().getString();
-					}
-				}
-				catch (Exception e) {
-					log.debug("No FOAF data under user URI: " + e.getMessage());
-				}
-				if (username == null) {
-					// 4. FOAF data in RODL
-					OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
-					userModel.read(ROSRService.getUser(uri), null);
-					Resource r2 = userModel.createResource(uri.toString());
-					if (r2 != null && r2.hasProperty(foafName)) {
-						username = r2.as(Individual.class).getPropertyValue(foafName).asLiteral().getString();
-					}
-				}
-			}
+			return usernames.get(uri);
 		}
-		catch (Exception e) {
-			log.error("Error when getting username", e);
+		catch (URISyntaxException e) {
+			return new Creator(nameOrUri);
 		}
-		if (username == null) {
-			username = uri.toString();
-		}
-		usernames.put(uri, username);
-		return username;
 	}
 
 
@@ -386,7 +440,7 @@ public class RoFactory
 	}
 
 
-	public static List<Annotation> createAnnotations(URI researchObjectURI, URI resourceURI, Map<URI, String> usernames)
+	public static List<Annotation> createAnnotations(URI researchObjectURI, URI resourceURI, Map<URI, Creator> usernames)
 	{
 		OntModel model = createManifestModel(researchObjectURI);
 
@@ -395,7 +449,7 @@ public class RoFactory
 
 
 	public static List<Annotation> createAnnotations(OntModel model, URI researchObjectURI, URI resourceURI,
-			Map<URI, String> usernames)
+			Map<URI, Creator> usernames)
 	{
 		List<Annotation> anns = new ArrayList<>();
 
@@ -408,7 +462,7 @@ public class RoFactory
 			try {
 				Calendar created = ((XSDDateTime) ann.getPropertyValue(DCTerms.created).asLiteral().getValue())
 						.asCalendar();
-				String creator = getUserName(usernames, ann.getPropertyResourceValue(DCTerms.creator));
+				Creator creator = getCreator(usernames, ann.getPropertyResourceValue(DCTerms.creator));
 				Resource body = ann.getPropertyResourceValue(aoBody);
 				String name = UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.relativize(new URI(ann.getURI()))
 						.toString(), "UTF-8");

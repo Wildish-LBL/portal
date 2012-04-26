@@ -22,6 +22,8 @@ import org.apache.wicket.model.PropertyModel;
 
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
+import pl.psnc.dl.wf4ever.portal.model.Creator;
+import pl.psnc.dl.wf4ever.portal.pages.util.CreatorsPanel;
 import pl.psnc.dl.wf4ever.portal.services.StabilityService;
 
 /**
@@ -68,7 +70,7 @@ public class ItemInfoPanel
 				itemModel.<URI> bind("downloadURI")));
 		creatorSection = new WebMarkupContainer("creatorSection", new Model<>());
 		add(creatorSection);
-		creatorSection.add(new Label("creator").setEscapeModelStrings(false));
+		creatorSection.add(new CreatorsPanel("creator", new PropertyModel<List<Creator>>(itemModel, "creators")));
 		createdSection = new WebMarkupContainer("createdSection", new Model<>());
 		add(createdSection);
 		createdSection.add(new Label("createdFormatted"));
@@ -138,7 +140,7 @@ public class ItemInfoPanel
 		if (resource != null) {
 			resourceURISection.setVisible(true);
 			downloadURISection.setVisible(resource.getDownloadURI() != null);
-			creatorSection.setVisible(resource.getCreator() != null);
+			creatorSection.setVisible(!resource.getCreators().isEmpty());
 			createdSection.setVisible(resource.getCreated() != null);
 			sizeSection.setVisible(resource.getSizeFormatted() != null);
 			stabilitySection.setVisible(resource.getStability() >= 0);

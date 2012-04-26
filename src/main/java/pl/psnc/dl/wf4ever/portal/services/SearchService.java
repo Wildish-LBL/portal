@@ -15,7 +15,10 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.jdom.Element;
 
+import pl.psnc.dl.wf4ever.portal.MySession;
+import pl.psnc.dl.wf4ever.portal.model.Creator;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
+import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.model.SearchResult;
 
 import com.sun.jersey.api.uri.UriBuilderImpl;
@@ -55,7 +58,7 @@ public class SearchService
 			URI researchObjectURI = null;
 			Calendar created = null;
 			String title = null;
-			List<String> creators = new ArrayList<>();
+			List<Creator> creators = new ArrayList<>();
 			double score = -1;
 			List<Element> dlMarkup = (List<Element>) entry.getForeignMarkup();
 			for (Element element : dlMarkup) {
@@ -68,7 +71,7 @@ public class SearchService
 								researchObjectURI = URI.create(element.getValue());
 								break;
 							case "Creator":
-								creators.add(element.getValue());
+								creators.add(RoFactory.getCreator(MySession.get().getUsernames(), element.getValue()));
 								break;
 							case "Created":
 								try {

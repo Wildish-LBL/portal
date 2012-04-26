@@ -32,37 +32,27 @@ public class RoTreeModel
 
 
 	/**
-	 * Adds the resource to the end of the list, not grouping it to any folder.
-	 * 
-	 * @param resource
-	 */
-	public void addAggregatedResource(AggregatedResource resource)
-	{
-		DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.getRoot();
-		root.add(new DefaultMutableTreeNode(resource));
-	}
-
-
-	/**
 	 * Adds the resource grouping it to all matching folders. If no folders is matched, it
 	 * is added directly to root node.
 	 * 
 	 * @param resource
 	 */
-	public void addAggregatedResource(AggregatedResource resource, Set<ResourceGroup> resourceGroups)
+	public void addAggregatedResource(AggregatedResource resource, boolean addToGroups)
 	{
-		if (resourceGroups.isEmpty()) {
-			addAggregatedResource(resource);
+		if (!addToGroups || resource.getMatchingGroups().isEmpty()) {
+			DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.getRoot();
+			root.add(new DefaultMutableTreeNode(resource));
 			return;
 		}
 
 		DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.getRoot();
-		Set<ResourceGroup> notFound = new HashSet<>(resourceGroups);
+		Set<ResourceGroup> notFound = new HashSet<>(resource.getMatchingGroups());
 		@SuppressWarnings("unchecked")
 		Enumeration<DefaultMutableTreeNode> e = root.breadthFirstEnumeration();
 		while (e.hasMoreElements()) {
 			DefaultMutableTreeNode node = e.nextElement();
-			if (node.getUserObject() instanceof ResourceGroup && resourceGroups.contains(node.getUserObject())) {
+			if (node.getUserObject() instanceof ResourceGroup
+					&& resource.getMatchingGroups().contains(node.getUserObject())) {
 				node.add(new DefaultMutableTreeNode(resource));
 				notFound.remove(node.getUserObject());
 			}
