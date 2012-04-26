@@ -19,6 +19,7 @@ import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
 
 import pl.psnc.dl.wf4ever.portal.model.ResourceGroup;
+import pl.psnc.dl.wf4ever.portal.pages.AllRosPage;
 import pl.psnc.dl.wf4ever.portal.pages.AuthenticatePage;
 import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
@@ -85,6 +86,7 @@ public class PortalApplication
 		mountPage("/wickethome", WicketHomePage.class);
 		mountPage("/home", HomePage.class);
 		mountPage("/myros", MyRosPage.class);
+		mountPage("/allros", AllRosPage.class);
 		mountPage("/ro", RoPage.class);
 		mountPage("/sparql", SparqlEndpointPage.class);
 		mountPage("/myexpimport", MyExpImportPage.class);

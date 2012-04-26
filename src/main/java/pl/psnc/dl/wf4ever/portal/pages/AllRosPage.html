@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wicket:extend xmlns:wicket="http://wicket.apache.org">
+	<script type="text/javascript" src="js/MyRosPage.js"></script>
+
+	<div class="row">
+		<div class="span12">
+			<div class="inspan12">
+				<ul class="breadcrumb">
+					<li><a href="home">Home</a> <span class="divider">/</span></li>
+					<li><a href="#">All Research Objects</a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="span12">
+			<section id="annotating-box" class="left_box inspan12">
+				<h3>
+					All Research Objects <img class="sh_button" src="images/l_open.gif">
+				</h3>
+				<div class="row">
+					<div class="span11">
+						<div wicket:id="feedbackPanel"></div>
+						<table class="table table-striped">
+							<thead>
+								<tr>
+									<th>&nbsp;</th>
+									<th>Title</th>
+									<th>Created</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr wicket:id="rosListView">
+									<td><a wicket:id="link"><span wicket:id="name"></span></a></td>
+									<td><span wicket:id="createdFormatted"></span></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</section>
+		</div>
+	</div>
+</wicket:extend>
