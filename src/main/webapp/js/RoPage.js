@@ -26,6 +26,16 @@ $(document).ready(function() {
 	})
 });
 
+//$(document).ready(function() {
+//	init();
+//});
+
+// this should be called when a tab is changed.
+$('a[data-toggle="tab"]').on('shown', function (e) {
+	  e.target // activated tab
+	  e.relatedTarget // previous tab
+	});
+	
 function showStmtEdit(content) {
 	$('#objectValue').wysiwyg('destroy');
 	$('#edit-ann-modal').modal('show');
@@ -74,4 +84,3 @@ function checkStmtRelationType() {
 		document.getElementById('customRelationURI').value = "";
 	}
 }
-

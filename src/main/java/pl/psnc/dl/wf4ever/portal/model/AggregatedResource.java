@@ -5,8 +5,10 @@ import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -47,6 +49,8 @@ public abstract class AggregatedResource
 	private double stability = -1;
 
 	private URI provenanceTraceURI;
+
+	private Set<ResourceGroup> matchingGroups = new HashSet<>();
 
 
 	public AggregatedResource(URI uri, Calendar created, List<String> creators, String name, long size, Type type)
@@ -278,4 +282,11 @@ public abstract class AggregatedResource
 	{
 		return provenanceTraceURI;
 	}
+
+
+	public Set<ResourceGroup> getMatchingGroups()
+	{
+		return matchingGroups;
+	}
+
 }

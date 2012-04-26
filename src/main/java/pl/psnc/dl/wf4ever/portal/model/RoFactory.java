@@ -15,16 +15,19 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.wicket.Application;
 import org.apache.wicket.request.UrlDecoder;
+import org.apache.wicket.util.crypt.Base64;
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonGenerator;
 
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource.Type;
@@ -162,8 +165,31 @@ public class RoFactory
 	}
 
 
+	public static void assignResourceGroupsToResources(OntModel model, URI researchObjectURI,
+			Set<ResourceGroup> resourceGroups, Map<URI, AggregatedResource> resources)
+	{
+		ResearchObject ro = (ResearchObject) resources.get(researchObjectURI);
+
+		// TODO take care of proxies
+		for (AggregatedResource resource : resources.values()) {
+			if (resource.equals(ro)) {
+				continue;
+			}
+			Individual res = model.getIndividual(resource.getURI().toString());
+			for (ResourceGroup resourceGroup : resourceGroups) {
+				for (URI classURI : resourceGroup.getRdfClasses()) {
+					if (res.hasRDFType(classURI.toString())) {
+						resource.getMatchingGroups().add(resourceGroup);
+						break;
+					}
+				}
+			}
+		}
+	}
+
+
 	public static RoTreeModel createConceptualResourcesTree(OntModel model, URI researchObjectURI,
-			Set<ResourceGroup> resourceGroups, Map<URI, AggregatedResource> resources, Map<URI, String> usernames)
+			Map<URI, AggregatedResource> resources)
 		throws URISyntaxException
 	{
 		ResearchObject ro = (ResearchObject) resources.get(researchObjectURI);
@@ -175,17 +201,7 @@ public class RoFactory
 			if (resource.equals(ro)) {
 				continue;
 			}
-			Individual res = model.getIndividual(resource.getURI().toString());
-			Set<ResourceGroup> matchingGroups = new HashSet<>();
-			for (ResourceGroup resourceGroup : resourceGroups) {
-				for (URI classURI : resourceGroup.getRdfClasses()) {
-					if (res.hasRDFType(classURI.toString())) {
-						matchingGroups.add(resourceGroup);
-						break;
-					}
-				}
-			}
-			treeModel.addAggregatedResource(resource, matchingGroups);
+			treeModel.addAggregatedResource(resource, true);
 		}
 		return treeModel;
 	}
@@ -201,10 +217,46 @@ public class RoFactory
 		// TODO take care of proxies & folders
 		for (AggregatedResource resource : resources.values()) {
 			if (isResourceInternal(researchObjectURI, resource.getURI())) {
-				treeModel.addAggregatedResource(resource);
+				treeModel.addAggregatedResource(resource, false);
 			}
 		}
 		return treeModel;
+	}
+
+
+	public static String createRoJSON(Map<URI, AggregatedResource> resources, String[] colors)
+		throws IOException
+	{
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		JsonFactory jsonFactory = new JsonFactory();
+		JsonGenerator jg = jsonFactory.createJsonGenerator(out);
+		jg.writeStartArray();
+		for (AggregatedResource resource : resources.values()) {
+			int rdfClassHashCode = 0;
+			for (ResourceGroup g : resource.getMatchingGroups()) {
+				rdfClassHashCode += g.hashCode();
+			}
+			String color = colors[Math.abs(rdfClassHashCode) % colors.length];
+			String tooltip = resource instanceof ResearchObject ? "Research Object" : StringUtils.join(
+				resource.getMatchingGroups(), ", ");
+
+			jg.writeStartObject();
+			jg.writeStringField("id", Base64.encodeBase64URLSafeString(resource.getURI().toString().getBytes()));
+			jg.writeStringField("name", resource.getName());
+			jg.writeObjectFieldStart("data");
+			jg.writeStringField("$color", color);
+			jg.writeStringField("tooltip", tooltip);
+			jg.writeEndObject();
+			jg.writeArrayFieldStart("adjacencies");
+			for (AggregatedResource adjacency : resource.getRelations().values()) {
+				jg.writeString(Base64.encodeBase64URLSafeString(adjacency.getURI().toString().getBytes()));
+			}
+			jg.writeEndArray();
+			jg.writeEndObject();
+		}
+		jg.writeEndArray();
+		jg.close(); // important: will force flushing of output, close underlying output stream
+		return out.toString();
 	}
 
 
