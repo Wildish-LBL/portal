@@ -300,8 +300,47 @@ public class RoPage
 				.createResource(roURI, resourceURI, true, MySession.get().getUsernames());
 		resource.getMatchingGroups().addAll(selectedResourceGroups);
 		getConceptualResourcesTree().addAggregatedResource(resource, true);
+		getPhysicalResourcesTree().addAggregatedResource(resource, false);
 		roViewerBox.conceptualTree.invalidateAll();
 		target.add(roViewerBox);
+
+		resources.put(resourceURI, resource);
+		String json = RoFactory.createRoJSON(resources, interactiveViewColors);
+		String callback = roViewerBox.getInteractiveViewCallbackUrl().toString();
+		target.appendJavaScript("var json = " + json + "; init(json, '" + callback + "');");
+	}
+
+
+	public void onRemoteResourceAdded(AjaxRequestTarget target, URI resourceURI, URI downloadURI,
+			Set<ResourceGroup> selectedTypes)
+		throws URISyntaxException, IOException
+	{
+		URI absoluteResourceURI = roURI.resolve(resourceURI);
+		//		URI absoluteDownloadURI = (downloadURI != null ? roURI.resolve(downloadURI) : null);
+		ROSRService.sendResource(absoluteResourceURI, MySession.get().getdLibraAccessToken());
+		OntModel manifestModel = RoFactory.createManifestModel(roURI);
+		Individual individual = manifestModel.createResource(absoluteResourceURI.toString()).as(Individual.class);
+		for (ResourceGroup resourceGroup : selectedTypes) {
+			individual.addRDFType(manifestModel.createResource(resourceGroup.getRdfClasses().iterator().next()
+					.toString()));
+		}
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		manifestModel.write(out);
+		ROSRService.sendResource(roURI.resolve(".ro/manifest.rdf"), new ByteArrayInputStream(out.toByteArray()),
+			"application/rdf+xml", MySession.get().getdLibraAccessToken());
+
+		AggregatedResource resource = RoFactory.createResource(roURI, absoluteResourceURI, true, MySession.get()
+				.getUsernames());
+		resource.getMatchingGroups().addAll(selectedTypes);
+		getConceptualResourcesTree().addAggregatedResource(resource, true);
+		getPhysicalResourcesTree().addAggregatedResource(resource, false);
+		roViewerBox.conceptualTree.invalidateAll();
+		target.add(roViewerBox);
+
+		resources.put(absoluteResourceURI, resource);
+		String json = RoFactory.createRoJSON(resources, interactiveViewColors);
+		String callback = roViewerBox.getInteractiveViewCallbackUrl().toString();
+		target.appendJavaScript("var json = " + json + "; init(json, '" + callback + "');");
 	}
 
 
@@ -380,4 +419,5 @@ public class RoPage
 		target.add(roViewerBox.infoPanel);
 		target.add(annotatingBox.annotationsDiv);
 	}
+
 }
