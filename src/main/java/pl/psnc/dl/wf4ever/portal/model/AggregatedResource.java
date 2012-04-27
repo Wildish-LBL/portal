@@ -10,9 +10,10 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.joda.time.DateTime;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.ocpsoft.pretty.time.PrettyTime;
 
 public abstract class AggregatedResource
 	implements Serializable
@@ -24,7 +25,9 @@ public abstract class AggregatedResource
 
 	private static final long serialVersionUID = -472666872267555742L;
 
-	public static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z");
+	public static final SimpleDateFormat SDF1 = new SimpleDateFormat("EEEE HH:mm");
+
+	public static final SimpleDateFormat SDF2 = new SimpleDateFormat("dd MMMM yyyy HH:mm");
 
 	protected URI uri;
 
@@ -96,20 +99,15 @@ public abstract class AggregatedResource
 	 */
 	public String getCreatedFormatted()
 	{
-		if (getCreated() != null)
-			return SDF.format(getCreated().getTime());
-		else
-			return null;
-	}
+		if (getCreated() != null) {
+			if (new DateTime(getCreated()).compareTo(new DateTime().minusWeeks(1)) > 0) {
+				return SDF1.format(getCreated().getTime());
+			}
+			else {
+				return SDF2.format(getCreated().getTime());
+			}
 
-
-	/**
-	 * @return the created
-	 */
-	public String getCreatedAgoFormatted()
-	{
-		if (getCreated() != null)
-			return new PrettyTime().format(getCreated().getTime());
+		}
 		else
 			return null;
 	}

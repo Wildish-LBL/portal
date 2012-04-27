@@ -140,7 +140,7 @@ class AnnotatingBox
 				};
 				item.add(statementsList);
 				item.add(new CreatorsPanel("creator", new PropertyModel<List<Creator>>(itemModel, "creators")));
-				item.add(new Label("createdAgoFormatted"));
+				item.add(new Label("createdFormatted"));
 			}
 		};
 		group.add(annList);

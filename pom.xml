@@ -158,11 +158,6 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.ocpsoft</groupId>
-			<artifactId>ocpsoft-pretty-time</artifactId>
-			<version>1.0.7</version>
-		</dependency>
-		<dependency>
 			<groupId>rome</groupId>
 			<artifactId>opensearch</artifactId>
 			<version>0.1</version>

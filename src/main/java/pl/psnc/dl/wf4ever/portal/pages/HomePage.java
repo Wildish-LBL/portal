@@ -137,7 +137,7 @@ public class HomePage
 				link.add(new Label("name"));
 				item.add(link);
 				item.add(new CreatorsPanel("creator", new PropertyModel<List<Creator>>(ro, "creators")));
-				item.add(new Label("createdAgoFormatted"));
+				item.add(new Label("createdFormatted"));
 			}
 		};
 		list.setReuseItems(true);
@@ -166,7 +166,7 @@ public class HomePage
 				item.add(new Label("scoreInPercent"));
 				item.add(new CreatorsPanel("researchObject.creator", new PropertyModel<List<Creator>>(result,
 						"researchObject.creators")));
-				item.add(new Label("researchObject.createdAgoFormatted"));
+				item.add(new Label("researchObject.createdFormatted"));
 				Label bar = new Label("percentBar", "");
 				bar.add(new Behavior() {
 
