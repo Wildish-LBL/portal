@@ -2,9 +2,10 @@ package pl.psnc.dl.wf4ever.portal.pages;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
@@ -31,6 +32,7 @@ import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.rdf.model.Literal;
 
 @AuthorizeInstantiation("USER")
 public class AllRosPage
@@ -49,15 +51,25 @@ public class AllRosPage
 		super(parameters);
 
 		QueryExecution x = QueryExecutionFactory.sparqlService(((PortalApplication) getApplication())
-				.getSparqlEndpointURL().toString(), MyQueryFactory.getxMostRecentROs(100));
+				.getSparqlEndpointURL().toString(), MyQueryFactory.getAllROs());
 		ResultSet results = x.execSelect();
 		List<ResearchObject> roHeaders = new ArrayList<>();
+		final Map<ResearchObject, Integer> resCnts = new HashMap<>();
 		while (results.hasNext()) {
 			QuerySolution solution = results.next();
-			URI uri = new URI(solution.getResource("resource").getURI());
-			Creator author = RoFactory.getCreator(MySession.get().getUsernames(), solution.get("creator"));
+			URI uri = new URI(solution.getResource("ro").getURI());
+			int resCnt = solution.getLiteral("resCnt").getInt();
+			Literal creators = solution.getLiteral("creators");
+			List<Creator> authors = new ArrayList<>();
+			if (creators != null) {
+				for (String creator : creators.getString().split(", ")) {
+					authors.add(RoFactory.getCreator(MySession.get().getUsernames(), creator));
+				}
+			}
 			Calendar created = ((XSDDateTime) solution.getLiteral("created").getValue()).asCalendar();
-			roHeaders.add(new ResearchObject(uri, created, Arrays.asList(author)));
+			ResearchObject ro = new ResearchObject(uri, created, authors);
+			roHeaders.add(ro);
+			resCnts.put(ro, resCnt);
 		}
 
 		add(new MyFeedbackPanel("feedbackPanel"));
@@ -74,14 +86,12 @@ public class AllRosPage
 				link.getPageParameters().add("ro", UrlEncoder.QUERY_INSTANCE.encode(ro.getURI().toString(), "UTF-8"));
 				link.add(new Label("name"));
 				item.add(link);
-				item.add(new CreatorsPanel("creator", new PropertyModel<List<Creator>>(ro, "creators")));
+				item.add(new Label("resourcesCnt", "" + resCnts.get(ro)));
+				item.add(new CreatorsPanel("creators", new PropertyModel<List<Creator>>(ro, "creators")));
 				item.add(new Label("createdFormatted"));
 			}
 
 		};
 		add(list);
-
-		add(new MyFeedbackPanel("addFeedbackPanel"));
 	}
-
 }

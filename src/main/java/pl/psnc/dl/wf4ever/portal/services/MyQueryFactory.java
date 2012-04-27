@@ -29,6 +29,8 @@ public class MyQueryFactory
 
 	private static String provenanceTraces;
 
+	private static String allROs;
+
 
 	/**
 	 * @return the xMostRecentROs
@@ -40,6 +42,15 @@ public class MyQueryFactory
 		if (xMostRecentROs == null)
 			xMostRecentROs = loadQuery("xMostRecentROs.sparql");
 		return String.format(xMostRecentROs, limit);
+	}
+
+
+	public static String getAllROs()
+		throws IOException
+	{
+		if (allROs == null)
+			allROs = loadQuery("allROs.sparql");
+		return allROs;
 	}
 
 

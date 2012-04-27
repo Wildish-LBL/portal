@@ -331,6 +331,9 @@ public class RoFactory
 	 */
 	public static Creator getCreator(final Map<URI, Creator> usernames, RDFNode creator)
 	{
+		if (creator == null) {
+			return null;
+		}
 		if (creator.isURIResource()) {
 			final URI uri = URI.create(creator.asResource().getURI());
 			try {

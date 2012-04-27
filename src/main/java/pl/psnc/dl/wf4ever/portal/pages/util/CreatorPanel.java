@@ -36,7 +36,7 @@ public class CreatorPanel
 		loading.setOutputMarkupId(true);
 		add(loading);
 
-		if (model.getObject().isLoading()) {
+		if (model.getObject() != null && model.getObject().isLoading()) {
 			add(new AbstractDefaultAjaxBehavior() {
 
 				@Override

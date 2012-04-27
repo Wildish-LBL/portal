@@ -6,8 +6,7 @@ SELECT ?resource ?creator ?created
 WHERE {
 	?resource a ro:ResearchObject ;
 		dcterms:created ?created ;
-		dcterms:creator ?foaf .
-	?foaf foaf:Name ?creator.
+		dcterms:creator ?creator .
 }
 ORDER BY DESC(?created)
 LIMIT %d

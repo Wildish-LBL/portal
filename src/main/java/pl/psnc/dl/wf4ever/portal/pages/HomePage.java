@@ -143,6 +143,8 @@ public class HomePage
 		list.setReuseItems(true);
 		add(list);
 
+		add(new BookmarkablePageLink<>("allRos", AllRosPage.class));
+
 		final WebMarkupContainer searchResultsDiv = new WebMarkupContainer("searchResultsDiv");
 		searchResultsDiv.setOutputMarkupId(true);
 		add(searchResultsDiv);
