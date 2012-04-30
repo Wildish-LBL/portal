@@ -2,6 +2,7 @@ package pl.psnc.dl.wf4ever.portal.model;
 
 import java.io.Serializable;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -26,8 +27,6 @@ public class AggregatedResource
 	public static final SimpleDateFormat SDF2 = new SimpleDateFormat("dd MMMM yyyy HH:mm");
 
 	protected URI uri;
-
-	protected URI downloadURI;
 
 	protected Calendar created;
 
@@ -77,13 +76,17 @@ public class AggregatedResource
 
 	public URI getDownloadURI()
 	{
-		return downloadURI;
-	}
-
-
-	public void setDownloadURI(URI downloadURI)
-	{
-		this.downloadURI = downloadURI;
+		//FIXME hack
+		if (uri.toString().startsWith("http://sandbox.wf4ever-project.org/rosrs5/")) {
+			try {
+				return new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), "content=true", null);
+			}
+			catch (URISyntaxException e) {
+				return null;
+			}
+		}
+		else
+			return null;
 	}
 
 

@@ -85,6 +85,8 @@ public class RoPage
 	/** http://www.colourlovers.com/palette/1473/Ocean_Five */
 	public static String[] interactiveViewColors = { "#00A0B0", "#6A4A3C", "#CC333F", "#EB6841", "#EDC951"};
 
+	private UploadResourceModal uploadResourceModal;
+
 
 	@SuppressWarnings("serial")
 	public RoPage(final PageParameters parameters)
@@ -114,8 +116,9 @@ public class RoPage
 		add(annotatingBox);
 		annotatingBox.selectedStatements.clear();
 		add(new DownloadMetadataModal("downloadMetadataModal", this));
-		add(new UploadResourceModal("uploadResourceModal", this,
-				((PortalApplication) getApplication()).getResourceGroups()));
+		uploadResourceModal = new UploadResourceModal("uploadResourceModal", this,
+				((PortalApplication) getApplication()).getResourceGroups());
+		add(uploadResourceModal);
 		stmtEditForm = new StatementEditModal("statementEditModal", RoPage.this, new CompoundPropertyModel<Statement>(
 				(Statement) null));
 		add(stmtEditForm);
@@ -383,6 +386,17 @@ public class RoPage
 	{
 		throw new RestartResponseException(RoPage.class, getPageParameters().add("redirectTo",
 			roURI.resolve(".ro/manifest." + format.getDefaultFileExtension() + "?original=manifest.rdf").toString())
+				.add("redirectDelay", 1));
+	}
+
+
+	/**
+	 * @param roPage
+	 * @throws URISyntaxException
+	 */
+	void onResourceDownload(URI downloadURI)
+	{
+		throw new RestartResponseException(RoPage.class, getPageParameters().add("redirectTo", downloadURI.toString())
 				.add("redirectDelay", 1));
 	}
 

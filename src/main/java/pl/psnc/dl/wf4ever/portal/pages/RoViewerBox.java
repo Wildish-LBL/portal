@@ -70,6 +70,12 @@ class RoViewerBox
 
 	private AjaxButton downloadROMetadata;
 
+	private MyAjaxButton editResource;
+
+	private MyAjaxButton downloadResource;
+
+	private MyAjaxButton downloadROZipped;
+
 
 	public RoViewerBox(final RoPage roPage, final CompoundPropertyModel<AggregatedResource> itemModel,
 			IModel< ? extends TreeModel> conceptualTreeModel, PropertyModel<TreeModel> physicalTreeModel,
@@ -141,6 +147,17 @@ class RoViewerBox
 
 		};
 
+		editResource = new MyAjaxButton("editResource", roForm) {
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+			{
+				super.onSubmit(target, form);
+				//				target.appendJavaScript("$('#upload-resource-modal').modal('show')");
+			}
+
+		};
+
 		deleteResource = new MyAjaxButton("deleteResource", roForm) {
 
 			@Override
@@ -161,7 +178,32 @@ class RoViewerBox
 			}
 
 		};
+		downloadResource = new MyAjaxButton("downloadResource", roForm) {
 
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+			{
+				super.onSubmit(target, form);
+				if (selectedItem instanceof AggregatedResource) {
+					AggregatedResource resource = (AggregatedResource) selectedItem;
+					if (resource.getDownloadURI() != null) {
+						roPage.onResourceDownload(resource.getDownloadURI());
+					}
+				}
+			}
+
+		};
+
+		downloadROZipped = new MyAjaxButton("downloadROZipped", roForm) {
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+			{
+				super.onSubmit(target, form);
+				roPage.onResourceDownload(roPage.roURI);
+			}
+
+		};
 		downloadROMetadata = new MyAjaxButton("downloadMetadata", roForm) {
 
 			@Override
@@ -179,24 +221,21 @@ class RoViewerBox
 			protected void onConfigure()
 			{
 				super.onConfigure();
-				if (roPage.canEdit) {
-					addResource.setEnabled(true);
-					if (selectedItem instanceof AggregatedResource && !(selectedItem instanceof ResearchObject)) {
-						deleteResource.setEnabled(true);
-					}
-					else {
-						deleteResource.setEnabled(false);
-					}
-				}
-				else {
-					addResource.setEnabled(false);
-					deleteResource.setEnabled(false);
-				}
+				boolean nonROResource = selectedItem instanceof AggregatedResource
+						&& !(selectedItem instanceof ResearchObject);
+				addResource.setEnabled(roPage.canEdit);
+				editResource.setEnabled(roPage.canEdit && nonROResource);
+				deleteResource.setEnabled(roPage.canEdit && nonROResource);
+				downloadResource.setEnabled(nonROResource
+						&& ((AggregatedResource) selectedItem).getDownloadURI() != null);
 			}
 		};
 		actionButtons.setOutputMarkupId(true);
 		actionButtons.add(addResource);
+		actionButtons.add(editResource);
 		actionButtons.add(deleteResource);
+		actionButtons.add(downloadResource);
+		actionButtons.add(downloadROZipped);
 		actionButtons.add(downloadROMetadata);
 		roForm.add(actionButtons);
 
