@@ -80,6 +80,14 @@ public class ROSRService
 	}
 
 
+	public static ClientResponse sendResource(URI resourceURI, Token dLibraToken)
+	{
+		Client client = Client.create();
+		WebResource webResource = client.resource(resourceURI.toString());
+		return webResource.header("Authorization", "Bearer " + dLibraToken.getToken()).put(ClientResponse.class, "");
+	}
+
+
 	public static ClientResponse deleteResource(URI resourceURI, Token dLibraToken)
 	{
 		Client client = Client.create();
