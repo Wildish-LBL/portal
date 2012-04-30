@@ -79,7 +79,13 @@ public class RoTreeModel
 		while (e.hasMoreElements()) {
 			DefaultMutableTreeNode node = e.nextElement();
 			if (resource.equals(node.getUserObject())) {
-				node.removeFromParent();
+				DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
+				if (parent != null && parent.getUserObject() instanceof ResourceGroup && parent.getChildCount() == 1) {
+					parent.removeFromParent();
+				}
+				else {
+					node.removeFromParent();
+				}
 			}
 		}
 

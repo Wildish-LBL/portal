@@ -8,10 +8,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 
 import org.apache.log4j.Logger;
@@ -52,6 +52,8 @@ import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.vocabulary.DCTerms;
 import com.sun.jersey.api.client.ClientResponse;
 
 public class RoPage
@@ -151,8 +153,8 @@ public class RoPage
 						//						RoFactory.createStabilities(model, roURI, resources);
 						start = printDuration(start, "stabilities");
 
-						itemModel.setObject((AggregatedResource) ((DefaultMutableTreeNode) getConceptualResourcesTree()
-								.getRoot()).getUserObject());
+						//						itemModel.setObject((AggregatedResource) ((DefaultMutableTreeNode) getConceptualResourcesTree()
+						//								.getRoot()).getUserObject());
 						roViewerBox.onRoTreeLoaded();
 						relEditForm.onRoTreeLoaded();
 						target.add(roViewerBox);
@@ -278,7 +280,7 @@ public class RoPage
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 */
-	void onFileUploaded(AjaxRequestTarget target, final FileUpload uploadedFile,
+	void onResourceAdd(AjaxRequestTarget target, final FileUpload uploadedFile,
 			Set<ResourceGroup> selectedResourceGroups)
 		throws IOException, URISyntaxException
 	{
@@ -300,8 +302,77 @@ public class RoPage
 				.createResource(roURI, resourceURI, true, MySession.get().getUsernames());
 		resource.getMatchingGroups().addAll(selectedResourceGroups);
 		getConceptualResourcesTree().addAggregatedResource(resource, true);
+		getPhysicalResourcesTree().addAggregatedResource(resource, false);
 		roViewerBox.conceptualTree.invalidateAll();
 		target.add(roViewerBox);
+
+		resources.put(resourceURI, resource);
+		RoFactory.addRelation(resources.get(roURI), RoFactory.aggregates, resource);
+		String json = RoFactory.createRoJSON(resources, interactiveViewColors);
+		String callback = roViewerBox.getInteractiveViewCallbackUrl().toString();
+		target.appendJavaScript("var json = " + json + "; init(json, '" + callback + "');");
+	}
+
+
+	public void onResourceDelete(AggregatedResource resource, AjaxRequestTarget target)
+		throws URISyntaxException, IOException
+	{
+		ROSRService.deleteResource(resource.getURI(), MySession.get().getdLibraAccessToken());
+		getConceptualResourcesTree().removeAggregatedResource(resource);
+		getPhysicalResourcesTree().removeAggregatedResource(resource);
+
+		resources.remove(resource.getURI());
+		for (Entry<String, AggregatedResource> entry : resource.getInverseRelations().entries()) {
+			entry.getValue().getRelations().remove(entry.getKey(), resource);
+		}
+		String json = RoFactory.createRoJSON(resources, interactiveViewColors);
+		String callback = roViewerBox.getInteractiveViewCallbackUrl().toString();
+		target.appendJavaScript("var json = " + json + "; init(json, '" + callback + "');");
+	}
+
+
+	public void onResourceSelected(AjaxRequestTarget target)
+	{
+		annotatingBox.selectedStatements.clear();
+		target.add(annotatingBox);
+	}
+
+
+	public void onRemoteResourceAdded(AjaxRequestTarget target, URI resourceURI, URI downloadURI,
+			Set<ResourceGroup> selectedTypes)
+		throws URISyntaxException, IOException
+	{
+		URI absoluteResourceURI = roURI.resolve(resourceURI);
+		//		URI absoluteDownloadURI = (downloadURI != null ? roURI.resolve(downloadURI) : null);
+		OntModel manifestModel = RoFactory.createManifestModel(roURI);
+		// HACK this shouldn't be added by portal but rather by RODL
+		Resource ro = manifestModel.createResource(roURI.toString());
+		Individual individual = manifestModel.createResource(absoluteResourceURI.toString()).as(Individual.class);
+		ro.addProperty(RoFactory.aggregates, individual);
+		individual.addProperty(DCTerms.creator, manifestModel.createResource(MySession.get().getUserURI().toString()));
+		individual.addRDFType(RoFactory.roResource);
+		for (ResourceGroup resourceGroup : selectedTypes) {
+			individual.addRDFType(manifestModel.createResource(resourceGroup.getRdfClasses().iterator().next()
+					.toString()));
+		}
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		manifestModel.write(out);
+		ROSRService.sendResource(roURI.resolve(".ro/manifest.rdf"), new ByteArrayInputStream(out.toByteArray()),
+			"application/rdf+xml", MySession.get().getdLibraAccessToken());
+
+		AggregatedResource resource = RoFactory.createResource(roURI, absoluteResourceURI, true, MySession.get()
+				.getUsernames());
+		resource.getMatchingGroups().addAll(selectedTypes);
+		getConceptualResourcesTree().addAggregatedResource(resource, true);
+		getPhysicalResourcesTree().addAggregatedResource(resource, false);
+		roViewerBox.conceptualTree.invalidateAll();
+		target.add(roViewerBox);
+
+		resources.put(absoluteResourceURI, resource);
+		RoFactory.addRelation(resources.get(roURI), RoFactory.aggregates, resource);
+		String json = RoFactory.createRoJSON(resources, interactiveViewColors);
+		String callback = roViewerBox.getInteractiveViewCallbackUrl().toString();
+		target.appendJavaScript("var json = " + json + "; init(json, '" + callback + "');");
 	}
 
 
@@ -376,8 +447,9 @@ public class RoPage
 					.getUsernames()));
 		AggregatedResource subjectAR = resources.get(statement.getSubjectURI());
 		AggregatedResource objectAR = resources.get(statement.getObjectURI());
-		subjectAR.getRelations().put(statement.getPropertyLocalNameNice(), objectAR);
+		RoFactory.addRelation(subjectAR, statement.getPropertyLocalNameNice(), objectAR);
 		target.add(roViewerBox.infoPanel);
 		target.add(annotatingBox.annotationsDiv);
 	}
+
 }

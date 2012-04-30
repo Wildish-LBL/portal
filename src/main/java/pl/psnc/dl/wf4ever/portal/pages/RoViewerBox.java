@@ -22,12 +22,11 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.crypt.Base64;
 
-import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
+import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.model.ResourceGroup;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.RoTree;
-import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 
 @SuppressWarnings("serial")
 class RoViewerBox
@@ -63,6 +62,14 @@ class RoViewerBox
 
 	final AbstractDefaultAjaxBehavior interactiveViewCallback;
 
+	private MyAjaxButton deleteResource;
+
+	private MyAjaxButton addResource;
+
+	private Object selectedItem;
+
+	private AjaxButton downloadROMetadata;
+
 
 	public RoViewerBox(final RoPage roPage, final CompoundPropertyModel<AggregatedResource> itemModel,
 			IModel< ? extends TreeModel> conceptualTreeModel, PropertyModel<TreeModel> physicalTreeModel,
@@ -87,16 +94,12 @@ class RoViewerBox
 			protected void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node)
 			{
 				Object object = ((DefaultMutableTreeNode) node).getUserObject();
-				if (object instanceof AggregatedResource) {
-					setInfoPanel(itemModel, (AggregatedResource) object);
+				if (conceptualTree.getTreeState().isNodeSelected(node)) {
+					onResourceSelected(itemModel, resourceGroupModel, target, object);
 				}
-				else if (object instanceof ResourceGroup) {
-					setInfoPanel(resourceGroupModel, (ResourceGroup) object);
+				else {
+					onResourceDeselected(itemModel, resourceGroupModel, target, object);
 				}
-				RoViewerBox.this.roPage.annotatingBox.selectedStatements.clear();
-				target.add(actionButtons);
-				target.add(infoPanel);
-				target.add(RoViewerBox.this.roPage.annotatingBox);
 			}
 
 		};
@@ -109,13 +112,12 @@ class RoViewerBox
 			protected void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node)
 			{
 				Object object = ((DefaultMutableTreeNode) node).getUserObject();
-				if (object instanceof AggregatedResource) {
-					setInfoPanel(itemModel, (AggregatedResource) object);
+				if (physicalTree.getTreeState().isNodeSelected(node)) {
+					onResourceSelected(itemModel, resourceGroupModel, target, object);
 				}
-				RoViewerBox.this.roPage.annotatingBox.selectedStatements.clear();
-				target.add(actionButtons);
-				target.add(infoPanel);
-				target.add(RoViewerBox.this.roPage.annotatingBox);
+				else {
+					onResourceDeselected(itemModel, resourceGroupModel, target, object);
+				}
 			}
 
 		};
@@ -128,11 +130,7 @@ class RoViewerBox
 		Form< ? > roForm = new Form<Void>("roForm");
 		add(roForm);
 
-		actionButtons = new WebMarkupContainer("actionButtons");
-		actionButtons.setOutputMarkupId(true);
-		roForm.add(actionButtons);
-
-		MyAjaxButton addResource = new MyAjaxButton("addResource", roForm) {
+		addResource = new MyAjaxButton("addResource", roForm) {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
@@ -141,51 +139,30 @@ class RoViewerBox
 				target.appendJavaScript("$('#upload-resource-modal').modal('show')");
 			}
 
-
-			@Override
-			public boolean isEnabled()
-			{
-				return super.isEnabled() && RoViewerBox.this.roPage.canEdit;
-			}
 		};
-		actionButtons.add(addResource);
 
-		MyAjaxButton deleteResource = new MyAjaxButton("deleteResource", roForm) {
+		deleteResource = new MyAjaxButton("deleteResource", roForm) {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 			{
 				super.onSubmit(target, form);
-				AggregatedResource res = (AggregatedResource) ((DefaultMutableTreeNode) conceptualTree.getTreeState()
-						.getSelectedNodes().iterator().next()).getUserObject();
-				try {
-					ROSRService.deleteResource(res.getURI(), MySession.get().getdLibraAccessToken());
-					RoViewerBox.this.roPage.getConceptualResourcesTree().removeAggregatedResource(res);
-					conceptualTree.invalidateAll();
-					target.add(roPage);
-				}
-				catch (Exception e) {
-					error(e);
+				if (selectedItem instanceof AggregatedResource) {
+					try {
+						roPage.onResourceDelete((AggregatedResource) selectedItem, target);
+						conceptualTree.invalidateAll();
+						physicalTree.invalidateAll();
+						target.add(RoViewerBox.this);
+					}
+					catch (Exception e) {
+						error(e);
+					}
 				}
 			}
 
-
-			@Override
-			public boolean isEnabled()
-			{
-				if (super.isEnabled() && RoViewerBox.this.roPage.canEdit
-						&& !conceptualTree.getTreeState().getSelectedNodes().isEmpty()) {
-					Object object = ((DefaultMutableTreeNode) conceptualTree.getTreeState().getSelectedNodes()
-							.iterator().next()).getUserObject();
-					return object instanceof AggregatedResource
-							&& !((AggregatedResource) object).getURI().equals(RoViewerBox.this.roPage.roURI);
-				}
-				return false;
-			}
 		};
-		actionButtons.add(deleteResource);
 
-		AjaxButton downloadMetadata = new MyAjaxButton("downloadMetadata", roForm) {
+		downloadROMetadata = new MyAjaxButton("downloadMetadata", roForm) {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
@@ -195,21 +172,52 @@ class RoViewerBox
 			}
 
 		};
-		actionButtons.add(downloadMetadata);
+
+		actionButtons = new WebMarkupContainer("actionButtons") {
+
+			@Override
+			protected void onConfigure()
+			{
+				super.onConfigure();
+				if (roPage.canEdit) {
+					addResource.setEnabled(true);
+					if (selectedItem instanceof AggregatedResource && !(selectedItem instanceof ResearchObject)) {
+						deleteResource.setEnabled(true);
+					}
+					else {
+						deleteResource.setEnabled(false);
+					}
+				}
+				else {
+					addResource.setEnabled(false);
+					deleteResource.setEnabled(false);
+				}
+			}
+		};
+		actionButtons.setOutputMarkupId(true);
+		actionButtons.add(addResource);
+		actionButtons.add(deleteResource);
+		actionButtons.add(downloadROMetadata);
+		roForm.add(actionButtons);
 
 		interactiveViewCallback = new AbstractDefaultAjaxBehavior() {
 
 			protected void respond(final AjaxRequestTarget target)
 			{
 				String nodeId = RequestCycle.get().getRequest().getQueryParameters().getParameterValue("id").toString();
+				boolean selected = RequestCycle.get().getRequest().getQueryParameters().getParameterValue("selected")
+						.toBoolean(false);
 				try {
 					URI resourceURI = new URI(new String(Base64.decodeBase64(nodeId)));
 					if (RoViewerBox.this.roPage.resources.containsKey(resourceURI)) {
-						setInfoPanel(itemModel, RoViewerBox.this.roPage.resources.get(resourceURI));
-						RoViewerBox.this.roPage.annotatingBox.selectedStatements.clear();
-						target.add(actionButtons);
-						target.add(infoPanel);
-						target.add(RoViewerBox.this.roPage.annotatingBox);
+						if (selected) {
+							onResourceSelected(itemModel, resourceGroupModel, target,
+								RoViewerBox.this.roPage.resources.get(resourceURI));
+						}
+						else {
+							onResourceDeselected(itemModel, resourceGroupModel, target,
+								RoViewerBox.this.roPage.resources.get(resourceURI));
+						}
 					}
 				}
 				catch (URISyntaxException e) {
@@ -252,5 +260,32 @@ class RoViewerBox
 		conceptualTreeLoading.replaceWith(conceptualTree);
 		physicalTreeLoading.replaceWith(physicalTree);
 		interactiveViewLoading.replaceWith(interactiveView);
+	}
+
+
+	private void onResourceSelected(final CompoundPropertyModel<AggregatedResource> itemModel,
+			final CompoundPropertyModel<ResourceGroup> resourceGroupModel, AjaxRequestTarget target, Object item)
+	{
+		this.selectedItem = item;
+		if (item instanceof AggregatedResource) {
+			setInfoPanel(itemModel, (AggregatedResource) item);
+		}
+		else if (item instanceof ResourceGroup) {
+			setInfoPanel(resourceGroupModel, (ResourceGroup) item);
+		}
+		roPage.onResourceSelected(target);
+		target.add(actionButtons);
+		target.add(infoPanel);
+	}
+
+
+	private void onResourceDeselected(CompoundPropertyModel<AggregatedResource> itemModel,
+			CompoundPropertyModel<ResourceGroup> resourceGroupModel, AjaxRequestTarget target, Object object)
+	{
+		this.selectedItem = null;
+		setInfoPanel(itemModel, (AggregatedResource) null);
+		roPage.onResourceSelected(target);
+		target.add(actionButtons);
+		target.add(infoPanel);
 	}
 }

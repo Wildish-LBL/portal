@@ -113,9 +113,10 @@ function init(json, callbackUrl) {
 							duration : 500
 						});
 						var wcall = wicketAjaxGet(callbackUrl + '&id='
-								+ node.id, function() {
-						}, function() {
-						});
+								+ node.id + '&selected=' + !(!node.selected),
+								function() {
+								}, function() {
+								});
 					}
 				},
 				// Number of iterations for the FD algorithm

@@ -26,20 +26,13 @@ public class ResearchObject
 	public ResearchObject(URI researchObjectURI, Calendar created, List<Creator> creators)
 	{
 		super(researchObjectURI, created, creators, UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.resolve("..")
-				.relativize(researchObjectURI).toString(), "UTF-8"), 0, Type.RESEARCH_OBJECT);
+				.relativize(researchObjectURI).toString(), "UTF-8"));
 	}
 
 
 	public ResearchObject()
 	{
 		super();
-	}
-
-
-	@Override
-	public String getSizeFormatted()
-	{
-		return null;
 	}
 
 

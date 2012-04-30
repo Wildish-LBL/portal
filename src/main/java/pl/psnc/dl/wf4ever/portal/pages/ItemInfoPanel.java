@@ -38,8 +38,6 @@ public class ItemInfoPanel
 
 	private static final Logger log = Logger.getLogger(ItemInfoPanel.class);
 
-	private final WebMarkupContainer downloadURISection;
-
 	private final WebMarkupContainer creatorSection;
 
 	private final WebMarkupContainer createdSection;
@@ -64,10 +62,6 @@ public class ItemInfoPanel
 		add(resourceURISection);
 		resourceURISection.add(new ExternalLink("resourceURI", itemModel.<String> bind("URI.toString"), itemModel
 				.<URI> bind("URI")));
-		downloadURISection = new WebMarkupContainer("downloadURISection", new Model<>());
-		add(downloadURISection);
-		downloadURISection.add(new ExternalLink("downloadURI", itemModel.<String> bind("downloadURI.toString"),
-				itemModel.<URI> bind("downloadURI")));
 		creatorSection = new WebMarkupContainer("creatorSection", new Model<>());
 		add(creatorSection);
 		creatorSection.add(new CreatorsPanel("creator", new PropertyModel<List<Creator>>(itemModel, "creators")));
@@ -139,7 +133,6 @@ public class ItemInfoPanel
 		AggregatedResource resource = (AggregatedResource) getDefaultModelObject();
 		if (resource != null) {
 			resourceURISection.setVisible(true);
-			downloadURISection.setVisible(resource.getDownloadURI() != null);
 			creatorSection.setVisible(!resource.getCreators().isEmpty());
 			createdSection.setVisible(resource.getCreated() != null);
 			sizeSection.setVisible(resource.getSizeFormatted() != null);
@@ -149,7 +142,6 @@ public class ItemInfoPanel
 		}
 		else {
 			resourceURISection.setVisible(false);
-			downloadURISection.setVisible(false);
 			creatorSection.setVisible(false);
 			createdSection.setVisible(false);
 			sizeSection.setVisible(false);

@@ -30,7 +30,6 @@ import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
-import pl.psnc.dl.wf4ever.portal.model.AggregatedResource.Type;
 import pl.psnc.dl.wf4ever.portal.services.MyQueryFactory;
 import pl.psnc.dl.wf4ever.portal.services.StabilityService;
 
@@ -210,11 +209,15 @@ public class RoFactory
 			Map<URI, AggregatedResource> resources, Map<URI, Creator> usernames)
 		throws URISyntaxException
 	{
+		ResearchObject ro = (ResearchObject) resources.get(researchObjectURI);
 		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(resources.get(researchObjectURI));
 		RoTreeModel treeModel = new RoTreeModel(rootNode);
 
 		// TODO take care of proxies & folders
 		for (AggregatedResource resource : resources.values()) {
+			if (resource.equals(ro)) {
+				continue;
+			}
 			if (isResourceInternal(researchObjectURI, resource.getURI())) {
 				treeModel.addAggregatedResource(resource, false);
 			}
@@ -279,7 +282,7 @@ public class RoFactory
 		Individual res = model.getIndividual(resourceURI.toString());
 		Calendar created = null;
 		List<Creator> creators = new ArrayList<>();
-		long size = 0;
+		long size = -1;
 
 		try {
 			created = ((XSDDateTime) res.getPropertyValue(DCTerms.created).asLiteral().getValue()).asCalendar();
@@ -303,18 +306,14 @@ public class RoFactory
 
 		String name = UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.relativize(resourceURI).toString(), "UTF-8");
 		AggregatedResource resource;
-		//FIXME this looks like a hack
 		if (res.hasRDFType("http://purl.org/wf4ever/ro#ResearchObject")) {
 			resource = new ResearchObject(resourceURI, created, creators);
 		}
-		else if (resourceURI.getPath().endsWith(".t2flow") || res.hasRDFType("http://purl.org/wf4ever/wfdesc#Workflow")) {
-			resource = new InternalResource(resourceURI, created, creators, name, size, Type.WORKFLOW);
-		}
-		else if (res.hasRDFType("http://purl.org/wf4ever/wf4ever#WebServiceProcess")) {
-			resource = new WebService(resourceURI, created, creators, name, size);
-		}
 		else {
-			resource = new InternalResource(resourceURI, created, creators, name, size, Type.OTHER);
+			resource = new AggregatedResource(resourceURI, created, creators, name);
+			if (size >= 0) {
+				resource.setSize(size);
+			}
 		}
 		if (includeAnnotations) {
 			resource.setAnnotations(createAnnotations(model, researchObjectURI, resourceURI, usernames));
@@ -434,12 +433,25 @@ public class RoFactory
 					if (resources.containsKey(objectURI)) {
 						AggregatedResource objectAR = resources.get(objectURI);
 						Property property = statement.getPredicate();
-						resourceAR.getRelations().put(RoFactory.splitCamelCase(property.getLocalName()).toLowerCase(),
-							objectAR);
+						addRelation(resourceAR, property, objectAR);
 					}
 				}
 			}
 		}
+	}
+
+
+	public static void addRelation(AggregatedResource resourceAR, Property property, AggregatedResource objectAR)
+	{
+		String propertyName = RoFactory.splitCamelCase(property.getLocalName()).toLowerCase();
+		addRelation(resourceAR, propertyName, objectAR);
+	}
+
+
+	public static void addRelation(AggregatedResource resourceAR, String propertyName, AggregatedResource objectAR)
+	{
+		resourceAR.getRelations().put(propertyName, objectAR);
+		objectAR.getInverseRelations().put(propertyName, resourceAR);
 	}
 
 

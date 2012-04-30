@@ -15,13 +15,9 @@ import org.joda.time.DateTime;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-public abstract class AggregatedResource
+public class AggregatedResource
 	implements Serializable
 {
-
-	public enum Type {
-		WORKFLOW, WEB_SERVICE, OTHER, RESEARCH_OBJECT, ANNOTATION
-	};
 
 	private static final long serialVersionUID = -472666872267555742L;
 
@@ -31,21 +27,23 @@ public abstract class AggregatedResource
 
 	protected URI uri;
 
+	protected URI downloadURI;
+
 	protected Calendar created;
 
 	protected List<Creator> creators;
 
 	protected String name;
 
-	protected long size;
+	protected long size = -1;
 
 	protected String title;
 
 	private List<Annotation> annotations;
 
-	private Type type = Type.OTHER;
-
 	private Multimap<String, AggregatedResource> relations = HashMultimap.create();
+
+	private Multimap<String, AggregatedResource> inverseRelations = HashMultimap.create();
 
 	private double stability = -1;
 
@@ -54,14 +52,12 @@ public abstract class AggregatedResource
 	private Set<ResourceGroup> matchingGroups = new HashSet<>();
 
 
-	public AggregatedResource(URI uri, Calendar created, List<Creator> creators, String name, long size, Type type)
+	public AggregatedResource(URI uri, Calendar created, List<Creator> creators, String name)
 	{
 		this.uri = uri;
 		this.created = created;
 		this.creators = creators;
 		this.name = name;
-		this.size = size;
-		this.setType(type);
 	}
 
 
@@ -79,10 +75,16 @@ public abstract class AggregatedResource
 	}
 
 
-	/**
-	 * @return the download URI
-	 */
-	public abstract URI getDownloadURI();
+	public URI getDownloadURI()
+	{
+		return downloadURI;
+	}
+
+
+	public void setDownloadURI(URI downloadURI)
+	{
+		this.downloadURI = downloadURI;
+	}
 
 
 	/**
@@ -144,12 +146,21 @@ public abstract class AggregatedResource
 	}
 
 
+	public void setSize(long size)
+	{
+		this.size = size;
+	}
+
+
 	/**
 	 * @return the size, nicely formatted (i.e. 23 MB)
 	 */
 	public String getSizeFormatted()
 	{
-		return humanReadableByteCount(getSize());
+		if (getSize() >= 0)
+			return humanReadableByteCount(getSize());
+		else
+			return null;
 	}
 
 
@@ -203,25 +214,6 @@ public abstract class AggregatedResource
 
 
 	/**
-	 * @return the type
-	 */
-	public Type getType()
-	{
-		return type;
-	}
-
-
-	/**
-	 * @param type
-	 *            the type to set
-	 */
-	public void setType(Type type)
-	{
-		this.type = type;
-	}
-
-
-	/**
 	 * @return the relations
 	 */
 	public Multimap<String, AggregatedResource> getRelations()
@@ -231,18 +223,23 @@ public abstract class AggregatedResource
 
 
 	/**
-	 * @param relations
-	 *            the relations to set
+	 * @return the relations
 	 */
-	public void setRelations(Multimap<String, AggregatedResource> relations)
+	public Multimap<String, AggregatedResource> getInverseRelations()
 	{
-		this.relations = relations;
+		return inverseRelations;
 	}
 
 
 	public ArrayList<Entry<String, AggregatedResource>> getRelationsEntries()
 	{
 		return new ArrayList<Entry<String, AggregatedResource>>(relations.entries());
+	}
+
+
+	public ArrayList<Entry<String, AggregatedResource>> getInverseRelationsEntries()
+	{
+		return new ArrayList<Entry<String, AggregatedResource>>(inverseRelations.entries());
 	}
 
 

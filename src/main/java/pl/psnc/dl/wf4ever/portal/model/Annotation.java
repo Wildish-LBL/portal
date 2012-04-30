@@ -31,7 +31,7 @@ public class Annotation
 
 	public Annotation(URI uri, Calendar created, List<Creator> creators, String name, URI bodyURI)
 	{
-		super(uri, created, creators, name, 0, Type.ANNOTATION);
+		super(uri, created, creators, name);
 		this.bodyURI = bodyURI;
 
 		bodyModel = new LoadableDetachableModel<List<Statement>>() {
