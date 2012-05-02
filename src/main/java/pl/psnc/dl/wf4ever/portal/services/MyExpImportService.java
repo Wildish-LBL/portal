@@ -28,7 +28,7 @@ import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
 
-import pl.psnc.dl.wf4ever.portal.model.RoFactory;
+import pl.psnc.dl.wf4ever.portal.model.Vocab;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.BaseResource;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.InternalPackItem;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.InternalPackItemHeader;
@@ -57,10 +57,10 @@ import com.sun.jersey.api.client.ClientResponse;
 public class MyExpImportService
 {
 
-	public static void startImport(ImportModel model, Token myExpAccessToken, Token dLibraAccessToken,
+	public static void startImport(ImportModel model, URI rodlURI, Token myExpAccessToken, Token dLibraAccessToken,
 			String consumerKey, String consumerSecret)
 	{
-		new ImportThread(model, myExpAccessToken, dLibraAccessToken, consumerKey, consumerSecret).start();
+		new ImportThread(model, rodlURI, myExpAccessToken, dLibraAccessToken, consumerKey, consumerSecret).start();
 	}
 
 
@@ -134,12 +134,15 @@ public class MyExpImportService
 		 */
 		private final Map<URI, URI> creators = new HashMap<>();
 
+		private URI rodlURI;
 
-		public ImportThread(ImportModel importModel, Token myExpAccessToken, Token dLibraToken, String consumerKey,
-				String consumerSecret)
+
+		public ImportThread(ImportModel importModel, URI rodlURI, Token myExpAccessToken, Token dLibraToken,
+				String consumerKey, String consumerSecret)
 		{
 			super();
 			model = importModel;
+			this.rodlURI = rodlURI;
 			myExpToken = myExpAccessToken;
 			this.dLibraToken = dLibraToken;
 			service = MyExpApi.getOAuthService(consumerKey, consumerSecret);
@@ -171,7 +174,7 @@ public class MyExpImportService
 			stepsTotal = simpleResourcesCnt * 4 + packs.size() * 2 + 3;
 
 			try {
-				researchObjectURI = createRO(model.getRoId());
+				researchObjectURI = createRO(rodlURI, model.getRoId());
 			}
 			catch (Exception e) {
 				log.error("Creating RO", e);
@@ -183,7 +186,7 @@ public class MyExpImportService
 				importSimpleResources(model.getSelectedFiles());
 				importSimpleResources(model.getSelectedWorkflows());
 				importPacks(packs);
-				manifest = getManifest();
+				manifest = getManifest(rodlURI);
 				updateManifest();
 				uploadAnnotations();
 				model.setProgressInPercent(100);
@@ -207,11 +210,11 @@ public class MyExpImportService
 		}
 
 
-		private URI createRO(String roId)
+		private URI createRO(URI rodlURI, String roId)
 			throws Exception
 		{
 			model.setMessage(String.format("Creating a Research Object \"%s\"", roId));
-			ClientResponse r = ROSRService.createResearchObject(roId, dLibraToken);
+			ClientResponse r = ROSRService.createResearchObject(rodlURI, roId, dLibraToken);
 			if (r.getStatus() != HttpServletResponse.SC_CREATED) {
 				throw new Exception("Error: " + r.getClientResponseStatus());
 			}
@@ -220,10 +223,10 @@ public class MyExpImportService
 		}
 
 
-		private OntModel getManifest()
+		private OntModel getManifest(URI rodlURI)
 		{
 			model.setMessage("Downloading the manifest");
-			InputStream is = ROSRService.getResource(researchObjectURI.resolve(".ro/manifest.rdf"));
+			InputStream is = ROSRService.getResource(rodlURI, researchObjectURI.resolve(".ro/manifest.rdf"));
 			OntModel manifest = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 			manifest.read(is, null);
 			incrementStepsComplete();
@@ -450,7 +453,7 @@ public class MyExpImportService
 		Resource target = body.createResource(targetURI.toString());
 
 		// source
-		Resource source = me.listObjectsOfProperty(RoFactory.foafPrimaryTopic).next().asResource();
+		Resource source = me.listObjectsOfProperty(Vocab.foafPrimaryTopic).next().asResource();
 		target.addProperty(DCTerms.source, source);
 
 		// title
@@ -475,7 +478,7 @@ public class MyExpImportService
 		OntModel me = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 		me.read(new ByteArrayInputStream(myExperimentRDF.getBytes("UTF-8")), null);
 
-		Resource source = me.listObjectsOfProperty(RoFactory.foafPrimaryTopic).next().asResource();
+		Resource source = me.listObjectsOfProperty(Vocab.foafPrimaryTopic).next().asResource();
 
 		// creator
 		Property owner = me.createProperty("http://rdfs.org/sioc/ns#has_owner");

@@ -19,8 +19,8 @@ import org.apache.wicket.request.UrlEncoder;
 import org.apache.wicket.util.crypt.Base64;
 import org.scribe.model.Token;
 
-import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.model.Statement;
+import pl.psnc.dl.wf4ever.portal.model.Vocab;
 
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
@@ -41,10 +41,8 @@ public class ROSRService
 
 	private static final Logger log = Logger.getLogger(ROSRService.class);
 
-	private static final URI baseURI = URI.create("http://sandbox.wf4ever-project.org/rosrs5/");
 
-
-	public static ClientResponse createResearchObject(String roId, Token dLibraToken)
+	public static ClientResponse createResearchObject(URI baseURI, String roId, Token dLibraToken)
 	{
 		Client client = Client.create();
 		WebResource webResource = client.resource(baseURI.toString()).path("ROs");
@@ -53,7 +51,7 @@ public class ROSRService
 	}
 
 
-	public static InputStream getResource(URI resourceURI)
+	public static InputStream getResource(URI baseURI, URI resourceURI)
 	{
 		Client client = Client.create();
 		WebResource webResource = client.resource(resourceURI.toString());
@@ -61,7 +59,7 @@ public class ROSRService
 	}
 
 
-	public static InputStream getUser(URI userURI)
+	public static InputStream getUser(URI baseURI, URI userURI)
 	{
 		Client client = Client.create();
 		WebResource webResource = client.resource(baseURI.toString()).path("users")
@@ -96,14 +94,14 @@ public class ROSRService
 	}
 
 
-	public static List<URI> getROList()
+	public static List<URI> getROList(URI baseURI)
 		throws Exception
 	{
-		return getROList(null);
+		return getROList(baseURI, null);
 	}
 
 
-	public static List<URI> getROList(Token dLibraToken)
+	public static List<URI> getROList(URI baseURI, Token dLibraToken)
 		throws MalformedURLException, URISyntaxException
 	{
 		Client client = Client.create();
@@ -133,10 +131,11 @@ public class ROSRService
 	}
 
 
-	public static ClientResponse addAnnotation(URI researchObjectURI, URI targetURI, URI userURI, Token dLibraToken)
+	public static ClientResponse addAnnotation(URI baseURI, URI researchObjectURI, URI targetURI, URI userURI,
+			Token dLibraToken)
 		throws URISyntaxException
 	{
-		return addAnnotation(researchObjectURI, targetURI, userURI, null, dLibraToken);
+		return addAnnotation(baseURI, researchObjectURI, targetURI, userURI, null, dLibraToken);
 	}
 
 
@@ -150,11 +149,11 @@ public class ROSRService
 	 * @throws OAuthException
 	 * @throws URISyntaxException
 	 */
-	public static ClientResponse addAnnotation(URI researchObjectURI, URI targetURI, URI userURI, Statement statement,
-			Token dLibraToken)
+	public static ClientResponse addAnnotation(URI baseURI, URI researchObjectURI, URI targetURI, URI userURI,
+			Statement statement, Token dLibraToken)
 		throws URISyntaxException
 	{
-		InputStream is = ROSRService.getResource(researchObjectURI.resolve(".ro/manifest.rdf"));
+		InputStream is = ROSRService.getResource(baseURI, researchObjectURI.resolve(".ro/manifest.rdf"));
 		OntModel manifest = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 		manifest.read(is, null);
 
@@ -175,10 +174,10 @@ public class ROSRService
 	}
 
 
-	public static ClientResponse deleteAnnotation(URI researchObjectURI, URI annURI, Token dLibraToken)
+	public static ClientResponse deleteAnnotation(URI baseURI, URI researchObjectURI, URI annURI, Token dLibraToken)
 		throws IllegalArgumentException, URISyntaxException
 	{
-		InputStream is = ROSRService.getResource(researchObjectURI.resolve(".ro/manifest.rdf"));
+		InputStream is = ROSRService.getResource(baseURI, researchObjectURI.resolve(".ro/manifest.rdf"));
 		OntModel manifest = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 		manifest.read(is, null);
 
@@ -186,7 +185,7 @@ public class ROSRService
 		if (ann == null) {
 			throw new IllegalArgumentException("Annotation URI is not valid");
 		}
-		Resource body = ann.getPropertyResourceValue(RoFactory.aoBody);
+		Resource body = ann.getPropertyResourceValue(Vocab.aoBody);
 		try {
 			deleteResource(new URI(body.getURI()), dLibraToken);
 		}
@@ -215,14 +214,14 @@ public class ROSRService
 		throws URISyntaxException
 	{
 		Individual ann = manifest.createIndividual(createAnnotationURI(manifest, researchObjectURI).toString(),
-			RoFactory.aggregatedAnnotation);
-		ann.addProperty(RoFactory.annotatesAggregatedResource, manifest.createResource(targetURI.toString()));
-		ann.addProperty(RoFactory.aoBody, manifest.createResource(bodyURI.toString()));
+			Vocab.aggregatedAnnotation);
+		ann.addProperty(Vocab.annotatesAggregatedResource, manifest.createResource(targetURI.toString()));
+		ann.addProperty(Vocab.aoBody, manifest.createResource(bodyURI.toString()));
 		ann.addProperty(DCTerms.created, manifest.createTypedLiteral(Calendar.getInstance()));
 		Resource agent = manifest.createResource(userURI.toString());
 		ann.addProperty(DCTerms.creator, agent);
 		Individual ro = manifest.createResource(researchObjectURI.toString()).as(Individual.class);
-		ro.addProperty(RoFactory.aggregates, ann);
+		ro.addProperty(Vocab.aggregates, ann);
 	}
 
 
@@ -268,7 +267,7 @@ public class ROSRService
 	}
 
 
-	public static InputStream getWhoAmi(Token dLibraToken)
+	public static InputStream getWhoAmi(URI baseURI, Token dLibraToken)
 		throws URISyntaxException
 	{
 		Client client = Client.create();
@@ -284,11 +283,11 @@ public class ROSRService
 	 * @return
 	 * @throws Exception
 	 */
-	public static boolean isRoIdFree(String roId)
+	public static boolean isRoIdFree(URI baseURI, String roId)
 		throws Exception
 	{
 		//FIXME there should be a way to implement this without getting the list of all URIs
-		List<URI> ros = getROList();
+		List<URI> ros = getROList(baseURI);
 		URI ro = baseURI.resolve("ROs/" + UrlEncoder.PATH_INSTANCE.encode(roId, "UTF-8") + "/");
 		return !ros.contains(ro);
 	}

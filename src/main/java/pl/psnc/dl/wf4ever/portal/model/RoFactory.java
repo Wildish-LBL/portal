@@ -37,6 +37,7 @@ import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
+import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QuerySolution;
@@ -64,20 +65,6 @@ public class RoFactory
 
 	private static final Logger log = Logger.getLogger(RoFactory.class);
 
-	private static final String RO_NAMESPACE = "http://purl.org/wf4ever/ro#";
-
-	private static final String ORE_NAMESPACE = "http://www.openarchives.org/ore/terms/";
-
-	private static final String AO_NAMESPACE = "http://purl.org/ao/";
-
-	@SuppressWarnings("unused")
-	private static final String WFPROV_NAMESPACE = "http://purl.org/wf4ever/wfprov#";
-
-	private static final String WFDESC_NAMESPACE = "http://purl.org/wf4ever/wfdesc#";
-
-	@SuppressWarnings("unused")
-	private static final String WF4EVER_NAMESPACE = "http://purl.org/wf4ever/wf4ever#";
-
 	public static final URI[] defaultProperties = { URI.create(DCTerms.type.getURI()),
 			URI.create(DCTerms.subject.getURI()), URI.create(DCTerms.description.getURI()),
 			URI.create(DCTerms.format.getURI()), URI.create(DCTerms.title.getURI()),
@@ -93,36 +80,6 @@ public class RoFactory
 			URI.create("http://purl.org/wf4ever/wfprov#describedByWorkflow"),
 			URI.create("http://purl.org/wf4ever/wfprov#wasOutputFrom"),
 			URI.create("http://purl.org/wf4ever/wfprov#usedInput")};
-
-	public static final Resource roResource = ModelFactory.createDefaultModel().createResource(
-		"http://purl.org/wf4ever/ro#Resource");
-
-	public static final Resource aggregatedAnnotation = ModelFactory.createDefaultModel().createResource(
-		"http://purl.org/wf4ever/ro#AggregatedAnnotation");
-
-	public static final Resource foafAgent = ModelFactory.createDefaultModel().createResource(
-		"http://xmlns.com/foaf/0.1/Agent");
-
-	public static final Property foafName = ModelFactory.createDefaultModel().createProperty(
-		"http://xmlns.com/foaf/0.1/name");
-
-	public static final Property foafPrimaryTopic = ModelFactory.createDefaultModel().createProperty(
-		"http://xmlns.com/foaf/0.1/primaryTopic");
-
-	public static final Property filesize = ModelFactory.createDefaultModel().createProperty(
-		"http://purl.org/wf4ever/ro#filesize");
-
-	public static final Property aggregates = ModelFactory.createDefaultModel().createProperty(
-		ORE_NAMESPACE + "aggregates");
-
-	public static final Property annotatesAggregatedResource = ModelFactory.createDefaultModel().createProperty(
-		RO_NAMESPACE + "annotatesAggregatedResource");
-
-	public static final Property aoBody = ModelFactory.createDefaultModel().createProperty(AO_NAMESPACE + "body");
-
-	public static final Property hasSubProcess = ModelFactory.createDefaultModel().createProperty(
-		WFDESC_NAMESPACE + "hasSubProcess");
-
 
 	public static ResearchObject createResearchObject(URI researchObjectURI, boolean includeAnnotations,
 			Map<URI, Creator> usernames)
@@ -150,10 +107,10 @@ public class RoFactory
 		ResearchObject researchObject = createResearchObject(model, researchObjectURI, true, usernames);
 		resources.put(researchObjectURI, researchObject);
 		Individual ro = model.getIndividual(researchObjectURI.toString());
-		NodeIterator it = model.listObjectsOfProperty(ro, aggregates);
+		NodeIterator it = model.listObjectsOfProperty(ro, Vocab.aggregates);
 		while (it.hasNext()) {
 			Individual res = it.next().as(Individual.class);
-			if (res.hasRDFType(roResource)) {
+			if (res.hasRDFType(Vocab.roResource)) {
 				AggregatedResource resource = createResource(model, researchObjectURI, new URI(res.getURI()), true,
 					usernames);
 				resources.put(resource.getURI(), resource);
@@ -299,7 +256,7 @@ public class RoFactory
 		catch (Exception e) {
 		}
 		try {
-			size = res.getPropertyValue(filesize).asLiteral().getLong();
+			size = res.getPropertyValue(Vocab.filesize).asLiteral().getLong();
 		}
 		catch (Exception e) {
 		}
@@ -340,8 +297,8 @@ public class RoFactory
 				if (usernames.containsKey(uri)) {
 				}
 				// 2. FOAF data defined inline
-				else if (creator.asResource().hasProperty(foafName)) {
-					usernames.put(uri, new Creator(creator.as(Individual.class).getPropertyValue(foafName).asLiteral()
+				else if (creator.asResource().hasProperty(Vocab.foafName)) {
+					usernames.put(uri, new Creator(creator.as(Individual.class).getPropertyValue(Vocab.foafName).asLiteral()
 							.getString()));
 				}
 				else {
@@ -444,14 +401,40 @@ public class RoFactory
 	public static void addRelation(AggregatedResource resourceAR, Property property, AggregatedResource objectAR)
 	{
 		String propertyName = RoFactory.splitCamelCase(property.getLocalName()).toLowerCase();
-		addRelation(resourceAR, propertyName, objectAR);
+		resourceAR.getRelations().put(propertyName, objectAR);
+		if (property.getModel() instanceof OntModel) {
+			OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM_RULES_INF);
+			try {
+				model.read(property.getNameSpace());
+			}
+			catch (DoesNotExistException e) {
+				// do nothing, model will be empty
+			}
+			OntProperty ontprop = model.getOntProperty(property.getURI());
+			if (ontprop != null) {
+				Property inverse = ontprop.getInverse();
+				if (inverse != null) {
+					String inversePropertyName = RoFactory.splitCamelCase(inverse.getLocalName()).toLowerCase();
+					objectAR.getRelations().put(inversePropertyName, resourceAR);
+					return;
+				}
+			}
+		}
+		objectAR.getInverseRelations().put(propertyName, resourceAR);
 	}
 
 
-	public static void addRelation(AggregatedResource resourceAR, String propertyName, AggregatedResource objectAR)
+	public static void addRelation(AggregatedResource resourceAR, URI propertyURI, AggregatedResource objectAR)
 	{
-		resourceAR.getRelations().put(propertyName, objectAR);
-		objectAR.getInverseRelations().put(propertyName, resourceAR);
+		OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM_RDFS_INF);
+		Property property = model.createProperty(propertyURI.toString());
+		try {
+			model.read(property.getNameSpace());
+		}
+		catch (DoesNotExistException e) {
+			// do nothing, model will be empty
+		}
+		addRelation(resourceAR, property, objectAR);
 	}
 
 
@@ -469,16 +452,16 @@ public class RoFactory
 		List<Annotation> anns = new ArrayList<>();
 
 		Individual res = model.getIndividual(resourceURI.toString());
-		ResIterator it = model.listSubjectsWithProperty(annotatesAggregatedResource, res);
+		ResIterator it = model.listSubjectsWithProperty(Vocab.annotatesAggregatedResource, res);
 		while (it.hasNext()) {
 			Individual ann = it.next().as(Individual.class);
-			if (!ann.hasRDFType(aggregatedAnnotation))
+			if (!ann.hasRDFType(Vocab.aggregatedAnnotation))
 				continue;
 			try {
 				Calendar created = ((XSDDateTime) ann.getPropertyValue(DCTerms.created).asLiteral().getValue())
 						.asCalendar();
 				Creator creator = getCreator(usernames, ann.getPropertyResourceValue(DCTerms.creator));
-				Resource body = ann.getPropertyResourceValue(aoBody);
+				Resource body = ann.getPropertyResourceValue(Vocab.aoBody);
 				String name = UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.relativize(new URI(ann.getURI()))
 						.toString(), "UTF-8");
 				anns.add(new Annotation(new URI(ann.getURI()), created, Arrays.asList(creator), name, new URI(body
@@ -576,7 +559,7 @@ public class RoFactory
 			// HACK for old ROs
 			graphset.read(manifestURI.toString() + "?original=manifest", "TRIG");
 		}
-		OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM,
+		OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM_RDFS_INF,
 			graphset.asJenaModel(researchObjectURI.resolve(".ro/manifest.rdf").toString()));
 		return model;
 	}

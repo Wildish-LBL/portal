@@ -124,6 +124,32 @@ public class ItemInfoPanel
 
 		};
 		relationsSection.add(relationsGroup);
+
+		ListView<Entry<String, AggregatedResource>> invRelationsGroup = new ListView<Entry<String, AggregatedResource>>(
+				"invRelationTarget", new PropertyModel<List<Entry<String, AggregatedResource>>>(itemModel,
+						"inverseRelationsEntries")) {
+
+			@Override
+			protected void populateItem(ListItem<Entry<String, AggregatedResource>> item)
+			{
+				Entry<String, AggregatedResource> entry = item.getModelObject();
+				item.add(new Label("invRelationType", entry.getKey()));
+				AjaxLink<String> link = new AjaxLink<String>("invTargetLink") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target)
+					{
+						// TODO Auto-generated method stub
+
+					}
+
+				};
+				item.add(link);
+				link.add(new Label("invTargetLabel", new PropertyModel<String>(entry.getValue(), "name")));
+			}
+
+		};
+		relationsSection.add(invRelationsGroup);
 	}
 
 
@@ -138,7 +164,8 @@ public class ItemInfoPanel
 			sizeSection.setVisible(resource.getSizeFormatted() != null);
 			stabilitySection.setVisible(resource.getStability() >= 0);
 			annotationsCntSection.setVisible(true);
-			relationsSection.setVisible(!resource.getRelations().isEmpty());
+			relationsSection
+					.setVisible(!resource.getRelations().isEmpty() || !resource.getInverseRelations().isEmpty());
 		}
 		else {
 			resourceURISection.setVisible(false);

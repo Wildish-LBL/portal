@@ -21,6 +21,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
+import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.Annotation;
 import pl.psnc.dl.wf4ever.portal.model.Creator;
@@ -193,8 +194,8 @@ class AnnotatingBox
 					try {
 						if (annotation.getBody().isEmpty()) {
 							ROSRService.deleteResource(annotation.getBodyURI(), dLibraToken);
-							ROSRService.deleteAnnotation(AnnotatingBox.this.roPage.roURI, annotation.getURI(),
-								dLibraToken);
+							ROSRService.deleteAnnotation(((PortalApplication) getApplication()).getRodlURI(),
+								AnnotatingBox.this.roPage.roURI, annotation.getURI(), dLibraToken);
 						}
 						else {
 							ROSRService.sendResource(annotation.getBodyURI(),

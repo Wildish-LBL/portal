@@ -46,6 +46,7 @@ import pl.psnc.dl.wf4ever.portal.model.ResourceGroup;
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 import pl.psnc.dl.wf4ever.portal.model.Statement;
+import pl.psnc.dl.wf4ever.portal.model.Vocab;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
@@ -102,7 +103,8 @@ public class RoPage
 		}
 
 		if (MySession.get().isSignedIn()) {
-			List<URI> uris = ROSRService.getROList(MySession.get().getdLibraAccessToken());
+			List<URI> uris = ROSRService.getROList(((PortalApplication) getApplication()).getRodlURI(), MySession.get()
+					.getdLibraAccessToken());
 			canEdit = uris.contains(roURI);
 		}
 		add(new Label("title", roURI.toString()));
@@ -310,7 +312,7 @@ public class RoPage
 		target.add(roViewerBox);
 
 		resources.put(resourceURI, resource);
-		RoFactory.addRelation(resources.get(roURI), RoFactory.aggregates, resource);
+		RoFactory.addRelation(resources.get(roURI), Vocab.aggregates, resource);
 		String json = RoFactory.createRoJSON(resources, interactiveViewColors);
 		String callback = roViewerBox.getInteractiveViewCallbackUrl().toString();
 		target.appendJavaScript("var json = " + json + "; init(json, '" + callback + "');");
@@ -351,9 +353,9 @@ public class RoPage
 		// HACK this shouldn't be added by portal but rather by RODL
 		Resource ro = manifestModel.createResource(roURI.toString());
 		Individual individual = manifestModel.createResource(absoluteResourceURI.toString()).as(Individual.class);
-		ro.addProperty(RoFactory.aggregates, individual);
+		ro.addProperty(Vocab.aggregates, individual);
 		individual.addProperty(DCTerms.creator, manifestModel.createResource(MySession.get().getUserURI().toString()));
-		individual.addRDFType(RoFactory.roResource);
+		individual.addRDFType(Vocab.roResource);
 		for (ResourceGroup resourceGroup : selectedTypes) {
 			individual.addRDFType(manifestModel.createResource(resourceGroup.getRdfClasses().iterator().next()
 					.toString()));
@@ -372,7 +374,7 @@ public class RoPage
 		target.add(roViewerBox);
 
 		resources.put(absoluteResourceURI, resource);
-		RoFactory.addRelation(resources.get(roURI), RoFactory.aggregates, resource);
+		RoFactory.addRelation(resources.get(roURI), Vocab.aggregates, resource);
 		String json = RoFactory.createRoJSON(resources, interactiveViewColors);
 		String callback = roViewerBox.getInteractiveViewCallbackUrl().toString();
 		target.appendJavaScript("var json = " + json + "; init(json, '" + callback + "');");
@@ -410,8 +412,8 @@ public class RoPage
 		throws URISyntaxException, Exception
 	{
 		Token dLibraToken = MySession.get().getdLibraAccessToken();
-		ClientResponse res = ROSRService.addAnnotation(roURI, statement.getSubjectURI(), MySession.get().getUserURI(),
-			statement, dLibraToken);
+		ClientResponse res = ROSRService.addAnnotation(((PortalApplication) getApplication()).getRodlURI(), roURI,
+			statement.getSubjectURI(), MySession.get().getUserURI(), statement, dLibraToken);
 		if (res.getStatus() != HttpServletResponse.SC_OK) {
 			throw new Exception("Error when adding annotation: " + res.getClientResponseStatus());
 		}
@@ -461,7 +463,7 @@ public class RoPage
 					.getUsernames()));
 		AggregatedResource subjectAR = resources.get(statement.getSubjectURI());
 		AggregatedResource objectAR = resources.get(statement.getObjectURI());
-		RoFactory.addRelation(subjectAR, statement.getPropertyLocalNameNice(), objectAR);
+		RoFactory.addRelation(subjectAR, statement.getPropertyURI(), objectAR);
 		target.add(roViewerBox.infoPanel);
 		target.add(annotatingBox.annotationsDiv);
 	}

@@ -16,7 +16,7 @@ import org.apache.wicket.util.cookies.CookieUtils;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.model.Creator;
-import pl.psnc.dl.wf4ever.portal.model.RoFactory;
+import pl.psnc.dl.wf4ever.portal.model.Vocab;
 import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 
 import com.hp.hpl.jena.ontology.Individual;
@@ -217,12 +217,13 @@ public class MySession
 	{
 		try {
 			OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
-			userModel.read(ROSRService.getWhoAmi(getdLibraAccessToken()), null);
-			ExtendedIterator<Individual> it = userModel.listIndividuals(RoFactory.foafAgent);
+			userModel.read(ROSRService.getWhoAmi(((PortalApplication) PortalApplication.get()).getRodlURI(),
+				getdLibraAccessToken()), null);
+			ExtendedIterator<Individual> it = userModel.listIndividuals(Vocab.foafAgent);
 			Individual user = it.next();
-			if (user != null && user.hasProperty(RoFactory.foafName)) {
+			if (user != null && user.hasProperty(Vocab.foafName)) {
 				userURI = new URI(user.getURI());
-				username = user.as(Individual.class).getPropertyValue(RoFactory.foafName).asLiteral().getString();
+				username = user.as(Individual.class).getPropertyValue(Vocab.foafName).asLiteral().getString();
 			}
 		}
 		catch (Exception e) {

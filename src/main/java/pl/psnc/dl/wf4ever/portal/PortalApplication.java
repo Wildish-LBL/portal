@@ -53,6 +53,8 @@ public class PortalApplication
 
 	private String callbackURL;
 
+	private URI rodlURI;
+
 	private URL sparqlEndpointURL;
 
 	private URL searchEndpointURL;
@@ -60,6 +62,10 @@ public class PortalApplication
 	private URL recommenderEndpointURL;
 
 	private URL stabilityEndpointURL;
+
+	private URL userAccessTokenEndpointURL;
+
+	private URL userAuthorizationEndpointURL;
 
 	private final Set<ResourceGroup> resourceGroups = new HashSet<>();
 
@@ -118,10 +124,13 @@ public class PortalApplication
 		Properties props = new Properties();
 		try {
 			props.load(getClass().getClassLoader().getResourceAsStream(propertiesFile));
+			rodlURI = new URI(props.getProperty("rodlURL"));
 			sparqlEndpointURL = new URL(props.getProperty("sparqlEndpointURL"));
 			searchEndpointURL = new URL(props.getProperty("searchEndpointURL"));
 			recommenderEndpointURL = new URL(props.getProperty("recommenderEndpointURL"));
 			stabilityEndpointURL = new URL(props.getProperty("stabilityEndpointURL"));
+			userAccessTokenEndpointURL = new URL(props.getProperty("userAccessTokenEndpointURL"));
+			userAuthorizationEndpointURL = new URL(props.getProperty("userAuthorizationEndpointURL"));
 		}
 		catch (Exception e) {
 			log.error("Failed to load properties: " + e.getMessage());
@@ -238,6 +247,12 @@ public class PortalApplication
 	}
 
 
+	public URI getRodlURI()
+	{
+		return rodlURI;
+	}
+
+
 	/**
 	 * @return the sparqlEndpoint
 	 */
@@ -320,6 +335,30 @@ public class PortalApplication
 	public void setStabilityEndpointURL(URL stabilityEndpointURL)
 	{
 		this.stabilityEndpointURL = stabilityEndpointURL;
+	}
+
+
+	public URL getUserAccessTokenEndpointURL()
+	{
+		return userAccessTokenEndpointURL;
+	}
+
+
+	public void setUserAccessTokenEndpointURL(URL userAccessTokenEndpointURL)
+	{
+		this.userAccessTokenEndpointURL = userAccessTokenEndpointURL;
+	}
+
+
+	public URL getUserAuthorizationEndpointURL()
+	{
+		return userAuthorizationEndpointURL;
+	}
+
+
+	public void setUserAuthorizationEndpointURL(URL userAuthorizationEndpointURL)
+	{
+		this.userAuthorizationEndpointURL = userAuthorizationEndpointURL;
 	}
 
 }

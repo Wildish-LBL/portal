@@ -28,6 +28,7 @@ import org.apache.wicket.validation.ValidationError;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
+import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
@@ -56,7 +57,8 @@ public class MyRosPage
 	{
 		super(parameters);
 
-		List<URI> uris = ROSRService.getROList(MySession.get().getdLibraAccessToken());
+		List<URI> uris = ROSRService.getROList(((PortalApplication) getApplication()).getRodlURI(), MySession.get()
+				.getdLibraAccessToken());
 		final List<ResearchObject> researchObjects = new ArrayList<ResearchObject>();
 		for (URI uri : uris) {
 			try {
@@ -120,7 +122,8 @@ public class MyRosPage
 			public void validate(IValidatable<String> validatable)
 			{
 				try {
-					if (!ROSRService.isRoIdFree(validatable.getValue())) {
+					if (!ROSRService.isRoIdFree(((PortalApplication) getApplication()).getRodlURI(),
+						validatable.getValue())) {
 						validatable.error(new ValidationError().setMessage("This ID is already in use"));
 					}
 				}
@@ -199,7 +202,8 @@ public class MyRosPage
 				super.onSubmit(target, addForm);
 				Token dLibraToken = MySession.get().getdLibraAccessToken();
 				try {
-					URI researchObjectURI = ROSRService.createResearchObject(roId, dLibraToken).getLocation();
+					URI researchObjectURI = ROSRService.createResearchObject(
+						((PortalApplication) getApplication()).getRodlURI(), roId, dLibraToken).getLocation();
 					researchObjects.add(RoFactory.createResearchObject(researchObjectURI, false, MySession.get()
 							.getUsernames()));
 				}

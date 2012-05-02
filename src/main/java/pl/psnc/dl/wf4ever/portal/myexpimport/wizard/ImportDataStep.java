@@ -70,8 +70,9 @@ public class ImportDataStep
 			{
 				if (model.getStatus() == ImportStatus.NOT_STARTED) {
 					PortalApplication app = (PortalApplication) getApplication();
-					MyExpImportService.startImport(model, MySession.get().getMyExpAccessToken(), MySession.get()
-							.getdLibraAccessToken(), app.getMyExpConsumerKey(), app.getMyExpConsumerSecret());
+					MyExpImportService.startImport(model, ((PortalApplication) PortalApplication.get()).getRodlURI(),
+						MySession.get().getMyExpAccessToken(), MySession.get().getdLibraAccessToken(),
+						app.getMyExpConsumerKey(), app.getMyExpConsumerSecret());
 					importStatus.add(updater);
 					target.add(importStatus);
 

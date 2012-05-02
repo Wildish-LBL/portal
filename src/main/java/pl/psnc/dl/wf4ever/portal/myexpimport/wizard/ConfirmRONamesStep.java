@@ -10,6 +10,7 @@ import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
 
+import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 
 /**
@@ -38,7 +39,8 @@ public class ConfirmRONamesStep
 			public void validate(IValidatable<String> validatable)
 			{
 				try {
-					if (!ROSRService.isRoIdFree(validatable.getValue())) {
+					if (!ROSRService.isRoIdFree(((PortalApplication) getApplication()).getRodlURI(),
+						validatable.getValue())) {
 						validatable.error(new ValidationError().setMessage("This ID is already in use"));
 					}
 				}
