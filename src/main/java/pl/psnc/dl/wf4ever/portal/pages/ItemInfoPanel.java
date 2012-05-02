@@ -4,8 +4,8 @@
 package pl.psnc.dl.wf4ever.portal.pages;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -17,6 +17,7 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 
@@ -99,27 +100,64 @@ public class ItemInfoPanel
 
 		relationsSection = new WebMarkupContainer("relationsSection", new Model<>());
 		add(relationsSection);
-		ListView<Entry<String, AggregatedResource>> relationsGroup = new ListView<Entry<String, AggregatedResource>>(
-				"relationTarget", new PropertyModel<List<Entry<String, AggregatedResource>>>(itemModel,
-						"relationsEntries")) {
+		ListView<String> relationsGroup = new ListView<String>("relationTarget", new PropertyModel<List<String>>(
+				itemModel, "relationKeys")) {
 
 			@Override
-			protected void populateItem(ListItem<Entry<String, AggregatedResource>> item)
+			protected ListItem<String> newItem(int index, IModel<String> itemModel)
 			{
-				Entry<String, AggregatedResource> entry = item.getModelObject();
-				item.add(new Label("relationType", entry.getKey()));
-				AjaxLink<String> link = new AjaxLink<String>("targetLink") {
+				return new MyListItem<>(index, itemModel);
+			}
+
+
+			@Override
+			protected void populateItem(final ListItem<String> item)
+			{
+				String key = item.getModelObject();
+				item.add(new Label("relationType", key));
+
+				final List<AggregatedResource> fullList = new ArrayList<>(itemModel.getObject().getRelations().get(key));
+				if (fullList.size() <= 3) {
+					((MyListItem<String>) item).setList(fullList);
+				}
+				else {
+					((MyListItem<String>) item).setList(new ArrayList<>(fullList.subList(0, 2)));
+					((MyListItem<String>) item).getList().add(null);
+				}
+
+				final ListView<AggregatedResource> quickView = new ListView<AggregatedResource>("target",
+						new PropertyModel<List<AggregatedResource>>(item, "list")) {
 
 					@Override
-					public void onClick(AjaxRequestTarget target)
+					protected void populateItem(final ListItem<AggregatedResource> item2)
 					{
-						// TODO Auto-generated method stub
+						final AggregatedResource resource = item2.getModelObject();
+						item2.add(new WebMarkupContainer("separator").setVisible(item2.getIndex() > 0));
+						AjaxLink<String> link = new AjaxLink<String>("targetLink") {
 
+							@Override
+							public void onClick(AjaxRequestTarget target)
+							{
+								if (resource == null) {
+									((MyListItem<String>) item).getList().remove(resource);
+									((MyListItem<String>) item).getList().addAll(fullList);
+									target.add(item);
+								}
+							}
+
+						};
+						item2.add(link);
+						if (resource != null) {
+							link.add(new Label("targetLabel", new PropertyModel<String>(resource, "name")));
+						}
+						else {
+							link.add(new Label("targetLabel", "" + (fullList.size() - 2) + " more..."));
+						}
 					}
-
 				};
-				item.add(link);
-				link.add(new Label("targetLabel", new PropertyModel<String>(entry.getValue(), "name")));
+
+				item.add(quickView);
+				item.setOutputMarkupId(true);
 			}
 
 		};
@@ -148,6 +186,33 @@ public class ItemInfoPanel
 			stabilitySection.setVisible(false);
 			annotationsCntSection.setVisible(false);
 			relationsSection.setVisible(false);
+		}
+	}
+
+	private class MyListItem<T>
+		extends ListItem<T>
+	{
+
+		private static final long serialVersionUID = 7849773836371849967L;
+
+		private List<AggregatedResource> list;
+
+
+		public MyListItem(int index, IModel<T> model)
+		{
+			super(index, model);
+		}
+
+
+		public List<AggregatedResource> getList()
+		{
+			return list;
+		}
+
+
+		public void setList(List<AggregatedResource> list)
+		{
+			this.list = list;
 		}
 	}
 

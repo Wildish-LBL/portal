@@ -240,9 +240,9 @@ public class AggregatedResource
 	}
 
 
-	public ArrayList<Entry<String, AggregatedResource>> getInverseRelationsEntries()
+	public ArrayList<String> getRelationKeys()
 	{
-		return new ArrayList<Entry<String, AggregatedResource>>(inverseRelations.entries());
+		return new ArrayList<String>(relations.keySet());
 	}
 
 
