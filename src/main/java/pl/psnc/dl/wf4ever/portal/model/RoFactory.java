@@ -81,6 +81,7 @@ public class RoFactory
 			URI.create("http://purl.org/wf4ever/wfprov#wasOutputFrom"),
 			URI.create("http://purl.org/wf4ever/wfprov#usedInput")};
 
+
 	public static ResearchObject createResearchObject(URI researchObjectURI, boolean includeAnnotations,
 			Map<URI, Creator> usernames)
 		throws URISyntaxException
@@ -298,8 +299,8 @@ public class RoFactory
 				}
 				// 2. FOAF data defined inline
 				else if (creator.asResource().hasProperty(Vocab.foafName)) {
-					usernames.put(uri, new Creator(creator.as(Individual.class).getPropertyValue(Vocab.foafName).asLiteral()
-							.getString()));
+					usernames.put(uri, new Creator(creator.as(Individual.class).getPropertyValue(Vocab.foafName)
+							.asLiteral().getString()));
 				}
 				else {
 					//3. load in a separate thread
@@ -402,25 +403,14 @@ public class RoFactory
 	{
 		String propertyName = RoFactory.splitCamelCase(property.getLocalName()).toLowerCase();
 		resourceAR.getRelations().put(propertyName, objectAR);
-		if (property.getModel() instanceof OntModel) {
-			OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM_RULES_INF);
-			try {
-				model.read(property.getNameSpace());
-			}
-			catch (DoesNotExistException e) {
-				// do nothing, model will be empty
-			}
-			OntProperty ontprop = model.getOntProperty(property.getURI());
-			if (ontprop != null) {
-				Property inverse = ontprop.getInverse();
-				if (inverse != null) {
-					String inversePropertyName = RoFactory.splitCamelCase(inverse.getLocalName()).toLowerCase();
-					objectAR.getRelations().put(inversePropertyName, resourceAR);
-					return;
-				}
-			}
-		}
 		objectAR.getInverseRelations().put(propertyName, resourceAR);
+
+		Property inverse = property.as(OntProperty.class).getInverse();
+		String inversePropertyName = (inverse != null ? RoFactory.splitCamelCase(inverse.getLocalName()).toLowerCase()
+				: "(inverse of) " + propertyName);
+		objectAR.getRelations().put(inversePropertyName, resourceAR);
+		resourceAR.getInverseRelations().put(inversePropertyName, objectAR);
+
 	}
 
 
