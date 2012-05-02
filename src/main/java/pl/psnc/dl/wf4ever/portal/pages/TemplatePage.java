@@ -1,5 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.pages;
 
+import java.net.URI;
+
 import org.apache.log4j.Logger;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.RestartResponseException;
@@ -14,6 +16,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
+import pl.psnc.dl.wf4ever.portal.PortalApplication;
 
 public class TemplatePage
 	extends WebPage
@@ -23,6 +26,8 @@ public class TemplatePage
 
 	@SuppressWarnings("unused")
 	private static final Logger log = Logger.getLogger(TemplatePage.class);
+
+	protected URI rodlURI = ((PortalApplication) getApplication()).getRodlURI();
 
 
 	public TemplatePage(final PageParameters parameters)

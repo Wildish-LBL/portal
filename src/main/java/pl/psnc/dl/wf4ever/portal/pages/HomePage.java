@@ -94,7 +94,7 @@ public class HomePage
 		while (results.hasNext()) {
 			QuerySolution solution = results.next();
 			URI uri = new URI(solution.getResource("resource").getURI());
-			Creator author = RoFactory.getCreator(MySession.get().getUsernames(), solution.get("creator"));
+			Creator author = RoFactory.getCreator(rodlURI, MySession.get().getUsernames(), solution.get("creator"));
 			Calendar created = ((XSDDateTime) solution.getLiteral("created").getValue()).asCalendar();
 			roHeaders.add(new ResearchObject(uri, created, Arrays.asList(author)));
 		}
@@ -203,7 +203,7 @@ public class HomePage
 				if (getSearchKeywords() != null && !getSearchKeywords().isEmpty()) {
 					URL searchEndpoint = ((PortalApplication) getApplication()).getSearchEndpointURL();
 					try {
-						List<SearchResult> results = SearchService.findByKeywords(searchEndpoint.toURI(),
+						List<SearchResult> results = SearchService.findByKeywords(rodlURI, searchEndpoint.toURI(),
 							getSearchKeywords());
 						setSearchResults(results);
 						getSession().cleanupFeedbackMessages();

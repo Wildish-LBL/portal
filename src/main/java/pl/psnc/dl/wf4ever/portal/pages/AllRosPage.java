@@ -63,7 +63,7 @@ public class AllRosPage
 			List<Creator> authors = new ArrayList<>();
 			if (creators != null) {
 				for (String creator : creators.getString().split(", ")) {
-					authors.add(RoFactory.getCreator(MySession.get().getUsernames(), creator));
+					authors.add(RoFactory.getCreator(rodlURI, MySession.get().getUsernames(), creator));
 				}
 			}
 			Calendar created = ((XSDDateTime) solution.getLiteral("created").getValue()).asCalendar();

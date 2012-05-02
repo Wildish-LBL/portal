@@ -6,6 +6,7 @@ import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.DCTerms;
+import com.hp.hpl.jena.vocabulary.OWL;
 
 public class Vocab
 {
@@ -48,4 +49,14 @@ public class Vocab
 	public static final OntProperty aoBody = model.createOntProperty(Vocab.AO_NAMESPACE + "body");
 
 	public static final OntProperty hasSubProcess = model.createOntProperty(Vocab.WFDESC_NAMESPACE + "hasSubProcess");
+
+	static {
+		model.add(DCTerms.references, OWL.inverseOf, DCTerms.isReferencedBy);
+		model.add(DCTerms.isReferencedBy, OWL.inverseOf, DCTerms.references);
+		model.add(DCTerms.replaces, OWL.inverseOf, DCTerms.isReplacedBy);
+		model.add(DCTerms.isReplacedBy, OWL.inverseOf, DCTerms.replaces);
+		model.add(DCTerms.requires, OWL.inverseOf, DCTerms.isRequiredBy);
+		model.add(DCTerms.isRequiredBy, OWL.inverseOf, DCTerms.requires);
+	}
+
 }

@@ -103,8 +103,7 @@ public class RoPage
 		}
 
 		if (MySession.get().isSignedIn()) {
-			List<URI> uris = ROSRService.getROList(((PortalApplication) getApplication()).getRodlURI(), MySession.get()
-					.getdLibraAccessToken());
+			List<URI> uris = ROSRService.getROList(rodlURI, MySession.get().getdLibraAccessToken());
 			canEdit = uris.contains(roURI);
 		}
 		add(new Label("title", roURI.toString()));
@@ -142,7 +141,7 @@ public class RoPage
 						start = printDuration(start, "get usernames");
 						OntModel model = RoFactory.createManifestAndAnnotationsModel(roURI);
 						start = printDuration(start, "create model");
-						resources = RoFactory.getAggregatedResources(model, roURI, usernames);
+						resources = RoFactory.getAggregatedResources(model, rodlURI, roURI, usernames);
 						start = printDuration(start, "get aggregated res");
 						RoFactory.assignResourceGroupsToResources(model, roURI, app.getResourceGroups(), resources);
 						start = printDuration(start, "assign groups");
@@ -303,8 +302,8 @@ public class RoPage
 		ROSRService.sendResource(roURI.resolve(".ro/manifest.rdf"), new ByteArrayInputStream(out.toByteArray()),
 			"application/rdf+xml", MySession.get().getdLibraAccessToken());
 
-		AggregatedResource resource = RoFactory
-				.createResource(roURI, resourceURI, true, MySession.get().getUsernames());
+		AggregatedResource resource = RoFactory.createResource(rodlURI, roURI, resourceURI, true, MySession.get()
+				.getUsernames());
 		resource.getMatchingGroups().addAll(selectedResourceGroups);
 		getConceptualResourcesTree().addAggregatedResource(resource, true);
 		getPhysicalResourcesTree().addAggregatedResource(resource, false);
@@ -365,8 +364,8 @@ public class RoPage
 		ROSRService.sendResource(roURI.resolve(".ro/manifest.rdf"), new ByteArrayInputStream(out.toByteArray()),
 			"application/rdf+xml", MySession.get().getdLibraAccessToken());
 
-		AggregatedResource resource = RoFactory.createResource(roURI, absoluteResourceURI, true, MySession.get()
-				.getUsernames());
+		AggregatedResource resource = RoFactory.createResource(rodlURI, roURI, absoluteResourceURI, true, MySession
+				.get().getUsernames());
 		resource.getMatchingGroups().addAll(selectedTypes);
 		getConceptualResourcesTree().addAggregatedResource(resource, true);
 		getPhysicalResourcesTree().addAggregatedResource(resource, false);
@@ -412,8 +411,8 @@ public class RoPage
 		throws URISyntaxException, Exception
 	{
 		Token dLibraToken = MySession.get().getdLibraAccessToken();
-		ClientResponse res = ROSRService.addAnnotation(((PortalApplication) getApplication()).getRodlURI(), roURI,
-			statement.getSubjectURI(), MySession.get().getUserURI(), statement, dLibraToken);
+		ClientResponse res = ROSRService.addAnnotation(rodlURI, roURI, statement.getSubjectURI(), MySession.get()
+				.getUserURI(), statement, dLibraToken);
 		if (res.getStatus() != HttpServletResponse.SC_OK) {
 			throw new Exception("Error when adding annotation: " + res.getClientResponseStatus());
 		}
@@ -444,7 +443,7 @@ public class RoPage
 	void onStatementAddedEdited(AjaxRequestTarget target)
 	{
 		this.annotatingBox.getModelObject().setAnnotations(
-			RoFactory.createAnnotations(roURI, this.annotatingBox.getModelObject().getURI(), MySession.get()
+			RoFactory.createAnnotations(rodlURI, roURI, this.annotatingBox.getModelObject().getURI(), MySession.get()
 					.getUsernames()));
 		target.add(roViewerBox.infoPanel);
 		target.add(annotatingBox.annotationsDiv);
@@ -459,7 +458,7 @@ public class RoPage
 	void onRelationAddedEdited(Statement statement, AjaxRequestTarget target)
 	{
 		this.annotatingBox.getModelObject().setAnnotations(
-			RoFactory.createAnnotations(roURI, this.annotatingBox.getModelObject().getURI(), MySession.get()
+			RoFactory.createAnnotations(rodlURI, roURI, this.annotatingBox.getModelObject().getURI(), MySession.get()
 					.getUsernames()));
 		AggregatedResource subjectAR = resources.get(statement.getSubjectURI());
 		AggregatedResource objectAR = resources.get(statement.getObjectURI());

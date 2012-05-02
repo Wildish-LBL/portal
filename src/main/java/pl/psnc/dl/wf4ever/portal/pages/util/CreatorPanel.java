@@ -1,15 +1,14 @@
 package pl.psnc.dl.wf4ever.portal.pages.util;
 
 import org.apache.log4j.Logger;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.IHeaderResponse;
+import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.util.time.Duration;
 
 import pl.psnc.dl.wf4ever.portal.model.Creator;
 
@@ -17,6 +16,7 @@ public class CreatorPanel
 	extends Panel
 {
 
+	@SuppressWarnings("unused")
 	private static final Logger log = Logger.getLogger(CreatorPanel.class);
 
 	/**
@@ -37,33 +37,21 @@ public class CreatorPanel
 		add(loading);
 
 		if (model.getObject() != null && model.getObject().isLoading()) {
-			add(new AbstractDefaultAjaxBehavior() {
+			add(new AjaxSelfUpdatingTimerBehavior(Duration.milliseconds(1000)) {
 
 				@Override
-				protected void respond(AjaxRequestTarget target)
+				protected void onPostProcessTarget(AjaxRequestTarget target)
 				{
 					synchronized (getDefaultModelObject()) {
 						Creator creator = (Creator) getDefaultModelObject();
-						if (creator.isLoading()) {
-							try {
-								creator.wait();
-							}
-							catch (InterruptedException e) {
-								log.error(e);
-							}
+						if (!creator.isLoading()) {
+							stop();
+							//							getParent().remove(this);
+							loading.setVisible(false);
+							target.add(value);
+							target.add(loading);
 						}
 					}
-					loading.setVisible(false);
-					target.add(value);
-					target.add(loading);
-				}
-
-
-				@Override
-				public void renderHead(final Component component, final IHeaderResponse response)
-				{
-					super.renderHead(component, response);
-					response.renderOnDomReadyJavaScript(getCallbackScript().toString());
 				}
 			});
 		}

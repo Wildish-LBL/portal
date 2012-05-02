@@ -43,7 +43,7 @@ public class SearchService
 
 
 	@SuppressWarnings("unchecked")
-	public static List<SearchResult> findByKeywords(URI baseURI, String keywords)
+	public static List<SearchResult> findByKeywords(URI rodlURI, URI baseURI, String keywords)
 		throws IllegalArgumentException, MalformedURLException, FeedException, IOException
 	{
 		URI queryURI = new UriBuilderImpl().uri(baseURI).queryParam("searchTerms", keywords)
@@ -71,7 +71,8 @@ public class SearchService
 								researchObjectURI = URI.create(element.getValue());
 								break;
 							case "Creator":
-								creators.add(RoFactory.getCreator(MySession.get().getUsernames(), element.getValue()));
+								creators.add(RoFactory.getCreator(rodlURI, MySession.get().getUsernames(),
+									element.getValue()));
 								break;
 							case "Created":
 								try {

@@ -54,7 +54,7 @@ class AnnotatingBox
 	}
 
 
-	public AnnotatingBox(RoPage roPage, final CompoundPropertyModel<AggregatedResource> itemModel)
+	public AnnotatingBox(final RoPage roPage, final CompoundPropertyModel<AggregatedResource> itemModel)
 
 	{
 		super("annotatingBox", itemModel);
@@ -208,8 +208,8 @@ class AnnotatingBox
 				}
 				//					roFactory.reload();
 				AnnotatingBox.this.getModelObject().setAnnotations(
-					RoFactory.createAnnotations(AnnotatingBox.this.roPage.roURI, AnnotatingBox.this.getModelObject()
-							.getURI(), MySession.get().getUsernames()));
+					RoFactory.createAnnotations(roPage.rodlURI, AnnotatingBox.this.roPage.roURI, AnnotatingBox.this
+							.getModelObject().getURI(), MySession.get().getUsernames()));
 				selectedStatements.clear();
 				target.add(AnnotatingBox.this.roPage.annotatingBox.annotationsDiv);
 				target.add(AnnotatingBox.this.roPage.roViewerBox.infoPanel);

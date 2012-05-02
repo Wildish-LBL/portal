@@ -8,7 +8,6 @@ import java.net.URI;
 
 import org.apache.log4j.Logger;
 
-import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 
 import com.hp.hpl.jena.ontology.Individual;
@@ -44,7 +43,7 @@ public class Creator
 	}
 
 
-	public Creator(final URI uri)
+	public Creator(final URI rodlURI, final URI uri)
 	{
 		this.value = uri.toString();
 		isLoading = true;
@@ -69,8 +68,7 @@ public class Creator
 				if (isLoading) {
 					// 4. FOAF data in RODL
 					OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
-					userModel.read(
-						ROSRService.getUser(((PortalApplication) PortalApplication.get()).getRodlURI(), uri), null);
+					userModel.read(ROSRService.getUser(rodlURI, uri), null);
 					Resource r2 = userModel.createResource(uri.toString());
 					if (r2 != null && r2.hasProperty(Vocab.foafName)) {
 						setValue(r2.as(Individual.class).getPropertyValue(Vocab.foafName).asLiteral().getString());

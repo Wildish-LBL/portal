@@ -57,12 +57,12 @@ public class MyRosPage
 	{
 		super(parameters);
 
-		List<URI> uris = ROSRService.getROList(((PortalApplication) getApplication()).getRodlURI(), MySession.get()
-				.getdLibraAccessToken());
+		List<URI> uris = ROSRService.getROList(rodlURI, MySession.get().getdLibraAccessToken());
 		final List<ResearchObject> researchObjects = new ArrayList<ResearchObject>();
 		for (URI uri : uris) {
 			try {
-				researchObjects.add(RoFactory.createResearchObject(uri, false, MySession.get().getUsernames()));
+				researchObjects
+						.add(RoFactory.createResearchObject(rodlURI, uri, false, MySession.get().getUsernames()));
 			}
 			catch (Exception e) {
 				error("Could not get manifest for: " + uri + " (" + e.getMessage() + ")");
@@ -204,8 +204,8 @@ public class MyRosPage
 				try {
 					URI researchObjectURI = ROSRService.createResearchObject(
 						((PortalApplication) getApplication()).getRodlURI(), roId, dLibraToken).getLocation();
-					researchObjects.add(RoFactory.createResearchObject(researchObjectURI, false, MySession.get()
-							.getUsernames()));
+					researchObjects.add(RoFactory.createResearchObject(rodlURI, researchObjectURI, false, MySession
+							.get().getUsernames()));
 				}
 				catch (URISyntaxException e) {
 					error("Could not add Research Object: " + roId + " (" + e.getMessage() + ")");
