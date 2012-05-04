@@ -26,9 +26,12 @@ $(document).ready(function() {
 	})
 });
 
-//$(document).ready(function() {
-//	init();
-//});
+$(document).ready(function() {
+	$('#import-annotation-modal').modal({
+		backdrop : 'static',
+		show : false
+	})
+});
 
 // this should be called when a tab is changed.
 $('a[data-toggle="tab"]').on('shown', function (e) {

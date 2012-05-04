@@ -21,7 +21,6 @@ import org.apache.wicket.model.PropertyModel;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
-import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.Annotation;
 import pl.psnc.dl.wf4ever.portal.model.Creator;
@@ -47,6 +46,14 @@ class AnnotatingBox
 
 	final List<Statement> selectedStatements = new ArrayList<Statement>();
 
+	private AjaxButton addStatement;
+
+	private AjaxButton deleteStatement;
+
+	private AjaxButton addRelation;
+
+	private AjaxButton importAnnotation;
+
 
 	public AggregatedResource getModelObject()
 	{
@@ -60,7 +67,7 @@ class AnnotatingBox
 		super("annotatingBox", itemModel);
 		this.roPage = roPage;
 		setOutputMarkupId(true);
-		add(new Label("annTarget", itemModel.<URI> bind("URI")));
+		add(new Label("annTarget", new PropertyModel<>(itemModel, "name")));
 
 		annotationsDiv = new WebMarkupContainer("annotationsDiv");
 		annotationsDiv.setOutputMarkupId(true);
@@ -146,7 +153,7 @@ class AnnotatingBox
 		};
 		group.add(annList);
 
-		AjaxButton addStatement = new MyAjaxButton("addAnnotation", annForm) {
+		addStatement = new MyAjaxButton("addAnnotation", annForm) {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
@@ -163,17 +170,10 @@ class AnnotatingBox
 					error(e.getMessage());
 				}
 			}
-
-
-			@Override
-			public boolean isEnabled()
-			{
-				return super.isEnabled() && AnnotatingBox.this.roPage.canEdit;
-			}
 		};
 		annForm.add(addStatement);
 
-		AjaxButton deleteStatement = new MyAjaxButton("deleteAnnotation", annForm) {
+		deleteStatement = new MyAjaxButton("deleteAnnotation", annForm) {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
@@ -194,11 +194,11 @@ class AnnotatingBox
 					try {
 						if (annotation.getBody().isEmpty()) {
 							ROSRService.deleteResource(annotation.getBodyURI(), dLibraToken);
-							ROSRService.deleteAnnotation(((PortalApplication) getApplication()).getRodlURI(),
-								AnnotatingBox.this.roPage.roURI, annotation.getURI(), dLibraToken);
+							ROSRService.deleteAnnotationAndBody(AnnotatingBox.this.roPage.roURI, annotation.getURI(),
+								dLibraToken);
 						}
 						else {
-							ROSRService.sendResource(annotation.getBodyURI(),
+							ROSRService.uploadResource(annotation.getBodyURI(),
 								RoFactory.wrapAnnotationBody(annotation.getBody()), "application/rdf+xml", dLibraToken);
 						}
 					}
@@ -214,17 +214,10 @@ class AnnotatingBox
 				target.add(AnnotatingBox.this.roPage.annotatingBox.annotationsDiv);
 				target.add(AnnotatingBox.this.roPage.roViewerBox.infoPanel);
 			}
-
-
-			@Override
-			public boolean isEnabled()
-			{
-				return super.isEnabled() && AnnotatingBox.this.roPage.canEdit;
-			}
 		};
 		annForm.add(deleteStatement);
 
-		AjaxButton addRelation = new MyAjaxButton("addRelation", annForm) {
+		addRelation = new MyAjaxButton("addRelation", annForm) {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
@@ -241,14 +234,33 @@ class AnnotatingBox
 					error(e.getMessage());
 				}
 			}
-
-
-			@Override
-			public boolean isEnabled()
-			{
-				return super.isEnabled() && AnnotatingBox.this.roPage.canEdit;
-			}
 		};
 		annForm.add(addRelation);
+
+		importAnnotation = new MyAjaxButton("importAnnotation", annForm) {
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+			{
+				super.onSubmit(target, form);
+				try {
+					target.appendJavaScript("$('#import-annotation-modal').modal('show');");
+				}
+				catch (Exception e) {
+					error(e.getMessage());
+				}
+			}
+		};
+		annForm.add(importAnnotation);
+	}
+
+
+	@Override
+	protected void onConfigure()
+	{
+		addRelation.setEnabled(roPage.canEdit && getDefaultModelObject() != null);
+		addStatement.setEnabled(roPage.canEdit && getDefaultModelObject() != null);
+		deleteStatement.setEnabled(roPage.canEdit && getDefaultModelObject() != null);
+		importAnnotation.setEnabled(roPage.canEdit && getDefaultModelObject() != null);
 	}
 }

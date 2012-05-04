@@ -65,19 +65,18 @@ class UploadResourceModal
 		// Enable multipart mode (need for uploads file)
 		form.setMultiPart(true);
 
-		final WebMarkupContainer changeable = new WebMarkupContainer("changeable");
-		changeable.setOutputMarkupId(true);
-		form.add(changeable);
-
 		resourceDiv = new WebMarkupContainer("resourceURIDiv");
 		resourceDiv.setOutputMarkupId(true);
-		changeable.add(resourceDiv);
+		resourceDiv.setOutputMarkupPlaceholderTag(true);
+		form.add(resourceDiv);
 		downloadDiv = new WebMarkupContainer("downloadURIDiv");
 		downloadDiv.setOutputMarkupId(true);
-		changeable.add(downloadDiv);
+		downloadDiv.setOutputMarkupPlaceholderTag(true);
+		form.add(downloadDiv);
 		fileDiv = new WebMarkupContainer("fileUploadDiv");
 		fileDiv.setOutputMarkupId(true);
-		changeable.add(fileDiv);
+		fileDiv.setOutputMarkupPlaceholderTag(true);
+		form.add(fileDiv);
 
 		RadioGroup<ResourceType> radioGroup = new RadioGroup<ResourceType>("radioGroup",
 				new PropertyModel<ResourceType>(this, "resourceType"));
@@ -91,7 +90,9 @@ class UploadResourceModal
 				resourceDiv.setVisible(false);
 				downloadDiv.setVisible(false);
 				fileDiv.setVisible(true);
-				target.add(changeable);
+				target.add(resourceDiv);
+				target.add(downloadDiv);
+				target.add(fileDiv);
 			}
 
 		});
@@ -105,7 +106,9 @@ class UploadResourceModal
 				resourceDiv.setVisible(true);
 				downloadDiv.setVisible(true);
 				fileDiv.setVisible(false);
-				target.add(changeable);
+				target.add(resourceDiv);
+				target.add(downloadDiv);
+				target.add(fileDiv);
 			}
 
 		});

@@ -5,7 +5,6 @@ package pl.psnc.dl.wf4ever.portal.services;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -226,9 +225,7 @@ public class MyExpImportService
 		private OntModel getManifest(URI rodlURI)
 		{
 			model.setMessage("Downloading the manifest");
-			InputStream is = ROSRService.getResource(rodlURI, researchObjectURI.resolve(".ro/manifest.rdf"));
-			OntModel manifest = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
-			manifest.read(is, null);
+			OntModel manifest = ROSRService.createManifestModel(researchObjectURI);
 			incrementStepsComplete();
 			return manifest;
 		}
@@ -239,18 +236,16 @@ public class MyExpImportService
 			model.setMessage("Updating the manifest");
 			for (Entry<URI, URI> e : annotations.entrySet()) {
 				try {
-					ROSRService.addAnnotation(manifest, researchObjectURI, e.getKey(), e.getValue(),
-						creators.get(e.getKey()));
+					URI annURI = ROSRService.createAnnotationURI(manifest, researchObjectURI);
+					ROSRService.addAnnotationToManifestModel(manifest, researchObjectURI, annURI, e.getKey(),
+						e.getValue(), creators.get(e.getKey()));
 				}
 				catch (Exception ex) {
 					log.error("When adding annotation", ex);
 					errors.add(String.format("When adding annotation for %s: %s", e.getKey(), ex.getMessage()));
 				}
 			}
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			manifest.write(out);
-			ROSRService.sendResource(researchObjectURI.resolve(".ro/manifest.rdf"),
-				new ByteArrayInputStream(out.toByteArray()), "application/rdf+xml", dLibraToken);
+			ROSRService.uploadManifestModel(researchObjectURI, manifest, dLibraToken);
 			incrementStepsComplete();
 		}
 
@@ -262,7 +257,7 @@ public class MyExpImportService
 				ByteArrayOutputStream out = new ByteArrayOutputStream();
 				e.getValue().write(out);
 				URI annBodyURI = e.getKey();
-				ROSRService.sendResource(annBodyURI, new ByteArrayInputStream(out.toByteArray()),
+				ROSRService.uploadResource(annBodyURI, new ByteArrayInputStream(out.toByteArray()),
 					"application/rdf+xml", dLibraToken);
 				incrementStepsComplete();
 			}
@@ -373,7 +368,7 @@ public class MyExpImportService
 			incrementStepsComplete();
 
 			model.setMessage(String.format("Uploading %s", r.getFilename()));
-			ROSRService.sendResource(researchObjectURI.resolve(r.getFilenameURI()),
+			ROSRService.uploadResource(researchObjectURI.resolve(r.getFilenameURI()),
 				new ByteArrayInputStream(r.getContentDecoded()), r.getContentType(), dLibraToken);
 
 			incrementStepsComplete();

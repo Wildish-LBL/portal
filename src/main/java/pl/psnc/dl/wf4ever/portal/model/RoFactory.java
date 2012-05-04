@@ -31,6 +31,7 @@ import org.codehaus.jackson.JsonGenerator;
 
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.services.MyQueryFactory;
+import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 import pl.psnc.dl.wf4ever.portal.services.StabilityService;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
@@ -53,8 +54,6 @@ import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.shared.DoesNotExistException;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 
-import de.fuberlin.wiwiss.ng4j.NamedGraphSet;
-import de.fuberlin.wiwiss.ng4j.impl.NamedGraphSetImpl;
 
 /**
  * @author piotrhol
@@ -86,7 +85,7 @@ public class RoFactory
 			Map<URI, Creator> usernames)
 		throws URISyntaxException
 	{
-		OntModel model = createManifestModel(researchObjectURI);
+		OntModel model = ROSRService.createManifestModel(researchObjectURI);
 		return createResearchObject(model, rodlURI, researchObjectURI, includeAnnotations, usernames);
 	}
 
@@ -223,7 +222,7 @@ public class RoFactory
 	public static AggregatedResource createResource(URI rodlURI, URI researchObjectURI, URI resourceURI,
 			boolean includeAnnotations, Map<URI, Creator> usernames)
 	{
-		OntModel model = createManifestModel(researchObjectURI);
+		OntModel model = ROSRService.createManifestModel(researchObjectURI);
 
 		return createResource(model, rodlURI, researchObjectURI, resourceURI, includeAnnotations, usernames);
 	}
@@ -431,7 +430,7 @@ public class RoFactory
 	public static List<Annotation> createAnnotations(URI rodlURI, URI researchObjectURI, URI resourceURI,
 			Map<URI, Creator> usernames)
 	{
-		OntModel model = createManifestModel(researchObjectURI);
+		OntModel model = ROSRService.createManifestModel(researchObjectURI);
 
 		return createAnnotations(model, rodlURI, researchObjectURI, resourceURI, usernames);
 	}
@@ -511,49 +510,6 @@ public class RoFactory
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		body.write(out);
 		return new ByteArrayInputStream(out.toByteArray());
-	}
-
-
-	/**
-	 * @param researchObjectURI
-	 * @return
-	 */
-	public static OntModel createManifestModel(URI researchObjectURI)
-	{
-		URI manifestURI = researchObjectURI.resolve(".ro/manifest.rdf");
-		OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
-		try {
-			model.read(manifestURI.toString());
-		}
-		catch (DoesNotExistException e) {
-			// do nothing, model will be empty
-		}
-		if (model.isEmpty()) {
-			// HACK for old ROs
-			manifestURI = researchObjectURI.resolve(".ro/manifest");
-			model.read(manifestURI.toString());
-		}
-		return model;
-	}
-
-
-	/**
-	 * @param researchObjectURI
-	 * @return
-	 */
-	public static OntModel createManifestAndAnnotationsModel(URI researchObjectURI)
-	{
-		URI manifestURI = researchObjectURI.resolve(".ro/manifest.trig");
-		NamedGraphSet graphset = new NamedGraphSetImpl();
-		graphset.read(manifestURI.toString() + "?original=manifest.rdf", "TRIG");
-		if (graphset.countQuads() == 0) {
-			// HACK for old ROs
-			graphset.read(manifestURI.toString() + "?original=manifest", "TRIG");
-		}
-		OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM,
-			graphset.asJenaModel(researchObjectURI.resolve(".ro/manifest.rdf").toString()));
-		model.add(Vocab.model);
-		return model;
 	}
 
 

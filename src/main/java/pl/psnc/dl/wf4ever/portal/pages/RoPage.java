@@ -1,7 +1,5 @@
 package pl.psnc.dl.wf4ever.portal.pages;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -83,6 +81,8 @@ public class RoPage
 
 	final RelationEditModal relEditForm;
 
+	private final ImportAnnotationModal importAnnotationModal;
+
 	/** http://www.colourlovers.com/palette/1473/Ocean_Five */
 	public static String[] interactiveViewColors = { "#00A0B0", "#6A4A3C", "#CC333F", "#EB6841", "#EDC951"};
 
@@ -126,6 +126,8 @@ public class RoPage
 		relEditForm = new RelationEditModal("relationEditModal", RoPage.this, new CompoundPropertyModel<Statement>(
 				(Statement) null), "loadingROFragment");
 		add(relEditForm);
+		importAnnotationModal = new ImportAnnotationModal("importAnnotationModal", this, itemModel);
+		add(importAnnotationModal);
 
 		add(new AbstractDefaultAjaxBehavior() {
 
@@ -139,7 +141,7 @@ public class RoPage
 						start = printDuration(start, "get app");
 						Map<URI, Creator> usernames = MySession.get().getUsernames();
 						start = printDuration(start, "get usernames");
-						OntModel model = RoFactory.createManifestAndAnnotationsModel(roURI);
+						OntModel model = ROSRService.createManifestAndAnnotationsModel(roURI);
 						start = printDuration(start, "create model");
 						resources = RoFactory.getAggregatedResources(model, rodlURI, roURI, usernames);
 						start = printDuration(start, "get aggregated res");
@@ -289,18 +291,15 @@ public class RoPage
 		throws IOException, URISyntaxException
 	{
 		URI resourceURI = roURI.resolve(UrlEncoder.PATH_INSTANCE.encode(uploadedFile.getClientFileName(), "UTF-8"));
-		ROSRService.sendResource(resourceURI, uploadedFile.getInputStream(), uploadedFile.getContentType(), MySession
+		ROSRService.uploadResource(resourceURI, uploadedFile.getInputStream(), uploadedFile.getContentType(), MySession
 				.get().getdLibraAccessToken());
-		OntModel manifestModel = RoFactory.createManifestModel(roURI);
+		OntModel manifestModel = ROSRService.createManifestModel(roURI);
 		Individual individual = manifestModel.createResource(resourceURI.toString()).as(Individual.class);
 		for (ResourceGroup resourceGroup : selectedResourceGroups) {
 			individual.addRDFType(manifestModel.createResource(resourceGroup.getRdfClasses().iterator().next()
 					.toString()));
 		}
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		manifestModel.write(out);
-		ROSRService.sendResource(roURI.resolve(".ro/manifest.rdf"), new ByteArrayInputStream(out.toByteArray()),
-			"application/rdf+xml", MySession.get().getdLibraAccessToken());
+		ROSRService.uploadManifestModel(roURI, manifestModel, MySession.get().getdLibraAccessToken());
 
 		AggregatedResource resource = RoFactory.createResource(rodlURI, roURI, resourceURI, true, MySession.get()
 				.getUsernames());
@@ -348,7 +347,7 @@ public class RoPage
 	{
 		URI absoluteResourceURI = roURI.resolve(resourceURI);
 		//		URI absoluteDownloadURI = (downloadURI != null ? roURI.resolve(downloadURI) : null);
-		OntModel manifestModel = RoFactory.createManifestModel(roURI);
+		OntModel manifestModel = ROSRService.createManifestModel(roURI);
 		// HACK this shouldn't be added by portal but rather by RODL
 		Resource ro = manifestModel.createResource(roURI.toString());
 		Individual individual = manifestModel.createResource(absoluteResourceURI.toString()).as(Individual.class);
@@ -359,10 +358,7 @@ public class RoPage
 			individual.addRDFType(manifestModel.createResource(resourceGroup.getRdfClasses().iterator().next()
 					.toString()));
 		}
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		manifestModel.write(out);
-		ROSRService.sendResource(roURI.resolve(".ro/manifest.rdf"), new ByteArrayInputStream(out.toByteArray()),
-			"application/rdf+xml", MySession.get().getdLibraAccessToken());
+		ROSRService.uploadManifestModel(roURI, manifestModel, MySession.get().getdLibraAccessToken());
 
 		AggregatedResource resource = RoFactory.createResource(rodlURI, roURI, absoluteResourceURI, true, MySession
 				.get().getUsernames());
@@ -411,9 +407,16 @@ public class RoPage
 		throws URISyntaxException, Exception
 	{
 		Token dLibraToken = MySession.get().getdLibraAccessToken();
-		ClientResponse res = ROSRService.addAnnotation(rodlURI, roURI, statement.getSubjectURI(), MySession.get()
-				.getUserURI(), statement, dLibraToken);
+		URI annURI = ROSRService.createAnnotationURI(null, roURI);
+		URI bodyURI = ROSRService.createAnnotationBodyURI(roURI, statement.getSubjectURI());
+		ClientResponse res = ROSRService.addAnnotation(rodlURI, roURI, annURI, statement.getSubjectURI(), bodyURI,
+			MySession.get().getUserURI(), dLibraToken);
 		if (res.getStatus() != HttpServletResponse.SC_OK) {
+			throw new Exception("Error when adding annotation: " + res.getClientResponseStatus());
+		}
+		res = ROSRService.uploadResource(bodyURI, statement, dLibraToken);
+		if (res.getStatus() != HttpServletResponse.SC_OK) {
+			ROSRService.deleteAnnotationAndBody(roURI, annURI, dLibraToken);
 			throw new Exception("Error when adding annotation: " + res.getClientResponseStatus());
 		}
 	}
@@ -428,7 +431,7 @@ public class RoPage
 	{
 		Token dLibraToken = MySession.get().getdLibraAccessToken();
 		Annotation ann = statement.getAnnotation();
-		ClientResponse res = ROSRService.sendResource(ann.getBodyURI(), RoFactory.wrapAnnotationBody(ann.getBody()),
+		ClientResponse res = ROSRService.uploadResource(ann.getBodyURI(), RoFactory.wrapAnnotationBody(ann.getBody()),
 			"application/rdf+xml", dLibraToken);
 		if (res.getStatus() != HttpServletResponse.SC_OK) {
 			throw new Exception("Error when adding statement: " + res.getClientResponseStatus());
@@ -467,4 +470,29 @@ public class RoPage
 		target.add(annotatingBox.annotationsDiv);
 	}
 
+
+	public void onAnnotationImport(AjaxRequestTarget target, FileUpload uploadedFile,
+			AggregatedResource aggregatedResource)
+		throws Exception
+	{
+		MySession session = (MySession) getSession();
+		URI annURI = ROSRService.createAnnotationURI(null, roURI);
+		URI bodyURI = ROSRService.createAnnotationBodyURI(roURI, aggregatedResource.getURI());
+		ClientResponse response = ROSRService.addAnnotation(rodlURI, roURI, annURI, aggregatedResource.getURI(),
+			bodyURI, session.getUserURI(), session.getdLibraAccessToken());
+		if (response.getStatus() != HttpServletResponse.SC_OK) {
+			throw new Exception(response.getClientResponseStatus().getReasonPhrase());
+		}
+
+		String contentType = RDFFormat.forFileName(uploadedFile.getClientFileName(), RDFFormat.RDFXML)
+				.getDefaultMIMEType();
+		response = ROSRService.uploadResource(bodyURI, uploadedFile.getInputStream(), contentType, MySession.get()
+				.getdLibraAccessToken());
+		if (response.getStatus() != HttpServletResponse.SC_OK) {
+			ROSRService.deleteAnnotationAndBody(roURI, annURI, session.getdLibraAccessToken());
+			throw new Exception(response.getClientResponseStatus().getReasonPhrase());
+		}
+
+		//reload the whole page
+	}
 }

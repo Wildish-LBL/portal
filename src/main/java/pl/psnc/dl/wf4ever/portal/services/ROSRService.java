@@ -14,6 +14,8 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.log4j.Logger;
 import org.apache.wicket.request.UrlEncoder;
 import org.apache.wicket.util.crypt.Base64;
@@ -27,10 +29,14 @@ import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.shared.DoesNotExistException;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+
+import de.fuberlin.wiwiss.ng4j.NamedGraphSet;
+import de.fuberlin.wiwiss.ng4j.impl.NamedGraphSetImpl;
 
 /**
  * @author Piotr Hołubowicz
@@ -42,16 +48,24 @@ public class ROSRService
 	private static final Logger log = Logger.getLogger(ROSRService.class);
 
 
-	public static ClientResponse createResearchObject(URI baseURI, String roId, Token dLibraToken)
+	public static ClientResponse createResearchObject(URI rodlURI, String roId, Token dLibraToken)
 	{
 		Client client = Client.create();
-		WebResource webResource = client.resource(baseURI.toString()).path("ROs");
+		WebResource webResource = client.resource(rodlURI.toString()).path("ROs");
 		return webResource.header("Authorization", "Bearer " + dLibraToken.getToken()).type("text/plain")
 				.post(ClientResponse.class, roId);
 	}
 
 
-	public static InputStream getResource(URI baseURI, URI resourceURI)
+	public static ClientResponse deleteResearchObject(URI researchObjectURI, Token dLibraToken)
+	{
+		Client client = Client.create();
+		WebResource webResource = client.resource(researchObjectURI.toString());
+		return webResource.header("Authorization", "Bearer " + dLibraToken.getToken()).delete(ClientResponse.class);
+	}
+
+
+	public static InputStream getResource(URI resourceURI)
 	{
 		Client client = Client.create();
 		WebResource webResource = client.resource(resourceURI.toString());
@@ -59,30 +73,30 @@ public class ROSRService
 	}
 
 
-	public static InputStream getUser(URI baseURI, URI userURI)
-	{
-		Client client = Client.create();
-		WebResource webResource = client.resource(baseURI.toString()).path("users")
-				.path(Base64.encodeBase64URLSafeString(userURI.toString().getBytes()));
-		return webResource.get(InputStream.class);
-	}
-
-
-	public static ClientResponse sendResource(URI resourceURI, InputStream content, String contentType,
+	public static ClientResponse uploadResource(URI resourceURI, InputStream content, String contentType,
 			Token dLibraToken)
 	{
 		Client client = Client.create();
+		//		client.setFollowRedirects(true);
 		WebResource webResource = client.resource(resourceURI.toString());
-		return webResource.header("Authorization", "Bearer " + dLibraToken.getToken()).type(contentType)
-				.put(ClientResponse.class, content);
+		ClientResponse response = webResource.header("Authorization", "Bearer " + dLibraToken.getToken())
+				.type(contentType).put(ClientResponse.class, content);
+		if (response.getStatus() == HttpServletResponse.SC_TEMPORARY_REDIRECT) {
+			return uploadResource(response.getLocation(), content, contentType, dLibraToken);
+		}
+		return response;
 	}
 
 
-	public static ClientResponse sendResource(URI resourceURI, Token dLibraToken)
+	public static ClientResponse uploadResource(URI bodyURI, Statement statement, Token dLibraToken)
 	{
-		Client client = Client.create();
-		WebResource webResource = client.resource(resourceURI.toString());
-		return webResource.header("Authorization", "Bearer " + dLibraToken.getToken()).put(ClientResponse.class, "");
+		OntModel body = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+		ByteArrayOutputStream out2 = new ByteArrayOutputStream();
+		if (statement != null) {
+			body.add(statement.createJenaStatement());
+		}
+		body.write(out2);
+		return uploadResource(bodyURI, new ByteArrayInputStream(out2.toByteArray()), "application/rdf+xml", dLibraToken);
 	}
 
 
@@ -94,18 +108,36 @@ public class ROSRService
 	}
 
 
-	public static List<URI> getROList(URI baseURI)
-		throws Exception
+	public static InputStream getUser(URI rodlURI, URI userURI)
 	{
-		return getROList(baseURI, null);
+		Client client = Client.create();
+		WebResource webResource = client.resource(rodlURI.toString()).path("users")
+				.path(Base64.encodeBase64URLSafeString(userURI.toString().getBytes()));
+		return webResource.get(InputStream.class);
 	}
 
 
-	public static List<URI> getROList(URI baseURI, Token dLibraToken)
+	public static InputStream getWhoAmi(URI rodlURI, Token dLibraToken)
+		throws URISyntaxException
+	{
+		Client client = Client.create();
+		WebResource webResource = client.resource(rodlURI.toString()).path("whoami");
+		return webResource.header("Authorization", "Bearer " + dLibraToken.getToken()).get(InputStream.class);
+	}
+
+
+	public static List<URI> getROList(URI rodlURI)
+		throws Exception
+	{
+		return getROList(rodlURI, null);
+	}
+
+
+	public static List<URI> getROList(URI rodlURI, Token dLibraToken)
 		throws MalformedURLException, URISyntaxException
 	{
 		Client client = Client.create();
-		WebResource webResource = client.resource(baseURI.toString()).path("ROs");
+		WebResource webResource = client.resource(rodlURI.toString()).path("ROs");
 		String response;
 		if (dLibraToken == null) {
 			response = webResource.get(String.class);
@@ -123,24 +155,8 @@ public class ROSRService
 	}
 
 
-	public static ClientResponse deleteResearchObject(URI researchObjectURI, Token dLibraToken)
-	{
-		Client client = Client.create();
-		WebResource webResource = client.resource(researchObjectURI.toString());
-		return webResource.header("Authorization", "Bearer " + dLibraToken.getToken()).delete(ClientResponse.class);
-	}
-
-
-	public static ClientResponse addAnnotation(URI baseURI, URI researchObjectURI, URI targetURI, URI userURI,
-			Token dLibraToken)
-		throws URISyntaxException
-	{
-		return addAnnotation(baseURI, researchObjectURI, targetURI, userURI, null, dLibraToken);
-	}
-
-
 	/**
-	 * Creates an annotation and an empty annotation body in ROSRS
+	 * Creates an annotation in ROSRS
 	 * 
 	 * @param researchObjectURI
 	 * @param targetURI
@@ -149,37 +165,20 @@ public class ROSRService
 	 * @throws OAuthException
 	 * @throws URISyntaxException
 	 */
-	public static ClientResponse addAnnotation(URI baseURI, URI researchObjectURI, URI targetURI, URI userURI,
-			Statement statement, Token dLibraToken)
+	public static ClientResponse addAnnotation(URI baseURI, URI researchObjectURI, URI annURI, URI targetURI,
+			URI bodyURI, URI userURI, Token dLibraToken)
 		throws URISyntaxException
 	{
-		InputStream is = ROSRService.getResource(baseURI, researchObjectURI.resolve(".ro/manifest.rdf"));
-		OntModel manifest = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
-		manifest.read(is, null);
-
-		URI bodyURI = ROSRService.createAnnotationBodyURI(researchObjectURI, targetURI);
-		addAnnotation(manifest, researchObjectURI, targetURI, bodyURI, userURI);
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		manifest.write(out);
-		sendResource(researchObjectURI.resolve(".ro/manifest.rdf"), new ByteArrayInputStream(out.toByteArray()),
-			"application/rdf+xml", dLibraToken);
-
-		OntModel body = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
-		ByteArrayOutputStream out2 = new ByteArrayOutputStream();
-		if (statement != null) {
-			body.add(statement.createJenaStatement());
-		}
-		body.write(out2);
-		return sendResource(bodyURI, new ByteArrayInputStream(out2.toByteArray()), "application/rdf+xml", dLibraToken);
+		OntModel manifest = createManifestModel(researchObjectURI);
+		addAnnotationToManifestModel(manifest, researchObjectURI, annURI, targetURI, bodyURI, userURI);
+		return uploadManifestModel(researchObjectURI, manifest, dLibraToken);
 	}
 
 
-	public static ClientResponse deleteAnnotation(URI baseURI, URI researchObjectURI, URI annURI, Token dLibraToken)
+	public static ClientResponse deleteAnnotationAndBody(URI researchObjectURI, URI annURI, Token dLibraToken)
 		throws IllegalArgumentException, URISyntaxException
 	{
-		InputStream is = ROSRService.getResource(baseURI, researchObjectURI.resolve(".ro/manifest.rdf"));
-		OntModel manifest = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
-		manifest.read(is, null);
+		OntModel manifest = createManifestModel(researchObjectURI);
 
 		Individual ann = manifest.getIndividual(annURI.toString());
 		if (ann == null) {
@@ -194,10 +193,7 @@ public class ROSRService
 		}
 
 		manifest.removeAll(ann, null, null);
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		manifest.write(out);
-		return sendResource(researchObjectURI.resolve(".ro/manifest.rdf"), new ByteArrayInputStream(out.toByteArray()),
-			"application/rdf+xml", dLibraToken);
+		return uploadManifestModel(researchObjectURI, manifest, dLibraToken);
 	}
 
 
@@ -210,11 +206,11 @@ public class ROSRService
 	 * @param bodyURI
 	 * @throws URISyntaxException
 	 */
-	public static void addAnnotation(OntModel manifest, URI researchObjectURI, URI targetURI, URI bodyURI, URI userURI)
+	public static void addAnnotationToManifestModel(OntModel manifest, URI researchObjectURI, URI annURI,
+			URI targetURI, URI bodyURI, URI userURI)
 		throws URISyntaxException
 	{
-		Individual ann = manifest.createIndividual(createAnnotationURI(manifest, researchObjectURI).toString(),
-			Vocab.aggregatedAnnotation);
+		Individual ann = manifest.createIndividual(annURI.toString(), Vocab.aggregatedAnnotation);
 		ann.addProperty(Vocab.annotatesAggregatedResource, manifest.createResource(targetURI.toString()));
 		ann.addProperty(Vocab.aoBody, manifest.createResource(bodyURI.toString()));
 		ann.addProperty(DCTerms.created, manifest.createTypedLiteral(Calendar.getInstance()));
@@ -233,13 +229,13 @@ public class ROSRService
 	 *         http://sandbox.wf4ever-project.org/rosrs5/ROs/.ro/manifest.rdf#ann217/52
 	 *         a272f1 -864f-4a42 -89ff-2501a739d6f0
 	 */
-	private static URI createAnnotationURI(OntModel manifest, URI researchObjectURI)
+	public static URI createAnnotationURI(OntModel manifest, URI researchObjectURI)
 	{
 		URI ann = null;
 		do {
 			ann = researchObjectURI.resolve(".ro/manifest.rdf#" + UUID.randomUUID().toString());
 		}
-		while (manifest.containsResource(manifest.createResource(ann.toString())));
+		while (manifest != null && manifest.containsResource(manifest.createResource(ann.toString())));
 		return ann;
 	}
 
@@ -267,15 +263,6 @@ public class ROSRService
 	}
 
 
-	public static InputStream getWhoAmi(URI baseURI, Token dLibraToken)
-		throws URISyntaxException
-	{
-		Client client = Client.create();
-		WebResource webResource = client.resource(baseURI.toString()).path("whoami");
-		return webResource.header("Authorization", "Bearer " + dLibraToken.getToken()).get(InputStream.class);
-	}
-
-
 	/**
 	 * Checks if it is possible to create an RO with workspace "default" and version "v1"
 	 * 
@@ -283,13 +270,65 @@ public class ROSRService
 	 * @return
 	 * @throws Exception
 	 */
-	public static boolean isRoIdFree(URI baseURI, String roId)
+	public static boolean isRoIdFree(URI rodlURI, String roId)
 		throws Exception
 	{
 		//FIXME there should be a way to implement this without getting the list of all URIs
-		List<URI> ros = getROList(baseURI);
-		URI ro = baseURI.resolve("ROs/" + UrlEncoder.PATH_INSTANCE.encode(roId, "UTF-8") + "/");
+		List<URI> ros = getROList(rodlURI);
+		URI ro = rodlURI.resolve("ROs/" + UrlEncoder.PATH_INSTANCE.encode(roId, "UTF-8") + "/");
 		return !ros.contains(ro);
+	}
+
+
+	/**
+	 * @param researchObjectURI
+	 * @return
+	 */
+	public static OntModel createManifestModel(URI researchObjectURI)
+	{
+		URI manifestURI = researchObjectURI.resolve(".ro/manifest.rdf");
+		OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
+		try {
+			model.read(manifestURI.toString());
+		}
+		catch (DoesNotExistException e) {
+			// do nothing, model will be empty
+		}
+		if (model.isEmpty()) {
+			// HACK for old ROs
+			manifestURI = researchObjectURI.resolve(".ro/manifest");
+			model.read(manifestURI.toString());
+		}
+		return model;
+	}
+
+
+	/**
+	 * @param researchObjectURI
+	 * @return
+	 */
+	public static OntModel createManifestAndAnnotationsModel(URI researchObjectURI)
+	{
+		URI manifestURI = researchObjectURI.resolve(".ro/manifest.trig");
+		NamedGraphSet graphset = new NamedGraphSetImpl();
+		graphset.read(manifestURI.toString() + "?original=manifest.rdf", "TRIG");
+		if (graphset.countQuads() == 0) {
+			// HACK for old ROs
+			graphset.read(manifestURI.toString() + "?original=manifest", "TRIG");
+		}
+		OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM,
+			graphset.asJenaModel(researchObjectURI.resolve(".ro/manifest.rdf").toString()));
+		model.add(Vocab.model);
+		return model;
+	}
+
+
+	public static ClientResponse uploadManifestModel(URI researchObjectURI, OntModel manifest, Token dLibraToken)
+	{
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		manifest.write(out);
+		return uploadResource(researchObjectURI.resolve(".ro/manifest.rdf"),
+			new ByteArrayInputStream(out.toByteArray()), "application/rdf+xml", dLibraToken);
 	}
 
 }
