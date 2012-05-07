@@ -132,7 +132,8 @@ public class OAuthHelpService
 				}
 				break;
 			case PUT:
-				if (response.getCode() != HttpURLConnection.HTTP_OK) {
+				if (response.getCode() != HttpURLConnection.HTTP_OK
+						&& response.getCode() != HttpURLConnection.HTTP_CREATED) {
 					throw prepareException(response);
 				}
 				break;

@@ -14,8 +14,6 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.log4j.Logger;
 import org.apache.wicket.request.UrlEncoder;
 import org.apache.wicket.util.crypt.Base64;
@@ -77,14 +75,9 @@ public class ROSRService
 			Token dLibraToken)
 	{
 		Client client = Client.create();
-		//		client.setFollowRedirects(true);
 		WebResource webResource = client.resource(resourceURI.toString());
-		ClientResponse response = webResource.header("Authorization", "Bearer " + dLibraToken.getToken())
-				.type(contentType).put(ClientResponse.class, content);
-		if (response.getStatus() == HttpServletResponse.SC_TEMPORARY_REDIRECT) {
-			return uploadResource(response.getLocation(), content, contentType, dLibraToken);
-		}
-		return response;
+		return webResource.header("Authorization", "Bearer " + dLibraToken.getToken()).type(contentType)
+				.put(ClientResponse.class, content);
 	}
 
 

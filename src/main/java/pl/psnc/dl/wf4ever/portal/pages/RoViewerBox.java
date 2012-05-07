@@ -1,16 +1,20 @@
 package pl.psnc.dl.wf4ever.portal.pages;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 
 import org.apache.log4j.Logger;
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -25,6 +29,7 @@ import org.apache.wicket.util.crypt.Base64;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.model.ResourceGroup;
+import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.RoTree;
 
@@ -40,7 +45,7 @@ class RoViewerBox
 	 */
 	private final RoPage roPage;
 
-	RoTree conceptualTree;
+	private RoTree conceptualTree;
 
 	private RoTree physicalTree;
 
@@ -75,6 +80,11 @@ class RoViewerBox
 	private MyAjaxButton downloadResource;
 
 	private MyAjaxButton downloadROZipped;
+
+	private transient String json;
+
+	/** http://www.colourlovers.com/palette/1473/Ocean_Five */
+	public static String[] interactiveViewColors = { "#00A0B0", "#6A4A3C", "#CC333F", "#EB6841", "#EDC951"};
 
 
 	public RoViewerBox(final RoPage roPage, final CompoundPropertyModel<AggregatedResource> itemModel,
@@ -268,6 +278,40 @@ class RoViewerBox
 	}
 
 
+	@Override
+	protected void onBeforeRender()
+	{
+		super.onBeforeRender();
+		add(new AbstractDefaultAjaxBehavior() {
+
+			private static final long serialVersionUID = 2750059373726239613L;
+
+
+			@Override
+			protected void respond(AjaxRequestTarget target)
+			{
+				try {
+					if (roPage.resources != null && json == null) {
+						renderJSComponents(roPage.resources, target);
+					}
+				}
+				catch (IOException e) {
+					log.error(e);
+				}
+			}
+
+
+			@Override
+			public void renderHead(final Component component, final IHeaderResponse response)
+			{
+				super.renderHead(component, response);
+				response.renderOnDomReadyJavaScript(getCallbackScript().toString());
+			}
+
+		});
+	}
+
+
 	public CharSequence getInteractiveViewCallbackUrl()
 	{
 		return interactiveViewCallback.getCallbackUrl();
@@ -327,4 +371,26 @@ class RoViewerBox
 		target.add(actionButtons);
 		target.add(infoPanel);
 	}
+
+
+	public void renderJSComponents(Map<URI, AggregatedResource> resources, AjaxRequestTarget target)
+		throws IOException
+	{
+		json = RoFactory.createRoJSON(resources, interactiveViewColors);
+		String callback = getInteractiveViewCallbackUrl().toString();
+		target.appendJavaScript("var json = " + json + "; init(json, '" + callback + "');");
+	}
+
+
+	public RoTree getConceptualTree()
+	{
+		return conceptualTree;
+	}
+
+
+	public RoTree getPhysicalTree()
+	{
+		return physicalTree;
+	}
+
 }

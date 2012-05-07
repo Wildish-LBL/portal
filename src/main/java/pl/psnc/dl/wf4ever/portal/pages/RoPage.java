@@ -31,8 +31,6 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.UrlDecoder;
 import org.apache.wicket.request.UrlEncoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
@@ -83,9 +81,6 @@ public class RoPage
 
 	private final ImportAnnotationModal importAnnotationModal;
 
-	/** http://www.colourlovers.com/palette/1473/Ocean_Five */
-	public static String[] interactiveViewColors = { "#00A0B0", "#6A4A3C", "#CC333F", "#EB6841", "#EDC951"};
-
 	private UploadResourceModal uploadResourceModal;
 
 
@@ -135,29 +130,19 @@ public class RoPage
 			protected void respond(AjaxRequestTarget target)
 			{
 				try {
-					if (getConceptualResourcesTree() == null) {
-						DateTime start = new DateTime();
+					if (getConceptualResourcesTree() == null || getPhysicalResourcesTree() == null) {
 						PortalApplication app = ((PortalApplication) getApplication());
-						start = printDuration(start, "get app");
 						Map<URI, Creator> usernames = MySession.get().getUsernames();
-						start = printDuration(start, "get usernames");
 						OntModel model = ROSRService.createManifestAndAnnotationsModel(roURI);
-						start = printDuration(start, "create model");
 						resources = RoFactory.getAggregatedResources(model, rodlURI, roURI, usernames);
-						start = printDuration(start, "get aggregated res");
 						RoFactory.assignResourceGroupsToResources(model, roURI, app.getResourceGroups(), resources);
-						start = printDuration(start, "assign groups");
 						setConceptualResourcesTree(RoFactory.createConceptualResourcesTree(model, roURI, resources));
-						start = printDuration(start, "concept tree");
 						setPhysicalResourcesTree(RoFactory.createPhysicalResourcesTree(model, roURI, resources,
 							usernames));
-						start = printDuration(start, "physical tree");
 
 						RoFactory.createRelations(model, roURI, resources);
-						start = printDuration(start, "relations");
 						// FIXME this has been turned off because it takes too much time and is generally a hack
 						//						RoFactory.createStabilities(model, roURI, resources);
-						start = printDuration(start, "stabilities");
 
 						//						itemModel.setObject((AggregatedResource) ((DefaultMutableTreeNode) getConceptualResourcesTree()
 						//								.getRoot()).getUserObject());
@@ -166,25 +151,11 @@ public class RoPage
 						target.add(roViewerBox);
 						target.add(annotatingBox);
 						target.add(relEditForm);
-						start = printDuration(start, "update target");
-
-						String json = RoFactory.createRoJSON(resources, interactiveViewColors);
-						start = printDuration(start, "create json");
-						String callback = roViewerBox.getInteractiveViewCallbackUrl().toString();
-						target.appendJavaScript("var json = " + json + "; init(json, '" + callback + "');");
 					}
 				}
-				catch (URISyntaxException | IOException e) {
+				catch (URISyntaxException e) {
 					log.error(e);
 				}
-			}
-
-
-			private DateTime printDuration(DateTime start, String comment)
-			{
-				DateTime end = new DateTime();
-				log.debug("Duration " + new Duration(start, end).toString() + " (" + comment + ")");
-				return end;
 			}
 
 
@@ -306,14 +277,12 @@ public class RoPage
 		resource.getMatchingGroups().addAll(selectedResourceGroups);
 		getConceptualResourcesTree().addAggregatedResource(resource, true);
 		getPhysicalResourcesTree().addAggregatedResource(resource, false);
-		roViewerBox.conceptualTree.invalidateAll();
 		target.add(roViewerBox);
 
 		resources.put(resourceURI, resource);
 		RoFactory.addRelation(resources.get(roURI), Vocab.aggregates, resource);
-		String json = RoFactory.createRoJSON(resources, interactiveViewColors);
-		String callback = roViewerBox.getInteractiveViewCallbackUrl().toString();
-		target.appendJavaScript("var json = " + json + "; init(json, '" + callback + "');");
+
+		roViewerBox.renderJSComponents(resources, target);
 	}
 
 
@@ -328,9 +297,8 @@ public class RoPage
 		for (Entry<String, AggregatedResource> entry : resource.getInverseRelations().entries()) {
 			entry.getValue().getRelations().remove(entry.getKey(), resource);
 		}
-		String json = RoFactory.createRoJSON(resources, interactiveViewColors);
-		String callback = roViewerBox.getInteractiveViewCallbackUrl().toString();
-		target.appendJavaScript("var json = " + json + "; init(json, '" + callback + "');");
+		roViewerBox.renderJSComponents(resources, target);
+		target.add(roViewerBox);
 	}
 
 
@@ -365,14 +333,12 @@ public class RoPage
 		resource.getMatchingGroups().addAll(selectedTypes);
 		getConceptualResourcesTree().addAggregatedResource(resource, true);
 		getPhysicalResourcesTree().addAggregatedResource(resource, false);
-		roViewerBox.conceptualTree.invalidateAll();
 		target.add(roViewerBox);
 
 		resources.put(absoluteResourceURI, resource);
 		RoFactory.addRelation(resources.get(roURI), Vocab.aggregates, resource);
-		String json = RoFactory.createRoJSON(resources, interactiveViewColors);
-		String callback = roViewerBox.getInteractiveViewCallbackUrl().toString();
-		target.appendJavaScript("var json = " + json + "; init(json, '" + callback + "');");
+
+		roViewerBox.renderJSComponents(resources, target);
 	}
 
 
@@ -488,11 +454,11 @@ public class RoPage
 				.getDefaultMIMEType();
 		response = ROSRService.uploadResource(bodyURI, uploadedFile.getInputStream(), contentType, MySession.get()
 				.getdLibraAccessToken());
-		if (response.getStatus() != HttpServletResponse.SC_OK) {
+		if (response.getStatus() != HttpServletResponse.SC_CREATED) {
 			ROSRService.deleteAnnotationAndBody(roURI, annURI, session.getdLibraAccessToken());
 			throw new Exception(response.getClientResponseStatus().getReasonPhrase());
 		}
 
-		//reload the whole page
+		setResponsePage(RoPage.class, getPageParameters());
 	}
 }
