@@ -381,7 +381,7 @@ public class RoPage
 			throw new Exception("Error when adding annotation: " + res.getClientResponseStatus());
 		}
 		res = ROSRService.uploadResource(bodyURI, statement, dLibraToken);
-		if (res.getStatus() != HttpServletResponse.SC_OK) {
+		if (res.getStatus() != HttpServletResponse.SC_CREATED) {
 			ROSRService.deleteAnnotationAndBody(roURI, annURI, dLibraToken);
 			throw new Exception("Error when adding annotation: " + res.getClientResponseStatus());
 		}
