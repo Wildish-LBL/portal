@@ -86,7 +86,6 @@ public class AllRosPage
 			resCnts.put(ro, resCnt);
 		}
 
-		add(new MyFeedbackPanel("feedbackPanel"));
 		ListView<ResearchObject> list = new PropertyListView<ResearchObject>("rosListView", roHeaders) {
 
 			private static final long serialVersionUID = -6310254217773728128L;
