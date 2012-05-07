@@ -31,6 +31,7 @@ import org.apache.wicket.protocol.http.RequestLogger;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.UrlEncoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.joda.time.format.ISODateTimeFormat;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
@@ -95,7 +96,19 @@ public class HomePage
 			QuerySolution solution = results.next();
 			URI uri = new URI(solution.getResource("resource").getURI());
 			Creator author = RoFactory.getCreator(rodlURI, MySession.get().getUsernames(), solution.get("creator"));
-			Calendar created = ((XSDDateTime) solution.getLiteral("created").getValue()).asCalendar();
+			Calendar created = null;
+			Object date = solution.getLiteral("created").getValue();
+			if (date instanceof XSDDateTime) {
+				created = ((XSDDateTime) date).asCalendar();
+			}
+			else {
+				try {
+					created = ISODateTimeFormat.dateTime().parseDateTime(date.toString()).toGregorianCalendar();
+				}
+				catch (IllegalArgumentException e) {
+					logger.warn("Don't know how to parse date: " + date);
+				}
+			}
 			roHeaders.add(new ResearchObject(uri, created, Arrays.asList(author)));
 		}
 

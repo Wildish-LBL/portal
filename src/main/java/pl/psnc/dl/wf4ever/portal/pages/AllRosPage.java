@@ -17,6 +17,7 @@ import org.apache.wicket.markup.html.list.PropertyListView;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.UrlEncoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.joda.time.format.ISODateTimeFormat;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
@@ -41,7 +42,6 @@ public class AllRosPage
 
 	private static final long serialVersionUID = 1L;
 
-	@SuppressWarnings("unused")
 	private static final Logger log = Logger.getLogger(AllRosPage.class);
 
 
@@ -66,7 +66,19 @@ public class AllRosPage
 					authors.add(RoFactory.getCreator(rodlURI, MySession.get().getUsernames(), creator));
 				}
 			}
-			Calendar created = ((XSDDateTime) solution.getLiteral("created").getValue()).asCalendar();
+			Calendar created = null;
+			Object date = solution.getLiteral("created").getValue();
+			if (date instanceof XSDDateTime) {
+				created = ((XSDDateTime) date).asCalendar();
+			}
+			else {
+				try {
+					created = ISODateTimeFormat.dateTime().parseDateTime(date.toString()).toGregorianCalendar();
+				}
+				catch (IllegalArgumentException e) {
+					log.warn("Don't know how to parse date: " + date);
+				}
+			}
 			ResearchObject ro = new ResearchObject(uri, created, authors);
 			roHeaders.add(ro);
 			resCnts.put(ro, resCnt);
