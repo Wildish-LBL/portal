@@ -169,6 +169,7 @@ class AnnotatingBox
 				catch (Exception e) {
 					error(e.getMessage());
 				}
+				target.add(roPage.getFeedbackPanel());
 			}
 		};
 		annForm.add(addStatement);
@@ -211,6 +212,7 @@ class AnnotatingBox
 					RoFactory.createAnnotations(roPage.rodlURI, AnnotatingBox.this.roPage.roURI, AnnotatingBox.this
 							.getModelObject().getURI(), MySession.get().getUsernames()));
 				selectedStatements.clear();
+				target.add(roPage.getFeedbackPanel());
 				target.add(AnnotatingBox.this.roPage.annotatingBox.annotationsDiv);
 				target.add(AnnotatingBox.this.roPage.roViewerBox.infoPanel);
 			}
@@ -233,6 +235,7 @@ class AnnotatingBox
 				catch (Exception e) {
 					error(e.getMessage());
 				}
+				target.add(roPage.getFeedbackPanel());
 			}
 		};
 		annForm.add(addRelation);
@@ -249,6 +252,7 @@ class AnnotatingBox
 				catch (Exception e) {
 					error(e.getMessage());
 				}
+				target.add(roPage.getFeedbackPanel());
 			}
 		};
 		annForm.add(importAnnotation);

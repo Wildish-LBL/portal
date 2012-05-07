@@ -50,6 +50,8 @@ public class AllRosPage
 	{
 		super(parameters);
 
+		add(new MyFeedbackPanel("feedbackPanel"));
+
 		QueryExecution x = QueryExecutionFactory.sparqlService(((PortalApplication) getApplication())
 				.getSparqlEndpointURL().toString(), MyQueryFactory.getAllROs());
 		ResultSet results = x.execSelect();

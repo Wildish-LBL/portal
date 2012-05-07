@@ -20,6 +20,7 @@ import org.apache.wicket.util.convert.IConverter;
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.model.Statement;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
+import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.pages.util.URIConverter;
 
 class StatementEditModal
@@ -43,6 +44,8 @@ class StatementEditModal
 
 	private Form<Statement> form;
 
+	private MyFeedbackPanel feedbackPanel;
+
 
 	@SuppressWarnings("serial")
 	public StatementEditModal(String id, final RoPage roPage, CompoundPropertyModel<Statement> model)
@@ -51,6 +54,10 @@ class StatementEditModal
 		setOutputMarkupId(true);
 		form = new Form<>("stmtEditForm", model);
 		add(form);
+
+		feedbackPanel = new MyFeedbackPanel("feedbackPanel");
+		feedbackPanel.setOutputMarkupId(true);
+		form.add(feedbackPanel);
 
 		form.add(new Label("title", new PropertyModel<String>(this, "title")));
 
@@ -117,8 +124,17 @@ class StatementEditModal
 					target.appendJavaScript("$('#edit-ann-modal').modal('hide')");
 				}
 				catch (Exception e) {
-					error("" + e.getMessage());
+					error(e.getMessage());
 				}
+				target.add(feedbackPanel);
+			}
+
+
+			@Override
+			protected void onError(AjaxRequestTarget target, Form< ? > form)
+			{
+				super.onError(target, form);
+				target.add(feedbackPanel);
 			}
 		});
 		form.add(new MyAjaxButton("cancel", form) {

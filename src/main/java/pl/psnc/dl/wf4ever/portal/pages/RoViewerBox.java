@@ -185,6 +185,7 @@ class RoViewerBox
 						error(e);
 					}
 				}
+				target.add(roPage.getFeedbackPanel());
 			}
 
 		};
@@ -272,6 +273,7 @@ class RoViewerBox
 				catch (URISyntaxException e) {
 					log.error("Could not parse node id", e);
 				}
+				target.add(roPage.getFeedbackPanel());
 			}
 		};
 		add(interactiveViewCallback);
@@ -298,6 +300,7 @@ class RoViewerBox
 				catch (IOException e) {
 					log.error(e);
 				}
+				target.add(roPage.getFeedbackPanel());
 			}
 
 

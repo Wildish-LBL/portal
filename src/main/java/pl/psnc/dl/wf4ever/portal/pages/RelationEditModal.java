@@ -25,6 +25,7 @@ import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.model.Statement;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
+import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.pages.util.RoTree;
 import pl.psnc.dl.wf4ever.portal.pages.util.URIConverter;
 
@@ -53,6 +54,8 @@ class RelationEditModal
 
 	private RoPage roPage;
 
+	private MyFeedbackPanel feedbackPanel;
+
 
 	@SuppressWarnings("serial")
 	public RelationEditModal(String id, final RoPage roPage, CompoundPropertyModel<Statement> model, String tempRoTreeId)
@@ -62,6 +65,10 @@ class RelationEditModal
 		setOutputMarkupId(true);
 		form = new Form<>("relEditForm", model);
 		add(form);
+
+		feedbackPanel = new MyFeedbackPanel("feedbackPanel");
+		feedbackPanel.setOutputMarkupId(true);
+		form.add(feedbackPanel);
 
 		form.add(new Label("title", new PropertyModel<String>(this, "title")));
 
@@ -140,8 +147,17 @@ class RelationEditModal
 					target.appendJavaScript("$('#edit-rel-modal').modal('hide')");
 				}
 				catch (Exception e) {
-					error("" + e.getMessage());
+					error(e.getMessage());
 				}
+				target.add(feedbackPanel);
+			}
+
+
+			@Override
+			protected void onError(AjaxRequestTarget target, Form< ? > form)
+			{
+				super.onError(target, form);
+				target.add(feedbackPanel);
 			}
 		});
 		form.add(new MyAjaxButton("cancel", form) {

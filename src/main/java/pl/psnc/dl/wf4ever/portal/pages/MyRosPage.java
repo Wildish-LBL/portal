@@ -50,12 +50,18 @@ public class MyRosPage
 
 	private String roId;
 
+	private MyFeedbackPanel addFeedbackPanel;
+
+	private MyFeedbackPanel deleteFeedbackPanel;
+
 
 	@SuppressWarnings("serial")
 	public MyRosPage(final PageParameters parameters)
 		throws Exception
 	{
 		super(parameters);
+
+		add(new MyFeedbackPanel("feedbackPanel"));
 
 		List<URI> uris = ROSRService.getROList(rodlURI, MySession.get().getdLibraAccessToken());
 		final List<ResearchObject> researchObjects = new ArrayList<ResearchObject>();
@@ -137,7 +143,9 @@ public class MyRosPage
 		addForm.add(name);
 		add(addForm);
 
-		addForm.add(new MyFeedbackPanel("addFeedbackPanel"));
+		addFeedbackPanel = new MyFeedbackPanel("addFeedbackPanel");
+		addFeedbackPanel.setOutputMarkupId(true);
+		addForm.add(addFeedbackPanel);
 
 		form.add(new MyAjaxButton("delete", form) {
 
@@ -152,6 +160,10 @@ public class MyRosPage
 				}
 			}
 		});
+
+		deleteFeedbackPanel = new MyFeedbackPanel("deleteFeedbackPanel");
+		deleteFeedbackPanel.setOutputMarkupId(true);
+		add(deleteFeedbackPanel);
 
 		add(new MyAjaxButton("confirmDelete", form) {
 
@@ -170,6 +182,7 @@ public class MyRosPage
 					}
 				}
 				target.add(form);
+				target.add(deleteFeedbackPanel);
 				target.appendJavaScript("$('#confirm-delete-modal').modal('hide')");
 			}
 		});
@@ -211,7 +224,16 @@ public class MyRosPage
 					error("Could not add Research Object: " + roId + " (" + e.getMessage() + ")");
 				}
 				target.add(form);
+				target.add(addFeedbackPanel);
 				target.appendJavaScript("$('#confirm-add-modal').modal('hide')");
+			}
+
+
+			@Override
+			protected void onError(AjaxRequestTarget target, Form< ? > form)
+			{
+				super.onError(target, form);
+				target.add(addFeedbackPanel);
 			}
 		});
 

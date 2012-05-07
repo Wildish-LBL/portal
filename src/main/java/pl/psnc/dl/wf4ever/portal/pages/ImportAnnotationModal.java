@@ -11,6 +11,7 @@ import org.apache.wicket.util.lang.Bytes;
 
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
+import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 
 @SuppressWarnings("serial")
 class ImportAnnotationModal
@@ -19,12 +20,19 @@ class ImportAnnotationModal
 
 	private static final Logger log = Logger.getLogger(ImportAnnotationModal.class);
 
+	private MyFeedbackPanel feedbackPanel;
+
 
 	public ImportAnnotationModal(String id, final RoPage roPage, final IModel<AggregatedResource> itemModel)
 	{
 		super(id);
+
 		Form< ? > form = new Form<Void>("uploadResourceForm");
 		add(form);
+
+		feedbackPanel = new MyFeedbackPanel("feedbackPanel");
+		feedbackPanel.setOutputMarkupId(true);
+		form.add(feedbackPanel);
 
 		// Enable multipart mode (need for uploads file)
 		form.setMultiPart(true);
@@ -51,6 +59,7 @@ class ImportAnnotationModal
 						error(e);
 					}
 				}
+				target.add(feedbackPanel);
 			}
 
 		});
@@ -60,9 +69,9 @@ class ImportAnnotationModal
 			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 			{
 				super.onSubmit(target, form);
+				target.add(feedbackPanel);
 				target.appendJavaScript("$('#import-annotation-modal').modal('hide')");
 			}
 		}.setDefaultFormProcessing(false));
 	}
-
 }

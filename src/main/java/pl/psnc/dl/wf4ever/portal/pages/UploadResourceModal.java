@@ -32,6 +32,7 @@ import org.apache.wicket.util.lang.Bytes;
 
 import pl.psnc.dl.wf4ever.portal.model.ResourceGroup;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
+import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.pages.util.URIConverter;
 
 @SuppressWarnings("serial")
@@ -55,12 +56,18 @@ class UploadResourceModal
 
 	private final WebMarkupContainer fileDiv;
 
+	private MyFeedbackPanel feedbackPanel;
+
 
 	public UploadResourceModal(String id, final RoPage roPage, final Set<ResourceGroup> set)
 	{
 		super(id);
 		Form< ? > form = new Form<Void>("uploadResourceForm");
 		add(form);
+
+		feedbackPanel = new MyFeedbackPanel("feedbackPanel");
+		feedbackPanel.setOutputMarkupId(true);
+		form.add(feedbackPanel);
 
 		// Enable multipart mode (need for uploads file)
 		form.setMultiPart(true);
@@ -193,6 +200,15 @@ class UploadResourceModal
 						}
 						break;
 				}
+				target.add(feedbackPanel);
+			}
+
+
+			@Override
+			protected void onError(AjaxRequestTarget target, Form< ? > form)
+			{
+				super.onError(target, form);
+				target.add(feedbackPanel);
 			}
 
 		});

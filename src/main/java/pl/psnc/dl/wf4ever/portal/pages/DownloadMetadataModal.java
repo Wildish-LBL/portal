@@ -11,6 +11,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
 
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
+import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
 @SuppressWarnings("serial")
@@ -20,12 +21,19 @@ class DownloadMetadataModal
 
 	private RDFFormat format = RDFFormat.RDFXML;
 
+	private MyFeedbackPanel feedbackPanel;
+
 
 	public DownloadMetadataModal(String id, final RoPage roPage)
 	{
 		super(id);
 		Form< ? > form = new Form<Void>("downloadMetadataForm");
 		add(form);
+
+		feedbackPanel = new MyFeedbackPanel("feedbackPanel");
+		feedbackPanel.setOutputMarkupId(true);
+		form.add(feedbackPanel);
+
 		List<RDFFormat> formats = Arrays.asList(RDFFormat.RDFXML, RDFFormat.TURTLE, RDFFormat.TRIG, RDFFormat.TRIX,
 			RDFFormat.N3);
 		DropDownChoice<RDFFormat> formatDropDown = new DropDownChoice<RDFFormat>("rdfFormat",
