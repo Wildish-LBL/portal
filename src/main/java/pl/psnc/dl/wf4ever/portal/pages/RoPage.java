@@ -50,6 +50,7 @@ import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 import com.sun.jersey.api.client.ClientResponse;
@@ -307,7 +308,12 @@ public class RoPage
 	{
 		ClientResponse response = ROSRService.deleteResource(resource.getURI(), MySession.get().getdLibraAccessToken());
 		if (response.getStatus() != HttpServletResponse.SC_NO_CONTENT) {
-			throw new IOException(response.getClientResponseStatus().getReasonPhrase());
+			if (response.getStatus() == HttpServletResponse.SC_NOT_FOUND) {
+				onRemoteResourceDelete(resource, target);
+			}
+			else {
+				throw new IOException(response.getClientResponseStatus().getReasonPhrase());
+			}
 		}
 		getConceptualResourcesTree().removeAggregatedResource(resource);
 		getPhysicalResourcesTree().removeAggregatedResource(resource);
@@ -318,6 +324,43 @@ public class RoPage
 		}
 		roViewerBox.renderJSComponents(resources, target);
 		target.add(roViewerBox);
+	}
+
+
+	private void onRemoteResourceDelete(AggregatedResource resource, AjaxRequestTarget target)
+		throws IOException
+	{
+		OntModel manifestModel = ROSRService.createManifestModel(roURI);
+		// HACK this shouldn't be deleted by portal but rather by RODL
+		Resource ro = manifestModel.createResource(roURI.toString());
+		URI absoluteResourceURI = roURI.resolve(resource.getURI());
+		Individual individual = manifestModel.createResource(absoluteResourceURI.toString()).as(Individual.class);
+		if (!ro.hasProperty(Vocab.aggregates, individual)) {
+			throw new IOException("Not found");
+		}
+
+		manifestModel.remove(ro, Vocab.aggregates, individual);
+
+		ResIterator it2 = manifestModel.listSubjectsWithProperty(Vocab.annotatesAggregatedResource, individual);
+		while (it2.hasNext()) {
+			Resource ann = it2.next();
+			manifestModel.remove(ann, Vocab.annotatesAggregatedResource, individual);
+			if (!ann.hasProperty(Vocab.annotatesAggregatedResource)) {
+				Resource annBody = ann.getPropertyResourceValue(Vocab.aoBody);
+				if (annBody != null && annBody.isURIResource()) {
+					URI annBodyURI = URI.create(annBody.getURI());
+					ROSRService.deleteResource(annBodyURI, ((MySession) getSession()).getdLibraAccessToken());
+				}
+				manifestModel.removeAll(ann, null, null);
+				manifestModel.removeAll(null, null, ann);
+			}
+		}
+
+		ClientResponse response = ROSRService.uploadManifestModel(roURI, manifestModel, MySession.get()
+				.getdLibraAccessToken());
+		if (response.getStatus() != HttpServletResponse.SC_OK) {
+			throw new IOException(response.getClientResponseStatus().getReasonPhrase());
+		}
 	}
 
 
