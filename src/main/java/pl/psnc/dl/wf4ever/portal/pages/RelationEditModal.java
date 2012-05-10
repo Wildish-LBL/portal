@@ -1,6 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.pages;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -55,6 +56,10 @@ class RelationEditModal
 	private RoPage roPage;
 
 	private MyFeedbackPanel feedbackPanel;
+
+	private List<Statement> statements = new ArrayList<>();
+
+	private MyAjaxButton anotherButton;
 
 
 	@SuppressWarnings("serial")
@@ -137,11 +142,13 @@ class RelationEditModal
 
 				try {
 					if (statement.getAnnotation() == null) {
-						roPage.onStatementAdd(statement);
+						statements.add(statement);
+						roPage.onStatementAdd(statements);
 					}
 					else {
 						roPage.onStatementEdit(statement);
 					}
+					statements.clear();
 					roPage.onRelationAddedEdited(statement, target);
 					target.add(form);
 					target.appendJavaScript("$('#edit-rel-modal').modal('hide')");
@@ -160,12 +167,44 @@ class RelationEditModal
 				target.add(feedbackPanel);
 			}
 		});
+		anotherButton = new MyAjaxButton("another", form) {
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+			{
+				super.onSubmit(target, form);
+				Statement statement = RelationEditModal.this.getModelObject();
+				AggregatedResource res = (AggregatedResource) ((DefaultMutableTreeNode) tree.getTreeState()
+						.getSelectedNodes().iterator().next()).getUserObject();
+				statement.setObjectURI(res.getURI());
+				statements.add(statement);
+				try {
+					RelationEditModal.this.setModelObject(new Statement(statement.getSubjectURI(), null));
+					target.add(form);
+					target.appendJavaScript("showRelEdit('');");
+				}
+				catch (Exception e) {
+					error(e.getMessage());
+				}
+				target.add(feedbackPanel);
+			}
+
+
+			@Override
+			protected void onError(AjaxRequestTarget target, Form< ? > form)
+			{
+				super.onError(target, form);
+				target.add(feedbackPanel);
+			}
+		};
+		form.add(anotherButton);
 		form.add(new MyAjaxButton("cancel", form) {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 			{
 				super.onSubmit(target, form);
+				statements.clear();
 				target.appendJavaScript("$('#edit-rel-modal').modal('hide')");
 			}
 		}.setDefaultFormProcessing(false));
@@ -236,7 +275,7 @@ class RelationEditModal
 	 * @param title
 	 *            the title to set
 	 */
-	public void setTitle(String title)
+	private void setTitle(String title)
 	{
 		this.title = title;
 	}
@@ -261,4 +300,32 @@ class RelationEditModal
 		}
 		return "./" + roPage.roURI.relativize(getModelObject().getSubjectURI()).toString();
 	}
+
+
+	// FIXME not the best design probably, these modals might use some refactoring
+	public void setAddMode()
+	{
+		setTitle("Add relation");
+		getAnotherButton().setVisible(true);
+	}
+
+
+	public void setEditMode()
+	{
+		setTitle("Edit relation");
+		getAnotherButton().setVisible(false);
+	}
+
+
+	public MyAjaxButton getAnotherButton()
+	{
+		return anotherButton;
+	}
+
+
+	public void setAnotherButton(MyAjaxButton anotherButton)
+	{
+		this.anotherButton = anotherButton;
+	}
+
 }

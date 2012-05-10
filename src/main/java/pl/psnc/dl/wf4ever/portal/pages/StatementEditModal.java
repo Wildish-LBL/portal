@@ -1,6 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.pages;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -45,6 +46,10 @@ class StatementEditModal
 	private Form<Statement> form;
 
 	private MyFeedbackPanel feedbackPanel;
+
+	private List<Statement> statements = new ArrayList<>();
+
+	private MyAjaxButton anotherButton;
 
 
 	@SuppressWarnings("serial")
@@ -114,11 +119,13 @@ class StatementEditModal
 				Statement statement = StatementEditModal.this.getModelObject();
 				try {
 					if (statement.getAnnotation() == null) {
-						roPage.onStatementAdd(statement);
+						statements.add(statement);
+						roPage.onStatementAdd(statements);
 					}
 					else {
 						roPage.onStatementEdit(statement);
 					}
+					statements.clear();
 					roPage.onStatementAddedEdited(target);
 					target.add(form);
 					target.appendJavaScript("$('#edit-ann-modal').modal('hide')");
@@ -137,12 +144,41 @@ class StatementEditModal
 				target.add(feedbackPanel);
 			}
 		});
+		anotherButton = new MyAjaxButton("another", form) {
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
+			{
+				super.onSubmit(target, form);
+				Statement statement = StatementEditModal.this.getModelObject();
+				statements.add(statement);
+				try {
+					StatementEditModal.this.setModelObject(new Statement(statement.getSubjectURI(), null));
+					target.add(form);
+					target.appendJavaScript("showStmtEdit('');");
+				}
+				catch (Exception e) {
+					error(e.getMessage());
+				}
+				target.add(feedbackPanel);
+			}
+
+
+			@Override
+			protected void onError(AjaxRequestTarget target, Form< ? > form)
+			{
+				super.onError(target, form);
+				target.add(feedbackPanel);
+			}
+		};
+		form.add(anotherButton);
 		form.add(new MyAjaxButton("cancel", form) {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 			{
 				super.onSubmit(target, form);
+				statements.clear();
 				target.appendJavaScript("$('#edit-ann-modal').modal('hide')");
 			}
 		}.setDefaultFormProcessing(false));
@@ -207,7 +243,7 @@ class StatementEditModal
 	 * @param title
 	 *            the title to set
 	 */
-	public void setTitle(String title)
+	private void setTitle(String title)
 	{
 		this.title = title;
 	}
@@ -222,6 +258,33 @@ class StatementEditModal
 	public void setModelObject(Statement stmt)
 	{
 		form.setModelObject(stmt);
+	}
+
+
+	// FIXME not the best design probably, these modals might use some refactoring
+	public void setAddMode()
+	{
+		setTitle("Add annotation");
+		getAnotherButton().setVisible(true);
+	}
+
+
+	public void setEditMode()
+	{
+		setTitle("Edit annotation");
+		getAnotherButton().setVisible(false);
+	}
+
+
+	public MyAjaxButton getAnotherButton()
+	{
+		return anotherButton;
+	}
+
+
+	public void setAnotherButton(MyAjaxButton anotherButton)
+	{
+		this.anotherButton = anotherButton;
 	}
 
 }

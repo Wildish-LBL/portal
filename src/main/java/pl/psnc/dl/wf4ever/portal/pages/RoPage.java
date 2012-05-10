@@ -431,22 +431,22 @@ public class RoPage
 
 
 	/**
-	 * @param statement
+	 * @param statements
 	 * @throws URISyntaxException
 	 * @throws Exception
 	 */
-	void onStatementAdd(Statement statement)
+	void onStatementAdd(List<Statement> statements)
 		throws URISyntaxException, IOException
 	{
 		Token dLibraToken = MySession.get().getdLibraAccessToken();
 		URI annURI = ROSRService.createAnnotationURI(null, roURI);
-		URI bodyURI = ROSRService.createAnnotationBodyURI(roURI, statement.getSubjectURI());
-		ClientResponse res = ROSRService.addAnnotation(rodlURI, roURI, annURI, statement.getSubjectURI(), bodyURI,
-			MySession.get().getUserURI(), dLibraToken);
+		URI bodyURI = ROSRService.createAnnotationBodyURI(roURI, statements.get(0).getSubjectURI());
+		ClientResponse res = ROSRService.addAnnotation(rodlURI, roURI, annURI, statements.get(0).getSubjectURI(),
+			bodyURI, MySession.get().getUserURI(), dLibraToken);
 		if (res.getStatus() != HttpServletResponse.SC_OK) {
 			throw new IOException("Error when adding annotation: " + res.getClientResponseStatus());
 		}
-		res = ROSRService.uploadResource(bodyURI, statement, dLibraToken);
+		res = ROSRService.uploadResource(bodyURI, statements, dLibraToken);
 		if (res.getStatus() != HttpServletResponse.SC_CREATED) {
 			ROSRService.deleteAnnotationAndBody(roURI, annURI, dLibraToken);
 			throw new IOException("Error when adding annotation: " + res.getClientResponseStatus());

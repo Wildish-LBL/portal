@@ -133,7 +133,7 @@ class AnnotatingBox
 										public void onClick(AjaxRequestTarget target)
 										{
 											AnnotatingBox.this.roPage.stmtEditForm.setModelObject(statement);
-											AnnotatingBox.this.roPage.stmtEditForm.setTitle("Edit statement");
+											AnnotatingBox.this.roPage.stmtEditForm.setEditMode();
 											target.add(AnnotatingBox.this.roPage.stmtEditForm);
 											target.appendJavaScript("showStmtEdit('"
 													+ StringEscapeUtils.escapeEcmaScript(statement.getObjectValue())
@@ -162,7 +162,7 @@ class AnnotatingBox
 				try {
 					AnnotatingBox.this.roPage.stmtEditForm.setModelObject(new Statement(itemModel.getObject().getURI(),
 							null));
-					AnnotatingBox.this.roPage.stmtEditForm.setTitle("Add annotation");
+					AnnotatingBox.this.roPage.stmtEditForm.setAddMode();
 					target.add(AnnotatingBox.this.roPage.stmtEditForm);
 					target.appendJavaScript("showStmtEdit('');");
 				}
@@ -228,7 +228,7 @@ class AnnotatingBox
 				try {
 					AnnotatingBox.this.roPage.relEditForm.setModelObject(new Statement(itemModel.getObject().getURI(),
 							null));
-					AnnotatingBox.this.roPage.relEditForm.setTitle("Add relation");
+					AnnotatingBox.this.roPage.relEditForm.setAddMode();
 					target.add(AnnotatingBox.this.roPage.relEditForm);
 					target.appendJavaScript("showRelEdit();");
 				}

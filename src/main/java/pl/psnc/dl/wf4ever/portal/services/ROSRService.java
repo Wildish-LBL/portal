@@ -81,12 +81,14 @@ public class ROSRService
 	}
 
 
-	public static ClientResponse uploadResource(URI bodyURI, Statement statement, Token dLibraToken)
+	public static ClientResponse uploadResource(URI bodyURI, List<Statement> statements, Token dLibraToken)
 	{
 		OntModel body = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 		ByteArrayOutputStream out2 = new ByteArrayOutputStream();
-		if (statement != null) {
-			body.add(statement.createJenaStatement());
+		if (statements != null) {
+			for (Statement statement : statements) {
+				body.add(statement.createJenaStatement());
+			}
 		}
 		body.write(out2);
 		return uploadResource(bodyURI, new ByteArrayInputStream(out2.toByteArray()), "application/rdf+xml", dLibraToken);
