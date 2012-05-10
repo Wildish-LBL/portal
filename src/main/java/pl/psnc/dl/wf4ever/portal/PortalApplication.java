@@ -104,8 +104,8 @@ public class PortalApplication
 		mountPage("/contact", ContactPage.class);
 		mountPage("/help", HelpPage.class);
 
-		loadTokens("tokens.properties");
 		loadProperties("portal.properties");
+		loadTokens("tokens.properties");
 		loadResourceGroups("resourceGroups.properties");
 
 		Locale.setDefault(Locale.ENGLISH);

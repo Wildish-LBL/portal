@@ -21,7 +21,7 @@ public class TestRecommender
 	}
 
 
-	@Test
+//	@Test
 	public final void testRecommend()
 		throws Exception
 	{
