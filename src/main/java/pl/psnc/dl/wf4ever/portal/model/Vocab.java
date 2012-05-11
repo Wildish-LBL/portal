@@ -13,6 +13,8 @@ public class Vocab
 
 	static final String RO_NAMESPACE = "http://purl.org/wf4ever/ro#";
 
+	static final String ROEVO_NAMESPACE = "http://purl.org/wf4ever/roevo#";
+
 	static final String ORE_NAMESPACE = "http://www.openarchives.org/ore/terms/";
 
 	static final String AO_NAMESPACE = "http://purl.org/ao/";
@@ -25,7 +27,8 @@ public class Vocab
 
 	public static final OntModel model = (OntModel) ModelFactory
 			.createOntologyModel(OntModelSpec.OWL_LITE_MEM_RDFS_INF).read(RO_NAMESPACE).read(ORE_NAMESPACE)
-			.read(AO_NAMESPACE).read(WFPROV_NAMESPACE).read(WFDESC_NAMESPACE).read(WF4EVER_NAMESPACE).read(DCTerms.NS);
+			.read(AO_NAMESPACE).read(WFPROV_NAMESPACE).read(WFDESC_NAMESPACE).read(WF4EVER_NAMESPACE).read(DCTerms.NS)
+			.read(ROEVO_NAMESPACE);
 
 	public static final Resource roResource = model.createResource("http://purl.org/wf4ever/ro#Resource");
 
@@ -49,6 +52,13 @@ public class Vocab
 	public static final OntProperty aoBody = model.createOntProperty(Vocab.AO_NAMESPACE + "body");
 
 	public static final OntProperty hasSubProcess = model.createOntProperty(Vocab.WFDESC_NAMESPACE + "hasSubProcess");
+
+	public static final OntProperty isSnapshotOf = model.createOntProperty(Vocab.ROEVO_NAMESPACE + "isSnapshotOf");
+
+	public static final OntProperty hasPreviousVersion = model.createOntProperty(Vocab.ROEVO_NAMESPACE
+			+ "hasPreviousVersion");
+
+	public static final OntProperty derivedFrom = model.createOntProperty(Vocab.ROEVO_NAMESPACE + "derivedFrom");
 
 	static {
 		model.add(DCTerms.references, OWL.inverseOf, DCTerms.isReferencedBy);
