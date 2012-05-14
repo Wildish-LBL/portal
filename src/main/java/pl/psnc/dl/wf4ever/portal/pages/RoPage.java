@@ -1,7 +1,6 @@
 package pl.psnc.dl.wf4ever.portal.pages;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -90,7 +89,7 @@ public class RoPage
 
 	@SuppressWarnings("serial")
 	public RoPage(final PageParameters parameters)
-		throws URISyntaxException, MalformedURLException, OAuthException
+		throws URISyntaxException, OAuthException, IOException
 	{
 		super(parameters);
 		if (!parameters.get("ro").isEmpty()) {
@@ -132,6 +131,8 @@ public class RoPage
 		importAnnotationModal = new ImportAnnotationModal("importAnnotationModal", this, itemModel);
 		add(importAnnotationModal);
 
+		add(new RoEvoBox("roEvoBox", ((PortalApplication) getApplication()).getSparqlEndpointURL().toURI(), roURI));
+
 		add(new AbstractDefaultAjaxBehavior() {
 
 			@Override
@@ -152,8 +153,6 @@ public class RoPage
 						// FIXME this has been turned off because it takes too much time and is generally a hack
 						//						RoFactory.createStabilities(model, roURI, resources);
 
-						//						itemModel.setObject((AggregatedResource) ((DefaultMutableTreeNode) getConceptualResourcesTree()
-						//								.getRoot()).getUserObject());
 						roViewerBox.onRoTreeLoaded();
 						relEditForm.onRoTreeLoaded();
 						target.add(roViewerBox);
