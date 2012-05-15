@@ -35,7 +35,7 @@ public class RoEvoBox
 	private static final long serialVersionUID = -3775797988389365540L;
 
 	private enum Direction {
-		HORIZONTAL, VERTICAL
+		UP, DOWN, LEFT, RIGHT
 	}
 
 
@@ -48,9 +48,8 @@ public class RoEvoBox
 		setOutputMarkupId(true);
 		setOutputMarkupPlaceholderTag(true);
 
-		final StringBuilder sb = new StringBuilder();
-
-		List<RoEvoNode> nodes = new ArrayList<>(RoEvoService.describeSnapshot(sparqlEndpointURI, researchObjectURI));
+		final List<RoEvoNode> nodes = new ArrayList<>(RoEvoService.describeSnapshot(sparqlEndpointURI,
+			researchObjectURI));
 		Collections.sort(nodes, new Comparator<RoEvoNode>() {
 
 			@Override
@@ -108,16 +107,10 @@ public class RoEvoBox
 				}
 				item.add(new AttributeModifier("style", "left: " + x + "em; top: " + y + "em;"));
 				item.getModelObject().setComponent(item);
+				item.setOutputMarkupId(true);
 			}
 
 		});
-
-		for (RoEvoNode source : nodes) {
-			for (RoEvoNode node : source.getItsLiveROs()) {
-				sb.append(createConnection(source, node, null, Direction.HORIZONTAL));
-			}
-
-		}
 
 		add(new Behavior() {
 
@@ -125,6 +118,18 @@ public class RoEvoBox
 			public void renderHead(Component component, IHeaderResponse response)
 			{
 				super.renderHead(component, response);
+				final StringBuilder sb = new StringBuilder();
+				sb.append("jsPlumb.ready(function() {");
+
+				for (RoEvoNode source : nodes) {
+					for (RoEvoNode node : source.getItsLiveROs()) {
+						sb.append(createConnection(source, node, null, Direction.UP));
+					}
+
+				}
+
+				sb.append("});");
+
 				response.renderOnLoadJavaScript(sb.toString());
 			}
 		});
@@ -139,11 +144,17 @@ public class RoEvoBox
 		sb.append("target: '" + target.getComponent().getMarkupId() + "',");
 		switch (direction) {
 			default:
-			case HORIZONTAL:
+			case LEFT:
 				sb.append("anchors : [ 'LeftMiddle', 'RightMiddle' ],");
 				break;
-			case VERTICAL:
+			case RIGHT:
+				sb.append("anchors : [ 'RightMiddle', 'LeftMiddle' ],");
+				break;
+			case DOWN:
 				sb.append("anchors : [ 'BottomCenter', 'TopCenter' ],");
+				break;
+			case UP:
+				sb.append("anchors : [ 'TopCenter', 'BottomCenter' ],");
 				break;
 		}
 		sb.append("connector : 'Straight'});");
