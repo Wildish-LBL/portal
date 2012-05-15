@@ -4,17 +4,16 @@
 
 .evo .node {
 	border: 2px solid #346789;
-    font-size: 0.8em;
-    height: 8em;
-    width: 8em;
+	font-size: 0.8em;
+	height: 8em;
+	width: 8em;
 	position: absolute;
-    z-index: 20;
-    
-    background-color: white;
-    color: black;
-    font-family: helvetica;
-    opacity: 0.8;
-    padding: 0.5em;
+	z-index: 20;
+	background-color: white;
+	color: black;
+	font-family: helvetica;
+	opacity: 0.8;
+	padding: 0.5em;
 }
 
 .evo .node.current {
@@ -22,6 +21,9 @@
 }
 
 .evo .evolabel {
-	margin: -1.5em;
+	border: 1px solid #346789;
+	background-color: white;
+	padding: 4px;
+	opacity: 1.0;
 	z-index: 30;
 }

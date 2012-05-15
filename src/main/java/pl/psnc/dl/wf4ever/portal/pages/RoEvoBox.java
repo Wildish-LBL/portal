@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
@@ -35,7 +36,7 @@ public class RoEvoBox
 	private static final long serialVersionUID = -3775797988389365540L;
 
 	private enum Direction {
-		HORIZONTAL, VERTICAL
+		UP, DOWN, LEFT, RIGHT
 	}
 
 
@@ -48,9 +49,8 @@ public class RoEvoBox
 		setOutputMarkupId(true);
 		setOutputMarkupPlaceholderTag(true);
 
-		final StringBuilder sb = new StringBuilder();
-
-		List<RoEvoNode> nodes = new ArrayList<>(RoEvoService.describeSnapshot(sparqlEndpointURI, researchObjectURI));
+		final List<RoEvoNode> nodes = new ArrayList<>(RoEvoService.describeSnapshot(sparqlEndpointURI,
+			researchObjectURI));
 		Collections.sort(nodes, new Comparator<RoEvoNode>() {
 
 			@Override
@@ -108,16 +108,10 @@ public class RoEvoBox
 				}
 				item.add(new AttributeModifier("style", "left: " + x + "em; top: " + y + "em;"));
 				item.getModelObject().setComponent(item);
+				item.setOutputMarkupId(true);
 			}
 
 		});
-
-		for (RoEvoNode source : nodes) {
-			for (RoEvoNode node : source.getItsLiveROs()) {
-				sb.append(createConnection(source, node, null, Direction.HORIZONTAL));
-			}
-
-		}
 
 		add(new Behavior() {
 
@@ -125,6 +119,21 @@ public class RoEvoBox
 			public void renderHead(Component component, IHeaderResponse response)
 			{
 				super.renderHead(component, response);
+				final StringBuilder sb = new StringBuilder();
+				sb.append("jsPlumb.ready(function() {");
+
+				for (RoEvoNode source : nodes) {
+					for (RoEvoNode node : source.getItsLiveROs()) {
+						sb.append(createConnection(source, node, "Has live RO", Direction.UP));
+					}
+					for (RoEvoNode node : source.getPreviousSnapshots()) {
+						sb.append(createConnection(source, node, "Previous snapshot", Direction.LEFT));
+					}
+
+				}
+
+				sb.append("});");
+
 				response.renderOnLoadJavaScript(sb.toString());
 			}
 		});
@@ -134,19 +143,30 @@ public class RoEvoBox
 	protected String createConnection(RoEvoNode source, RoEvoNode target, String label, Direction direction)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append("jsPlumb.connect({");
+		String connId = "conn" + Math.abs(new Random().nextInt());
+		sb.append("var " + connId + " = jsPlumb.connect({");
 		sb.append("source: '" + source.getComponent().getMarkupId() + "',");
 		sb.append("target: '" + target.getComponent().getMarkupId() + "',");
-		switch (direction) {
-			default:
-			case HORIZONTAL:
-				sb.append("anchors : [ 'LeftMiddle', 'RightMiddle' ],");
-				break;
-			case VERTICAL:
-				sb.append("anchors : [ 'BottomCenter', 'TopCenter' ],");
-				break;
-		}
-		sb.append("connector : 'Straight'});");
+		sb.append("overlays:[ [ 'Label', { label:'" + label + "', id: 'label', cssClass : 'evolabel' } ] ]");
+		//		switch (direction) {
+		//			default:
+		//			case LEFT:
+		//				sb.append("anchors : [ 'LeftMiddle', 'RightMiddle' ],");
+		//				break;
+		//			case RIGHT:
+		//				sb.append("anchors : [ 'RightMiddle', 'LeftMiddle' ],");
+		//				break;
+		//			case DOWN:
+		//				sb.append("anchors : [ 'BottomCenter', 'TopCenter' ],");
+		//				break;
+		//			case UP:
+		//				sb.append("anchors : [ 'TopCenter', 'BottomCenter' ],");
+		//				break;
+		//		}
+		sb.append("});");
+		sb.append(connId + ".bind('mouseenter', function (c) { c.showOverlay('label'); });");
+		sb.append(connId + ".bind('mouseexit', function (c) { c.hideOverlay('label'); });");
+		sb.append(connId + ".hideOverlay('label');");
 		return sb.toString();
 	}
 }

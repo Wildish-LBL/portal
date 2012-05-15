@@ -45,16 +45,19 @@ CONSTRUCT
 }
 WHERE
 {
-	OPTIONAL { <%<s> roevo:isSnapshotOf ?live . }
+	OPTIONAL 
+	{ 
+		<%<s> roevo:isSnapshotOf ?live . 
+		OPTIONAL { ?live dcterms:identifier ?liveid . }
+		OPTIONAL { ?live dcterms:created ?livecreated . }
+		OPTIONAL { ?live a ?liveclass . }
+		OPTIONAL { ?live dcterms:type ?livetype . }
+	}
+	
 	OPTIONAL { <%<s> dcterms:identifier ?id . }
 	OPTIONAL { <%<s> dcterms:created ?created . }
 	OPTIONAL { <%<s> a ?class . }
 	OPTIONAL { <%<s> dcterms:type ?type . }
-
-	OPTIONAL { ?live dcterms:identifier ?liveid . }
-	OPTIONAL { ?live dcterms:created ?livecreated . }
-	OPTIONAL { ?live a ?liveclass . }
-	OPTIONAL { ?live dcterms:type ?livetype . }
 
 	OPTIONAL
 	{

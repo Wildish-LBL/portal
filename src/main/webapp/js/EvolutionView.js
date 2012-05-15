@@ -1,36 +1,16 @@
-//jsPlumb.ready(function() {
-//	jsPlumb.connect({
-//		source : "ro1",
-//		target : "ro2",
-//		anchors : [ "BottomCenter", "TopCenter" ],
-//		connector : "Straight"
-//	});
-//	jsPlumb.connect({
-//		source : "ro1",
-//		target : "ro3",
-//		anchors : [ "BottomCenter", "TopCenter" ],
-//		connector : "Straight"
-//	});
-//	jsPlumb.connect({
-//		source : "ro1",
-//		target : "ro4",
-//		anchors : [ "BottomCenter", "TopCenter" ],
-//		connector : "Straight"
-//	});
-//	jsPlumb.connect({
-//		source : "ro3",
-//		target : "ro2",
-//		anchors : [ "LeftMiddle", "RightMiddle" ],
-//		connector : "Straight",
-//		overlays : [ "Arrow", [ "Label", {
-//			label : "hasPrevious",
-//			cssClass : "evolabel"
-//		} ] ]
-//	});
-//	jsPlumb.connect({
-//		source : "ro3",
-//		target : "ro4",
-//		anchors : [ "RightMiddle", "LeftMiddle" ],
-//		connector : "Straight"
-//	});
-//});
+jsPlumb.ready(function() {
+	jsPlumb.Defaults.PaintStyle = {
+		lineWidth : 3,
+		strokeStyle : '#056'
+	}
+
+	jsPlumb.Defaults.Anchor = 'Continuous';
+	jsPlumb.Defaults.Endpoint = 'Blank';
+	jsPlumb.Defaults.Connector = 'StateMachine';
+	jsPlumb.Defaults.Overlays = [ [ 'PlainArrow', {
+		location : 1,
+		width : 20,
+		length : 12
+	} ] ];
+
+});
