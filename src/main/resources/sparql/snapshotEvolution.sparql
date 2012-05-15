@@ -4,6 +4,7 @@ PREFIX dcterms: <http://purl.org/dc/terms/>
 
 CONSTRUCT
 {
+<<<<<<< HEAD
 	<%s> roevo:isSnapshotOf ?live ;
 		roevo:hasPreviousVersion ?father ;
 		dcterms:identifier ?id ;
@@ -101,5 +102,76 @@ WHERE
 		OPTIONAL { ?derived roevo:isSnapshotOf ?live . }
 		OPTIONAL { ?derived a ?derivedclass . }
 		OPTIONAL { ?derived dcterms:type ?derivedtype . }
+=======
+	<%s> roevo:isSnapshotOf ?live .
+	?son roevo:isSnapshotOf ?live .
+	?grandson roevo:isSnapshotOf ?live .
+	?father roevo:isSnapshotOf ?live .
+	?grandfather roevo:isSnapshotOf ?live .
+
+	<%s> dcterms:identifier ?id .
+	?son dcterms:identifier ?sonid .
+	?grandson dcterms:identifier ?grandsonid .
+	?father dcterms:identifier ?fatherid .
+	?grandfather dcterms:identifier ?grandfatherid .
+
+	<%s> a ro:ResearchObject .
+	?son a ro:ResearchObject .
+	?grandson a ro:ResearchObject .
+	?father a ro:ResearchObject .
+	?grandfather a ro:ResearchObject .
+		
+	?grandson roevo:hasPreviousVersion ?son .
+	?son roevo:hasPreviousVersion <%s> .
+	<%s> roevo:hasPreviousVersion ?father .
+	?father roevo:hasPreviousVersion ?grandfather .
+
+	?derived roevo:derivedFrom <%s> .
+	?derived dcterms:identifier ?derivedid .
+	?derived a ro:ResearchObject .	
+}
+WHERE
+{
+	OPTIONAL
+	{
+		<%s> roevo:isSnapshotOf ?live .
+		<%s> dcterms:identifier ?id .
+		<%s> a ro:ResearchObject .
+	}
+
+	OPTIONAL
+	{
+		<%s> roevo:hasPreviousVersion ?father .
+		?father dcterms:identifier ?fatherid .
+		?father roevo:isSnapshotOf ?live .
+		?father a ro:ResearchObject .
+		OPTIONAL{
+			?father roevo:hasPreviousVersion ?grandfather .
+			?grandfather dcterms:identifier ?grandfatherid .
+			?grandfather roevo:isSnapshotOf ?live .
+			?grandfather a ro:ResearchObject .
+		}
+	}
+
+	OPTIONAL
+	{
+		?son roevo:hasPreviousVersion <%s> .
+		?son dcterms:identifier ?sonid .
+		?son roevo:isSnapshotOf ?live .
+		?son a ro:ResearchObject .
+		OPTIONAL
+		{
+			?grandson roevo:hasPreviousVersion ?son .
+			?grandson dcterms:identifier ?grandsonid .
+			?grandson roevo:isSnapshotOf ?live .
+			?grandson a ro:ResearchObject .
+		}
+	}
+	OPTIONAL
+	{
+		?derived roevo:derivedFrom <%s> .
+		?derived dcterms:identifier ?derivedid .
+		?derived a ro:ResearchObject .	
+>>>>>>> branch 'master' of https://piotrholubowicz@github.com/wf4ever/portal.git
 	}
 }
