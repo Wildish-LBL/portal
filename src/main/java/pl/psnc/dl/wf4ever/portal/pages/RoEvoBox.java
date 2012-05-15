@@ -142,6 +142,7 @@ public class RoEvoBox
 
 	protected String createConnection(RoEvoNode source, RoEvoNode target, String label, Direction direction)
 	{
+
 		StringBuilder sb = new StringBuilder();
 		String connId = "conn" + Math.abs(new Random().nextInt());
 		sb.append("var " + connId + " = jsPlumb.connect({");
