@@ -9,9 +9,9 @@ import org.apache.wicket.markup.html.form.RequiredTextField;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
+import org.purl.wf4ever.rosrs.client.common.ROSRService;
 
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
-import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 
 /**
  * @author Piotr Hołubowicz

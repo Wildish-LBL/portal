@@ -12,10 +12,10 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.joda.time.format.ISODateTimeFormat;
+import org.purl.wf4ever.rosrs.client.common.Vocab;
 
 import pl.psnc.dl.wf4ever.portal.model.RoEvoNode;
 import pl.psnc.dl.wf4ever.portal.model.RoEvoNode.EvoClass;
-import pl.psnc.dl.wf4ever.portal.model.Vocab;
 
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;

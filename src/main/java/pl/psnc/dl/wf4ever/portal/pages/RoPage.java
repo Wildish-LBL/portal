@@ -3,6 +3,7 @@ package pl.psnc.dl.wf4ever.portal.pages;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -30,6 +31,8 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.UrlDecoder;
 import org.apache.wicket.request.UrlEncoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.purl.wf4ever.rosrs.client.common.ROSRService;
+import org.purl.wf4ever.rosrs.client.common.Vocab;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
@@ -41,10 +44,8 @@ import pl.psnc.dl.wf4ever.portal.model.ResourceGroup;
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 import pl.psnc.dl.wf4ever.portal.model.Statement;
-import pl.psnc.dl.wf4ever.portal.model.Vocab;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
-import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
 import com.hp.hpl.jena.ontology.Individual;
@@ -445,7 +446,11 @@ public class RoPage
 		if (res.getStatus() != HttpServletResponse.SC_OK) {
 			throw new IOException("Error when adding annotation: " + res.getClientResponseStatus());
 		}
-		res = ROSRService.uploadResource(bodyURI, statements, dLibraToken);
+		List<com.hp.hpl.jena.rdf.model.Statement> jenaStatements = new ArrayList<>();
+		for (Statement s : statements) {
+			jenaStatements.add(s.createJenaStatement());
+		}
+		res = ROSRService.uploadResource(bodyURI, jenaStatements, dLibraToken);
 		if (res.getStatus() != HttpServletResponse.SC_CREATED) {
 			ROSRService.deleteAnnotationAndBody(roURI, annURI, dLibraToken);
 			throw new IOException("Error when adding annotation: " + res.getClientResponseStatus());

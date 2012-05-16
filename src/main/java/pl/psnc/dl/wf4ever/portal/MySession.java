@@ -13,11 +13,11 @@ import org.apache.wicket.authroles.authentication.AbstractAuthenticatedWebSessio
 import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.util.cookies.CookieUtils;
+import org.purl.wf4ever.rosrs.client.common.ROSRService;
+import org.purl.wf4ever.rosrs.client.common.Vocab;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.model.Creator;
-import pl.psnc.dl.wf4ever.portal.model.Vocab;
-import pl.psnc.dl.wf4ever.portal.services.ROSRService;
 
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;

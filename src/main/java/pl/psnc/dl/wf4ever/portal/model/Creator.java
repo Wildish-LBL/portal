@@ -7,8 +7,8 @@ import java.io.Serializable;
 import java.net.URI;
 
 import org.apache.log4j.Logger;
-
-import pl.psnc.dl.wf4ever.portal.services.ROSRService;
+import org.purl.wf4ever.rosrs.client.common.ROSRService;
+import org.purl.wf4ever.rosrs.client.common.Vocab;
 
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
