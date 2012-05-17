@@ -3,27 +3,61 @@
 }
 
 .evo .node {
-	border: 2px solid #346789;
+	border-width: 2px;
+	border-style: solid;
 	font-size: 0.8em;
 	height: 8em;
-	width: 8em;
+	width: 10em;
+	border-radius: 5em/4em;
 	position: absolute;
 	z-index: 20;
-	background-color: white;
-	color: black;
-	font-family: helvetica;
 	opacity: 0.8;
-	padding: 0.5em;
+	color: black;
 }
 
-.evo .node.current {
-	border-width: 4px;
+.evo .node.live {
+	border-color: rgb(237,201,81);
+	background-color: rgba(237,201,81,0.2);
+}
+
+.evo .node.snapshot {
+	border-color: rgb(235,104,65);
+	background-color: rgba(235,104,65,0.2);
+}
+
+.evo .node.archived {
+	border-color: rgb(204,51,63);
+	background-color: rgba(204,51,63,0.2);
+}
+
+
+.evo .nodeInside {
+	height: 6em;
+	width: 6em;
+	position: absolute;
+	top: 1em;
+	left: 2em;
+	word-wrap: break-word;
+}
+
+.evo .roMark {
+	position: absolute;
+	top: 6em;
+	left: 7em;
+}
+
+.evo .roMark span {
+	font-size: smaller;
+}
+
+.evo .node.active {
+	box-shadow: 0 0 12px 6px rgba(82,168,236,0.8);
 }
 
 .evo .evolabel {
 	border: 1px solid #346789;
 	background-color: white;
-	padding: 4px;
+	padding: 3px;
 	opacity: 1.0;
 	z-index: 30;
 }

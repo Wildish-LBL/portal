@@ -32,6 +32,7 @@ import org.apache.wicket.request.UrlDecoder;
 import org.apache.wicket.request.UrlEncoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.purl.wf4ever.rosrs.client.common.ROSRService;
+import org.purl.wf4ever.rosrs.client.common.ROService;
 import org.purl.wf4ever.rosrs.client.common.Vocab;
 import org.scribe.model.Token;
 
@@ -439,8 +440,8 @@ public class RoPage
 		throws URISyntaxException, IOException
 	{
 		Token dLibraToken = MySession.get().getdLibraAccessToken();
-		URI annURI = ROSRService.createAnnotationURI(null, roURI);
-		URI bodyURI = ROSRService.createAnnotationBodyURI(roURI, statements.get(0).getSubjectURI());
+		URI annURI = ROService.createAnnotationURI(null, roURI);
+		URI bodyURI = ROService.createAnnotationBodyURI(roURI, statements.get(0).getSubjectURI());
 		ClientResponse res = ROSRService.addAnnotation(rodlURI, roURI, annURI, statements.get(0).getSubjectURI(),
 			bodyURI, MySession.get().getUserURI(), dLibraToken);
 		if (res.getStatus() != HttpServletResponse.SC_OK) {
@@ -512,11 +513,12 @@ public class RoPage
 		throws IOException, URISyntaxException
 	{
 		MySession session = (MySession) getSession();
-		URI annURI = ROSRService.createAnnotationURI(null, roURI);
-		URI bodyURI = ROSRService.createAnnotationBodyURI(roURI, aggregatedResource.getURI());
+		URI annURI = ROService.createAnnotationURI(null, roURI);
+		URI bodyURI = ROService.createAnnotationBodyURI(roURI, aggregatedResource.getURI());
 		ClientResponse response = ROSRService.addAnnotation(rodlURI, roURI, annURI, aggregatedResource.getURI(),
 			bodyURI, session.getUserURI(), session.getdLibraAccessToken());
 		if (response.getStatus() != HttpServletResponse.SC_OK) {
+			log.error(response.getEntity(String.class));
 			throw new IOException(response.getClientResponseStatus().getReasonPhrase());
 		}
 
@@ -526,6 +528,7 @@ public class RoPage
 				.getdLibraAccessToken());
 		if (response.getStatus() != HttpServletResponse.SC_CREATED) {
 			ROSRService.deleteAnnotationAndBody(roURI, annURI, session.getdLibraAccessToken());
+			log.error(response.getEntity(String.class));
 			throw new IOException(response.getClientResponseStatus().getReasonPhrase());
 		}
 

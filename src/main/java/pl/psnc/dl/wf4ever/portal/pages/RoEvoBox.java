@@ -7,15 +7,15 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.html.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -26,7 +26,7 @@ import pl.psnc.dl.wf4ever.portal.model.RoEvoNode;
 import pl.psnc.dl.wf4ever.portal.services.RoEvoService;
 
 /**
- * @author Piotr Ho∏ubowicz
+ * @author Piotr Ho≈Çubowicz
  * 
  */
 public class RoEvoBox
@@ -35,13 +35,9 @@ public class RoEvoBox
 
 	private static final long serialVersionUID = -3775797988389365540L;
 
-	private enum Direction {
-		UP, DOWN, LEFT, RIGHT
-	}
-
 
 	@SuppressWarnings("serial")
-	public RoEvoBox(String id, URI sparqlEndpointURI, URI researchObjectURI)
+	public RoEvoBox(String id, URI sparqlEndpointURI, final URI researchObjectURI)
 		throws IOException, URISyntaxException
 	{
 		super(id);
@@ -49,64 +45,69 @@ public class RoEvoBox
 		setOutputMarkupId(true);
 		setOutputMarkupPlaceholderTag(true);
 
-		final List<RoEvoNode> nodes = new ArrayList<>(RoEvoService.describeSnapshot(sparqlEndpointURI,
-			researchObjectURI));
-		Collections.sort(nodes, new Comparator<RoEvoNode>() {
+		Collection<RoEvoNode> nodes = RoEvoService.describeSnapshot(sparqlEndpointURI, researchObjectURI);
+		List<RoEvoNode> preorder = new ArrayList<>();
+		final List<RoEvoNode> postorder = new ArrayList<>();
+		for (RoEvoNode node : nodes) {
+			if (!preorder.contains(node)) {
+				visit(node, preorder, postorder);
+			}
+		}
+		final int dx = 15;
+		final int dy = 12;
+		add(new ListView<RoEvoNode>("roEvoNode", postorder) {
+
+			private int liveX, liveY, snapX, snapY;
+
 
 			@Override
-			public int compare(RoEvoNode n1, RoEvoNode n2)
+			protected void onConfigure()
 			{
-				if (n1.getCreated() != null && n2.getCreated() != null) {
-					if (n1.getCreated().isBefore(n2.getCreated())) {
-						return -1;
-					}
-					if (n1.getCreated().isAfter(n2.getCreated())) {
-						return 1;
-					}
-				}
-				if (n2.getPreviousSnapshots().contains(n1)) {
-					return -1;
-				}
-				if (n1.getPreviousSnapshots().contains(n2)) {
-					return 1;
-				}
-				return 0;
+				super.onConfigure();
+				liveX = 0;
+				liveY = 0;
+				snapX = 0;
+				snapY = 0 + dy;
 			}
-		});
-		final int dist = 15;
-		add(new ListView<RoEvoNode>("roEvoNode", nodes) {
-
-			int liveX = 0;
-
-			int liveY = 0;
-
-			int snapX = 0;
-
-			int snapY = 0 + dist;
 
 
 			@Override
 			protected void populateItem(ListItem<RoEvoNode> item)
 			{
-				item.add(new Label("identifier", new PropertyModel<>(item.getModelObject(), "identifier")));
 				int x, y;
+				StringBuilder cssClasses = new StringBuilder();
+				item.add(new Label("labelOrIdentifier", new PropertyModel<>(item.getModelObject(), "labelOrIdentifier")));
 				switch (item.getModelObject().getEvoClass()) {
 					case LIVE:
 						x = liveX;
 						y = liveY;
-						liveX += dist;
+						liveX += dx;
+						cssClasses.append(" live");
+						break;
+					case ARCHIVED:
+						y = snapY + dy;
+						x = snapX;
+						snapX += dx;
+						cssClasses.append(" archived");
 						break;
 					case SNAPSHOT:
 						x = snapX;
 						y = snapY;
-						snapX += dist;
+						snapX += dx;
+						cssClasses.append(" snapshot");
 						break;
 					default:
 						x = 0;
 						y = 0;
 						break;
 				}
-				item.add(new AttributeModifier("style", "left: " + x + "em; top: " + y + "em;"));
+				if (researchObjectURI.equals(item.getModelObject().getUri())) {
+					cssClasses.append(" active");
+				}
+				item.add(new AttributeAppender("style", "left: " + x + "em; top: " + y + "em;"));
+				item.add(new AttributeAppender("class", cssClasses.toString()));
+				item.add(new WebMarkupContainer("roMark").setVisible(item.getModelObject().isResearchObject()));
+
 				item.getModelObject().setComponent(item);
 				item.setOutputMarkupId(true);
 			}
@@ -122,12 +123,12 @@ public class RoEvoBox
 				final StringBuilder sb = new StringBuilder();
 				sb.append("jsPlumb.ready(function() {");
 
-				for (RoEvoNode source : nodes) {
+				for (RoEvoNode source : postorder) {
 					for (RoEvoNode node : source.getItsLiveROs()) {
-						sb.append(createConnection(source, node, "Has live RO", Direction.UP));
+						sb.append(createConnection(source, node, "Has live RO"));
 					}
 					for (RoEvoNode node : source.getPreviousSnapshots()) {
-						sb.append(createConnection(source, node, "Previous snapshot", Direction.LEFT));
+						sb.append(createConnection(source, node, "Previous snapshot"));
 					}
 
 				}
@@ -140,7 +141,24 @@ public class RoEvoBox
 	}
 
 
-	protected String createConnection(RoEvoNode source, RoEvoNode target, String label, Direction direction)
+	private void visit(RoEvoNode node, List<RoEvoNode> preorder, List<RoEvoNode> postorder)
+	{
+		preorder.add(node);
+		for (RoEvoNode n : node.getPreviousSnapshots()) {
+			if (!preorder.contains(n)) {
+				visit(n, preorder, postorder);
+			}
+		}
+		for (RoEvoNode n : node.getItsLiveROs()) {
+			if (!preorder.contains(n)) {
+				visit(n, preorder, postorder);
+			}
+		}
+		postorder.add(node);
+	}
+
+
+	protected String createConnection(RoEvoNode source, RoEvoNode target, String label)
 	{
 
 		StringBuilder sb = new StringBuilder();
@@ -149,21 +167,6 @@ public class RoEvoBox
 		sb.append("source: '" + source.getComponent().getMarkupId() + "',");
 		sb.append("target: '" + target.getComponent().getMarkupId() + "',");
 		sb.append("overlays:[ [ 'Label', { label:'" + label + "', id: 'label', cssClass : 'evolabel' } ] ]");
-		//		switch (direction) {
-		//			default:
-		//			case LEFT:
-		//				sb.append("anchors : [ 'LeftMiddle', 'RightMiddle' ],");
-		//				break;
-		//			case RIGHT:
-		//				sb.append("anchors : [ 'RightMiddle', 'LeftMiddle' ],");
-		//				break;
-		//			case DOWN:
-		//				sb.append("anchors : [ 'BottomCenter', 'TopCenter' ],");
-		//				break;
-		//			case UP:
-		//				sb.append("anchors : [ 'TopCenter', 'BottomCenter' ],");
-		//				break;
-		//		}
 		sb.append("});");
 		sb.append(connId + ".bind('mouseenter', function (c) { c.showOverlay('label'); });");
 		sb.append(connId + ".bind('mouseexit', function (c) { c.hideOverlay('label'); });");

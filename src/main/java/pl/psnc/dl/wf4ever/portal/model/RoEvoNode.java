@@ -28,9 +28,9 @@ public class RoEvoNode
 	private URI uri;
 
 	/**
-	 * dcterms:identifier
+	 * rdfs:label
 	 */
-	private String identifier;
+	private String label;
 
 	/**
 	 * dcterms:created
@@ -97,15 +97,28 @@ public class RoEvoNode
 	}
 
 
-	public String getIdentifier()
+	public String getLabel()
 	{
-		return identifier;
+		return label;
 	}
 
 
-	public void setIdentifier(String identifier)
+	public void setLabel(String identifier)
 	{
-		this.identifier = identifier;
+		this.label = identifier;
+	}
+
+
+	public String getLabelOrIdentifier()
+	{
+		if (getLabel() != null) {
+			return getLabel();
+		}
+		else if (getUri() != null) {
+			String[] segments = getUri().getPath().split("/");
+			return segments[segments.length - 1];
+		}
+		return null;
 	}
 
 
@@ -179,5 +192,5 @@ public class RoEvoNode
 	{
 		this.component = component;
 	}
-	
+
 }
