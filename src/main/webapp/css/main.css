@@ -299,6 +299,10 @@ div.separated {
 	border-right: 1px dashed #BBBBBB;
 }
 
+div.separated_bottom {
+	border-bottom: 1px dashed #BBBBBB;
+}
+
 hr.separation {
 	border-top: 1px dashed #BBBBBB;
 	border-bottom: none;

@@ -28,6 +28,7 @@ import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 import com.hp.hpl.jena.vocabulary.RDF;
+import com.hp.hpl.jena.vocabulary.RDFS;
 
 /**
  * @author piotrekhol
@@ -58,8 +59,8 @@ public class RoEvoService
 			RoEvoNode node = nodes.get(subjectURI);
 			Property property = statement.getPredicate();
 			RDFNode object = statement.getObject();
-			if (property.equals(DCTerms.identifier)) {
-				node.setIdentifier(object.asLiteral().getString());
+			if (property.equals(RDFS.label)) {
+				node.setLabel(object.asLiteral().getString());
 			}
 			if (property.equals(DCTerms.created)) {
 				try {
@@ -83,12 +84,15 @@ public class RoEvoService
 					node.setResearchObject(true);
 				}
 				else if (object.equals(Vocab.snapshotRO)) {
+					node.setResearchObject(true);
 					node.setEvoClass(EvoClass.SNAPSHOT);
 				}
 				else if (object.equals(Vocab.liveRO)) {
+					node.setResearchObject(true);
 					node.setEvoClass(EvoClass.LIVE);
 				}
 				else if (object.equals(Vocab.archivedRO)) {
+					node.setResearchObject(true);
 					node.setEvoClass(EvoClass.ARCHIVED);
 				}
 

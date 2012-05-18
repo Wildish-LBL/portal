@@ -2,11 +2,13 @@ PREFIX ro: <http://purl.org/wf4ever/ro#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
-SELECT ?resource ?creator ?created
+SELECT ?ro (group_concat(distinct ?creator; separator=", ") as ?creators) (sample(?created1) as ?created)
 WHERE {
-	?resource a ro:ResearchObject ;
-		dcterms:created ?created ;
+	?ro a ro:ResearchObject ;
+		dcterms:created ?created1 ;
 		dcterms:creator ?creator .
+	filter(datatype(?created1) = <http://www.w3.org/2001/XMLSchema#dateTime>)
 }
+GROUP BY ?ro
 ORDER BY DESC(?created)
 LIMIT %d

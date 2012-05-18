@@ -5,7 +5,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
@@ -52,6 +51,7 @@ import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.rdf.model.Literal;
 import com.sun.syndication.io.FeedException;
 
 public class HomePage
@@ -94,8 +94,14 @@ public class HomePage
 		List<ResearchObject> roHeaders = new ArrayList<>();
 		while (results.hasNext()) {
 			QuerySolution solution = results.next();
-			URI uri = new URI(solution.getResource("resource").getURI());
-			Creator author = RoFactory.getCreator(rodlURI, MySession.get().getUsernames(), solution.get("creator"));
+			URI uri = new URI(solution.getResource("ro").getURI());
+			Literal creators = solution.getLiteral("creators");
+			List<Creator> authors = new ArrayList<>();
+			if (creators != null) {
+				for (String creator : creators.getString().split(", ")) {
+					authors.add(RoFactory.getCreator(rodlURI, MySession.get().getUsernames(), creator));
+				}
+			}
 			Calendar created = null;
 			Object date = solution.getLiteral("created").getValue();
 			if (date instanceof XSDDateTime) {
@@ -109,7 +115,7 @@ public class HomePage
 					logger.warn("Don't know how to parse date: " + date);
 				}
 			}
-			roHeaders.add(new ResearchObject(uri, created, Arrays.asList(author)));
+			roHeaders.add(new ResearchObject(uri, created, authors));
 		}
 
 		results = QueryExecutionFactory.sparqlService(

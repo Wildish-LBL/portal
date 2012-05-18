@@ -5,11 +5,39 @@
 		<h3>
 			RO evolution <img class="sh_button" src="images/l_open.gif">
 		</h3>
-		<div class="row">
-			<div class="span11 evo" style="height: 27em;">
-				<div wicket:id="roEvoNode" class="node"
-					style="left: 30em; top: 0em;">
-					<span wicket:id="identifier">[RO]</span>
+		<div class="row evoroot" id="evoroot">
+			<div class="span11 evo live separated_bottom" wicket:id="live">
+				<div>Live</div>
+				<div wicket:id="liveNodes" class="node">
+					<div class="nodeInside">
+						<span wicket:id="labelOrIdentifier">[RO]</span>
+					</div>
+					<div class="roMark" wicket:id="roMark">
+						<span class="badge">RO</span>
+					</div>
+				</div>
+			</div>
+			<div class="span11 evo snapshot separated_bottom"
+				wicket:id="snapshots">
+				<div>Snapshots</div>
+				<div wicket:id="snapshotNodes" class="node">
+					<div class="nodeInside">
+						<span wicket:id="labelOrIdentifier">[RO]</span>
+					</div>
+					<div class="roMark" wicket:id="roMark">
+						<span class="badge">RO</span>
+					</div>
+				</div>
+			</div>
+			<div class="span11 evo archived" wicket:id="archived">
+				<div>Archived</div>
+				<div wicket:id="archivedNodes" class="node">
+					<div class="nodeInside">
+						<span wicket:id="labelOrIdentifier">[RO]</span>
+					</div>
+					<div class="roMark" wicket:id="roMark">
+						<span class="badge">RO</span>
+					</div>
 				</div>
 			</div>
 		</div>

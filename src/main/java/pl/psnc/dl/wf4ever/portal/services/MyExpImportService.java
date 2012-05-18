@@ -23,6 +23,7 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.apache.log4j.Logger;
 import org.purl.wf4ever.rosrs.client.common.ROSRService;
+import org.purl.wf4ever.rosrs.client.common.ROService;
 import org.purl.wf4ever.rosrs.client.common.Vocab;
 import org.scribe.model.Response;
 import org.scribe.model.Token;
@@ -237,8 +238,8 @@ public class MyExpImportService
 			model.setMessage("Updating the manifest");
 			for (Entry<URI, URI> e : annotations.entrySet()) {
 				try {
-					URI annURI = ROSRService.createAnnotationURI(manifest, researchObjectURI);
-					ROSRService.addAnnotationToManifestModel(manifest, researchObjectURI, annURI, e.getKey(),
+					URI annURI = ROService.createAnnotationURI(manifest, researchObjectURI);
+					ROService.addAnnotationToManifestModel(manifest, researchObjectURI, annURI, e.getKey(),
 						e.getValue(), creators.get(e.getKey()));
 				}
 				catch (Exception ex) {
@@ -411,7 +412,7 @@ public class MyExpImportService
 			else {
 				annTargetURI = researchObjectURI;
 			}
-			URI bodyURI = ROSRService.createAnnotationBodyURI(researchObjectURI, annTargetURI);
+			URI bodyURI = ROService.createAnnotationBodyURI(researchObjectURI, annTargetURI);
 			annBodies.put(bodyURI, createAnnotationBody(annTargetURI, rdf));
 			annotations.put(annTargetURI, bodyURI);
 			creators.put(annTargetURI, getResourceAuthor(rdf));
