@@ -16,7 +16,8 @@ import com.hp.hpl.jena.query.Syntax;
  * @author piotrek
  * 
  */
-public class MyQueryFactory {
+public class MyQueryFactory
+{
 
 	private static String xMostRecentROs = null;
 
@@ -32,25 +33,37 @@ public class MyQueryFactory {
 
 	private static String snapshotEvolution;
 
+	private static String liveEvolution;
+
+	private static String archivedEvolution;
+
+	private static String resourceClass;
+
+
 	/**
 	 * @return the xMostRecentROs
 	 * @throws IOException
 	 */
-	public static String getxMostRecentROs(int limit) throws IOException {
+	public static String getxMostRecentROs(int limit)
+		throws IOException
+	{
 		if (xMostRecentROs == null)
 			xMostRecentROs = loadQuery("xMostRecentROs.sparql");
 		return String.format(xMostRecentROs, limit);
 	}
 
-	public static String getAllROs() throws IOException {
+
+	public static String getAllROs()
+		throws IOException
+	{
 		if (allROs == null)
 			allROs = loadQuery("allROs.sparql");
 		return allROs;
 	}
 
+
 	/**
-	 * Returns the query for the quantity of resources of a given class in the
-	 * triplestore
+	 * Returns the query for the quantity of resources of a given class in the triplestore
 	 * 
 	 * @param resourceClass
 	 *            where ro: is the Wf4Ever RO prefix
@@ -58,52 +71,81 @@ public class MyQueryFactory {
 	 * @throws IOException
 	 */
 	public static Query getResourcesCount(String resourceClass)
-			throws IOException {
+		throws IOException
+	{
 		if (resourcesCount == null)
 			resourcesCount = loadQuery("resourcesCount.sparql");
-		return QueryFactory.create(
-				String.format(resourcesCount, resourceClass), Syntax.syntaxARQ);
+		return QueryFactory.create(String.format(resourcesCount, resourceClass), Syntax.syntaxARQ);
 	}
+
 
 	public static Query getWorkflowOutputs(String researchObject)
-			throws IOException {
+		throws IOException
+	{
 		if (workflowOutputs == null)
 			workflowOutputs = loadQuery("workflowOutputs.sparql");
-		return QueryFactory.create(
-				String.format(workflowOutputs, researchObject),
-				Syntax.syntaxARQ);
+		return QueryFactory.create(String.format(workflowOutputs, researchObject), Syntax.syntaxARQ);
 	}
+
 
 	public static Query getWorkflowInputs(String researchObject)
-			throws IOException {
+		throws IOException
+	{
 		if (workflowInputs == null)
 			workflowInputs = loadQuery("workflowInputs.sparql");
-		return QueryFactory
-				.create(String.format(workflowInputs, researchObject),
-						Syntax.syntaxARQ);
+		return QueryFactory.create(String.format(workflowInputs, researchObject), Syntax.syntaxARQ);
 	}
+
 
 	public static Query getProvenanceTraces(String researchObject)
-			throws IOException {
+		throws IOException
+	{
 		if (provenanceTraces == null)
 			provenanceTraces = loadQuery("provenanceTraces.sparql");
-		return QueryFactory.create(
-				String.format(provenanceTraces, researchObject),
-				Syntax.syntaxARQ);
+		return QueryFactory.create(String.format(provenanceTraces, researchObject), Syntax.syntaxARQ);
 	}
+
 
 	public static Query getSnapshotEvolution(String researchObject)
-			throws IOException {
+		throws IOException
+	{
 		if (snapshotEvolution == null)
 			snapshotEvolution = loadQuery("snapshotEvolution.sparql");
-		return QueryFactory.create(
-				String.format(snapshotEvolution, researchObject),
-				Syntax.syntaxARQ);
+		return QueryFactory.create(String.format(snapshotEvolution, researchObject), Syntax.syntaxARQ);
 	}
 
-	private static String loadQuery(String file) throws IOException {
-		InputStream is = MyQueryFactory.class.getClassLoader()
-				.getResourceAsStream("sparql/" + file);
+
+	public static Query getLiveEvolution(String researchObject)
+		throws IOException
+	{
+		if (liveEvolution == null)
+			liveEvolution = loadQuery("liveEvolution.sparql");
+		return QueryFactory.create(String.format(liveEvolution, researchObject), Syntax.syntaxARQ);
+	}
+
+
+	public static Query getArchivedEvolution(String researchObject)
+		throws IOException
+	{
+		if (archivedEvolution == null)
+			archivedEvolution = loadQuery("archivedEvolution.sparql");
+		return QueryFactory.create(String.format(archivedEvolution, researchObject), Syntax.syntaxARQ);
+	}
+
+
+	public static Query getResourceClass(String researchObject)
+		throws IOException
+	{
+		if (resourceClass == null)
+			resourceClass = loadQuery("resourceClass.sparql");
+		return QueryFactory.create(String.format(resourceClass, researchObject), Syntax.syntaxARQ);
+	}
+
+
+	private static String loadQuery(String file)
+		throws IOException
+	{
+		InputStream is = MyQueryFactory.class.getClassLoader().getResourceAsStream("sparql/" + file);
 		return IOUtils.toString(is, "UTF-8");
 	}
 

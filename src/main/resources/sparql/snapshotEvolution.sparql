@@ -1,108 +1,80 @@
 PREFIX roevo: <http://purl.org/wf4ever/roevo#>
 PREFIX ro: <http://purl.org/wf4ever/ro#>
-PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
 CONSTRUCT
 {
 	<%s> roevo:isSnapshotOf ?live ;
 		roevo:hasPreviousVersion ?father ;
-		dcterms:identifier ?id ;
-		dcterms:created ?created ;
-		a ?class ;
-		a ?type .
-	?live dcterms:identifier ?liveid ;
-		dcterms:created ?livecreated ;
-		a ?liveclass ;
-		a ?livetype .
+		rdfs:label ?id ;
+		a ?class .
+	?live rdfs:label ?liveid ;
+		a ?liveclass .
 	?son roevo:isSnapshotOf ?live ;
 		roevo:hasPreviousVersion <%<s> ;
-		dcterms:identifier ?sonid ;
-		dcterms:created ?soncreated ;
-		a ?sonclass ;
-		a ?sontype .
+		rdfs:label ?sonid ;
+		a ?sonclass .
 	?grandson roevo:isSnapshotOf ?live ;
 		roevo:hasPreviousVersion ?son ;
-		dcterms:identifier ?grandsonid ;
-		dcterms:created ?grandsoncreated ;
-		a ?grandsonclass ;
-		a ?grandsontype .
+		rdfs:label ?grandsonid ;
+		a ?grandsonclass .
 	?father roevo:isSnapshotOf ?live ;
 		roevo:hasPreviousVersion ?grandfather ;
-		dcterms:identifier ?fatherid ;
-		dcterms:created ?fathercreated ;
-		a ?fatherclass ;
-		a ?fathertype .
+		rdfs:label ?fatherid ;
+		a ?fatherclass .
 	?grandfather roevo:isSnapshotOf ?live ;
-		dcterms:identifier ?grandfatherid ;
-		dcterms:created ?grandfathercreated ;
-		a ?grandfatherclass ;
-		a ?grandfathertype .
+		rdfs:label ?grandfatherid ;
+		a ?grandfatherclass .
 	?derived roevo:derivedFrom <%<s> ;
-		dcterms:identifier ?derivedid ;
-		dcterms:created ?derivedcreated ;
-		a ?derivedclass ;
-		a ?derivedtype .
+		rdfs:label ?derivedid ;
+		a ?derivedclass .
 }
 WHERE
 {
 	OPTIONAL 
 	{ 
 		<%<s> roevo:isSnapshotOf ?live . 
-		OPTIONAL { ?live dcterms:identifier ?liveid . }
-		OPTIONAL { ?live dcterms:created ?livecreated . }
+		OPTIONAL { ?live rdfs:label ?liveid . }
 		OPTIONAL { ?live a ?liveclass . }
-		OPTIONAL { ?live dcterms:type ?livetype . }
 	}
 	
-	OPTIONAL { <%<s> dcterms:identifier ?id . }
-	OPTIONAL { <%<s> dcterms:created ?created . }
+	OPTIONAL { <%<s> rdfs:label ?id . }
 	OPTIONAL { <%<s> a ?class . }
-	OPTIONAL { <%<s> dcterms:type ?type . }
 
 	OPTIONAL
 	{
 		<%<s> roevo:hasPreviousVersion ?father .
-		OPTIONAL { ?father dcterms:identifier ?fatherid . }
-		OPTIONAL { ?father dcterms:created ?fathercreated . }
+		OPTIONAL { ?father rdfs:label ?fatherid . }
 		OPTIONAL { ?father roevo:isSnapshotOf ?live . }
 		OPTIONAL { ?father a ?fatherclass . }
-		OPTIONAL { ?father dcterms:type ?fathertype . }
 		OPTIONAL{
 			?father roevo:hasPreviousVersion ?grandfather .
-			OPTIONAL { ?grandfather dcterms:identifier ?grandfatherid . }
-			OPTIONAL { ?grandfather dcterms:created ?grandfathercreated . }
+			OPTIONAL { ?grandfather rdfs:label ?grandfatherid . }
 			OPTIONAL { ?grandfather roevo:isSnapshotOf ?live . }
 			OPTIONAL { ?grandfather a ?grandfatherclass . }
-			OPTIONAL { ?grandfather dcterms:type ?grandfathertype . }
 		}
 	}
 
 	OPTIONAL
 	{
 		?son roevo:hasPreviousVersion <%<s> .
-		OPTIONAL { ?son dcterms:identifier ?sonid . }
-		OPTIONAL { ?son dcterms:created ?soncreated . }
+		OPTIONAL { ?son rdfs:label ?sonid . }
 		OPTIONAL { ?son roevo:isSnapshotOf ?live . }
 		OPTIONAL { ?son a ?sonclass . }
-		OPTIONAL { ?son dcterms:type ?sontype . }
 		OPTIONAL
 		{
 			?grandson roevo:hasPreviousVersion ?son ;
-			OPTIONAL { ?grandson dcterms:identifier ?grandsonid . }
-			OPTIONAL { ?grandson dcterms:created ?grandsoncreated . }
+			OPTIONAL { ?grandson rdfs:label ?grandsonid . }
 			OPTIONAL { ?grandson roevo:isSnapshotOf ?live . }
 			OPTIONAL { ?grandson a ?grandsonclass . }
-			OPTIONAL { ?grandson dcterms:type ?grandsontype . }
 		}
 	}
 
 	OPTIONAL
 	{
 		?derived roevo:derivedFrom <%<s> .
-		OPTIONAL { ?derived dcterms:identifier ?derivedid . }
-		OPTIONAL { ?derived dcterms:created ?derivedcreated . }
+		OPTIONAL { ?derived rdfs:label ?derivedid . }
 		OPTIONAL { ?derived roevo:isSnapshotOf ?live . }
 		OPTIONAL { ?derived a ?derivedclass . }
-		OPTIONAL { ?derived dcterms:type ?derivedtype . }
 	}
 }

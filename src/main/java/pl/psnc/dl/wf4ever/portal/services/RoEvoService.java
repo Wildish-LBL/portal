@@ -11,14 +11,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.joda.time.format.ISODateTimeFormat;
 import org.purl.wf4ever.rosrs.client.common.Vocab;
 
 import pl.psnc.dl.wf4ever.portal.model.RoEvoNode;
 import pl.psnc.dl.wf4ever.portal.model.RoEvoNode.EvoClass;
 
+import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
+import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -26,7 +27,6 @@ import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.vocabulary.DCTerms;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
@@ -37,6 +37,7 @@ import com.hp.hpl.jena.vocabulary.RDFS;
 public class RoEvoService
 {
 
+	@SuppressWarnings("unused")
 	private static final Logger log = Logger.getLogger(RoEvoService.class);
 
 
@@ -45,7 +46,27 @@ public class RoEvoService
 	{
 		OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
 		QueryExecution x = QueryExecutionFactory.sparqlService(sparqlEndpointURI.toString(),
-			MyQueryFactory.getSnapshotEvolution(researchObjectURI.toString()));
+			MyQueryFactory.getResourceClass(researchObjectURI.toString()));
+		x.execConstruct(model);
+
+		Query query = null;
+		Individual i = model.getIndividual(researchObjectURI.toString());
+		if (i != null) {
+			if (i.hasRDFType(Vocab.snapshotRO)) {
+				query = MyQueryFactory.getSnapshotEvolution(researchObjectURI.toString());
+			}
+			else if (i.hasRDFType(Vocab.liveRO)) {
+				query = MyQueryFactory.getLiveEvolution(researchObjectURI.toString());
+			}
+			else if (i.hasRDFType(Vocab.archivedRO)) {
+				query = MyQueryFactory.getArchivedEvolution(researchObjectURI.toString());
+			}
+		}
+		if (query == null) {
+			query = MyQueryFactory.getSnapshotEvolution(researchObjectURI.toString());
+		}
+
+		x = QueryExecutionFactory.sparqlService(sparqlEndpointURI.toString(), query);
 		x.execConstruct(model);
 
 		Map<URI, RoEvoNode> nodes = new HashMap<>();
@@ -61,14 +82,6 @@ public class RoEvoService
 			RDFNode object = statement.getObject();
 			if (property.equals(RDFS.label)) {
 				node.setLabel(object.asLiteral().getString());
-			}
-			if (property.equals(DCTerms.created)) {
-				try {
-					node.setCreated(ISODateTimeFormat.dateTimeParser().parseDateTime(object.asLiteral().getString()));
-				}
-				catch (IllegalArgumentException e) {
-					log.debug("Could not parse date", e);
-				}
 			}
 			else if (property.equals(Vocab.isSnapshotOf) && object.isURIResource()) {
 				node.getItsLiveROs().add(createNode(nodes, object.asResource().getURI()));

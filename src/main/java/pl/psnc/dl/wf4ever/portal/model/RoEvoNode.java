@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.Component;
-import org.joda.time.DateTime;
 
 /**
  * @author piotrekhol
@@ -31,11 +30,6 @@ public class RoEvoNode
 	 * rdfs:label
 	 */
 	private String label;
-
-	/**
-	 * dcterms:created
-	 */
-	private DateTime created;
 
 	/**
 	 * Does it have ro:ResearchObject RDF class
@@ -119,18 +113,6 @@ public class RoEvoNode
 			return segments[segments.length - 1];
 		}
 		return null;
-	}
-
-
-	public DateTime getCreated()
-	{
-		return created;
-	}
-
-
-	public void setCreated(DateTime created)
-	{
-		this.created = created;
 	}
 
 
