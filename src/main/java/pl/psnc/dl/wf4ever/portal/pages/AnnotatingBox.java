@@ -16,6 +16,7 @@ import org.apache.wicket.markup.html.form.CheckGroup;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PropertyListView;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.common.ROSRService;
@@ -32,7 +33,7 @@ import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 
 @SuppressWarnings("serial")
 class AnnotatingBox
-	extends WebMarkupContainer
+	extends Panel
 {
 
 	/**
