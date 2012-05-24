@@ -61,8 +61,6 @@ public class MyRosPage
 	{
 		super(parameters);
 
-		add(new MyFeedbackPanel("feedbackPanel"));
-
 		List<URI> uris = ROSRService.getROList(rodlURI, MySession.get().getdLibraAccessToken());
 		final List<ResearchObject> researchObjects = new ArrayList<ResearchObject>();
 		for (URI uri : uris) {

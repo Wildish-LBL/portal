@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<wicket:panel xmlns:wicket="http://wicket.apache.org">
+	<!-- Annotating box -->
+	<section class="box inspan12">
+		<h3 class="collapsible">
+			Annotations for the selected resource <img class="sh_button"
+				src="images/l_open.gif">
+		</h3>
+		<div class="row boxDiv">
+			<div wicket:id="annotationsDiv" class="span11 entries-list">
+				<form class="form" wicket:id="annotationsForm">
+					<section wicket:id="group">
+						<div class="row" style="margin-bottom: 20px;"
+							wicket:id="annotationsList">
+							<div class="span11">
+								<table class="table table-bordered table-striped"
+									style="width: 95%; margin-bottom: 5px; table-layout: fixed;">
+									<thead>
+										<tr>
+											<th style="width: 30px;"></th>
+											<th style="width: 100px;">Resource</th>
+											<th>Value</th>
+											<th style="width: 70px;">Action</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr wicket:id="statementsList">
+											<td><input type="checkbox" wicket:id="checkbox" /></td>
+											<td><div wicket:id="subject" style="overflow: hidden">[subject]</div></td>
+											<td><span class="label"
+												wicket:id="propertyLocalNameNice">[Property]</span> <span
+												wicket:id="object">[object]</span></td>
+											<td><span wicket:id="edit"></span></td>
+										</tr>
+									</tbody>
+								</table>
+								<p>
+									<span style="font-size: x-small;">by <span
+										wicket:id="creator"></span>, <span
+										wicket:id="createdFormatted"></span></span>
+								</p>
+							</div>
+						</div>
+					</section>
+					<div class="form-actions btn-toolbar">
+						<div class="btn-group">
+							<button wicket:id="addAnnotation" class="btn" type="submit">
+								<i class="icon-file"></i> Add annotation
+							</button>
+							<button wicket:id="deleteAnnotation" class="btn" type="submit">
+								<i class="icon-trash"></i> Delete selected annotations
+							</button>
+						</div>
+						<div class="btn-group">
+							<button wicket:id="addRelation" class="btn" type="submit">
+								<i class="icon-retweet"></i> Add relation
+							</button>
+						</div>
+						<div class="btn-group">
+							<button wicket:id="importAnnotation" class="btn" type="submit">
+								<i class="icon-upload"></i> Import annotation
+							</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</section>
+</wicket:panel>
