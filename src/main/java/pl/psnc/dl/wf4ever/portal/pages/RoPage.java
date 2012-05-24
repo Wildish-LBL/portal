@@ -158,8 +158,6 @@ public class RoPage
 						roViewerBox.onRoTreeLoaded();
 						relEditForm.onRoTreeLoaded();
 						target.add(roViewerBox);
-						target.add(annotatingBox);
-						target.add(relEditForm);
 					}
 				}
 				catch (URISyntaxException e) {

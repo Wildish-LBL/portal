@@ -17,80 +17,70 @@
 	<div class="row">
 		<div class="span12" wicket:id="feedbackPanel"></div>
 	</div>
-	<div class="row">
-		<!-- RO viewer -->
-		<div class="span12">
-			<section wicket:id="roViewerBox" class="left_box inspan12">
-				<h3 data-toggle="collapse" data-target="#roViewerBoxBody">
-					<span wicket:id="title"> </span> <img class="sh_button"
-						src="images/l_open.gif">
-				</h3>
-				<div class="row collapse in" id="roViewerBoxBody">
-					<div class="span6 separated">
-						<ul class="nav nav-tabs">
-							<li class="active"><a data-toggle="tab"
-								id="interactiveViewLink" href="#interactiveView">Interactive</a></li>
-							<li><a data-toggle="tab" id="conceptualViewLink"
-								href="#conceptualView">Conceptual</a></li>
-							<li><a data-toggle="tab" id="physicalViewLink"
-								href="#physicalView">Physical</a></li>
-						</ul>
-						<div class="tab-content" style="display: block">
-							<div wicket:id="interactiveView" class="tab-pane active"
-								id="interactiveView">
-								<div id="infovis" style="width: 450px; height: 450px;"></div>
-								<div id="log"></div>
-							</div>
-							<div wicket:id="treeTable" class="tab-pane" id="conceptualView"></div>
-							<div wicket:id="physicalTreeTable" class="tab-pane"
-								id="physicalView"></div>
-						</div>
+	<!-- RO viewer -->
+	<div class="row" wicket:id="roViewerBox">
+		<div class="span7 separated">
+			<ul class="nav nav-tabs">
+				<li class="active"><a data-toggle="tab"
+					id="interactiveViewLink" href="#interactiveView">Interactive</a></li>
+				<li><a data-toggle="tab" id="conceptualViewLink"
+					href="#conceptualView">Conceptual</a></li>
+				<li><a data-toggle="tab" id="physicalViewLink"
+					href="#physicalView">Physical</a></li>
+			</ul>
+			<div class="tab-content" style="display: block">
+				<div wicket:id="interactiveView" class="tab-pane active"
+					id="interactiveView">
+					<div id="infovis" style="width: 540px; height: 400px;"></div>
+					<div id="log"></div>
+				</div>
+				<div wicket:id="treeTable" class="tab-pane" id="conceptualView"></div>
+				<div wicket:id="physicalTreeTable" class="tab-pane"
+					id="physicalView"></div>
+			</div>
 
-						<form class="form-stacked" wicket:id="roForm">
-							<div wicket:id="actionButtons">
-								<div class="form-actions btn-toolbar">
-									<h5>Resource</h5>
-									<div class="btn-group">
-										<button class="btn" type="submit" wicket:id="addResource">
-											<i class="icon-file"></i> Add
-										</button>
-										<button class="btn" type="submit" wicket:id="editResource">
-											<i class="icon-pencil"></i> Edit
-										</button>
-										<button class="btn" type="submit" wicket:id="deleteResource">
-											<i class="icon-trash"></i> Delete
-										</button>
-									</div>
-									<div class="btn-group">
-										<button class="btn" type="submit" wicket:id="downloadResource">
-											<i class="icon-download-alt"></i> Download
-										</button>
-									</div>
-								</div>
-								<div class="form-actions btn-toolbar">
-									<h5>Research Object</h5>
-									<div class="btn-group">
-										<button class="btn" type="submit" wicket:id="downloadROZipped">
-											<i class="icon-download-alt"></i> Download ZIP
-										</button>
-										<button class="btn" type="submit" wicket:id="downloadMetadata">
-											<i class="icon-download-alt"></i> Metadata
-										</button>
-									</div>
-									<div class="btn-group">
-										<button class="btn">
-											<i class="icon-share-alt"></i> Publish
-										</button>
-									</div>
-								</div>
-							</div>
-						</form>
+			<form class="form-stacked" wicket:id="roForm">
+				<div wicket:id="actionButtons">
+					<div class="form-actions btn-toolbar">
+						<h5>Resource</h5>
+						<div class="btn-group">
+							<button class="btn" type="submit" wicket:id="addResource">
+								<i class="icon-file"></i> Add
+							</button>
+							<button class="btn" type="submit" wicket:id="editResource">
+								<i class="icon-pencil"></i> Edit
+							</button>
+							<button class="btn" type="submit" wicket:id="deleteResource">
+								<i class="icon-trash"></i> Delete
+							</button>
+						</div>
+						<div class="btn-group">
+							<button class="btn" type="submit" wicket:id="downloadResource">
+								<i class="icon-download-alt"></i> Download
+							</button>
+						</div>
 					</div>
-					<div class="span5" style="overflow: hidden">
-						<div wicket:id="itemInfo"></div>
+					<div class="form-actions btn-toolbar">
+						<h5>Research Object</h5>
+						<div class="btn-group">
+							<button class="btn" type="submit" wicket:id="downloadROZipped">
+								<i class="icon-download-alt"></i> Download ZIP
+							</button>
+							<button class="btn" type="submit" wicket:id="downloadMetadata">
+								<i class="icon-download-alt"></i> Metadata
+							</button>
+						</div>
+						<div class="btn-group">
+							<button class="btn">
+								<i class="icon-share-alt"></i> Publish
+							</button>
+						</div>
 					</div>
 				</div>
-			</section>
+			</form>
+		</div>
+		<div class="span5" style="overflow: hidden; margin-left: 19px;">
+			<div wicket:id="itemInfo"></div>
 		</div>
 	</div>
 	<div class="row">

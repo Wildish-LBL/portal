@@ -68,7 +68,6 @@ class AnnotatingBox
 		super("annotatingBox", itemModel);
 		this.roPage = roPage;
 		setOutputMarkupId(true);
-		add(new Label("annTarget", new PropertyModel<>(itemModel, "name")));
 
 		annotationsDiv = new WebMarkupContainer("annotationsDiv");
 		annotationsDiv.setOutputMarkupId(true);

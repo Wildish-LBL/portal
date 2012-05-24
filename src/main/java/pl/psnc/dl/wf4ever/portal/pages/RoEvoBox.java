@@ -130,7 +130,7 @@ public class RoEvoBox
 			{
 				super.renderHead(component, response);
 				final StringBuilder sb = new StringBuilder();
-				sb.append("jsPlumb.ready(function() {");
+				sb.append("$('#evoroot').on('firstShow', function() {");
 
 				for (RoEvoNode source : postorder) {
 					for (RoEvoNode node : source.getItsLiveROs()) {
