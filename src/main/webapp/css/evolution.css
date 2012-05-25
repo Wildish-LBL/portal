@@ -11,9 +11,9 @@
 	border-width: 2px;
 	border-style: solid;
 	font-size: 0.8em;
-	height: 80px;
-	width: 100px;
-	border-radius: 50px/40px;
+	height: 70px;
+	width: 80px;
+	border-radius: 40px/35px;
 	top: 20px;
 	z-index: 20;
 	opacity: 0.8;
@@ -22,6 +22,11 @@
 
 .evo div {
 	position: absolute;
+}
+
+.evo.sources .node {
+	border-color: rgb(0, 160, 176);
+	background-color: rgba(0, 160, 176, 0.2);
 }
 
 .evo.live .node {
@@ -39,19 +44,24 @@
 	background-color: rgba(204, 51, 63, 0.2);
 }
 
+.evo.forks .node {
+	border-color: rgb(106, 74, 60);
+	background-color: rgba(106, 74, 60, 0.2);
+}
+
 .evo .nodeInside {
-	height: 60px;
+	height: 50px;
 	width: 60px;
 	position: absolute;
-	top: 10px;
-	left: 20px;
+	top: 7px;
+	left: 10px;
 	word-wrap: break-word;
 }
 
 .evo .roMark {
 	position: absolute;
-	top: 60px;
-	left: 70px;
+	top: 50px;
+	left: 55px;
 }
 
 .evo .roMark span {

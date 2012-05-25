@@ -30,6 +30,9 @@ CONSTRUCT
 		roevo:isArchivedOf ?live ;
 		rdfs:label ?grandfatherid ;
 		a ?grandfatherclass .
+	?live roevo:derivedFrom ?source .
+	?source rdfs:label ?sourceid ;
+		a ?sourceclass .
 }
 WHERE
 {
@@ -69,7 +72,8 @@ WHERE
 					OPTIONAL { ?father roevo:isArchivedOf ?live . }
 					OPTIONAL { ?father a ?fatherclass . }
 
-					OPTIONAL{
+					OPTIONAL
+					{
 						?father roevo:hasPreviousVersion ?grandfather .
 						OPTIONAL { ?grandfather rdfs:label ?grandfatherid . }
 						OPTIONAL { ?grandfather roevo:isSnapshotOf ?live . }
@@ -79,5 +83,12 @@ WHERE
 				}
 			}
 		}
+	}
+	
+	OPTIONAL
+	{
+		?live roevo:derivedFrom ?source .
+		OPTIONAL { ?source rdfs:label ?sourceid . }
+		OPTIONAL { ?source a ?sourceclass . }
 	}
 }

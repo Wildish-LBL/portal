@@ -15,33 +15,24 @@
 	</div>
 	<div class="row">
 		<div class="span12">
-			<section id="annotating-box" class="left_box inspan12">
-				<h3>
-					All Research Objects <img class="sh_button" src="images/l_open.gif">
-				</h3>
-				<div class="row">
-					<div class="span11">
-						<table class="table table-striped">
-							<thead>
-								<tr>
-									<th>Title</th>
-									<th>#resources</th>
-									<th>Creators</th>
-									<th>Created</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr wicket:id="rosListView">
-									<td><a wicket:id="link"><span wicket:id="name"></span></a></td>
-									<td><span wicket:id="resourcesCnt">?</span></td>
-									<td><span wicket:id="creators"></span></td>
-									<td><span wicket:id="createdFormatted"></span></td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</section>
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th>Title</th>
+						<th>#resources</th>
+						<th>Creators</th>
+						<th>Created</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr wicket:id="rosListView">
+						<td><a wicket:id="link"><span wicket:id="name"></span></a></td>
+						<td><span wicket:id="resourcesCnt">?</span></td>
+						<td><span wicket:id="creators"></span></td>
+						<td><span wicket:id="createdFormatted"></span></td>
+					</tr>
+				</tbody>
+			</table>
 		</div>
 	</div>
 </wicket:extend>

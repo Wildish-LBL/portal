@@ -25,9 +25,9 @@ CONSTRUCT
 	?grandfather roevo:isSnapshotOf ?live ;
 		rdfs:label ?grandfatherid ;
 		a ?grandfatherclass .
-	?derived roevo:derivedFrom <%<s> ;
-		rdfs:label ?derivedid ;
-		a ?derivedclass .
+	?fork roevo:derivedFrom <%<s> ;
+		rdfs:label ?forkid ;
+		a ?forkclass .
 }
 WHERE
 {
@@ -72,9 +72,8 @@ WHERE
 
 	OPTIONAL
 	{
-		?derived roevo:derivedFrom <%<s> .
-		OPTIONAL { ?derived rdfs:label ?derivedid . }
-		OPTIONAL { ?derived roevo:isSnapshotOf ?live . }
-		OPTIONAL { ?derived a ?derivedclass . }
+		?fork roevo:derivedFrom <%<s> .
+		OPTIONAL { ?fork rdfs:label ?forkid . }
+		OPTIONAL { ?fork a ?forkclass . }
 	}
 }

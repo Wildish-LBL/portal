@@ -23,179 +23,213 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
 
 import pl.psnc.dl.wf4ever.portal.model.RoEvoNode;
+import pl.psnc.dl.wf4ever.portal.model.RoEvoNode.EvoClassModifier;
 import pl.psnc.dl.wf4ever.portal.services.RoEvoService;
 
 /**
  * @author Piotr Hołubowicz
  * 
  */
-public class RoEvoBox
-	extends Panel
-{
+public class RoEvoBox extends Panel {
 
-	private static final long serialVersionUID = -3775797988389365540L;
+    private static final long serialVersionUID = -3775797988389365540L;
 
 
-	@SuppressWarnings("serial")
-	public RoEvoBox(String id, URI sparqlEndpointURI, final URI researchObjectURI)
-		throws IOException, URISyntaxException
-	{
-		super(id);
+    @SuppressWarnings("serial")
+    public RoEvoBox(String id, URI sparqlEndpointURI, final URI researchObjectURI)
+            throws IOException, URISyntaxException {
+        super(id);
 
-		setOutputMarkupId(true);
-		setOutputMarkupPlaceholderTag(true);
+        setOutputMarkupId(true);
+        setOutputMarkupPlaceholderTag(true);
 
-		WebMarkupContainer live = new WebMarkupContainer("live");
-		add(live);
-		WebMarkupContainer snapshots = new WebMarkupContainer("snapshots");
-		add(snapshots);
-		WebMarkupContainer archived = new WebMarkupContainer("archived");
-		add(archived);
+        WebMarkupContainer sources = new WebMarkupContainer("sources");
+        add(sources);
+        WebMarkupContainer live = new WebMarkupContainer("live");
+        add(live);
+        WebMarkupContainer snapshots = new WebMarkupContainer("snapshots");
+        add(snapshots);
+        WebMarkupContainer archived = new WebMarkupContainer("archived");
+        add(archived);
+        WebMarkupContainer forks = new WebMarkupContainer("forks");
+        add(forks);
 
-		Collection<RoEvoNode> nodes = RoEvoService.describeSnapshot(sparqlEndpointURI, researchObjectURI);
-		List<RoEvoNode> preorder = new ArrayList<>();
-		final List<RoEvoNode> postorder = new ArrayList<>();
-		for (RoEvoNode node : nodes) {
-			if (!preorder.contains(node)) {
-				visit(node, preorder, postorder);
-			}
-		}
-		final int dx = 150, ox = 20;
-		List<RoEvoNode> liveNodes = new ArrayList<>();
-		List<RoEvoNode> snapshotNodes = new ArrayList<>();
-		List<RoEvoNode> archivedNodes = new ArrayList<>();
-		for (RoEvoNode node : nodes) {
-			switch (node.getEvoClass()) {
-				case LIVE:
-					liveNodes.add(node);
-					break;
-				case SNAPSHOT:
-					snapshotNodes.add(node);
-					break;
-				case ARCHIVED:
-					archivedNodes.add(node);
-					break;
-				default:
-					snapshotNodes.add(node);
-					break;
-			}
-		}
-		if (!liveNodes.isEmpty()) {
-			live.add(new ListView<RoEvoNode>("liveNodes", liveNodes) {
+        Collection<RoEvoNode> nodes = RoEvoService.describeSnapshot(sparqlEndpointURI, researchObjectURI);
+        List<RoEvoNode> preorder = new ArrayList<>();
+        final List<RoEvoNode> postorder = new ArrayList<>();
+        for (RoEvoNode node : nodes) {
+            if (!preorder.contains(node)) {
+                visit(node, preorder, postorder);
+            }
+        }
+        final int dx = 120, ox = 20;
+        List<RoEvoNode> sourceNodes = new ArrayList<>();
+        List<RoEvoNode> liveNodes = new ArrayList<>();
+        List<RoEvoNode> snapshotNodes = new ArrayList<>();
+        List<RoEvoNode> archivedNodes = new ArrayList<>();
+        List<RoEvoNode> forkNodes = new ArrayList<>();
+        for (RoEvoNode node : nodes) {
+            if (node.getEvoClassModifier() == EvoClassModifier.SOURCE && node.getItsLiveROs().isEmpty()) {
+                sourceNodes.add(node);
+                continue;
+            }
+            if (node.getEvoClassModifier() == EvoClassModifier.FORK && !node.getUri().equals(researchObjectURI)) {
+                forkNodes.add(node);
+                continue;
+            }
+            switch (node.getEvoClass()) {
+                case LIVE:
+                    liveNodes.add(node);
+                    break;
+                case SNAPSHOT:
+                    snapshotNodes.add(node);
+                    break;
+                case ARCHIVED:
+                    archivedNodes.add(node);
+                    break;
+                default:
+                    snapshotNodes.add(node);
+                    break;
+            }
+        }
+        if (!sourceNodes.isEmpty()) {
+            sources.add(new ListView<RoEvoNode>("sourceNodes", sourceNodes) {
 
-				@Override
-				protected void populateItem(ListItem<RoEvoNode> item)
-				{
-					populateRoEvoNode(item, researchObjectURI, ox + dx * postorder.indexOf(item.getModelObject()));
-				}
+                @Override
+                protected void populateItem(ListItem<RoEvoNode> item) {
+                    populateRoEvoNode(item, researchObjectURI, ox + dx * postorder.indexOf(item.getModelObject()));
+                }
 
-			});
-		}
-		else {
-			live.setVisible(false);
-		}
-		if (!snapshotNodes.isEmpty()) {
-			snapshots.add(new ListView<RoEvoNode>("snapshotNodes", snapshotNodes) {
+            });
+        } else {
+            sources.setVisible(false);
+        }
+        if (!liveNodes.isEmpty()) {
+            live.add(new ListView<RoEvoNode>("liveNodes", liveNodes) {
 
-				@Override
-				protected void populateItem(ListItem<RoEvoNode> item)
-				{
-					populateRoEvoNode(item, researchObjectURI, ox + dx * postorder.indexOf(item.getModelObject()));
-				}
+                @Override
+                protected void populateItem(ListItem<RoEvoNode> item) {
+                    populateRoEvoNode(item, researchObjectURI, ox + dx * postorder.indexOf(item.getModelObject()));
+                }
 
-			});
-		}
-		else {
-			snapshots.setVisible(false);
-		}
-		if (!archivedNodes.isEmpty()) {
-			archived.add(new ListView<RoEvoNode>("archivedNodes", archivedNodes) {
+            });
+        } else {
+            live.setVisible(false);
+        }
+        if (!snapshotNodes.isEmpty()) {
+            snapshots.add(new ListView<RoEvoNode>("snapshotNodes", snapshotNodes) {
 
-				@Override
-				protected void populateItem(ListItem<RoEvoNode> item)
-				{
-					populateRoEvoNode(item, researchObjectURI, ox + dx * postorder.indexOf(item.getModelObject()));
-				}
+                @Override
+                protected void populateItem(ListItem<RoEvoNode> item) {
+                    populateRoEvoNode(item, researchObjectURI, ox + dx * postorder.indexOf(item.getModelObject()));
+                }
 
-			});
-		}
-		else {
-			archived.setVisible(false);
-		}
+            });
+        } else {
+            snapshots.setVisible(false);
+        }
+        if (!archivedNodes.isEmpty()) {
+            archived.add(new ListView<RoEvoNode>("archivedNodes", archivedNodes) {
 
-		add(new Behavior() {
+                @Override
+                protected void populateItem(ListItem<RoEvoNode> item) {
+                    populateRoEvoNode(item, researchObjectURI, ox + dx * postorder.indexOf(item.getModelObject()));
+                }
 
-			@Override
-			public void renderHead(Component component, IHeaderResponse response)
-			{
-				super.renderHead(component, response);
-				final StringBuilder sb = new StringBuilder();
-				sb.append("$('#evoroot').on('firstShow', function() {");
+            });
+        } else {
+            archived.setVisible(false);
+        }
+        if (!forkNodes.isEmpty()) {
+            forks.add(new ListView<RoEvoNode>("forkNodes", forkNodes) {
 
-				for (RoEvoNode source : postorder) {
-					for (RoEvoNode node : source.getItsLiveROs()) {
-						sb.append(createConnection(source, node, "Has live RO"));
-					}
-					for (RoEvoNode node : source.getPreviousSnapshots()) {
-						sb.append(createConnection(source, node, "Previous snapshot"));
-					}
+                @Override
+                protected void populateItem(ListItem<RoEvoNode> item) {
+                    populateRoEvoNode(item, researchObjectURI, ox + dx * postorder.indexOf(item.getModelObject()));
+                }
 
-				}
+            });
+        } else {
+            forks.setVisible(false);
+        }
 
-				sb.append("});");
+        add(new Behavior() {
 
-				response.renderOnLoadJavaScript(sb.toString());
-			}
-		});
-	}
+            @Override
+            public void renderHead(Component component, IHeaderResponse response) {
+                super.renderHead(component, response);
+                final StringBuilder sb = new StringBuilder();
+                sb.append("$('#evoroot').on('firstShow', function() {");
 
+                for (RoEvoNode source : postorder) {
+                    for (RoEvoNode node : source.getItsLiveROs()) {
+                        sb.append(createConnection(source, node, "Has live RO"));
+                    }
+                    for (RoEvoNode node : source.getPreviousSnapshots()) {
+                        sb.append(createConnection(source, node, "Previous snapshot"));
+                    }
+                    for (RoEvoNode node : source.getDerivedResources()) {
+                        sb.append(createConnection(source, node, "Derived from"));
+                    }
 
-	private void visit(RoEvoNode node, List<RoEvoNode> preorder, List<RoEvoNode> postorder)
-	{
-		preorder.add(node);
-		for (RoEvoNode n : node.getPreviousSnapshots()) {
-			if (!preorder.contains(n)) {
-				visit(n, preorder, postorder);
-			}
-		}
-		for (RoEvoNode n : node.getItsLiveROs()) {
-			if (!preorder.contains(n)) {
-				visit(n, preorder, postorder);
-			}
-		}
-		postorder.add(node);
-	}
+                }
 
+                sb.append("});");
 
-	private void populateRoEvoNode(ListItem<RoEvoNode> item, final URI researchObjectURI, int x)
-	{
-		RoEvoNode node = item.getModelObject();
-		item.add(new Label("labelOrIdentifier", new PropertyModel<>(node, "labelOrIdentifier")));
-		StringBuilder cssClasses = new StringBuilder();
-		if (researchObjectURI.equals(item.getModelObject().getUri())) {
-			cssClasses.append(" active");
-		}
-		item.add(new AttributeAppender("style", "left: " + x + "px;"));
-		item.add(new AttributeAppender("class", cssClasses.toString()));
-		item.add(new WebMarkupContainer("roMark").setVisible(node.isResearchObject()));
-		node.setComponent(item);
-		item.setOutputMarkupId(true);
-	}
+                response.renderOnLoadJavaScript(sb.toString());
+            }
+        });
+    }
 
 
-	protected String createConnection(RoEvoNode source, RoEvoNode target, String label)
-	{
+    private void visit(RoEvoNode node, List<RoEvoNode> preorder, List<RoEvoNode> postorder) {
+        preorder.add(node);
+        for (RoEvoNode n : node.getPreviousSnapshots()) {
+            if (!preorder.contains(n)) {
+                visit(n, preorder, postorder);
+            }
+        }
+        for (RoEvoNode n : node.getItsLiveROs()) {
+            if (!preorder.contains(n)) {
+                visit(n, preorder, postorder);
+            }
+        }
+        for (RoEvoNode n : node.getDerivedResources()) {
+            if (!preorder.contains(n)) {
+                visit(n, preorder, postorder);
+            }
+        }
+        postorder.add(node);
+    }
 
-		StringBuilder sb = new StringBuilder();
-		String connId = "conn" + Math.abs(new Random().nextInt());
-		sb.append("var " + connId + " = jsPlumb.connect({");
-		sb.append("source: '" + source.getComponent().getMarkupId() + "',");
-		sb.append("target: '" + target.getComponent().getMarkupId() + "',");
-		sb.append("overlays:[ [ 'Label', { label:'" + label + "', id: 'label', cssClass : 'evolabel' } ] ]");
-		sb.append("});");
-		sb.append(connId + ".bind('mouseenter', function (c) { c.showOverlay('label'); });");
-		sb.append(connId + ".bind('mouseexit', function (c) { c.hideOverlay('label'); });");
-		sb.append(connId + ".hideOverlay('label');");
-		return sb.toString();
-	}
+
+    private void populateRoEvoNode(ListItem<RoEvoNode> item, final URI researchObjectURI, int x) {
+        RoEvoNode node = item.getModelObject();
+        item.add(new Label("labelOrIdentifier", new PropertyModel<>(node, "labelOrIdentifier")));
+        StringBuilder cssClasses = new StringBuilder();
+        if (researchObjectURI.equals(item.getModelObject().getUri())) {
+            cssClasses.append(" active");
+        }
+        item.add(new AttributeAppender("style", "left: " + x + "px;"));
+        item.add(new AttributeAppender("class", cssClasses.toString()));
+        item.add(new WebMarkupContainer("roMark").setVisible(node.isResearchObject()));
+        node.setComponent(item);
+        item.setOutputMarkupId(true);
+    }
+
+
+    protected String createConnection(RoEvoNode source, RoEvoNode target, String label) {
+
+        StringBuilder sb = new StringBuilder();
+        String connId = "conn" + Math.abs(new Random().nextInt());
+        sb.append("var " + connId + " = jsPlumb.connect({");
+        sb.append("source: '" + source.getComponent().getMarkupId() + "',");
+        sb.append("target: '" + target.getComponent().getMarkupId() + "',");
+        sb.append("overlays:[ [ 'Label', { label:'" + label + "', id: 'label', cssClass : 'evolabel' } ] ]");
+        sb.append("});");
+        sb.append(connId + ".bind('mouseenter', function (c) { c.showOverlay('label'); });");
+        sb.append(connId + ".bind('mouseexit', function (c) { c.hideOverlay('label'); });");
+        sb.append(connId + ".hideOverlay('label');");
+        return sb.toString();
+    }
 }
