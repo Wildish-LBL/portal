@@ -26,218 +26,254 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
 /**
+ * Custom app session.
+ * 
  * @author piotrhol
  * 
  */
-public class MySession
-	extends AbstractAuthenticatedWebSession
-{
+public class MySession extends AbstractAuthenticatedWebSession {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -4113134277706549806L;
+    /** Id. */
+    private static final long serialVersionUID = -4113134277706549806L;
 
-	private static final Logger log = Logger.getLogger(MySession.class);
+    /** Logger. */
+    private static final Logger LOG = Logger.getLogger(MySession.class);
 
-	private Token dLibraAccessToken;
+    /** RODL access token. */
+    private Token dLibraAccessToken;
 
-	private boolean dirtydLibra = false;
+    /** Should RODL tokens be flushed to cookies. */
+    private boolean dirtydLibra = false;
 
-	private Token myExpAccessToken;
+    /** myExperiment access token. */
+    private Token myExpAccessToken;
 
-	private boolean dirtyMyExp = false;
+    /** Should myExperiment tokens be flushed to cookies. */
+    private boolean dirtyMyExp = false;
 
-	private Token requestToken;
+    /** Temporary token used for OAuth 1.0 with myExperiment. */
+    private Token requestToken;
 
-	private URI userURI;
+    /** User RODL URI. */
+    private URI userURI;
 
-	private String username;
+    /** Nice username. */
+    private String username;
 
-	private final static String DLIBRA_KEY = "dlibra";
+    /** Cookie key. */
+    private static final String DLIBRA_KEY = "dlibra";
 
-	private final static String MYEXP_KEY_TOKEN = "myexp1";
+    /** Cookie key. */
+    private static final String MYEXP_KEY_TOKEN = "myexp1";
 
-	private final static String MYEXP_KEY_SECRET = "myexp2";
+    /** Cookie key. */
+    private static final String MYEXP_KEY_SECRET = "myexp2";
 
-	private final Map<URI, Creator> usernames = new HashMap<>();
-
-
-	public MySession(Request request)
-	{
-		super(request);
-		if (new CookieUtils().load(DLIBRA_KEY) != null)
-			setdLibraAccessToken(new Token(new CookieUtils().load(DLIBRA_KEY), null));
-		if (new CookieUtils().load(MYEXP_KEY_TOKEN) != null && new CookieUtils().load(MYEXP_KEY_SECRET) != null) {
-			myExpAccessToken = new Token(new CookieUtils().load(MYEXP_KEY_TOKEN),
-					new CookieUtils().load(MYEXP_KEY_SECRET));
-		}
-	}
+    /** Usernames cache. */
+    private final Map<URI, Creator> usernames = new HashMap<>();
 
 
-	public static MySession get()
-	{
-		return (MySession) Session.get();
-	}
+    /**
+     * Constructor.
+     * 
+     * @param request
+     *            same as for superclass
+     */
+    public MySession(Request request) {
+        super(request);
+        if (new CookieUtils().load(DLIBRA_KEY) != null) {
+            setdLibraAccessToken(new Token(new CookieUtils().load(DLIBRA_KEY), null));
+        }
+        if (new CookieUtils().load(MYEXP_KEY_TOKEN) != null && new CookieUtils().load(MYEXP_KEY_SECRET) != null) {
+            myExpAccessToken = new Token(new CookieUtils().load(MYEXP_KEY_TOKEN),
+                    new CookieUtils().load(MYEXP_KEY_SECRET));
+        }
+    }
 
 
-	/**
-	 * @return the dLibraAccessToken
-	 */
-	public Token getdLibraAccessToken()
-	{
-		return dLibraAccessToken;
-	}
+    /**
+     * Singleton.
+     * 
+     * @return the only instance
+     */
+    public static MySession get() {
+        return (MySession) Session.get();
+    }
 
 
-	/**
-	 * @param dLibraAccessToken
-	 *            the dLibraAccessToken to set
-	 */
-	public void setdLibraAccessToken(Token dLibraAccessToken)
-	{
-		this.dLibraAccessToken = dLibraAccessToken;
-		fetchUserData();
-		dirtydLibra = true;
-	}
+    /**
+     * RODL access token.
+     * 
+     * @return the dLibraAccessToken
+     */
+    public Token getdLibraAccessToken() {
+        return dLibraAccessToken;
+    }
 
 
-	/**
-	 * @return the myExpAccessToken
-	 */
-	public Token getMyExpAccessToken()
-	{
-		return myExpAccessToken;
-	}
+    /**
+     * RODL access token.
+     * 
+     * @param dLibraAccessToken
+     *            the dLibraAccessToken to set
+     */
+    public void setdLibraAccessToken(Token dLibraAccessToken) {
+        this.dLibraAccessToken = dLibraAccessToken;
+        fetchUserData();
+        dirtydLibra = true;
+    }
 
 
-	/**
-	 * @param myExpAccessToken
-	 *            the myExpAccessToken to set
-	 */
-	public void setMyExpAccessToken(Token myExpAccessToken)
-	{
-		this.myExpAccessToken = myExpAccessToken;
-		dirtyMyExp = true;
-	}
+    /**
+     * myExperiment access token.
+     * 
+     * @return the myExpAccessToken
+     */
+    public Token getMyExpAccessToken() {
+        return myExpAccessToken;
+    }
 
 
-	/**
-	 * @return the requestToken
-	 */
-	public Token getRequestToken()
-	{
-		return requestToken;
-	}
+    /**
+     * myExperiment access token.
+     * 
+     * @param myExpAccessToken
+     *            the myExpAccessToken to set
+     */
+    public void setMyExpAccessToken(Token myExpAccessToken) {
+        this.myExpAccessToken = myExpAccessToken;
+        dirtyMyExp = true;
+    }
 
 
-	/**
-	 * @param requestToken
-	 *            the requestToken to set
-	 */
-	public void setRequestToken(Token requestToken)
-	{
-		this.requestToken = requestToken;
-	}
+    /**
+     * myExperiment temporary access token.
+     * 
+     * @return the requestToken
+     */
+    public Token getRequestToken() {
+        return requestToken;
+    }
 
 
-	@Override
-	public Roles getRoles()
-	{
-		return isSignedIn() ? new Roles(Roles.USER) : null;
-	}
+    /**
+     * myExperiment temporary access token.
+     * 
+     * @param requestToken
+     *            the requestToken to set
+     */
+    public void setRequestToken(Token requestToken) {
+        this.requestToken = requestToken;
+    }
 
 
-	@Override
-	public boolean isSignedIn()
-	{
-		return getdLibraAccessToken() != null;
-	}
+    @Override
+    public Roles getRoles() {
+        return isSignedIn() ? new Roles(Roles.USER) : null;
+    }
 
 
-	public void signOut()
-	{
-		dLibraAccessToken = null;
-		myExpAccessToken = null;
-		username = null;
-		new CookieUtils().remove(DLIBRA_KEY);
-		new CookieUtils().remove(MYEXP_KEY_TOKEN);
-		new CookieUtils().remove(MYEXP_KEY_SECRET);
-	}
+    @Override
+    public boolean isSignedIn() {
+        return getdLibraAccessToken() != null;
+    }
 
 
-	public void persist()
-	{
-		if (dirtydLibra) {
-			if (dLibraAccessToken != null) {
-				new CookieUtils().save(DLIBRA_KEY, dLibraAccessToken.getToken());
-			}
-			dirtydLibra = false;
-		}
-		if (dirtyMyExp) {
-			if (myExpAccessToken != null) {
-				new CookieUtils().save(MYEXP_KEY_TOKEN, myExpAccessToken.getToken());
-				new CookieUtils().save(MYEXP_KEY_SECRET, myExpAccessToken.getSecret());
-			}
-			dirtyMyExp = false;
-		}
-	}
+    /**
+     * Remove access tokens from memory and cookies.
+     */
+    public void signOut() {
+        dLibraAccessToken = null;
+        myExpAccessToken = null;
+        username = null;
+        new CookieUtils().remove(DLIBRA_KEY);
+        new CookieUtils().remove(MYEXP_KEY_TOKEN);
+        new CookieUtils().remove(MYEXP_KEY_SECRET);
+    }
 
 
-	/**
-	 * @return the username
-	 */
-	public String getUsername()
-	{
-		return username;
-	}
+    /**
+     * Flush access tokens to cookies.
+     */
+    public void persist() {
+        if (dirtydLibra) {
+            if (dLibraAccessToken != null) {
+                new CookieUtils().save(DLIBRA_KEY, dLibraAccessToken.getToken());
+            }
+            dirtydLibra = false;
+        }
+        if (dirtyMyExp) {
+            if (myExpAccessToken != null) {
+                new CookieUtils().save(MYEXP_KEY_TOKEN, myExpAccessToken.getToken());
+                new CookieUtils().save(MYEXP_KEY_SECRET, myExpAccessToken.getSecret());
+            }
+            dirtyMyExp = false;
+        }
+    }
 
 
-	/**
-	 * @return the userURI
-	 */
-	public URI getUserURI()
-	{
-		return userURI;
-	}
+    /**
+     * Nice username.
+     * 
+     * @return the username
+     */
+    public String getUsername() {
+        return username;
+    }
 
 
-	/**
-	 * @return the username
-	 */
-	public String getUsername(String defaultValue)
-	{
-		if (username != null)
-			return username;
-		return defaultValue;
-	}
+    /**
+     * Nice username.
+     * 
+     * @return the userURI
+     */
+    public URI getUserURI() {
+        return userURI;
+    }
 
 
-	private void fetchUserData()
-	{
-		try {
-			OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
-			userModel.read(ROSRService.getWhoAmi(((PortalApplication) PortalApplication.get()).getRodlURI(),
-				getdLibraAccessToken()), null);
-			ExtendedIterator<Individual> it = userModel.listIndividuals(Vocab.foafAgent);
-			Individual user = it.next();
-			if (user != null && user.hasProperty(Vocab.foafName)) {
-				userURI = new URI(user.getURI());
-				username = user.as(Individual.class).getPropertyValue(Vocab.foafName).asLiteral().getString();
-			}
-		}
-		catch (Exception e) {
-			log.error("Error when retrieving user data: " + e.getMessage());
-		}
-	}
+    /**
+     * Nice username or default.
+     * 
+     * @param defaultValue
+     *            the value to use if username is null
+     * @return the username
+     */
+    public String getUsername(String defaultValue) {
+        if (username != null) {
+            return username;
+        }
+        return defaultValue;
+    }
 
 
-	/**
-	 * @return the usernames
-	 */
-	public Map<URI, Creator> getUsernames()
-	{
-		return usernames;
-	}
+    /**
+     * Load user URI and username using the RODL access token.
+     */
+    private void fetchUserData() {
+        try {
+            OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
+            userModel.read(ROSRService.getWhoAmi(((PortalApplication) PortalApplication.get()).getRodlURI(),
+                getdLibraAccessToken()), null);
+            ExtendedIterator<Individual> it = userModel.listIndividuals(Vocab.foafAgent);
+            Individual user = it.next();
+            if (user != null && user.hasProperty(Vocab.foafName)) {
+                userURI = new URI(user.getURI());
+                username = user.as(Individual.class).getPropertyValue(Vocab.foafName).asLiteral().getString();
+            }
+        } catch (Exception e) {
+            LOG.error("Error when retrieving user data: " + e.getMessage());
+        }
+    }
+
+
+    /**
+     * The usernames cache.
+     * 
+     * @return the usernames
+     */
+    public Map<URI, Creator> getUsernames() {
+        return usernames;
+    }
 
 }
