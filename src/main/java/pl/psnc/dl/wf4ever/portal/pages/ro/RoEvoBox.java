@@ -1,7 +1,7 @@
 /**
  * 
  */
-package pl.psnc.dl.wf4ever.portal.pages;
+package pl.psnc.dl.wf4ever.portal.pages.ro;
 
 import java.io.IOException;
 import java.net.URI;

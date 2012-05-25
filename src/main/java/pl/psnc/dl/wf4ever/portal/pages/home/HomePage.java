@@ -1,4 +1,4 @@
-package pl.psnc.dl.wf4ever.portal.pages;
+package pl.psnc.dl.wf4ever.portal.pages.home;
 
 import java.io.IOException;
 import java.net.URI;
@@ -39,6 +39,11 @@ import pl.psnc.dl.wf4ever.portal.model.Recommendation;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.model.SearchResult;
+import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
+import pl.psnc.dl.wf4ever.portal.pages.HelpPage;
+import pl.psnc.dl.wf4ever.portal.pages.TemplatePage;
+import pl.psnc.dl.wf4ever.portal.pages.all.AllRosPage;
+import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
 import pl.psnc.dl.wf4ever.portal.pages.util.CreatorsPanel;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;

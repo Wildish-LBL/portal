@@ -1,36 +1,30 @@
-package pl.psnc.dl.wf4ever.portal.pages;
+package pl.psnc.dl.wf4ever.portal.pages.ro;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeModel;
-
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.FormComponent;
+import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.form.validation.IFormValidator;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.convert.IConverter;
 
-import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.model.Statement;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
-import pl.psnc.dl.wf4ever.portal.pages.util.RoTree;
 import pl.psnc.dl.wf4ever.portal.pages.util.URIConverter;
 
-class RelationEditModal
+class StatementEditModal
 	extends Panel
 {
 
@@ -39,21 +33,17 @@ class RelationEditModal
 	 */
 	private static final long serialVersionUID = -805443481947725257L;
 
-	private final TextField<String> subjectURI;
+	private final TextArea<String> value;
 
-	private final TextField<URI> relationURI;
+	private final TextField<URI> objectURI;
 
-	private URI selectedRelation;
+	private final TextField<URI> propertyURI;
+
+	private URI selectedProperty;
 
 	private String title;
 
 	private Form<Statement> form;
-
-	private RoTree tree;
-
-	private Fragment treeLoading;
-
-	private RoPage roPage;
 
 	private MyFeedbackPanel feedbackPanel;
 
@@ -63,12 +53,11 @@ class RelationEditModal
 
 
 	@SuppressWarnings("serial")
-	public RelationEditModal(String id, final RoPage roPage, CompoundPropertyModel<Statement> model, String tempRoTreeId)
+	public StatementEditModal(String id, final RoPage roPage, CompoundPropertyModel<Statement> model)
 	{
 		super(id, model);
-		this.roPage = roPage;
 		setOutputMarkupId(true);
-		form = new Form<>("relEditForm", model);
+		form = new Form<>("stmtEditForm", model);
 		add(form);
 
 		feedbackPanel = new MyFeedbackPanel("feedbackPanel");
@@ -77,20 +66,16 @@ class RelationEditModal
 
 		form.add(new Label("title", new PropertyModel<String>(this, "title")));
 
-		subjectURI = new TextField<String>("subjectURI", new PropertyModel<String>(this, "subjectURIShort"));
-		subjectURI.setEnabled(false);
-		form.add(subjectURI);
+		List<URI> choices = Arrays.asList(RoFactory.defaultProperties);
+		DropDownChoice<URI> properties = new DropDownChoice<URI>("propertyURI", new PropertyModel<URI>(this,
+				"selectedProperty"), choices);
+		properties.setNullValid(true);
+		form.add(properties);
 
-		List<URI> choices = Arrays.asList(RoFactory.defaultRelations);
-		DropDownChoice<URI> relations = new DropDownChoice<URI>("relationURI", new PropertyModel<URI>(this,
-				"selectedRelation"), choices);
-		relations.setNullValid(true);
-		form.add(relations);
+		final WebMarkupContainer propertyURIDiv = new WebMarkupContainer("customPropertyURIDiv");
+		form.add(propertyURIDiv);
 
-		final WebMarkupContainer relationURIDiv = new WebMarkupContainer("customRelationURIDiv");
-		form.add(relationURIDiv);
-
-		relationURI = new TextField<URI>("customRelationURI", new PropertyModel<URI>(this, "customRelation"), URI.class) {
+		propertyURI = new TextField<URI>("customPropertyURI", new PropertyModel<URI>(this, "customProperty"), URI.class) {
 
 			@SuppressWarnings("unchecked")
 			@Override
@@ -99,35 +84,31 @@ class RelationEditModal
 				return (IConverter<C>) new URIConverter();
 			}
 		};
-		relationURIDiv.add(relationURI);
+		propertyURIDiv.add(propertyURI);
 
-		tree = new RoTree("objectTree", new PropertyModel<TreeModel>(roPage, "conceptualResourcesTree"));
-		treeLoading = new Fragment("objectTree", tempRoTreeId, roPage);
-		form.add(treeLoading);
+		final WebMarkupContainer uriDiv = new WebMarkupContainer("objectURIDiv");
+		form.add(uriDiv);
 
-		form.add(new IFormValidator() {
+		objectURI = new TextField<URI>("objectURI", URI.class) {
 
+			@SuppressWarnings("unchecked")
 			@Override
-			public void validate(Form< ? > form)
+			public <C> IConverter<C> getConverter(Class<C> type)
 			{
-				if (tree.getTreeState().getSelectedNodes().isEmpty()) {
-					form.error("You have to select one resource");
-					return;
-				}
-				DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getTreeState().getSelectedNodes()
-						.iterator().next();
-				if (!(node.getUserObject() instanceof AggregatedResource)) {
-					form.error("You must select a resource");
-				}
+				return (IConverter<C>) new URIConverter();
 			}
+		};
+		uriDiv.add(objectURI);
 
+		final WebMarkupContainer valueDiv = new WebMarkupContainer("objectValueDiv");
+		form.add(valueDiv);
 
-			@Override
-			public FormComponent< ? >[] getDependentFormComponents()
-			{
-				return null;
-			}
-		});
+		value = new TextArea<String>("objectValue");
+		value.setEscapeModelStrings(false);
+		valueDiv.add(value);
+
+		CheckBox objectType = new CheckBox("objectURIResource");
+		form.add(objectType);
 
 		form.add(new MyAjaxButton("save", form) {
 
@@ -135,11 +116,7 @@ class RelationEditModal
 			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 			{
 				super.onSubmit(target, form);
-				Statement statement = RelationEditModal.this.getModelObject();
-				AggregatedResource res = (AggregatedResource) ((DefaultMutableTreeNode) tree.getTreeState()
-						.getSelectedNodes().iterator().next()).getUserObject();
-				statement.setObjectURI(res.getURI());
-
+				Statement statement = StatementEditModal.this.getModelObject();
 				try {
 					if (statement.getAnnotation() == null) {
 						statements.add(statement);
@@ -149,9 +126,9 @@ class RelationEditModal
 						roPage.onStatementEdit(statement);
 					}
 					statements.clear();
-					roPage.onRelationAddedEdited(statement, target);
+					roPage.onStatementAddedEdited(target);
 					target.add(form);
-					target.appendJavaScript("$('#edit-rel-modal').modal('hide')");
+					target.appendJavaScript("$('#edit-ann-modal').modal('hide')");
 				}
 				catch (Exception e) {
 					error(e.getMessage());
@@ -173,15 +150,12 @@ class RelationEditModal
 			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
 			{
 				super.onSubmit(target, form);
-				Statement statement = RelationEditModal.this.getModelObject();
-				AggregatedResource res = (AggregatedResource) ((DefaultMutableTreeNode) tree.getTreeState()
-						.getSelectedNodes().iterator().next()).getUserObject();
-				statement.setObjectURI(res.getURI());
+				Statement statement = StatementEditModal.this.getModelObject();
 				statements.add(statement);
 				try {
-					RelationEditModal.this.setModelObject(new Statement(statement.getSubjectURI(), null));
+					StatementEditModal.this.setModelObject(new Statement(statement.getSubjectURI(), null));
 					target.add(form);
-					target.appendJavaScript("showRelEdit('');");
+					target.appendJavaScript("showStmtEdit('');");
 				}
 				catch (Exception e) {
 					error(e.getMessage());
@@ -205,45 +179,39 @@ class RelationEditModal
 			{
 				super.onSubmit(target, form);
 				statements.clear();
-				target.appendJavaScript("$('#edit-rel-modal').modal('hide')");
+				target.appendJavaScript("$('#edit-ann-modal').modal('hide')");
 			}
 		}.setDefaultFormProcessing(false));
 	}
 
 
-	public void onRoTreeLoaded()
-	{
-		treeLoading.replaceWith(tree);
-	}
-
-
 	/**
 	 * @return the selectedProperty
 	 */
-	public URI getSelectedRelation()
+	public URI getSelectedProperty()
 	{
-		if (selectedRelation == null && getModelObject() != null)
+		if (selectedProperty == null && getModelObject() != null)
 			return getModelObject().getPropertyURI();
-		return selectedRelation;
+		return selectedProperty;
 	}
 
 
 	/**
-	 * @param selectedRelation
+	 * @param selectedProperty
 	 *            the selectedProperty to set
 	 */
-	public void setSelectedRelation(URI selectedRelation)
+	public void setSelectedProperty(URI selectedProperty)
 	{
-		this.selectedRelation = selectedRelation;
-		if (selectedRelation != null)
-			getModelObject().setPropertyURI(selectedRelation);
+		this.selectedProperty = selectedProperty;
+		if (selectedProperty != null)
+			getModelObject().setPropertyURI(selectedProperty);
 	}
 
 
 	/**
 	 * @return the selectedProperty
 	 */
-	public URI getCustomRelation()
+	public URI getCustomProperty()
 	{
 		if (getModelObject() != null)
 			return getModelObject().getPropertyURI();
@@ -252,13 +220,13 @@ class RelationEditModal
 
 
 	/**
-	 * @param selectedRelation
+	 * @param selectedProperty
 	 *            the selectedProperty to set
 	 */
-	public void setCustomRelation(URI customRelation)
+	public void setCustomProperty(URI customProperty)
 	{
-		if (selectedRelation == null && customRelation != null)
-			getModelObject().setPropertyURI(customRelation);
+		if (selectedProperty == null && customProperty != null)
+			getModelObject().setPropertyURI(customProperty);
 	}
 
 
@@ -293,26 +261,17 @@ class RelationEditModal
 	}
 
 
-	public String getSubjectURIShort()
-	{
-		if (getModelObject() == null) {
-			return null;
-		}
-		return "./" + roPage.roURI.relativize(getModelObject().getSubjectURI()).toString();
-	}
-
-
 	// FIXME not the best design probably, these modals might use some refactoring
 	public void setAddMode()
 	{
-		setTitle("Add relation");
+		setTitle("Add annotation");
 		getAnotherButton().setVisible(true);
 	}
 
 
 	public void setEditMode()
 	{
-		setTitle("Edit relation");
+		setTitle("Edit annotation");
 		getAnotherButton().setVisible(false);
 	}
 

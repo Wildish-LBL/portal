@@ -1,4 +1,4 @@
-package pl.psnc.dl.wf4ever.portal.pages;
+package pl.psnc.dl.wf4ever.portal.pages.ro;
 
 import java.net.URI;
 import java.util.ArrayList;

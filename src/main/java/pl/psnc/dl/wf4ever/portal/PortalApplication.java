@@ -19,18 +19,18 @@ import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
 
 import pl.psnc.dl.wf4ever.portal.model.ResourceGroup;
-import pl.psnc.dl.wf4ever.portal.pages.AllRosPage;
 import pl.psnc.dl.wf4ever.portal.pages.AuthenticatePage;
 import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
 import pl.psnc.dl.wf4ever.portal.pages.HelpPage;
-import pl.psnc.dl.wf4ever.portal.pages.HomePage;
 import pl.psnc.dl.wf4ever.portal.pages.MyExpAuthorizePage;
 import pl.psnc.dl.wf4ever.portal.pages.MyExpImportPage;
-import pl.psnc.dl.wf4ever.portal.pages.MyRosPage;
 import pl.psnc.dl.wf4ever.portal.pages.OAuthPage;
-import pl.psnc.dl.wf4ever.portal.pages.RoPage;
 import pl.psnc.dl.wf4ever.portal.pages.SparqlEndpointPage;
+import pl.psnc.dl.wf4ever.portal.pages.all.AllRosPage;
+import pl.psnc.dl.wf4ever.portal.pages.home.HomePage;
+import pl.psnc.dl.wf4ever.portal.pages.my.MyRosPage;
+import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
 import pl.psnc.dl.wf4ever.portal.services.DlibraApi;
 
 /**
