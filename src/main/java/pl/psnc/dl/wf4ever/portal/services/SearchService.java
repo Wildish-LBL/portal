@@ -29,79 +29,113 @@ import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.XmlReader;
 
 /**
+ * This service fetches prepares a query using the OpenSearch API and sends it to dLibra, later it parses the responses.
+ * 
  * @author piotrek
  * 
  */
-public class SearchService
-{
+public final class SearchService {
 
-	private final static Logger logger = Logger.getLogger(SearchService.class);
+    /** Logger. */
+    private static final Logger LOG = Logger.getLogger(SearchService.class);
 
-	private static final String DL_QUERY_NS = "http://dlibra.psnc.pl/opensearch/";
+    /** dLibra namespace. */
+    private static final String DL_QUERY_NS = "http://dlibra.psnc.pl/opensearch/";
 
-	public static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z");
+    /** date format for parsing the dates in search results. */
+    public static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z");
 
 
-	@SuppressWarnings("unchecked")
-	public static List<SearchResult> findByKeywords(URI rodlURI, URI baseURI, String keywords)
-		throws IllegalArgumentException, MalformedURLException, FeedException, IOException
-	{
-		URI queryURI = new UriBuilderImpl().uri(baseURI).queryParam("searchTerms", keywords)
-				.queryParam("aggregate", "false").queryParam("count", 50).build();
+    /**
+     * Private constructor, this is a static service.
+     */
+    private SearchService() {
+        //nope
+    }
 
-		SyndFeedInput input = new SyndFeedInput();
-		SyndFeed feed = input.build(new XmlReader(queryURI.toURL()));
 
-		List<SyndEntry> entries = feed.getEntries();
-		List<SearchResult> ros = new ArrayList<>();
-		for (SyndEntry entry : entries) {
-			URI researchObjectURI = null;
-			Calendar created = null;
-			String title = null;
-			List<Creator> creators = new ArrayList<>();
-			double score = -1;
-			List<Element> dlMarkup = (List<Element>) entry.getForeignMarkup();
-			for (Element element : dlMarkup) {
-				if (!DL_QUERY_NS.equals(element.getNamespaceURI()))
-					continue;
-				switch (element.getName()) {
-					case "attribute":
-						switch (element.getAttributeValue("name")) {
-							case "Identifier":
-								researchObjectURI = URI.create(element.getValue());
-								break;
-							case "Creator":
-								creators.add(RoFactory.getCreator(rodlURI, MySession.get().getUsernames(),
-									element.getValue()));
-								break;
-							case "Created":
-								try {
-									created = Calendar.getInstance();
-									created.setTime(SDF.parse(element.getValue()));
-								}
-								catch (ParseException e) {
-									logger.warn("Incorrect date", e);
-									created = null;
-								}
-								break;
-							case "Title":
-								title = element.getValue();
-								break;
-						}
-						break;
-					case "score":
-						score = Double.parseDouble(element.getValue());
-						break;
-				}
-			}
+    /**
+     * Performs a search in RODL.
+     * 
+     * @param rodlURI
+     *            RODL URI
+     * @param baseURI
+     *            search module URI
+     * @param keywords
+     *            words to look for
+     * @return list of search results
+     * @throws IllegalArgumentException
+     *             when the list of keywords is incorrect
+     * @throws MalformedURLException
+     *             the query string is incorrect
+     * @throws FeedException
+     *             the query string is incorrect
+     * @throws IOException
+     *             the query string is incorrect
+     */
+    @SuppressWarnings("unchecked")
+    public static List<SearchResult> findByKeywords(URI rodlURI, URI baseURI, String keywords)
+            throws IllegalArgumentException, MalformedURLException, FeedException, IOException {
+        URI queryURI = new UriBuilderImpl().uri(baseURI).queryParam("searchTerms", keywords)
+                .queryParam("aggregate", "false").queryParam("count", 50).build();
 
-			if (researchObjectURI != null && score != -1) {
-				ResearchObject ro = new ResearchObject(researchObjectURI, created, creators);
-				ro.setTitle(title);
-				ros.add(new SearchResult(ro, score));
-			}
-		}
+        SyndFeedInput input = new SyndFeedInput();
+        SyndFeed feed = input.build(new XmlReader(queryURI.toURL()));
 
-		return ros;
-	}
+        List<SyndEntry> entries = feed.getEntries();
+        List<SearchResult> ros = new ArrayList<>();
+        for (SyndEntry entry : entries) {
+            URI researchObjectURI = null;
+            Calendar created = null;
+            String title = null;
+            List<Creator> creators = new ArrayList<>();
+            double score = -1;
+            List<Element> dlMarkup = (List<Element>) entry.getForeignMarkup();
+            for (Element element : dlMarkup) {
+                if (!DL_QUERY_NS.equals(element.getNamespaceURI())) {
+                    continue;
+                }
+                switch (element.getName()) {
+                    case "attribute":
+                        switch (element.getAttributeValue("name")) {
+                            case "Identifier":
+                                researchObjectURI = URI.create(element.getValue());
+                                break;
+                            case "Creator":
+                                creators.add(RoFactory.getCreator(rodlURI, MySession.get().getUsernames(),
+                                    element.getValue()));
+                                break;
+                            case "Created":
+                                try {
+                                    created = Calendar.getInstance();
+                                    created.setTime(SDF.parse(element.getValue()));
+                                } catch (ParseException e) {
+                                    LOG.warn("Incorrect date", e);
+                                    created = null;
+                                }
+                                break;
+                            case "Title":
+                                title = element.getValue();
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    case "score":
+                        score = Double.parseDouble(element.getValue());
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if (researchObjectURI != null && score != -1) {
+                ResearchObject ro = new ResearchObject(researchObjectURI, created, creators);
+                ro.setTitle(title);
+                ros.add(new SearchResult(ro, score));
+            }
+        }
+
+        return ros;
+    }
 }
