@@ -11,79 +11,96 @@ import java.util.List;
 import org.apache.wicket.Component;
 
 /**
+ * A node in visualization of RO evolution. Represents an RO or any other resource.
+ * 
  * @author piotrekhol
  * 
  */
 public class RoEvoNode implements Serializable {
 
+    /** id. */
     private static final long serialVersionUID = 3083098588758012143L;
 
 
+    /**
+     * roevo RDF class.
+     * 
+     * @author piotrekhol
+     * 
+     */
     public enum EvoClass {
+        /** roevo:LiveRO. */
         LIVE,
+        /** roevo:SnapshotRO. */
         SNAPSHOT,
+        /** roevo:ArchivedRO. */
         ARCHIVED,
+        /** Default value. */
         UNKNOWN
     }
 
 
+    /**
+     * Modifiers suggesting that the node may need to be placed not according to its EvoClass.
+     * 
+     * @author piotrekhol
+     * 
+     */
     public enum EvoClassModifier {
+        /** Some other node is roevo:derivedFrom this one. */
         SOURCE,
+        /** This node is roevo:derivedFrom some other node. */
         FORK,
+        /** Default value. */
         NONE
     }
 
 
+    /** Resource URI. */
     private URI uri;
 
-    /**
-     * rdfs:label
-     */
+    /** rdfs:label. */
     private String label;
 
-    /**
-     * Does it have ro:ResearchObject RDF class
-     */
+    /** Does it have ro:ResearchObject RDF class. */
     private boolean isResearchObject = false;
 
-    /**
-     * Any of roevo RDF classes
-     */
+    /** Any of roevo RDF classes. */
     private EvoClass evoClass = EvoClass.UNKNOWN;
 
+    /** Position modifiers. */
     private EvoClassModifier evoLayer = EvoClassModifier.NONE;
 
-    /**
-     * For snapshots: roevo:previousSnapshot
-     */
+    /** For snapshots: roevo:previousSnapshot. */
     private final List<RoEvoNode> previousSnapshots = new ArrayList<>();
 
-    /**
-     * For snapshots: roevo:hasSnapshot
-     */
+    /** For snapshots: roevo:hasSnapshot. */
     private final List<RoEvoNode> itsLiveROs = new ArrayList<>();
 
-    /**
-     * For snapshots: roevo:derivedFrom
-     */
+    /** For snapshots: roevo:derivedFrom. */
     private final List<RoEvoNode> derivedResources = new ArrayList<>();
 
-    /**
-     * For live ROs: roevo:derivedFrom
-     */
+    /** For live ROs: roevo:derivedFrom. */
     private final List<RoEvoNode> sourceResources = new ArrayList<>();
 
-    /**
-     * Its representation on the page
-     */
+    /** Its representation on the page. */
     private Component component;
 
 
+    /**
+     * Default constructor.
+     */
     public RoEvoNode() {
 
     }
 
 
+    /**
+     * Constructor.
+     * 
+     * @param uri
+     *            resource URI
+     */
     public RoEvoNode(URI uri) {
         setUri(uri);
     }
@@ -109,6 +126,11 @@ public class RoEvoNode implements Serializable {
     }
 
 
+    /**
+     * Returns label or, if it's null, the identifier.
+     * 
+     * @return label or identifier
+     */
     public String getLabelOrIdentifier() {
         if (getLabel() != null) {
             return getLabel();

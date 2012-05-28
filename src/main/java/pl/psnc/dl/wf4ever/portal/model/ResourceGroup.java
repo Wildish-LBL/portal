@@ -5,96 +5,93 @@ import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ResourceGroup
-	implements Serializable
-{
+/**
+ * Represents a group of resources that have certain RDF classes.
+ * 
+ * @author piotrekhol
+ * 
+ */
+public class ResourceGroup implements Serializable {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1544890733112265628L;
+    /** id. */
+    private static final long serialVersionUID = 1544890733112265628L;
 
-	private final String title;
+    /** Title. */
+    private final String title;
 
-	private String description;
+    /** Description. */
+    private String description;
 
-	private final Set<URI> rdfClasses = new HashSet<>();
-
-
-	/**
-	 * @param title
-	 * @param description
-	 */
-	public ResourceGroup(String title)
-	{
-		this.title = title;
-	}
+    /** RDF classes. */
+    private final Set<URI> rdfClasses = new HashSet<>();
 
 
-	/**
-	 * @return the title
-	 */
-	public String getTitle()
-	{
-		return title;
-	}
+    /**
+     * Constructor.
+     * 
+     * @param title
+     *            title
+     */
+    public ResourceGroup(String title) {
+        this.title = title;
+    }
 
 
-	/**
-	 * @return the description
-	 */
-	public String getDescription()
-	{
-		return description;
-	}
+    public String getTitle() {
+        return title;
+    }
 
 
-	public void setDescription(String description)
-	{
-		this.description = description;
-	}
+    public String getDescription() {
+        return description;
+    }
 
 
-	@Override
-	public String toString()
-	{
-		return getTitle();
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
 
-	public Set<URI> getRdfClasses()
-	{
-		return rdfClasses;
-	}
+    @Override
+    public String toString() {
+        return getTitle();
+    }
 
 
-	@Override
-	public int hashCode()
-	{
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((title == null) ? 0 : title.hashCode());
-		return result;
-	}
+    public Set<URI> getRdfClasses() {
+        return rdfClasses;
+    }
 
 
-	@Override
-	public boolean equals(Object obj)
-	{
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ResourceGroup other = (ResourceGroup) obj;
-		if (title == null) {
-			if (other.title != null)
-				return false;
-		}
-		else if (!title.equals(other.title))
-			return false;
-		return true;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((title == null) ? 0 : title.hashCode());
+        return result;
+    }
+
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ResourceGroup other = (ResourceGroup) obj;
+        if (title == null) {
+            if (other.title != null) {
+                return false;
+            }
+        } else if (!title.equals(other.title)) {
+            return false;
+        }
+        return true;
+    }
 
 }
