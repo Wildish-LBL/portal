@@ -12,84 +12,90 @@ import java.util.List;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 /**
+ * Represents ao:Annotation.
+ * 
  * @author piotrhol
  * 
  */
-public class Annotation
-	extends AggregatedResource
-{
+public class Annotation extends AggregatedResource {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 8821418401311175036L;
+    /** id. */
+    private static final long serialVersionUID = 8821418401311175036L;
 
-	private URI bodyURI;
+    /** Annotation body URI. */
+    private URI bodyURI;
 
-	private LoadableDetachableModel<List<Statement>> bodyModel;
+    /** Jena annotation body model (not serializable). */
+    private LoadableDetachableModel<List<Statement>> bodyModel;
 
 
-	public Annotation(URI uri, Calendar created, List<Creator> creators, String name, URI bodyURI)
-	{
-		super(uri, created, creators, name);
-		this.bodyURI = bodyURI;
+    /**
+     * Constructor.
+     * 
+     * @param uri
+     *            annotation URI
+     * @param created
+     *            creation date
+     * @param creators
+     *            list of creators
+     * @param name
+     *            annotation name
+     * @param bodyURI
+     *            annotation body URI
+     */
+    public Annotation(URI uri, Calendar created, List<Creator> creators, String name, URI bodyURI) {
+        super(uri, created, creators, name);
+        this.bodyURI = bodyURI;
 
-		bodyModel = new LoadableDetachableModel<List<Statement>>() {
+        bodyModel = new LoadableDetachableModel<List<Statement>>() {
 
-			private static final long serialVersionUID = 4142916952621994965L;
-
-
-			@Override
-			protected List<Statement> load()
-			{
-				try {
-					List<Statement> res = RoFactory.createAnnotationBody(Annotation.this, getBodyURI());
-					return res != null ? res : new ArrayList<Statement>();
-				}
-				catch (URISyntaxException e) {
-					return new ArrayList<Statement>();
-				}
-			}
-		};
-	}
+            private static final long serialVersionUID = 4142916952621994965L;
 
 
-	public Annotation()
-	{
-		super();
-	}
+            @Override
+            protected List<Statement> load() {
+                try {
+                    List<Statement> res = RoFactory.createAnnotationBody(Annotation.this, getBodyURI());
+                    return res != null ? res : new ArrayList<Statement>();
+                } catch (URISyntaxException e) {
+                    return new ArrayList<Statement>();
+                }
+            }
+        };
+    }
 
 
-	/**
-	 * @return the bodyURI
-	 */
-	public URI getBodyURI()
-	{
-		return bodyURI;
-	}
+    /**
+     * Default constructor.
+     */
+    public Annotation() {
+        super();
+    }
 
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see pl.psnc.dl.wf4ever.portal.model.AggregatedResource#getDownloadURI()
-	 */
-	@Override
-	public URI getDownloadURI()
-	{
-		return getURI();
-	}
+    public URI getBodyURI() {
+        return bodyURI;
+    }
 
 
-	@Override
-	public String getSizeFormatted()
-	{
-		return "--";
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see pl.psnc.dl.wf4ever.portal.model.AggregatedResource#getDownloadURI()
+     */
+    @Override
+    public URI getDownloadURI() {
+        return getURI();
+    }
 
 
-	public List<Statement> getBody()
-	{
-		return bodyModel.getObject();
-	}
+    @Override
+    public String getSizeFormatted() {
+        return "--";
+    }
+
+
+    public List<Statement> getBody() {
+        return bodyModel.getObject();
+    }
 }

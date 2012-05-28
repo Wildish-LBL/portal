@@ -9,126 +9,84 @@ import java.net.URI;
 import javax.xml.bind.annotation.XmlElement;
 
 /**
+ * Represents a single recommendation coming out of a recommendation service.
+ * 
  * @author piotrhol
  * 
  */
-public class Recommendation
-	implements Serializable
-{
+public class Recommendation implements Serializable {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1713651403977265592L;
+    /** id. */
+    private static final long serialVersionUID = 1713651403977265592L;
 
-	private int itemID;
+    /** Recommendation id. */
+    private int itemID;
 
-	private URI resource;
+    /** Resource URI. */
+    private URI resource;
 
-	private double strength;
+    /** Recommendation strength. */
+    private double strength;
 
-	private URI userURI;
+    /** Resource creator URI. */
+    private URI userURI;
 
-	private String title;
-
-
-	/**
-	 * @return the itemID
-	 */
-	@XmlElement
-	public int getItemID()
-	{
-		return itemID;
-	}
+    /** Resource title. */
+    private String title;
 
 
-	/**
-	 * @param itemID
-	 *            the itemID to set
-	 */
-	public void setItemID(int itemID)
-	{
-		this.itemID = itemID;
-	}
+    @XmlElement
+    public int getItemID() {
+        return itemID;
+    }
 
 
-	/**
-	 * @return the itemURI
-	 */
-	@XmlElement
-	public URI getResource()
-	{
-		return resource;
-	}
+    public void setItemID(int itemID) {
+        this.itemID = itemID;
+    }
 
 
-	/**
-	 * @param itemURI
-	 *            the itemURI to set
-	 */
-	public void setResource(URI itemURI)
-	{
-		this.resource = itemURI;
-	}
+    @XmlElement
+    public URI getResource() {
+        return resource;
+    }
 
 
-	/**
-	 * @return the strength
-	 */
-	@XmlElement
-	public double getStrength()
-	{
-		return strength;
-	}
+    public void setResource(URI itemURI) {
+        this.resource = itemURI;
+    }
 
 
-	/**
-	 * @param strength
-	 *            the strength to set
-	 */
-	public void setStrength(double strength)
-	{
-		this.strength = strength;
-	}
+    @XmlElement
+    public double getStrength() {
+        return strength;
+    }
 
 
-	/**
-	 * @return the userURI
-	 */
-	@XmlElement
-	public URI getUserURI()
-	{
-		return userURI;
-	}
+    public void setStrength(double strength) {
+        this.strength = strength;
+    }
 
 
-	/**
-	 * @param userURI
-	 *            the userURI to set
-	 */
-	public void setUserURI(URI userURI)
-	{
-		this.userURI = userURI;
-	}
+    @XmlElement
+    public URI getUserURI() {
+        return userURI;
+    }
 
 
-	/**
-	 * @return the title
-	 */
-	@XmlElement
-	public String getTitle()
-	{
-		return title;
-	}
+    public void setUserURI(URI userURI) {
+        this.userURI = userURI;
+    }
 
 
-	/**
-	 * @param title
-	 *            the title to set
-	 */
-	public void setTitle(String title)
-	{
-		this.title = title;
-	}
+    @XmlElement
+    public String getTitle() {
+        return title;
+    }
+
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
 }

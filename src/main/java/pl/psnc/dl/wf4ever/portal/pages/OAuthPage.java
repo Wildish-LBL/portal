@@ -53,7 +53,7 @@ public class OAuthPage
 		PortalApplication app = (PortalApplication) getApplication();
 
 		if (session.getdLibraAccessToken() == null) {
-			OAuthService service = DlibraApi.getOAuthService(app.getdLibraClientId(), app.getCallbackURL());
+			OAuthService service = DlibraApi.getOAuthService(app.getDLibraClientId(), app.getCallbackURL());
 			Token token = retrieveDlibraAccessToken(pageParameters, service);
 			session.setdLibraAccessToken(token);
 			if (token != null) {

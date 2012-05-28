@@ -10,38 +10,28 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
+ * A list of recommendations from a recommendation service.
+ * 
  * @author piotrhol
  * 
  */
 @XmlRootElement(name = "recommendations")
-public class Recommendations
-	implements Serializable
-{
+public class Recommendations implements Serializable {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 4635589213628595605L;
+    /** id. */
+    private static final long serialVersionUID = 4635589213628595605L;
 
-	private List<Recommendation> recommendations;
+    /** The list of recommendations. */
+    private List<Recommendation> recommendations;
 
 
-	/**
-	 * @return the recommendations
-	 */
-	@XmlElement(name = "recommendation")
-	public List<Recommendation> getRecommendations()
-	{
-		return recommendations;
-	}
+    @XmlElement(name = "recommendation")
+    public List<Recommendation> getRecommendations() {
+        return recommendations;
+    }
 
 
-	/**
-	 * @param recommendations
-	 *            the recommendations to set
-	 */
-	public void setRecommendations(List<Recommendation> recommendations)
-	{
-		this.recommendations = recommendations;
-	}
+    public void setRecommendations(List<Recommendation> recommendations) {
+        this.recommendations = recommendations;
+    }
 }

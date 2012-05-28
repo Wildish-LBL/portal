@@ -17,101 +17,107 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 /**
+ * Represents dcterms:creator.
+ * 
  * @author piotrhol
  * 
  */
-public class Creator
-	implements Serializable
-{
+public class Creator implements Serializable {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 4104896753518461266L;
+    /** id. */
+    private static final long serialVersionUID = 4104896753518461266L;
 
-	private static final Logger log = Logger.getLogger(Creator.class);
+    /** Logger. */
+    private static final Logger LOG = Logger.getLogger(Creator.class);
 
-	private String value;
+    /** Creator name or URI. */
+    private String value;
 
-	private boolean isLoading;
-
-
-	public Creator(String value)
-	{
-		this.value = value;
-		isLoading = false;
-	}
+    /** Is the creator name being fetched from its URI. */
+    private boolean isLoading;
 
 
-	public Creator(final URI rodlURI, final URI uri)
-	{
-		this.value = uri.toString();
-		isLoading = true;
-
-		new Thread() {
-
-			public void run()
-			{
-				try {
-					// 3. FOAF data under user URI
-					OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
-					userModel.read(uri.toString(), null);
-					Resource r2 = userModel.createResource(uri.toString());
-					if (r2 != null && r2.hasProperty(Vocab.foafName)) {
-						setValue(r2.as(Individual.class).getPropertyValue(Vocab.foafName).asLiteral().getString());
-						isLoading = false;
-					}
-				}
-				catch (Exception e) {
-					log.debug("No FOAF data under user URI: " + e.getMessage());
-				}
-				if (isLoading) {
-					// 4. FOAF data in RODL
-					OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
-					userModel.read(ROSRService.getUser(rodlURI, uri), null);
-					Resource r2 = userModel.createResource(uri.toString());
-					if (r2 != null && r2.hasProperty(Vocab.foafName)) {
-						setValue(r2.as(Individual.class).getPropertyValue(Vocab.foafName).asLiteral().getString());
-						isLoading = false;
-					}
-				}
-				synchronized (Creator.this) {
-					Creator.this.notifyAll();
-				}
-			};
-		}.start();
-
-	}
+    /**
+     * Constructor, will NOT try to load the name from the URI.
+     * 
+     * @param value
+     *            name as string
+     */
+    public Creator(String value) {
+        this.value = value;
+        isLoading = false;
+    }
 
 
-	public String getValue()
-	{
-		return value;
-	}
+    /**
+     * Constructor, will try to load the name from the URI.
+     * 
+     * @param rodlURI
+     *            RODL URI
+     * @param uri
+     *            creator URI
+     */
+    public Creator(final URI rodlURI, final URI uri) {
+        this.value = uri.toString();
+        isLoading = true;
+
+        new Thread() {
+
+            public void run() {
+                try {
+                    // 3. FOAF data under user URI
+                    OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
+                    userModel.read(uri.toString(), null);
+                    Resource r2 = userModel.createResource(uri.toString());
+                    if (r2 != null && r2.hasProperty(Vocab.foafName)) {
+                        setValue(r2.as(Individual.class).getPropertyValue(Vocab.foafName).asLiteral().getString());
+                        isLoading = false;
+                    }
+                } catch (Exception e) {
+                    LOG.debug("No FOAF data under user URI: " + e.getMessage());
+                }
+                if (isLoading) {
+                    // 4. FOAF data in RODL
+                    OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
+                    userModel.read(ROSRService.getUser(rodlURI, uri), null);
+                    Resource r2 = userModel.createResource(uri.toString());
+                    if (r2 != null && r2.hasProperty(Vocab.foafName)) {
+                        setValue(r2.as(Individual.class).getPropertyValue(Vocab.foafName).asLiteral().getString());
+                        isLoading = false;
+                    }
+                }
+                synchronized (Creator.this) {
+                    Creator.this.notifyAll();
+                }
+            };
+        }.start();
+
+    }
 
 
-	public void setValue(String value)
-	{
-		this.value = value;
-	}
+    public String getValue() {
+        return value;
+    }
 
 
-	public boolean isLoading()
-	{
-		return isLoading;
-	}
+    public void setValue(String value) {
+        this.value = value;
+    }
 
 
-	public void setLoading(boolean isLoading)
-	{
-		this.isLoading = isLoading;
-	}
+    public boolean isLoading() {
+        return isLoading;
+    }
 
 
-	@Override
-	public String toString()
-	{
-		return getValue();
-	}
+    public void setLoading(boolean isLoading) {
+        this.isLoading = isLoading;
+    }
+
+
+    @Override
+    public String toString() {
+        return getValue();
+    }
 
 }
