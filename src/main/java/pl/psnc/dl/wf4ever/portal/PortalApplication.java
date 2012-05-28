@@ -32,6 +32,7 @@ import pl.psnc.dl.wf4ever.portal.pages.home.HomePage;
 import pl.psnc.dl.wf4ever.portal.pages.my.MyRosPage;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
 import pl.psnc.dl.wf4ever.portal.services.DlibraApi;
+import pl.psnc.dl.wf4ever.portal.services.RSSService;
 
 /**
  * Application object for your web application. If you want to run this application without deploying, run the Start
@@ -60,7 +61,7 @@ public class PortalApplication extends AuthenticatedWebApplication {
     private URI rodlURI;
 
     /** RODL SPARQL URI. */
-    private URL sparqlEndpointURL;
+    private URI sparqlEndpoint;
 
     /** RODL search service URI. */
     private URL searchEndpointURL;
@@ -110,6 +111,8 @@ public class PortalApplication extends AuthenticatedWebApplication {
         loadTokens("tokens.properties");
         loadResourceGroups("resourceGroups.properties");
 
+        RSSService.start(null, sparqlEndpoint, rodlURI);
+
         Locale.setDefault(Locale.ENGLISH);
     }
 
@@ -131,7 +134,7 @@ public class PortalApplication extends AuthenticatedWebApplication {
         try {
             props.load(getClass().getClassLoader().getResourceAsStream(propertiesFile));
             rodlURI = new URI(props.getProperty("rodlURL"));
-            sparqlEndpointURL = new URL(props.getProperty("sparqlEndpointURL"));
+            sparqlEndpoint = new URI(props.getProperty("sparqlEndpointURL"));
             searchEndpointURL = new URL(props.getProperty("searchEndpointURL"));
             recommenderEndpointURL = new URL(props.getProperty("recommenderEndpointURL"));
             stabilityEndpointURL = new URL(props.getProperty("stabilityEndpointURL"));
@@ -234,8 +237,8 @@ public class PortalApplication extends AuthenticatedWebApplication {
     }
 
 
-    public URL getSparqlEndpointURL() {
-        return sparqlEndpointURL;
+    public URI getSparqlEndpointURI() {
+        return sparqlEndpoint;
     }
 
 

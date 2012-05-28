@@ -33,6 +33,9 @@ public class Creator implements Serializable {
     /** Creator name or URI. */
     private String value;
 
+    /** Creator URI, or null. */
+    private URI uri;
+
     /** Is the creator name being fetched from its URI. */
     private boolean isLoading;
 
@@ -58,6 +61,7 @@ public class Creator implements Serializable {
      *            creator URI
      */
     public Creator(final URI rodlURI, final URI uri) {
+        this.uri = uri;
         this.value = uri.toString();
         isLoading = true;
 
@@ -102,6 +106,11 @@ public class Creator implements Serializable {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+
+    public URI getURI() {
+        return uri;
     }
 
 

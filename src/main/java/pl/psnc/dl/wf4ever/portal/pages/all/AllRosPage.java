@@ -53,7 +53,7 @@ public class AllRosPage
 		add(new MyFeedbackPanel("feedbackPanel"));
 
 		QueryExecution x = QueryExecutionFactory.sparqlService(((PortalApplication) getApplication())
-				.getSparqlEndpointURL().toString(), MyQueryFactory.getAllROs());
+				.getSparqlEndpointURI().toString(), MyQueryFactory.getAllROs());
 		ResultSet results = x.execSelect();
 		List<ResearchObject> roHeaders = new ArrayList<>();
 		final Map<ResearchObject, Integer> resCnts = new HashMap<>();

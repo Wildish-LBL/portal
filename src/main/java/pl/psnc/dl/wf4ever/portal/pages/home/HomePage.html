@@ -59,19 +59,17 @@
 
 			<section class="box small">
 				<h3 class="collapsible">
-					RSS Channels <img class="sh_button" src="images/l_open.gif" />
+					Atom feeds <img class="sh_button" src="images/l_open.gif" />
 				</h3>
 				<div class="boxDiv">
 					<p>
-						<a href="#"><img alt="rss20" src="images/rss2_small.gif"
-							height="15" /></a> 5 most recent Research Objects
+						<a wicket:id="recentROsRSSFeed"><img alt="atom10"
+							src="images/atom-icon.svg" style="height: 15px;" /></a> 5 most
+						recent Research Objects <span class="label label-important">New!!</span>
 					</p>
 					<p>
-						<a href="#"><img alt="rss20" src="images/rss2_small.gif"
-							height="15" /></a> News
-					</p>
-					<p>
-						<a href="#">What is RSS feed?</a>
+						<a href="http://en.wikipedia.org/wiki/Atom_(standard)">What is
+							an Atom feed?</a>
 					</p>
 				</div>
 			</section>
@@ -132,8 +130,7 @@
 								<hr class="listLine" /></li>
 						</ol>
 						<p class="more2" style="margin-top: 1em;">
-							<a wicket:id="allRos"> More... </a><span
-								class="label label-important">New!!</span>
+							<a wicket:id="allRos"> More... </a>
 						</p>
 					</div>
 					<div class="span4 offset1" wicket:id="recommendationsDiv">
