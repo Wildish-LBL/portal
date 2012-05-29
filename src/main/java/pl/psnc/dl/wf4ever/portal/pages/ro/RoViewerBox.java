@@ -28,9 +28,9 @@ import org.apache.wicket.util.crypt.Base64;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.model.ResourceGroup;
-import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.RoTree;
+import pl.psnc.dl.wf4ever.portal.services.RoFactory;
 
 @SuppressWarnings("serial")
 class RoViewerBox

@@ -42,13 +42,13 @@ import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.Annotation;
 import pl.psnc.dl.wf4ever.portal.model.Creator;
 import pl.psnc.dl.wf4ever.portal.model.ResourceGroup;
-import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 import pl.psnc.dl.wf4ever.portal.model.Statement;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
 import pl.psnc.dl.wf4ever.portal.pages.TemplatePage;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
+import pl.psnc.dl.wf4ever.portal.services.RoFactory;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
 import com.hp.hpl.jena.ontology.Individual;
@@ -144,9 +144,8 @@ public class RoPage extends TemplatePage {
                         OntModel model = ROSRService.createManifestAndAnnotationsModel(roURI);
                         resources = RoFactory.getAggregatedResources(model, rodlURI, roURI, usernames);
                         RoFactory.assignResourceGroupsToResources(model, roURI, app.getResourceGroups(), resources);
-                        setConceptualResourcesTree(RoFactory.createConceptualResourcesTree(model, roURI, resources));
-                        setPhysicalResourcesTree(RoFactory.createPhysicalResourcesTree(model, roURI, resources,
-                            usernames));
+                        setConceptualResourcesTree(RoFactory.createConceptualResourcesTree(roURI, resources));
+                        setPhysicalResourcesTree(RoFactory.createPhysicalResourcesTree(roURI, resources));
 
                         RoFactory.createRelations(model, roURI, resources);
                         // FIXME this has been turned off because it takes too much time and is generally a hack
