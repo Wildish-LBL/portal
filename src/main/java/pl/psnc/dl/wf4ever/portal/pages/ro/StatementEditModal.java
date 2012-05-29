@@ -18,273 +18,253 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.convert.IConverter;
 
-import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.model.Statement;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.pages.util.URIConverter;
 
-class StatementEditModal
-	extends Panel
-{
+import com.hp.hpl.jena.vocabulary.DCTerms;
 
-	/**
+class StatementEditModal extends Panel {
+
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = -805443481947725257L;
+    private static final long serialVersionUID = -805443481947725257L;
+    public static final URI[] defaultProperties = { URI.create(DCTerms.type.getURI()),
+            URI.create(DCTerms.subject.getURI()), URI.create(DCTerms.description.getURI()),
+            URI.create(DCTerms.format.getURI()), URI.create(DCTerms.title.getURI()),
+            URI.create(DCTerms.created.getURI()) };
 
-	private final TextArea<String> value;
+    private final TextArea<String> value;
 
-	private final TextField<URI> objectURI;
+    private final TextField<URI> objectURI;
 
-	private final TextField<URI> propertyURI;
+    private final TextField<URI> propertyURI;
 
-	private URI selectedProperty;
+    private URI selectedProperty;
 
-	private String title;
+    private String title;
 
-	private Form<Statement> form;
+    private Form<Statement> form;
 
-	private MyFeedbackPanel feedbackPanel;
+    private MyFeedbackPanel feedbackPanel;
 
-	private List<Statement> statements = new ArrayList<>();
+    private List<Statement> statements = new ArrayList<>();
 
-	private MyAjaxButton anotherButton;
-
-
-	@SuppressWarnings("serial")
-	public StatementEditModal(String id, final RoPage roPage, CompoundPropertyModel<Statement> model)
-	{
-		super(id, model);
-		setOutputMarkupId(true);
-		form = new Form<>("stmtEditForm", model);
-		add(form);
-
-		feedbackPanel = new MyFeedbackPanel("feedbackPanel");
-		feedbackPanel.setOutputMarkupId(true);
-		form.add(feedbackPanel);
-
-		form.add(new Label("title", new PropertyModel<String>(this, "title")));
-
-		List<URI> choices = Arrays.asList(RoFactory.defaultProperties);
-		DropDownChoice<URI> properties = new DropDownChoice<URI>("propertyURI", new PropertyModel<URI>(this,
-				"selectedProperty"), choices);
-		properties.setNullValid(true);
-		form.add(properties);
-
-		final WebMarkupContainer propertyURIDiv = new WebMarkupContainer("customPropertyURIDiv");
-		form.add(propertyURIDiv);
-
-		propertyURI = new TextField<URI>("customPropertyURI", new PropertyModel<URI>(this, "customProperty"), URI.class) {
-
-			@SuppressWarnings("unchecked")
-			@Override
-			public <C> IConverter<C> getConverter(Class<C> type)
-			{
-				return (IConverter<C>) new URIConverter();
-			}
-		};
-		propertyURIDiv.add(propertyURI);
-
-		final WebMarkupContainer uriDiv = new WebMarkupContainer("objectURIDiv");
-		form.add(uriDiv);
-
-		objectURI = new TextField<URI>("objectURI", URI.class) {
-
-			@SuppressWarnings("unchecked")
-			@Override
-			public <C> IConverter<C> getConverter(Class<C> type)
-			{
-				return (IConverter<C>) new URIConverter();
-			}
-		};
-		uriDiv.add(objectURI);
-
-		final WebMarkupContainer valueDiv = new WebMarkupContainer("objectValueDiv");
-		form.add(valueDiv);
-
-		value = new TextArea<String>("objectValue");
-		value.setEscapeModelStrings(false);
-		valueDiv.add(value);
-
-		CheckBox objectType = new CheckBox("objectURIResource");
-		form.add(objectType);
-
-		form.add(new MyAjaxButton("save", form) {
-
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-			{
-				super.onSubmit(target, form);
-				Statement statement = StatementEditModal.this.getModelObject();
-				try {
-					if (statement.getAnnotation() == null) {
-						statements.add(statement);
-						roPage.onStatementAdd(statements);
-					}
-					else {
-						roPage.onStatementEdit(statement);
-					}
-					statements.clear();
-					roPage.onStatementAddedEdited(target);
-					target.add(form);
-					target.appendJavaScript("$('#edit-ann-modal').modal('hide')");
-				}
-				catch (Exception e) {
-					error(e.getMessage());
-				}
-				target.add(feedbackPanel);
-			}
+    private MyAjaxButton anotherButton;
 
 
-			@Override
-			protected void onError(AjaxRequestTarget target, Form< ? > form)
-			{
-				super.onError(target, form);
-				target.add(feedbackPanel);
-			}
-		});
-		anotherButton = new MyAjaxButton("another", form) {
+    @SuppressWarnings("serial")
+    public StatementEditModal(String id, final RoPage roPage, CompoundPropertyModel<Statement> model) {
+        super(id, model);
+        setOutputMarkupId(true);
+        form = new Form<>("stmtEditForm", model);
+        add(form);
 
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-			{
-				super.onSubmit(target, form);
-				Statement statement = StatementEditModal.this.getModelObject();
-				statements.add(statement);
-				try {
-					StatementEditModal.this.setModelObject(new Statement(statement.getSubjectURI(), null));
-					target.add(form);
-					target.appendJavaScript("showStmtEdit('');");
-				}
-				catch (Exception e) {
-					error(e.getMessage());
-				}
-				target.add(feedbackPanel);
-			}
+        feedbackPanel = new MyFeedbackPanel("feedbackPanel");
+        feedbackPanel.setOutputMarkupId(true);
+        form.add(feedbackPanel);
 
+        form.add(new Label("title", new PropertyModel<String>(this, "title")));
 
-			@Override
-			protected void onError(AjaxRequestTarget target, Form< ? > form)
-			{
-				super.onError(target, form);
-				target.add(feedbackPanel);
-			}
-		};
-		form.add(anotherButton);
-		form.add(new MyAjaxButton("cancel", form) {
+        List<URI> choices = Arrays.asList(defaultProperties);
+        DropDownChoice<URI> properties = new DropDownChoice<URI>("propertyURI", new PropertyModel<URI>(this,
+                "selectedProperty"), choices);
+        properties.setNullValid(true);
+        form.add(properties);
 
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-			{
-				super.onSubmit(target, form);
-				statements.clear();
-				target.appendJavaScript("$('#edit-ann-modal').modal('hide')");
-			}
-		}.setDefaultFormProcessing(false));
-	}
+        final WebMarkupContainer propertyURIDiv = new WebMarkupContainer("customPropertyURIDiv");
+        form.add(propertyURIDiv);
 
+        propertyURI = new TextField<URI>("customPropertyURI", new PropertyModel<URI>(this, "customProperty"), URI.class) {
 
-	/**
-	 * @return the selectedProperty
-	 */
-	public URI getSelectedProperty()
-	{
-		if (selectedProperty == null && getModelObject() != null)
-			return getModelObject().getPropertyURI();
-		return selectedProperty;
-	}
+            @SuppressWarnings("unchecked")
+            @Override
+            public <C> IConverter<C> getConverter(Class<C> type) {
+                return (IConverter<C>) new URIConverter();
+            }
+        };
+        propertyURIDiv.add(propertyURI);
 
+        final WebMarkupContainer uriDiv = new WebMarkupContainer("objectURIDiv");
+        form.add(uriDiv);
 
-	/**
-	 * @param selectedProperty
-	 *            the selectedProperty to set
-	 */
-	public void setSelectedProperty(URI selectedProperty)
-	{
-		this.selectedProperty = selectedProperty;
-		if (selectedProperty != null)
-			getModelObject().setPropertyURI(selectedProperty);
-	}
+        objectURI = new TextField<URI>("objectURI", URI.class) {
 
+            @SuppressWarnings("unchecked")
+            @Override
+            public <C> IConverter<C> getConverter(Class<C> type) {
+                return (IConverter<C>) new URIConverter();
+            }
+        };
+        uriDiv.add(objectURI);
 
-	/**
-	 * @return the selectedProperty
-	 */
-	public URI getCustomProperty()
-	{
-		if (getModelObject() != null)
-			return getModelObject().getPropertyURI();
-		return null;
-	}
+        final WebMarkupContainer valueDiv = new WebMarkupContainer("objectValueDiv");
+        form.add(valueDiv);
+
+        value = new TextArea<String>("objectValue");
+        value.setEscapeModelStrings(false);
+        valueDiv.add(value);
+
+        CheckBox objectType = new CheckBox("objectURIResource");
+        form.add(objectType);
+
+        form.add(new MyAjaxButton("save", form) {
+
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                super.onSubmit(target, form);
+                Statement statement = StatementEditModal.this.getModelObject();
+                try {
+                    if (statement.getAnnotation() == null) {
+                        statements.add(statement);
+                        roPage.onStatementAdd(statements);
+                    } else {
+                        roPage.onStatementEdit(statement);
+                    }
+                    statements.clear();
+                    roPage.onStatementAddedEdited(target);
+                    target.add(form);
+                    target.appendJavaScript("$('#edit-ann-modal').modal('hide')");
+                } catch (Exception e) {
+                    error(e.getMessage());
+                }
+                target.add(feedbackPanel);
+            }
 
 
-	/**
-	 * @param selectedProperty
-	 *            the selectedProperty to set
-	 */
-	public void setCustomProperty(URI customProperty)
-	{
-		if (selectedProperty == null && customProperty != null)
-			getModelObject().setPropertyURI(customProperty);
-	}
+            @Override
+            protected void onError(AjaxRequestTarget target, Form<?> form) {
+                super.onError(target, form);
+                target.add(feedbackPanel);
+            }
+        });
+        anotherButton = new MyAjaxButton("another", form) {
+
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                super.onSubmit(target, form);
+                Statement statement = StatementEditModal.this.getModelObject();
+                statements.add(statement);
+                try {
+                    StatementEditModal.this.setModelObject(new Statement(statement.getSubjectURI(), null));
+                    target.add(form);
+                    target.appendJavaScript("showStmtEdit('');");
+                } catch (Exception e) {
+                    error(e.getMessage());
+                }
+                target.add(feedbackPanel);
+            }
 
 
-	/**
-	 * @return the title
-	 */
-	public String getTitle()
-	{
-		return title;
-	}
+            @Override
+            protected void onError(AjaxRequestTarget target, Form<?> form) {
+                super.onError(target, form);
+                target.add(feedbackPanel);
+            }
+        };
+        form.add(anotherButton);
+        form.add(new MyAjaxButton("cancel", form) {
+
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                super.onSubmit(target, form);
+                statements.clear();
+                target.appendJavaScript("$('#edit-ann-modal').modal('hide')");
+            }
+        }.setDefaultFormProcessing(false));
+    }
 
 
-	/**
-	 * @param title
-	 *            the title to set
-	 */
-	private void setTitle(String title)
-	{
-		this.title = title;
-	}
+    /**
+     * @return the selectedProperty
+     */
+    public URI getSelectedProperty() {
+        if (selectedProperty == null && getModelObject() != null)
+            return getModelObject().getPropertyURI();
+        return selectedProperty;
+    }
 
 
-	public Statement getModelObject()
-	{
-		return form.getModelObject();
-	}
+    /**
+     * @param selectedProperty
+     *            the selectedProperty to set
+     */
+    public void setSelectedProperty(URI selectedProperty) {
+        this.selectedProperty = selectedProperty;
+        if (selectedProperty != null)
+            getModelObject().setPropertyURI(selectedProperty);
+    }
 
 
-	public void setModelObject(Statement stmt)
-	{
-		form.setModelObject(stmt);
-	}
+    /**
+     * @return the selectedProperty
+     */
+    public URI getCustomProperty() {
+        if (getModelObject() != null)
+            return getModelObject().getPropertyURI();
+        return null;
+    }
 
 
-	// FIXME not the best design probably, these modals might use some refactoring
-	public void setAddMode()
-	{
-		setTitle("Add annotation");
-		getAnotherButton().setVisible(true);
-	}
+    /**
+     * @param selectedProperty
+     *            the selectedProperty to set
+     */
+    public void setCustomProperty(URI customProperty) {
+        if (selectedProperty == null && customProperty != null)
+            getModelObject().setPropertyURI(customProperty);
+    }
 
 
-	public void setEditMode()
-	{
-		setTitle("Edit annotation");
-		getAnotherButton().setVisible(false);
-	}
+    /**
+     * @return the title
+     */
+    public String getTitle() {
+        return title;
+    }
 
 
-	public MyAjaxButton getAnotherButton()
-	{
-		return anotherButton;
-	}
+    /**
+     * @param title
+     *            the title to set
+     */
+    private void setTitle(String title) {
+        this.title = title;
+    }
 
 
-	public void setAnotherButton(MyAjaxButton anotherButton)
-	{
-		this.anotherButton = anotherButton;
-	}
+    public Statement getModelObject() {
+        return form.getModelObject();
+    }
+
+
+    public void setModelObject(Statement stmt) {
+        form.setModelObject(stmt);
+    }
+
+
+    // FIXME not the best design probably, these modals might use some refactoring
+    public void setAddMode() {
+        setTitle("Add annotation");
+        getAnotherButton().setVisible(true);
+    }
+
+
+    public void setEditMode() {
+        setTitle("Edit annotation");
+        getAnotherButton().setVisible(false);
+    }
+
+
+    public MyAjaxButton getAnotherButton() {
+        return anotherButton;
+    }
+
+
+    public void setAnotherButton(MyAjaxButton anotherButton) {
+        this.anotherButton = anotherButton;
+    }
 
 }

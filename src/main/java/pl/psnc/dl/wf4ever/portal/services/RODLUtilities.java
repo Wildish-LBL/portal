@@ -12,7 +12,6 @@ import org.joda.time.format.ISODateTimeFormat;
 
 import pl.psnc.dl.wf4ever.portal.model.Creator;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
-import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.query.QueryExecution;

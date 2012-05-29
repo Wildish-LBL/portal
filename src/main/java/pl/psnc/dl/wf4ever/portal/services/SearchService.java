@@ -18,7 +18,6 @@ import org.jdom.Element;
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.model.Creator;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
-import pl.psnc.dl.wf4ever.portal.model.RoFactory;
 import pl.psnc.dl.wf4ever.portal.model.SearchResult;
 
 import com.sun.jersey.api.uri.UriBuilderImpl;

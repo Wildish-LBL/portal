@@ -11,6 +11,8 @@ import java.util.List;
 
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import pl.psnc.dl.wf4ever.portal.services.RoFactory;
+
 /**
  * Represents ao:Annotation.
  * 
