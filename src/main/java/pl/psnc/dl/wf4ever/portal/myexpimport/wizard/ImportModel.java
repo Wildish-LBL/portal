@@ -16,224 +16,213 @@ import pl.psnc.dl.wf4ever.portal.myexpimport.model.User;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.WorkflowHeader;
 
 /**
+ * The import model, which contains all the import settings and status.
+ * 
  * @author Piotr Hołubowicz
  * 
  */
-public class ImportModel
-	implements Serializable
-{
+public class ImportModel implements Serializable {
 
-	public enum ImportStatus {
-		NOT_STARTED, RUNNING, FINISHED, FAILED
-	}
-
-	public enum WorkspaceType {
-		EXISTING, NEW
-	}
-
-	private static final long serialVersionUID = -6654329540413067819L;
-
-	private final User myExpUser;
-
-	private String message = "Ready";
-
-	private List<String> messages = new ArrayList<String>();
-
-	private ImportStatus status = ImportStatus.NOT_STARTED;
-
-	private WorkspaceType workspaceType = WorkspaceType.EXISTING;
-
-	private final List<FileHeader> selectedFiles;
-
-	private final List<WorkflowHeader> selectedWorkflows;
-
-	private final List<PackHeader> selectedPacks;
-
-	private String roId;
-
-	private int progressInPercent = 0;
-
-	private String customPackId;
+    /** Import (data copying) process status. */
+    public enum ImportStatus {
+        /** not started. */
+        NOT_STARTED,
+        /** running. */
+        RUNNING,
+        /** finished successfully. */
+        FINISHED,
+        /** failed. */
+        FAILED
+    }
 
 
-	public ImportModel(User user)
-	{
-		super();
-		this.myExpUser = user;
-		this.selectedFiles = new ArrayList<FileHeader>();
-		this.selectedWorkflows = new ArrayList<WorkflowHeader>();
-		this.selectedPacks = new ArrayList<PackHeader>();
-	}
+    /** What myExperiment data will be imported. */
+    public enum ImportedData {
+        /** Personal data of a myExperiment user. */
+        PERSONAL_ITEMS,
+        /** A public pack. */
+        PUBLIC_PACK,
+        /** A public workflow. */
+        PUBLIC_WORKFLOW
+    }
 
 
-	public List<FileHeader> getSelectedFiles()
-	{
-		return selectedFiles;
-	}
+    /** id. */
+    private static final long serialVersionUID = -6654329540413067819L;
+
+    /** myExperiment access token holder if the resources are personal. */
+    private User myExpUser;
+
+    /** Current message for the user. */
+    private String message = "Ready";
+
+    /** A list of all messages. */
+    private List<String> messages = new ArrayList<String>();
+
+    /** Data import status. */
+    private ImportStatus status = ImportStatus.NOT_STARTED;
+
+    /** Imported data type. */
+    private ImportedData importedData = ImportedData.PUBLIC_PACK;
+
+    /** Selected personal files. */
+    private final List<FileHeader> selectedPersonalFiles;
+
+    /** Selected personal workflows. */
+    private final List<WorkflowHeader> selectedPersonalWorkflows;
+
+    /** Selected personal packs. */
+    private final List<PackHeader> selectedPersonalPacks;
+
+    /** Public pack id. */
+    private String publicPackId;
+
+    /** Public workflow id. */
+    private String publicWorkflowId;
+
+    /** New RO id. */
+    private String roId;
+
+    /** Data import progress, 0-100. */
+    private int progressInPercent = 0;
 
 
-	public List<WorkflowHeader> getSelectedWorkflows()
-	{
-		return selectedWorkflows;
-	}
+    /**
+     * Constructor.
+     * 
+     */
+    public ImportModel() {
+        super();
+        this.selectedPersonalFiles = new ArrayList<FileHeader>();
+        this.selectedPersonalWorkflows = new ArrayList<WorkflowHeader>();
+        this.selectedPersonalPacks = new ArrayList<PackHeader>();
+    }
 
 
-	public List<PackHeader> getSelectedPacks()
-	{
-		return selectedPacks;
-	}
+    public ImportedData getImportedData() {
+        return importedData;
+    }
 
 
-	/**
-	 * @return the myExpUser
-	 */
-	public User getMyExpUser()
-	{
-		return myExpUser;
-	}
+    public void setImportedData(ImportedData importedData) {
+        this.importedData = importedData;
+    }
 
 
-	/**
-	 * @return the message
-	 */
-	public String getMessage()
-	{
-		return message;
-	}
+    public List<FileHeader> getSelectedFiles() {
+        return selectedPersonalFiles;
+    }
 
 
-	/**
-	 * @param message
-	 *            the message to set
-	 */
-	public void setMessage(String message)
-	{
-		this.message = message;
-		if (messages == null)
-			messages = new ArrayList<String>();
-		messages.add(message);
-	}
+    public List<WorkflowHeader> getSelectedWorkflows() {
+        return selectedPersonalWorkflows;
+    }
 
 
-	/**
-	 * @return the messages
-	 */
-	public String getMessages()
-	{
-		return StringUtils.join(messages, "\r\n");
-	}
+    public List<PackHeader> getSelectedPacks() {
+        return selectedPersonalPacks;
+    }
 
 
-	/**
-	 * This method doesn't do anything.
-	 * 
-	 * @param messages
-	 */
-	public void setMessages(List<String> messages)
-	{
-		// do nothing
-	}
+    public String getPublicPackId() {
+        return publicPackId;
+    }
 
 
-	/**
-	 * @return the status
-	 */
-	public ImportStatus getStatus()
-	{
-		return status;
-	}
+    public void setPublicPackId(String customPackId) {
+        this.publicPackId = customPackId;
+    }
 
 
-	/**
-	 * @param status
-	 *            the status to set
-	 */
-	public void setStatus(ImportStatus status)
-	{
-		this.status = status;
-	}
+    public String getPublicWorkflowId() {
+        return publicWorkflowId;
+    }
 
 
-	/**
-	 * @return the workspaceType
-	 */
-	public WorkspaceType getWorkspaceType()
-	{
-		return workspaceType;
-	}
+    public void setPublicWorkflowId(String customPackId) {
+        this.publicWorkflowId = customPackId;
+    }
 
 
-	/**
-	 * @param workspaceType
-	 *            the workspaceType to set
-	 */
-	public void setWorkspaceType(WorkspaceType workspaceType)
-	{
-		this.workspaceType = workspaceType;
-	}
+    public User getMyExpUser() {
+        return myExpUser;
+    }
 
 
-	public boolean isValid()
-	{
-		return !selectedFiles.isEmpty() || !selectedWorkflows.isEmpty() || !selectedPacks.isEmpty()
-				|| customPackId != null;
-	}
+    public void setMyExpUser(User myExpUser) {
+        this.myExpUser = myExpUser;
+    }
 
 
-	/**
-	 * @return the roId
-	 */
-	public String getRoId()
-	{
-		return roId;
-	}
+    public String getMessage() {
+        return message;
+    }
 
 
-	/**
-	 * @param roId
-	 *            the roName to set
-	 */
-	public void setRoId(String roId)
-	{
-		this.roId = roId;
-	}
+    /**
+     * Set the current message.
+     * 
+     * @param message
+     *            message
+     */
+    public void setMessage(String message) {
+        this.message = message;
+        if (messages == null) {
+            messages = new ArrayList<String>();
+        }
+        messages.add(message);
+    }
 
 
-	/**
-	 * @return the progressInPercent
-	 */
-	public int getProgressInPercent()
-	{
-		return progressInPercent;
-	}
+    public String getMessages() {
+        return StringUtils.join(messages, "\r\n");
+    }
 
 
-	/**
-	 * @param progressInPercent
-	 *            the progressInPercent to set
-	 */
-	public void setProgressInPercent(int progressInPercent)
-	{
-		this.progressInPercent = progressInPercent;
-	}
+    /**
+     * This method doesn't do anything.
+     * 
+     * @param messages
+     *            messages
+     */
+    public void setMessages(List<String> messages) {
+        // do nothing
+    }
 
 
-	/**
-	 * @return the customPackId
-	 */
-	public String getCustomPackId()
-	{
-		return customPackId;
-	}
+    public ImportStatus getStatus() {
+        return status;
+    }
 
 
-	/**
-	 * @param customPackId
-	 *            the customPackId to set
-	 */
-	public void setCustomPackId(String customPackId)
-	{
-		this.customPackId = customPackId;
-	}
+    public void setStatus(ImportStatus status) {
+        this.status = status;
+    }
+
+
+    public boolean isValid() {
+        return !selectedPersonalFiles.isEmpty() || !selectedPersonalWorkflows.isEmpty()
+                || !selectedPersonalPacks.isEmpty() || publicPackId != null || publicWorkflowId != null;
+    }
+
+
+    public String getRoId() {
+        return roId;
+    }
+
+
+    public void setRoId(String roId) {
+        this.roId = roId;
+    }
+
+
+    public int getProgressInPercent() {
+        return progressInPercent;
+    }
+
+
+    public void setProgressInPercent(int progressInPercent) {
+        this.progressInPercent = progressInPercent;
+    }
 
 }

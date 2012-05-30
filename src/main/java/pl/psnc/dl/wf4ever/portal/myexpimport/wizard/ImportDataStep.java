@@ -6,6 +6,7 @@ package pl.psnc.dl.wf4ever.portal.myexpimport.wizard;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.extensions.wizard.WizardStep;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.PropertyModel;
@@ -17,16 +18,26 @@ import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportModel.ImportStatus;
 import pl.psnc.dl.wf4ever.portal.services.MyExpImportService;
 
 /**
+ * Step of performing the import process.
+ * 
  * @author Piotr Hołubowicz
  * 
  */
-public class ImportDataStep extends AbstractImportStep {
+public class ImportDataStep extends WizardStep {
 
+    /** id. */
     private static final long serialVersionUID = -2632389547400514998L;
 
+    /** Progress bar refresh interval, in ms. */
     private static final double INTERVAL = 500;
 
 
+    /**
+     * Constructor.
+     * 
+     * @param model
+     *            import model
+     */
     @SuppressWarnings("serial")
     public ImportDataStep(final ImportModel model) {
         super("Import data", null);
@@ -64,10 +75,10 @@ public class ImportDataStep extends AbstractImportStep {
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 if (model.getStatus() == ImportStatus.NOT_STARTED) {
                     PortalApplication app = (PortalApplication) getApplication();
-                    MyExpImportService.startImport(model, ((PortalApplication) PortalApplication.get()).getRodlURI(),
-                        ((PortalApplication) PortalApplication.get()).getWf2ROService(), MySession.get()
-                                .getMyExpAccessToken(), MySession.get().getdLibraAccessToken(), app
-                                .getMyExpConsumerKey(), app.getMyExpConsumerSecret());
+                    MySession session = (MySession) getSession();
+                    MyExpImportService.startImport(model, app.getRodlURI(), app.getWf2ROService(),
+                        session.getMyExpAccessToken(), session.getdLibraAccessToken(), app.getMyExpConsumerKey(),
+                        app.getMyExpConsumerSecret());
                     importStatus.add(updater);
                     target.add(importStatus);
 

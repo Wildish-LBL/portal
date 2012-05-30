@@ -29,13 +29,13 @@ import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
 
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.BaseResource;
+import pl.psnc.dl.wf4ever.portal.myexpimport.model.BaseResourceHeader;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.File;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.FileHeader;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.InternalPackItem;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.InternalPackItemHeader;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.Pack;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.PackHeader;
-import pl.psnc.dl.wf4ever.portal.myexpimport.model.BaseResourceHeader;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.User;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.Workflow;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.WorkflowHeader;
@@ -230,14 +230,22 @@ public final class MyExpImportService {
             model.setStatus(ImportStatus.RUNNING);
             model.setMessage("Preparing the data");
 
-            //			try {
             List<Pack> packs = getPacks(model.getSelectedPacks());
-            if (model.getCustomPackId() != null) {
+            if (model.getPublicPackId() != null) {
                 try {
-                    packs.add(getPack(model.getCustomPackId()));
+                    packs.add(getPack(model.getPublicPackId()));
                 } catch (Exception e) {
-                    LOG.error("Preparing packs", e);
-                    errors.add(String.format("When fetching pack with ID %s: %s", model.getCustomPackId(),
+                    LOG.error("Preparing public pack", e);
+                    errors.add(String.format("When fetching pack with ID %s: %s", model.getPublicPackId(),
+                        e.getMessage()));
+                }
+            }
+            if (model.getPublicWorkflowId() != null) {
+                try {
+                    model.getSelectedWorkflows().add(getWorkflowHeader(model.getPublicWorkflowId()));
+                } catch (Exception e) {
+                    LOG.error("Preparing public workflow", e);
+                    errors.add(String.format("When fetching workflow with ID %s: %s", model.getPublicWorkflowId(),
                         e.getMessage()));
                 }
             }
@@ -454,6 +462,23 @@ public final class MyExpImportService {
             PackHeader packHeader = new PackHeader();
             packHeader.setUri(URI.create("http://www.myexperiment.org/pack.xml?id=" + customPackId));
             return (Pack) getResource(packHeader, Pack.class);
+        }
+
+
+        /**
+         * Prepare short workflow metadata for a given id.
+         * 
+         * @param customWorkflowId
+         *            myExperiment workflow id
+         * @return workflow short metadata
+         * @throws OAuthException
+         *             when there is a problem with authorization
+         */
+        private WorkflowHeader getWorkflowHeader(String customWorkflowId)
+                throws OAuthException {
+            WorkflowHeader workflowHeader = new WorkflowHeader();
+            workflowHeader.setUri(URI.create("http://www.myexperiment.org/workflow.xml?id=" + customWorkflowId));
+            return workflowHeader;
         }
 
 

@@ -23,7 +23,6 @@ import pl.psnc.dl.wf4ever.portal.pages.AuthenticatePage;
 import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
 import pl.psnc.dl.wf4ever.portal.pages.HelpPage;
-import pl.psnc.dl.wf4ever.portal.pages.MyExpAuthorizePage;
 import pl.psnc.dl.wf4ever.portal.pages.MyExpImportPage;
 import pl.psnc.dl.wf4ever.portal.pages.OAuthPage;
 import pl.psnc.dl.wf4ever.portal.pages.SparqlEndpointPage;
@@ -103,7 +102,6 @@ public class PortalApplication extends AuthenticatedWebApplication {
         mountPage("/ro", RoPage.class);
         mountPage("/sparql", SparqlEndpointPage.class);
         mountPage("/myexpimport", MyExpImportPage.class);
-        mountPage("/myexpauthorize", MyExpAuthorizePage.class);
         mountPage("/oauth", OAuthPage.class);
         mountPage("/authenticate", AuthenticatePage.class);
         mountPage("/error", ErrorPage.class);

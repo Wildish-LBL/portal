@@ -1,22 +1,41 @@
 <?xml version="1.0"?>
-<wicket:extend xmlns:wicket="http://wicket.apache.org">
+<wicket:panel xmlns:wicket="http://wicket.apache.org">
 	<div class="inspan9" style="margin-top: 30px;">
-		<p>Please select the resources that you want to import.</p>
-		<div wicket:id="filesDiv"></div>
-		<div wicket:id="workflowsDiv"></div>
-		<div wicket:id="packsDiv"></div>
-		<p>
-			<strong>Any public pack</strong>
-		</p>
-		<form wicket:id="form">
+		<div wicket:id="personalItems">
+			<p>
+				You have been authorized in myExperiment as <strong
+					wicket:id="myExpUser.name"></strong>.
+			</p>
+			<p>
+				<span wicket:id="myExpUser.packs.size">0</span> packs, <span
+					wicket:id="myExpUser.workflows.size">0</span> workflows and <span
+					wicket:id="myExpUser.files.size">0</span> files have been found in
+				your myExperiment account.
+			</p>
+			<p>Please select the resources that you want to import.</p>
+			<div wicket:id="filesDiv"></div>
+			<div wicket:id="workflowsDiv"></div>
+			<div wicket:id="packsDiv"></div>
+		</div>
+		<form class="form-horizontal" wicket:id="publicPackForm">
 			<fieldset>
 				<div class="control-group">
-					<label class="control-label" for="customPackId">Pack ID</label>
+					<label class="control-label">Pack ID</label>
 					<div class="controls">
-						<input type="text" id="customPackId" wicket:id="customPackId" />
+						<input type="text" wicket:id="publicPackId" />
+					</div>
+				</div>
+			</fieldset>
+		</form>
+		<form class="form-horizontal" wicket:id="publicWorkflowForm">
+			<fieldset>
+				<div class="control-group">
+					<label class="control-label">Workflow ID</label>
+					<div class="controls">
+						<input type="text" wicket:id="publicWorkflowId" />
 					</div>
 				</div>
 			</fieldset>
 		</form>
 	</div>
-</wicket:extend>
+</wicket:panel>

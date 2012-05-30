@@ -17,64 +17,71 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 
 /**
+ * List of steps on the left side of the wizard.
+ * 
  * @author Piotr Hołubowicz
- *
+ * 
  */
-public class TocPanel
-	extends Panel
-	implements IWizardModelListener
-{
+public class TocPanel extends Panel implements IWizardModelListener {
 
-	private static final long serialVersionUID = -3775797988389365540L;
+    /** id. */
+    private static final long serialVersionUID = -3775797988389365540L;
 
 
-	public TocPanel(String id, IWizardModel model)
-	{
-		super(id, new Model<IWizardModel>(model));
+    /**
+     * Constructor.
+     * 
+     * @param id
+     *            wicket:id
+     * @param model
+     *            wizard model
+     */
+    public TocPanel(String id, IWizardModel model) {
+        super(id, new Model<IWizardModel>(model));
 
-		add(getStepList(model));
+        add(getStepList(model));
 
-		model.addListener(this);
-	}
-
-
-	/**
-	 * @param model
-	 */
-	private RepeatingView getStepList(IWizardModel model)
-	{
-		Iterator<IWizardStep> it = model.stepIterator();
-		RepeatingView view = new RepeatingView("repeater");
-		while (it.hasNext()) {
-			IWizardStep step = it.next();
-			Label label = new Label(view.newChildId(), new PropertyModel<WizardStep>(step, "title"));
-			if (step.equals(model.getActiveStep())) {
-				label.add(new AttributeModifier("class", new Model<String>("selectedStep")));
-			}
-			view.add(label);
-		}
-		return view;
-	}
+        model.addListener(this);
+    }
 
 
-	@Override
-	public void onActiveStepChanged(IWizardStep newStep)
-	{
-		addOrReplace(getStepList((IWizardModel) getDefaultModelObject()));
-	}
+    /**
+     * Return a component with a list of steps.
+     * 
+     * @param model
+     *            wizard model
+     * @return a RepeatingView with step list
+     */
+    private RepeatingView getStepList(IWizardModel model) {
+        Iterator<IWizardStep> it = model.stepIterator();
+        RepeatingView view = new RepeatingView("repeater");
+        while (it.hasNext()) {
+            IWizardStep step = it.next();
+            Label label = new Label(view.newChildId(), new PropertyModel<WizardStep>(step, "title"));
+            if (step.equals(model.getActiveStep())) {
+                label.add(new AttributeModifier("class", new Model<String>("selectedStep")));
+            }
+            view.add(label);
+        }
+        return view;
+    }
 
 
-	@Override
-	public void onCancel()
-	{
-		// do nothing
-	}
+    @Override
+    public void onActiveStepChanged(IWizardStep newStep) {
+        addOrReplace(getStepList((IWizardModel) getDefaultModelObject()));
+    }
 
 
-	@Override
-	public void onFinish()
-	{
-		// do nothing
-	}
+    @Override
+    public void onCancel() {
+        // do nothing
+    }
+
+
+    @Override
+    public void onFinish() {
+        // do nothing
+    }
 
 }

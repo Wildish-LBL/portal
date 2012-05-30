@@ -1,19 +1,9 @@
 <?xml version="1.0"?>
-<wicket:extend xmlns:wicket="http://wicket.apache.org">
+<wicket:panel xmlns:wicket="http://wicket.apache.org">
 	<div class="inspan9" style="margin-top: 30px;">
-		<p>
-			You have been authorized in myExperiment as <strong
-				wicket:id="myExpUser.name"></strong>.
-		</p>
-		<p>
-			<span wicket:id="myExpUser.packs.size">0</span> packs, <span
-				wicket:id="myExpUser.workflows.size">0</span> workflows and <span
-				wicket:id="myExpUser.files.size">0</span> files have been found in
-			your myExperiment account.
-		</p>
-		<p>This wizard allows you to copy your resources
-			(workflows/files/packs) from myExperiment to dLibra, aggregating them
-			as a new Research Object (RO).</p>
+		<p>This wizard allows you to copy myExperiment resources
+			(workflows/files/packs) to RODL, aggregating them as a new Research
+			Object (RO).</p>
 		<div class="well">
 			<p>
 				<strong>Annotations.</strong> The following annotations will be made
@@ -26,15 +16,26 @@
 				<li>Description - as in myExperiment</li>
 			</ul>
 		</div>
-		<p>The wizard has the following steps:</p>
-		<ol>
-			<li>Start.</li>
-			<!-- 			<li>Choose which workspace you want to import to.</li> -->
-			<li>Select resources: files, workflows or packs.</li>
-			<li>Confirm RO identifier.</li>
-			<li>Create the Research Object in RODL, and copy selected
-				resources from myExperiment.</li>
-			<!-- 			<li>Summary.</li> -->
-		</ol>
+		<form class="form-horizontal" wicket:id="importedDataForm">
+			<fieldset>
+				<div class="control-group">
+					<label class="control-label">What would you like to import?</label>
+					<div class="controls">
+						<div wicket:id="importedData">
+							<label class="radio"> <input id="publicPack"
+								wicket:id="publicPack" type="radio" value="publicPack" />A
+								public pack
+							</label> <label class="radio"> <input id="publicWorkflow"
+								wicket:id="publicWorkflow" type="radio" value="publicWorkflow" />A
+								public workflow
+							</label> <label class="radio"> <input id="personalItems"
+								wicket:id="personalItems" type="radio" value="personalItems" />My
+								own myExperiment items (requires an account in myExpetiment)
+							</label>
+						</div>
+					</div>
+				</div>
+			</fieldset>
+		</form>
 	</div>
-</wicket:extend>
+</wicket:panel>

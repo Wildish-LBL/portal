@@ -32,7 +32,7 @@ import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
-import pl.psnc.dl.wf4ever.portal.pages.MyExpAuthorizePage;
+import pl.psnc.dl.wf4ever.portal.pages.MyExpImportPage;
 import pl.psnc.dl.wf4ever.portal.pages.TemplatePage;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
 import pl.psnc.dl.wf4ever.portal.pages.util.ModelIteratorAdapter;
@@ -41,240 +41,219 @@ import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.services.RoFactory;
 
 @AuthorizeInstantiation("USER")
-public class MyRosPage
-	extends TemplatePage
-{
+public class MyRosPage extends TemplatePage {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private static final Logger log = Logger.getLogger(MyRosPage.class);
+    private static final Logger log = Logger.getLogger(MyRosPage.class);
 
-	final List<ResearchObject> selectedResearchObjects = new ArrayList<ResearchObject>();
+    final List<ResearchObject> selectedResearchObjects = new ArrayList<ResearchObject>();
 
-	private String roId;
+    private String roId;
 
-	private MyFeedbackPanel addFeedbackPanel;
+    private MyFeedbackPanel addFeedbackPanel;
 
-	private MyFeedbackPanel deleteFeedbackPanel;
+    private MyFeedbackPanel deleteFeedbackPanel;
 
 
-	@SuppressWarnings("serial")
-	public MyRosPage(final PageParameters parameters)
-		throws Exception
-	{
-		super(parameters);
+    @SuppressWarnings("serial")
+    public MyRosPage(final PageParameters parameters)
+            throws Exception {
+        super(parameters);
 
-		List<URI> uris = ROSRService.getROList(rodlURI, MySession.get().getdLibraAccessToken());
-		final List<ResearchObject> researchObjects = new ArrayList<ResearchObject>();
-		for (URI uri : uris) {
-			try {
-				researchObjects
-						.add(RoFactory.createResearchObject(rodlURI, uri, false, MySession.get().getUsernames()));
-			}
-			catch (Exception e) {
-				error("Could not get manifest for: " + uri + " (" + e.getMessage() + ")");
-			}
-		}
+        List<URI> uris = ROSRService.getROList(rodlURI, MySession.get().getdLibraAccessToken());
+        final List<ResearchObject> researchObjects = new ArrayList<ResearchObject>();
+        for (URI uri : uris) {
+            try {
+                researchObjects
+                        .add(RoFactory.createResearchObject(rodlURI, uri, false, MySession.get().getUsernames()));
+            } catch (Exception e) {
+                error("Could not get manifest for: " + uri + " (" + e.getMessage() + ")");
+            }
+        }
 
-		final Form< ? > form = new Form<Void>("form");
-		form.setOutputMarkupId(true);
-		add(form);
-		form.add(new MyFeedbackPanel("feedbackPanel"));
-		CheckGroup<ResearchObject> group = new CheckGroup<ResearchObject>("group", selectedResearchObjects);
-		form.add(group);
-		RefreshingView<ResearchObject> list = new RefreshingView<ResearchObject>("rosListView") {
+        final Form<?> form = new Form<Void>("form");
+        form.setOutputMarkupId(true);
+        add(form);
+        form.add(new MyFeedbackPanel("feedbackPanel"));
+        CheckGroup<ResearchObject> group = new CheckGroup<ResearchObject>("group", selectedResearchObjects);
+        form.add(group);
+        RefreshingView<ResearchObject> list = new RefreshingView<ResearchObject>("rosListView") {
 
-			private static final long serialVersionUID = -6310254217773728128L;
+            private static final long serialVersionUID = -6310254217773728128L;
 
 
-			@Override
-			protected void populateItem(Item<ResearchObject> item)
-			{
-				AggregatedResource researchObject = (AggregatedResource) item.getDefaultModelObject();
-				item.add(new Check<ResearchObject>("checkbox", item.getModel()));
-				BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);
-				link.getPageParameters().add("ro",
-					UrlEncoder.QUERY_INSTANCE.encode(researchObject.getURI().toString(), "UTF-8"));
-				link.add(new Label("URI"));
-				item.add(link);
-				item.add(new Label("createdFormatted"));
-			}
+            @Override
+            protected void populateItem(Item<ResearchObject> item) {
+                AggregatedResource researchObject = (AggregatedResource) item.getDefaultModelObject();
+                item.add(new Check<ResearchObject>("checkbox", item.getModel()));
+                BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);
+                link.getPageParameters().add("ro",
+                    UrlEncoder.QUERY_INSTANCE.encode(researchObject.getURI().toString(), "UTF-8"));
+                link.add(new Label("URI"));
+                item.add(link);
+                item.add(new Label("createdFormatted"));
+            }
 
 
-			@Override
-			protected Iterator<IModel<ResearchObject>> getItemModels()
-			{
-				return new ModelIteratorAdapter<ResearchObject>(researchObjects.iterator()) {
+            @Override
+            protected Iterator<IModel<ResearchObject>> getItemModels() {
+                return new ModelIteratorAdapter<ResearchObject>(researchObjects.iterator()) {
 
-					@Override
-					protected IModel<ResearchObject> model(ResearchObject ro)
-					{
-						return new CompoundPropertyModel<ResearchObject>(ro);
-					}
-				};
-			}
+                    @Override
+                    protected IModel<ResearchObject> model(ResearchObject ro) {
+                        return new CompoundPropertyModel<ResearchObject>(ro);
+                    }
+                };
+            }
 
-		};
-		group.add(list);
+        };
+        group.add(list);
 
-		final Label deleteCntLabel = new Label("deleteCnt", new PropertyModel<String>(this, "deleteCnt"));
-		deleteCntLabel.setOutputMarkupId(true);
-		add(deleteCntLabel);
+        final Label deleteCntLabel = new Label("deleteCnt", new PropertyModel<String>(this, "deleteCnt"));
+        deleteCntLabel.setOutputMarkupId(true);
+        add(deleteCntLabel);
 
-		final Form< ? > addForm = new Form<Void>("addForm");
-		RequiredTextField<String> name = new RequiredTextField<String>("roId", new PropertyModel<String>(this, "roId"));
-		name.add(new IValidator<String>() {
+        final Form<?> addForm = new Form<Void>("addForm");
+        RequiredTextField<String> name = new RequiredTextField<String>("roId", new PropertyModel<String>(this, "roId"));
+        name.add(new IValidator<String>() {
 
-			@Override
-			public void validate(IValidatable<String> validatable)
-			{
-				try {
-					if (!ROSRService.isRoIdFree(((PortalApplication) getApplication()).getRodlURI(),
-						validatable.getValue())) {
-						validatable.error(new ValidationError().setMessage("This ID is already in use"));
-					}
-				}
-				catch (Exception e) {
-					log.error(e);
-					// assume it's ok
-				}
-			}
+            @Override
+            public void validate(IValidatable<String> validatable) {
+                try {
+                    if (!ROSRService.isRoIdFree(((PortalApplication) getApplication()).getRodlURI(),
+                        validatable.getValue())) {
+                        validatable.error(new ValidationError().setMessage("This ID is already in use"));
+                    }
+                } catch (Exception e) {
+                    log.error(e);
+                    // assume it's ok
+                }
+            }
 
-		});
-		addForm.add(name);
-		add(addForm);
+        });
+        addForm.add(name);
+        add(addForm);
 
-		addFeedbackPanel = new MyFeedbackPanel("addFeedbackPanel");
-		addFeedbackPanel.setOutputMarkupId(true);
-		addForm.add(addFeedbackPanel);
+        addFeedbackPanel = new MyFeedbackPanel("addFeedbackPanel");
+        addFeedbackPanel.setOutputMarkupId(true);
+        addForm.add(addFeedbackPanel);
 
-		form.add(new MyAjaxButton("delete", form) {
+        form.add(new MyAjaxButton("delete", form) {
 
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-			{
-				super.onSubmit(target, form);
-				form.process(null);
-				if (!selectedResearchObjects.isEmpty()) {
-					target.add(deleteCntLabel);
-					target.appendJavaScript("$('#confirm-delete-modal').modal('show')");
-				}
-			}
-		});
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                super.onSubmit(target, form);
+                form.process(null);
+                if (!selectedResearchObjects.isEmpty()) {
+                    target.add(deleteCntLabel);
+                    target.appendJavaScript("$('#confirm-delete-modal').modal('show')");
+                }
+            }
+        });
 
-		deleteFeedbackPanel = new MyFeedbackPanel("deleteFeedbackPanel");
-		deleteFeedbackPanel.setOutputMarkupId(true);
-		add(deleteFeedbackPanel);
+        deleteFeedbackPanel = new MyFeedbackPanel("deleteFeedbackPanel");
+        deleteFeedbackPanel.setOutputMarkupId(true);
+        add(deleteFeedbackPanel);
 
-		add(new MyAjaxButton("confirmDelete", form) {
+        add(new MyAjaxButton("confirmDelete", form) {
 
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-			{
-				super.onSubmit(target, form);
-				Token dLibraToken = MySession.get().getdLibraAccessToken();
-				for (AggregatedResource ro : selectedResearchObjects) {
-					try {
-						ROSRService.deleteResearchObject(ro.getURI(), dLibraToken);
-						researchObjects.remove(ro);
-					}
-					catch (Exception e) {
-						error("Could not delete Research Object: " + ro.getURI() + " (" + e.getMessage() + ")");
-					}
-				}
-				target.add(form);
-				target.add(deleteFeedbackPanel);
-				target.appendJavaScript("$('#confirm-delete-modal').modal('hide')");
-			}
-		});
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                super.onSubmit(target, form);
+                Token dLibraToken = MySession.get().getdLibraAccessToken();
+                for (AggregatedResource ro : selectedResearchObjects) {
+                    try {
+                        ROSRService.deleteResearchObject(ro.getURI(), dLibraToken);
+                        researchObjects.remove(ro);
+                    } catch (Exception e) {
+                        error("Could not delete Research Object: " + ro.getURI() + " (" + e.getMessage() + ")");
+                    }
+                }
+                target.add(form);
+                target.add(deleteFeedbackPanel);
+                target.appendJavaScript("$('#confirm-delete-modal').modal('hide')");
+            }
+        });
 
-		add(new MyAjaxButton("cancelDelete", form) {
+        add(new MyAjaxButton("cancelDelete", form) {
 
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-			{
-				super.onSubmit(target, form);
-				target.appendJavaScript("$('#confirm-delete-modal').modal('hide')");
-			}
-		});
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                super.onSubmit(target, form);
+                target.appendJavaScript("$('#confirm-delete-modal').modal('hide')");
+            }
+        });
 
-		form.add(new MyAjaxButton("add", form) {
+        form.add(new MyAjaxButton("add", form) {
 
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-			{
-				super.onSubmit(target, form);
-				target.appendJavaScript("$('#confirm-add-modal').modal('show')");
-			}
-		});
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                super.onSubmit(target, form);
+                target.appendJavaScript("$('#confirm-add-modal').modal('show')");
+            }
+        });
 
-		addForm.add(new MyAjaxButton("confirmAdd", addForm) {
+        addForm.add(new MyAjaxButton("confirmAdd", addForm) {
 
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form< ? > addForm)
-			{
-				super.onSubmit(target, addForm);
-				Token dLibraToken = MySession.get().getdLibraAccessToken();
-				try {
-					URI researchObjectURI = ROSRService.createResearchObject(
-						((PortalApplication) getApplication()).getRodlURI(), roId, dLibraToken).getLocation();
-					researchObjects.add(RoFactory.createResearchObject(rodlURI, researchObjectURI, false, MySession
-							.get().getUsernames()));
-				}
-				catch (URISyntaxException e) {
-					error("Could not add Research Object: " + roId + " (" + e.getMessage() + ")");
-				}
-				target.add(form);
-				target.add(addFeedbackPanel);
-				target.appendJavaScript("$('#confirm-add-modal').modal('hide')");
-			}
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> addForm) {
+                super.onSubmit(target, addForm);
+                Token dLibraToken = MySession.get().getdLibraAccessToken();
+                try {
+                    URI researchObjectURI = ROSRService.createResearchObject(
+                        ((PortalApplication) getApplication()).getRodlURI(), roId, dLibraToken).getLocation();
+                    researchObjects.add(RoFactory.createResearchObject(rodlURI, researchObjectURI, false, MySession
+                            .get().getUsernames()));
+                } catch (URISyntaxException e) {
+                    error("Could not add Research Object: " + roId + " (" + e.getMessage() + ")");
+                }
+                target.add(form);
+                target.add(addFeedbackPanel);
+                target.appendJavaScript("$('#confirm-add-modal').modal('hide')");
+            }
 
 
-			@Override
-			protected void onError(AjaxRequestTarget target, Form< ? > form)
-			{
-				super.onError(target, form);
-				target.add(addFeedbackPanel);
-			}
-		});
+            @Override
+            protected void onError(AjaxRequestTarget target, Form<?> form) {
+                super.onError(target, form);
+                target.add(addFeedbackPanel);
+            }
+        });
 
-		addForm.add(new MyAjaxButton("cancelAdd", addForm) {
+        addForm.add(new MyAjaxButton("cancelAdd", addForm) {
 
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form< ? > form)
-			{
-				super.onSubmit(target, form);
-				target.appendJavaScript("$('#confirm-add-modal').modal('hide')");
-			}
-		}.setDefaultFormProcessing(false));
-		form.add(new BookmarkablePageLink<Void>("myExpImport", MyExpAuthorizePage.class));
-	}
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                super.onSubmit(target, form);
+                target.appendJavaScript("$('#confirm-add-modal').modal('hide')");
+            }
+        }.setDefaultFormProcessing(false));
+        form.add(new BookmarkablePageLink<Void>("myExpImport", MyExpImportPage.class));
+    }
 
 
-	public String getDeleteCnt()
-	{
-		if (selectedResearchObjects.size() == 1)
-			return "1 Research Object";
-		return selectedResearchObjects.size() + " Research Objects";
-	}
+    public String getDeleteCnt() {
+        if (selectedResearchObjects.size() == 1)
+            return "1 Research Object";
+        return selectedResearchObjects.size() + " Research Objects";
+    }
 
 
-	/**
-	 * @return the roId
-	 */
-	public String getRoId()
-	{
-		return roId;
-	}
+    /**
+     * @return the roId
+     */
+    public String getRoId() {
+        return roId;
+    }
 
 
-	/**
-	 * @param roId
-	 *            the roId to set
-	 */
-	public void setRoId(String roId)
-	{
-		this.roId = roId;
-	}
+    /**
+     * @param roId
+     *            the roId to set
+     */
+    public void setRoId(String roId) {
+        this.roId = roId;
+    }
 
 }
