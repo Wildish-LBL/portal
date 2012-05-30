@@ -16,8 +16,8 @@ public class JobConfig {
     /** workflow URI. */
     private URI resource;
 
-    /** workflow format URI. */
-    private URI format;
+    /** workflow MIME type. */
+    private String format;
 
     /** RO URI. */
     private URI ro;
@@ -40,13 +40,13 @@ public class JobConfig {
      * @param resource
      *            workflow URI
      * @param format
-     *            workflow format URI
+     *            workflow MIME type
      * @param ro
      *            RO URI
      * @param token
      *            RODL access token
      */
-    public JobConfig(URI resource, URI format, URI ro, String token) {
+    public JobConfig(URI resource, String format, URI ro, String token) {
         super();
         this.resource = resource;
         this.format = format;
@@ -65,12 +65,12 @@ public class JobConfig {
     }
 
 
-    public URI getFormat() {
+    public String getFormat() {
         return format;
     }
 
 
-    public void setFormat(URI format) {
+    public void setFormat(String format) {
         this.format = format;
     }
 

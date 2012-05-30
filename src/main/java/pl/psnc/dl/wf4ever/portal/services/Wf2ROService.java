@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
 
@@ -36,13 +37,31 @@ public final class Wf2ROService {
     }
 
 
-    public static void transformWorkflow(URI wf2ROService, URI workflow, URI workflowFormat, URI ro, String accessToken)
+    /**
+     * Launches the Wf-RO transformation service and waits until it's finished.
+     * 
+     * @param wf2ROService
+     *            Wf-RO service URI
+     * @param workflow
+     *            workflow URI
+     * @param string
+     *            workflow MIME type
+     * @param ro
+     *            RO URI
+     * @param accessToken
+     *            RODL access token
+     * @return {@link JobStatus} after the job has finished
+     * @throws IOException
+     *             when there is a problem reported by the transformation service
+     */
+    public static JobStatus transformWorkflow(URI wf2ROService, URI workflow, String string, URI ro, String accessToken)
             throws IOException {
-        JobConfig config = new JobConfig(workflow, workflowFormat, ro, accessToken);
+        JobConfig config = new JobConfig(workflow, string, ro, accessToken);
         Client client = Client.create();
         WebResource webResource = client.resource(wf2ROService.toString());
 
-        ClientResponse response = webResource.path("jobs").post(ClientResponse.class, config);
+        ClientResponse response = webResource.path("jobs").type(MediaType.APPLICATION_JSON_TYPE)
+                .post(ClientResponse.class, config);
         if (response.getStatus() != HttpServletResponse.SC_CREATED) {
             throw new IOException("Service returned response " + response.toString());
         }
@@ -59,7 +78,9 @@ public final class Wf2ROService {
             }
             status = webResource.uri(job).get(JobStatus.class);
         }
-
+        if (status.getStatus() != State.DONE) {
+            throw new IOException("Transformation finished with status " + status.getStatus());
+        }
+        return status;
     }
-
 }

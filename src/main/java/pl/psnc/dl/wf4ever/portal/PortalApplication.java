@@ -78,6 +78,9 @@ public class PortalApplication extends AuthenticatedWebApplication {
     /** RODL user management application authorization token endpoint URI. */
     private URL userAuthorizationEndpointURL;
 
+    /** Wf-RO transformation service URI. */
+    private URI wf2ROService;
+
     /** How are resources displayed depending on their RDF classes. */
     private final Set<ResourceGroup> resourceGroups = new HashSet<>();
 
@@ -140,6 +143,7 @@ public class PortalApplication extends AuthenticatedWebApplication {
             stabilityEndpointURL = new URL(props.getProperty("stabilityEndpointURL"));
             userAccessTokenEndpointURL = new URL(props.getProperty("userAccessTokenEndpointURL"));
             userAuthorizationEndpointURL = new URL(props.getProperty("userAuthorizationEndpointURL"));
+            wf2ROService = new URI(props.getProperty("wf2ROService"));
         } catch (Exception e) {
             LOG.error("Failed to load properties: " + e.getMessage());
         }
@@ -279,6 +283,11 @@ public class PortalApplication extends AuthenticatedWebApplication {
 
     public void setUserAuthorizationEndpointURL(URL userAuthorizationEndpointURL) {
         this.userAuthorizationEndpointURL = userAuthorizationEndpointURL;
+    }
+
+
+    public URI getWf2ROService() {
+        return wf2ROService;
     }
 
 

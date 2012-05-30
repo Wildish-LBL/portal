@@ -33,6 +33,7 @@
 	<properties>
 		<wicket.version>1.5.5</wicket.version>
 		<jetty.version>7.5.0.v20110901</jetty.version>
+		<jersey.version>1.13-b01</jersey.version>
 	</properties>
 	<repositories>
 		<repository>
@@ -139,8 +140,13 @@
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-client</artifactId>
-			<version>1.11</version>
+			<version>${jersey.version}</version>
 			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-json</artifactId>
+			<version>${jersey.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>

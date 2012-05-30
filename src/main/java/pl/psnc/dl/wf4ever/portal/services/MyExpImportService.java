@@ -2,6 +2,7 @@ package pl.psnc.dl.wf4ever.portal.services;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -28,6 +29,8 @@ import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
 
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.BaseResource;
+import pl.psnc.dl.wf4ever.portal.myexpimport.model.File;
+import pl.psnc.dl.wf4ever.portal.myexpimport.model.FileHeader;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.InternalPackItem;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.InternalPackItemHeader;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.Pack;
@@ -36,6 +39,8 @@ import pl.psnc.dl.wf4ever.portal.myexpimport.model.ResourceHeader;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.SimpleResource;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.SimpleResourceHeader;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.User;
+import pl.psnc.dl.wf4ever.portal.myexpimport.model.Workflow;
+import pl.psnc.dl.wf4ever.portal.myexpimport.model.WorkflowHeader;
 import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportModel;
 import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportModel.ImportStatus;
 
@@ -56,6 +61,10 @@ import com.sun.jersey.api.client.ClientResponse;
  */
 public final class MyExpImportService {
 
+    /** Logger. */
+    private static final Logger LOG = Logger.getLogger(MyExpImportService.class);
+
+
     /**
      * Private constructor.
      */
@@ -71,6 +80,8 @@ public final class MyExpImportService {
      *            model with all import settings
      * @param rodlURI
      *            RODL URI
+     * @param wf2ROService
+     *            Wf-RO transformation service URI
      * @param myExpAccessToken
      *            myExp access token
      * @param dLibraAccessToken
@@ -80,9 +91,10 @@ public final class MyExpImportService {
      * @param consumerSecret
      *            myExp consumer secret
      */
-    public static void startImport(ImportModel model, URI rodlURI, Token myExpAccessToken, Token dLibraAccessToken,
-            String consumerKey, String consumerSecret) {
-        new ImportThread(model, rodlURI, myExpAccessToken, dLibraAccessToken, consumerKey, consumerSecret).start();
+    public static void startImport(ImportModel model, URI rodlURI, URI wf2ROService, Token myExpAccessToken,
+            Token dLibraAccessToken, String consumerKey, String consumerSecret) {
+        new ImportThread(model, rodlURI, wf2ROService, myExpAccessToken, dLibraAccessToken, consumerKey, consumerSecret)
+                .start();
     }
 
 
@@ -179,7 +191,10 @@ public final class MyExpImportService {
         private final Map<URI, URI> creators = new HashMap<>();
 
         /** RODL URI. */
-        private URI rodlURI;
+        private final URI rodlURI;
+
+        /** Wf-RO transformation service URI. */
+        private final URI wf2ROService;
 
 
         /**
@@ -189,6 +204,8 @@ public final class MyExpImportService {
          *            Import model with all the settings
          * @param rodlURI
          *            RODL URI
+         * @param wf2ROService
+         *            Wf-RO transformation service URI
          * @param myExpAccessToken
          *            myExperiment OAuth access token
          * @param dLibraToken
@@ -198,11 +215,12 @@ public final class MyExpImportService {
          * @param consumerSecret
          *            myExp consumer secret
          */
-        public ImportThread(ImportModel importModel, URI rodlURI, Token myExpAccessToken, Token dLibraToken,
-                String consumerKey, String consumerSecret) {
+        public ImportThread(ImportModel importModel, URI rodlURI, URI wf2ROService, Token myExpAccessToken,
+                Token dLibraToken, String consumerKey, String consumerSecret) {
             super();
             model = importModel;
             this.rodlURI = rodlURI;
+            this.wf2ROService = wf2ROService;
             myExpToken = myExpAccessToken;
             this.dLibraToken = dLibraToken;
             service = MyExpApi.getOAuthService(consumerKey, consumerSecret);
@@ -240,8 +258,8 @@ public final class MyExpImportService {
                 model.setStatus(ImportStatus.FAILED);
             }
             if (researchObjectURI != null) {
-                importSimpleResources(model.getSelectedFiles());
-                importSimpleResources(model.getSelectedWorkflows());
+                importFiles(model.getSelectedFiles());
+                importWorkflows(model.getSelectedWorkflows());
                 importPacks(packs);
                 getManifest(rodlURI);
                 updateManifest();
@@ -339,15 +357,15 @@ public final class MyExpImportService {
 
 
         /**
-         * Import a file or workflow.
+         * Import files.
          * 
-         * @param resourceHeaders
-         *            a list of headers of files or workflows.
+         * @param fileHeaders
+         *            a list of headers of files.
          */
-        private void importSimpleResources(List<? extends SimpleResourceHeader> resourceHeaders) {
-            for (SimpleResourceHeader header : resourceHeaders) {
+        private void importFiles(List<FileHeader> fileHeaders) {
+            for (FileHeader header : fileHeaders) {
                 try {
-                    SimpleResource r = importSimpleResource(header, header.getResourceClass());
+                    SimpleResource r = importFile(header);
                     downloadResourceMetadata(r);
                 } catch (Exception e) {
                     LOG.error("When importing simple resource " + header.getResource(), e);
@@ -357,6 +375,56 @@ public final class MyExpImportService {
         }
 
 
+        /**
+         * Import workfows.
+         * 
+         * @param workflowHeaders
+         *            a list of headers of workflows.
+         */
+        private void importWorkflows(List<WorkflowHeader> workflowHeaders) {
+            for (WorkflowHeader header : workflowHeaders) {
+                try {
+                    Workflow w = importWorkflow(header);
+                    downloadResourceMetadata(w);
+                } catch (Exception e) {
+                    LOG.error("When importing workflow " + header.getResource(), e);
+                    errors.add(String.format("When importing %s: %s", header.getResource(), e.getMessage()));
+                }
+            }
+        }
+
+
+        /**
+         * Import a workflow using the Wf-RO transformation service.
+         * 
+         * @param header
+         *            workflow metadata
+         * @return workflow complete metadata
+         * @throws OAuthException
+         *             when there is a problem with authorization with myExperiment
+         * @throws JAXBException
+         *             when there is a problem with parsing the workflow metadata
+         * @throws IOException
+         *             when there is a problem with the Wf-RO service
+         */
+        private Workflow importWorkflow(WorkflowHeader header)
+                throws OAuthException, JAXBException, IOException {
+            Workflow w = (Workflow) getResource(header, Workflow.class);
+            model.setMessage(String.format("Transforming workflow %s", w.getResource()));
+            Wf2ROService.transformWorkflow(wf2ROService, URI.create(w.getContentUri()), w.getContentType(),
+                researchObjectURI, dLibraToken.getToken());
+            incrementStepsComplete();
+            return w;
+        }
+
+
+        /**
+         * Download complete pack metadata based on short pack metadata.
+         * 
+         * @param packHeaders
+         *            list of pack headers
+         * @return a list of pack metadata
+         */
         private List<Pack> getPacks(List<PackHeader> packHeaders) {
             List<Pack> packs = new ArrayList<Pack>();
             for (PackHeader packHeader : packHeaders) {
@@ -372,6 +440,17 @@ public final class MyExpImportService {
         }
 
 
+        /**
+         * Download pack metadata.
+         * 
+         * @param customPackId
+         *            myExperiment pack id
+         * @return pack metadata
+         * @throws OAuthException
+         *             when there is a problem with authorization
+         * @throws JAXBException
+         *             when there is a problem with parsing the pack metadata
+         */
         private Pack getPack(String customPackId)
                 throws OAuthException, JAXBException {
             PackHeader packHeader = new PackHeader();
@@ -381,14 +460,10 @@ public final class MyExpImportService {
 
 
         /**
-         * @param roName
+         * Import a set of packs.
+         * 
          * @param packs
-         * @param model
-         * @param ro
-         * @param myExpToken
-         * @param dLibraUser
-         * @throws JAXBException
-         * @throws Exception
+         *            list of packs metadata
          */
         private void importPacks(List<Pack> packs) {
             for (Pack pack : packs) {
@@ -413,28 +488,51 @@ public final class MyExpImportService {
 
 
         /**
-         * @param model
-         * @param ro
-         * @param myExpToken
-         * @param user
+         * Import an internal pack item.
+         * 
          * @param pack
-         * @param r
+         *            pack metadata
+         * @param packItemHeader
+         *            pack internal item short metadata
+         * @throws OAuthException
+         *             when there is a problem with authorization
          * @throws JAXBException
-         * @throws Exception
+         *             when there is a problem with parsing the pack item metadata
+         * @throws URISyntaxException
+         *             when the resource URI cannot be created
+         * @throws IOException
+         *             when there is a problem with Wf-RO service
          */
         private void importInternalPackItem(Pack pack, InternalPackItemHeader packItemHeader)
-                throws JAXBException, Exception {
+                throws JAXBException, OAuthException, URISyntaxException, IOException {
             InternalPackItem internalItem = (InternalPackItem) getResource(packItemHeader, InternalPackItem.class);
             SimpleResourceHeader resourceHeader = internalItem.getItem();
-            SimpleResource r = importSimpleResource(resourceHeader, resourceHeader.getResourceClass());
+            SimpleResource r;
+            if (resourceHeader instanceof FileHeader) {
+                r = importFile((FileHeader) resourceHeader);
+            } else {
+                r = importWorkflow((WorkflowHeader) resourceHeader);
+            }
             downloadResourceMetadata(r);
         }
 
 
-        private SimpleResource importSimpleResource(SimpleResourceHeader res,
-                Class<? extends SimpleResource> resourceClass)
-                throws Exception {
-            SimpleResource r = (SimpleResource) getResource(res, resourceClass);
+        /**
+         * Import a file.
+         * 
+         * @param res
+         *            resource short metadata
+         * @return resource complete metadata
+         * @throws OAuthException
+         *             when there is a problem with authorization
+         * @throws JAXBException
+         *             when there is a problem with parsing the pack item metadata
+         * @throws URISyntaxException
+         *             when the resource URI cannot be created
+         */
+        private SimpleResource importFile(FileHeader res)
+                throws OAuthException, JAXBException, URISyntaxException {
+            SimpleResource r = (SimpleResource) getResource(res, File.class);
             incrementStepsComplete();
 
             model.setMessage(String.format("Uploading %s", r.getFilename()));
@@ -447,12 +545,17 @@ public final class MyExpImportService {
 
 
         /**
+         * Download complete resource metadata.
+         * 
          * @param res
-         * @param path
+         *            resource short metadata
          * @param resourceClass
-         * @return
+         *            resource Java class
+         * @return complete resource metadata
          * @throws OAuthException
+         *             when there is a problem with authorization
          * @throws JAXBException
+         *             when there is a problem with parsing the resource metadata
          */
         private BaseResource getResource(ResourceHeader res, Class<? extends BaseResource> resourceClass)
                 throws OAuthException, JAXBException {
@@ -463,8 +566,18 @@ public final class MyExpImportService {
         }
 
 
+        /**
+         * Import selected statements from myExperiment RDF file describing a resource as an annotation body.
+         * 
+         * @param res
+         *            resource complete metadata
+         * @throws OAuthException
+         *             when there is a problem with authorization
+         * @throws URISyntaxException
+         *             when the resource URI cannot be created
+         */
         private void downloadResourceMetadata(BaseResource res)
-                throws Exception {
+                throws OAuthException, URISyntaxException {
             model.setMessage(String.format("Downloading metadata file %s", res.getResource()));
             Response response = OAuthHelpService.sendRequest(service, Verb.GET, res.getResource(), myExpToken,
                 "application/rdf+xml");
@@ -486,6 +599,17 @@ public final class MyExpImportService {
         }
 
 
+        /**
+         * Deserialize a myExperiment complete metadata file.
+         * 
+         * @param xml
+         *            XML with metadata
+         * @param resourceClass
+         *            Java class
+         * @return deserialized metadata object
+         * @throws JAXBException
+         *             when the metadata could not be parsed
+         */
         private static Object createMyExpResource(String xml, Class<? extends BaseResource> resourceClass)
                 throws JAXBException {
             JAXBContext jc = JAXBContext.newInstance(resourceClass);
@@ -495,6 +619,9 @@ public final class MyExpImportService {
         }
 
 
+        /**
+         * Mark one more import step done.
+         */
         private void incrementStepsComplete() {
             stepsComplete++;
             model.setProgressInPercent((int) Math.round((double) stepsComplete / stepsTotal * 100));
@@ -503,10 +630,22 @@ public final class MyExpImportService {
     }
 
 
-    static Model createAnnotationBody(URI targetURI, String myExperimentRDF)
-            throws UnsupportedEncodingException {
+    /**
+     * Create a Jena model with selected statements built from myExperiment metadata.
+     * 
+     * @param targetURI
+     *            the subject of the statements
+     * @param myExperimentRDF
+     *            the RDF graph
+     * @return a Jena model describing the subject
+     */
+    static Model createAnnotationBody(URI targetURI, String myExperimentRDF) {
         OntModel me = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
-        me.read(new ByteArrayInputStream(myExperimentRDF.getBytes("UTF-8")), null);
+        try {
+            me.read(new ByteArrayInputStream(myExperimentRDF.getBytes("UTF-8")), null);
+        } catch (UnsupportedEncodingException e) {
+            LOG.error("UTF-8 is not supported", e);
+        }
         Model body = ModelFactory.createDefaultModel();
 
         Resource target = body.createResource(targetURI.toString());
@@ -516,25 +655,41 @@ public final class MyExpImportService {
         target.addProperty(DCTerms.source, source);
 
         // title
-        if (source.hasProperty(DCTerms.title))
+        if (source.hasProperty(DCTerms.title)) {
             target.addProperty(DCTerms.title, source.getProperty(DCTerms.title).getLiteral());
+        }
 
         // description
-        if (source.hasProperty(DCTerms.description))
+        if (source.hasProperty(DCTerms.description)) {
             target.addProperty(DCTerms.description, source.getProperty(DCTerms.description).getLiteral());
+        }
 
         // creator
         Property owner = me.createProperty("http://rdfs.org/sioc/ns#has_owner");
-        if (source.hasProperty(owner))
+        if (source.hasProperty(owner)) {
             target.addProperty(DCTerms.creator, source.getPropertyResourceValue(owner));
+        }
         return body;
     }
 
 
+    /**
+     * Get a sample creator from an RDF graph.
+     * 
+     * @param myExperimentRDF
+     *            an RDF graph
+     * @return URI of a sample author in the graph
+     * @throws URISyntaxException
+     *             when the author URI is not valid
+     */
     static URI getResourceAuthor(String myExperimentRDF)
-            throws UnsupportedEncodingException, URISyntaxException {
+            throws URISyntaxException {
         OntModel me = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
-        me.read(new ByteArrayInputStream(myExperimentRDF.getBytes("UTF-8")), null);
+        try {
+            me.read(new ByteArrayInputStream(myExperimentRDF.getBytes("UTF-8")), null);
+        } catch (UnsupportedEncodingException e) {
+            LOG.error("UTF-8 is not supported", e);
+        }
 
         Resource source = me.listObjectsOfProperty(Vocab.foafPrimaryTopic).next().asResource();
 
