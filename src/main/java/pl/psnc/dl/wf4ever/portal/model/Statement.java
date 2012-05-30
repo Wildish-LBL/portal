@@ -17,229 +17,211 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 
 /**
+ * A simplified verion of {@link com.hp.hpl.jena.rdf.model.Statement}, which unlike the original is serializable.
+ * 
  * @author piotrhol
  * 
  */
-public class Statement
-	implements Serializable
-{
+public class Statement implements Serializable {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1704407898614509230L;
+    /** id. */
+    private static final long serialVersionUID = 1704407898614509230L;
 
-	private final boolean isSubjectURIResource;
+    /** Is the subject a resource with a URI, based on {@link RDFNode#isURIResource()}. */
+    private final boolean isSubjectURIResource;
 
-	private final String subjectValue;
+    /** The subject URI if it's a resource with URI, the String value otherwise. */
+    private final String subjectValue;
 
-	private final URI subjectURI;
+    /** The subject URI if it's a resource with URI, null otherwise. */
+    private final URI subjectURI;
 
-	private URI propertyURI;
+    /** Property URI. */
+    private URI propertyURI;
 
-	private String propertyLocalName;
+    /** Property local name, based on {@link Property#getLocalName()}. */
+    private String propertyLocalName;
 
-	private final Annotation annotation;
+    /** Annotation that this statement belongs to. */
+    private final Annotation annotation;
 
-	private String objectValue;
+    /** The object URI if it's a resource with URI, the String value otherwise. */
+    private String objectValue;
 
-	private URI objectURI;
-
-
-	public Statement(com.hp.hpl.jena.rdf.model.Statement original, Annotation annotation)
-		throws URISyntaxException
-	{
-		isSubjectURIResource = original.getSubject().isURIResource();
-		if (isSubjectURIResource) {
-			subjectURI = new URI(original.getSubject().getURI());
-			subjectValue = original.getSubject().getURI();
-		}
-		else {
-			subjectURI = null;
-			subjectValue = original.getSubject().asResource().getId().getLabelString();
-		}
-		setPropertyURI(new URI(original.getPredicate().getURI()));
-		RDFNode node = original.getObject();
-		if (node.isURIResource()) {
-			objectURI = new URI(node.asResource().getURI());
-			objectValue = node.asResource().toString();
-		}
-		else if (node.isResource()) {
-			objectURI = null;
-			objectValue = original.getObject().asResource().getId().getLabelString();
-		}
-		else {
-			objectURI = null;
-			objectValue = original.getObject().asLiteral().getValue().toString();
-		}
-		this.annotation = annotation;
-	}
+    /** The object URI if it's a resource with URI, the String value otherwise. */
+    private URI objectURI;
 
 
-	public Statement(URI subjectURI, Annotation annotation)
-		throws URISyntaxException
-	{
-		this.subjectURI = subjectURI;
-		subjectValue = "";
-		isSubjectURIResource = false;
-		setPropertyURI(new URI(DCTerms.source.getURI()));
-		objectURI = null;
-		objectValue = "";
-		this.annotation = annotation;
-	}
+    /**
+     * Constructor.
+     * 
+     * @param original
+     *            the original {@link com.hp.hpl.jena.rdf.model.Statement}
+     * @param annotation
+     *            annotation this statement belongs to
+     * @throws URISyntaxException
+     *             some URI in the original is incorrect
+     */
+    public Statement(com.hp.hpl.jena.rdf.model.Statement original, Annotation annotation)
+            throws URISyntaxException {
+        isSubjectURIResource = original.getSubject().isURIResource();
+        if (isSubjectURIResource) {
+            subjectURI = new URI(original.getSubject().getURI());
+            subjectValue = original.getSubject().getURI();
+        } else {
+            subjectURI = null;
+            subjectValue = original.getSubject().asResource().getId().getLabelString();
+        }
+        setPropertyURI(new URI(original.getPredicate().getURI()));
+        RDFNode node = original.getObject();
+        if (node.isURIResource()) {
+            objectURI = new URI(node.asResource().getURI());
+            objectValue = node.asResource().toString();
+        } else if (node.isResource()) {
+            objectURI = null;
+            objectValue = original.getObject().asResource().getId().getLabelString();
+        } else {
+            objectURI = null;
+            objectValue = original.getObject().asLiteral().getValue().toString();
+        }
+        this.annotation = annotation;
+    }
 
 
-	/**
-	 * @return the annotation
-	 */
-	public Annotation getAnnotation()
-	{
-		return annotation;
-	}
+    /**
+     * Constructor for an empty statement. The default property is dcterms:source, the default value is "".
+     * 
+     * @param subjectURI
+     *            subject URI
+     * @param annotation
+     *            annotation this statement belongs to
+     */
+    public Statement(URI subjectURI, Annotation annotation) {
+        this.subjectURI = subjectURI;
+        subjectValue = "";
+        isSubjectURIResource = false;
+        setPropertyURI(URI.create(DCTerms.source.getURI()));
+        objectURI = null;
+        objectValue = "";
+        this.annotation = annotation;
+    }
 
 
-	/**
-	 * @return the propertyURI
-	 */
-	public URI getPropertyURI()
-	{
-		return propertyURI;
-	}
+    public Annotation getAnnotation() {
+        return annotation;
+    }
 
 
-	/**
-	 * @return the propertyLocalName
-	 */
-	public String getPropertyLocalName()
-	{
-		return propertyLocalName;
-	}
+    public URI getPropertyURI() {
+        return propertyURI;
+    }
 
 
-	public String getPropertyLocalNameNice()
-	{
-		return RoFactory.splitCamelCase(getPropertyLocalName()).toLowerCase();
-	}
+    public String getPropertyLocalName() {
+        return propertyLocalName;
+    }
 
 
-	/**
-	 * @return the objectValue
-	 */
-	public String getObjectValue()
-	{
-		return objectValue;
-	}
+    public String getPropertyLocalNameNice() {
+        return RoFactory.splitCamelCase(getPropertyLocalName()).toLowerCase();
+    }
 
 
-	/**
-	 * @return the objectURI
-	 */
-	public URI getObjectURI()
-	{
-		return objectURI;
-	}
+    public String getObjectValue() {
+        return objectValue;
+    }
 
 
-	/**
-	 * @return the isObjectURIResource
-	 */
-	public boolean isObjectURIResource()
-	{
-		return this.objectURI != null;
-	}
+    public URI getObjectURI() {
+        return objectURI;
+    }
 
 
-	/**
-	 * @param propertyURI
-	 *            the propertyURI to set
-	 */
-	public void setPropertyURI(URI propertyURI)
-	{
-		if (propertyURI == null)
-			throw new NullPointerException("Property URI cannot be null");
-		this.propertyURI = propertyURI;
-		this.propertyLocalName = ModelFactory.createDefaultModel().createProperty(propertyURI.toString())
-				.getLocalName();
-	}
+    public boolean isObjectURIResource() {
+        return this.objectURI != null;
+    }
 
 
-	/**
-	 * @param isObjectURIResource
-	 *            the isObjectURIResource to set
-	 */
-	public void setObjectURIResource(boolean isObjectURIResource)
-	{
-		if (isObjectURIResource) {
-			this.objectURI = URI.create("");
-			this.objectValue = null;
-		}
-		else {
-			this.objectURI = null;
-			this.objectValue = "";
-		}
-	}
+    /**
+     * Set property URI and its local name.
+     * 
+     * @param propertyURI
+     *            property URI, not null
+     */
+    public void setPropertyURI(URI propertyURI) {
+        if (propertyURI == null) {
+            throw new NullPointerException("Property URI cannot be null");
+        }
+        this.propertyURI = propertyURI;
+        this.propertyLocalName = ModelFactory.createDefaultModel().createProperty(propertyURI.toString())
+                .getLocalName();
+    }
 
 
-	/**
-	 * @param objectValue
-	 *            the objectValue to set
-	 */
-	public void setObjectValue(String objectValue)
-	{
-		this.objectValue = objectValue;
-	}
+    /**
+     * Is object a resource with a URI.
+     * 
+     * @param isObjectURIResource
+     *            is it
+     */
+    public void setObjectURIResource(boolean isObjectURIResource) {
+        if (isObjectURIResource) {
+            this.objectURI = URI.create("");
+            this.objectValue = null;
+        } else {
+            this.objectURI = null;
+            this.objectValue = "";
+        }
+    }
 
 
-	/**
-	 * @param objectURI
-	 *            the objectURI to set
-	 */
-	public void setObjectURI(URI objectURI)
-	{
-		this.objectURI = subjectURI.resolve(objectURI);
-	}
+    public void setObjectValue(String objectValue) {
+        this.objectValue = objectValue;
+    }
 
 
-	/**
-	 * @return the subjectURI
-	 */
-	public URI getSubjectURI()
-	{
-		return subjectURI;
-	}
+    /**
+     * Set object URI, resolved against subject URI.
+     * 
+     * @param objectURI
+     *            object URI
+     */
+    public void setObjectURI(URI objectURI) {
+        this.objectURI = subjectURI.resolve(objectURI);
+    }
 
 
-	/**
-	 * @return the subjectValue
-	 */
-	public String getSubjectValue()
-	{
-		return subjectValue;
-	}
+    public URI getSubjectURI() {
+        return subjectURI;
+    }
 
 
-	/**
-	 * @return the isSubjectURIResource
-	 */
-	public boolean isSubjectURIResource()
-	{
-		return isSubjectURIResource;
-	}
+    public String getSubjectValue() {
+        return subjectValue;
+    }
 
 
-	public com.hp.hpl.jena.rdf.model.Statement createJenaStatement()
-	{
-		Model model = ModelFactory.createDefaultModel();
-		Resource subject = model.createResource(subjectURI.toString());
-		Property property = model.createProperty(propertyURI.toString());
-		RDFNode object = null;
-		if (isObjectURIResource()) {
-			object = model.createResource(objectURI.toString());
-		}
-		else {
-			object = model.createTypedLiteral(objectValue);
-		}
-		return model.createStatement(subject, property, object);
-	}
+    public boolean isSubjectURIResource() {
+        return isSubjectURIResource;
+    }
+
+
+    /**
+     * Create a {@link com.hp.hpl.jena.rdf.model.Statement} based on this one.
+     * 
+     * @return a statement
+     */
+    public com.hp.hpl.jena.rdf.model.Statement createJenaStatement() {
+        Model model = ModelFactory.createDefaultModel();
+        Resource subject = model.createResource(subjectURI.toString());
+        Property property = model.createProperty(propertyURI.toString());
+        RDFNode object = null;
+        if (isObjectURIResource()) {
+            object = model.createResource(objectURI.toString());
+        } else {
+            object = model.createTypedLiteral(objectValue);
+        }
+        return model.createStatement(subject, property, object);
+    }
 
 }

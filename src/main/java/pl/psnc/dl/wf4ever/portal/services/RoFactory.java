@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.wicket.Application;
@@ -294,8 +292,7 @@ public final class RoFactory {
     public static RoTreeModel createConceptualResourcesTree(URI researchObjectURI,
             Map<URI, AggregatedResource> resources) {
         ResearchObject ro = (ResearchObject) resources.get(researchObjectURI);
-        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(ro);
-        RoTreeModel treeModel = new RoTreeModel(rootNode);
+        RoTreeModel treeModel = new RoTreeModel(ro);
 
         // TODO take care of proxies
         for (AggregatedResource resource : resources.values()) {
@@ -320,8 +317,7 @@ public final class RoFactory {
 
     public static RoTreeModel createPhysicalResourcesTree(URI researchObjectURI, Map<URI, AggregatedResource> resources) {
         ResearchObject ro = (ResearchObject) resources.get(researchObjectURI);
-        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(resources.get(researchObjectURI));
-        RoTreeModel treeModel = new RoTreeModel(rootNode);
+        RoTreeModel treeModel = new RoTreeModel(resources.get(researchObjectURI));
 
         // TODO take care of proxies & folders
         for (AggregatedResource resource : resources.values()) {
