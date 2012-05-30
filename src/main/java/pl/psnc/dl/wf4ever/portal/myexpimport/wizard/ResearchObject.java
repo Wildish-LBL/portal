@@ -12,7 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.FileHeader;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.PackHeader;
-import pl.psnc.dl.wf4ever.portal.myexpimport.model.ResourceHeader;
+import pl.psnc.dl.wf4ever.portal.myexpimport.model.BaseResourceHeader;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.WorkflowHeader;
 
 /**
@@ -31,7 +31,7 @@ public class ResearchObject
 
 	private boolean existing;
 
-	private List< ? extends ResourceHeader> resources;
+	private List< ? extends BaseResourceHeader> resources;
 
 	private List<FileHeader> files = new ArrayList<FileHeader>();
 
@@ -86,7 +86,7 @@ public class ResearchObject
 	/**
 	 * @return the resources
 	 */
-	public List< ? extends ResourceHeader> getResources()
+	public List< ? extends BaseResourceHeader> getResources()
 	{
 		return resources;
 	}
@@ -95,7 +95,7 @@ public class ResearchObject
 	/**
 	 * @param resources the resources to set
 	 */
-	public void setResources(List< ? extends ResourceHeader> resources)
+	public void setResources(List< ? extends BaseResourceHeader> resources)
 	{
 		this.resources = resources;
 	}
@@ -173,7 +173,7 @@ public class ResearchObject
 	}
 
 
-	public ResourceHeader getFirstResource()
+	public BaseResourceHeader getFirstResource()
 	{
 		if (!packs.isEmpty()) {
 			return packs.get(0);
@@ -196,7 +196,7 @@ public class ResearchObject
 
 	public void setDefaultName()
 	{
-		ResourceHeader resource = getFirstResource();
+		BaseResourceHeader resource = getFirstResource();
 		if (resource == null) {
 			name = "";
 		}

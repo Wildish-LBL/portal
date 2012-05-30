@@ -7,57 +7,50 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
+ * Represents complete myExperiment file metadata. It could contain data but doesn't, since importing workflows is
+ * handled by a dedicated Wf-RO transformation service.
+ * 
  * @author Piotr Hołubowicz
- *
+ * 
  */
 @XmlRootElement(name = "workflow")
-public class Workflow
-	extends SimpleResource
-{
+public class Workflow extends BaseResource {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 3019438116219497825L;
+    /** id. */
+    private static final long serialVersionUID = 3019438116219497825L;
 
-	private String contentUri;
+    /** URI to workflow content. */
+    private String contentUri;
 
-
-	/**
-	 * @return the filename
-	 */
-	@Override
-	@XmlElement
-	public String getFilename()
-	{
-		//FIXME this should be done using URI manipulation
-		return contentUri.substring(contentUri.lastIndexOf('/') + 1).trim();
-	}
+    /** Content MIME type. */
+    private String contentType;
 
 
-	/**
-	 * @return the contentUri
-	 */
-	@XmlElement(name = "content-uri")
-	public String getContentUri()
-	{
-		return contentUri;
-	}
+    @XmlElement(name = "content-type")
+    public String getContentType() {
+        return contentType;
+    }
 
 
-	/**
-	 * @param contentUri the contentUri to set
-	 */
-	public void setContentUri(String contentUri)
-	{
-		this.contentUri = contentUri;
-	}
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
 
 
-	@Override
-	public String toString()
-	{
-		return String.format("workflow \"%s\"", getFilename());
-	}
+    @XmlElement(name = "content-uri")
+    public String getContentUri() {
+        return contentUri;
+    }
+
+
+    public void setContentUri(String contentUri) {
+        this.contentUri = contentUri;
+    }
+
+
+    @Override
+    public String toString() {
+        return String.format("workflow \"%s\"", getContentUri());
+    }
 
 }

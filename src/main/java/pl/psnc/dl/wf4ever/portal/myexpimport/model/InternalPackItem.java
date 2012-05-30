@@ -3,141 +3,65 @@
  */
 package pl.psnc.dl.wf4ever.portal.myexpimport.model;
 
-import java.net.URI;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
+ * Internal myExperiment pack item. Such resource basically references another item such as pack, workflow or file.
+ * 
  * @author Piotr Hołubowicz
- *
+ * 
  */
 @XmlRootElement(name = "internal-pack-item")
-public class InternalPackItem
-	extends BaseResource
+public class InternalPackItem extends BaseResource {
 
-{
+    /** id. */
+    private static final long serialVersionUID = -9038815722609845400L;
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -9038815722609845400L;
-
-	private URI uri;
-
-	private URI resource;
-
-	private int id;
-
-	private List<SimpleResourceHeader> items;
+    /** A list of references to other resources. */
+    private List<BaseResourceHeader> items;
 
 
-	public InternalPackItem()
-	{
+    /**
+     * Default constructor.
+     */
+    public InternalPackItem() {
 
-	}
-
-
-	/**
-	 * @return the uri
-	 */
-	@Override
-	@XmlAttribute
-	public URI getUri()
-	{
-		return uri;
-	}
+    }
 
 
-	/**
-	 * @param uri the uri to set
-	 */
-	@Override
-	public void setUri(URI uri)
-	{
-		this.uri = uri;
-	}
+    /**
+     * Returns the first item from the list.
+     * 
+     * @return the item the first resource or null
+     */
+    public BaseResourceHeader getItem() {
+        if (items == null || items.isEmpty()) {
+            return null;
+        } else {
+            return items.get(0);
+        }
+    }
 
 
-	/**
-	 * @return the resource
-	 */
-	@Override
-	@XmlAttribute
-	public URI getResource()
-	{
-		return resource;
-	}
+    /**
+     * Returns all the references resources.
+     * 
+     * @return the items a list of workflow or file headers
+     */
+    @XmlElementWrapper(name = "item")
+    @XmlElements({ @XmlElement(name = "file", type = FileHeader.class),
+            @XmlElement(name = "workflow", type = WorkflowHeader.class) })
+    public List<BaseResourceHeader> getItems() {
+        return items;
+    }
 
 
-	/**
-	 * @param resource the resource to set
-	 */
-	@Override
-	public void setResource(URI resource)
-	{
-		this.resource = resource;
-	}
-
-
-	/**
-	 * @return the title
-	 */
-
-	/**
-	 * @return the id
-	 */
-	@Override
-	@XmlElement
-	public int getId()
-	{
-		return id;
-	}
-
-
-	/**
-	 * @param id the id to set
-	 */
-	@Override
-	public void setId(int id)
-	{
-		this.id = id;
-	}
-
-
-	/**
-	 * @return the item
-	 */
-	public SimpleResourceHeader getItem()
-	{
-		if (items == null || items.isEmpty())
-			return null;
-		else
-			return items.get(0);
-	}
-
-
-	/**
-	 * @return the items
-	 */
-	@XmlElementWrapper(name = "item")
-	@XmlElements({ @XmlElement(name = "file", type = FileHeader.class),
-			@XmlElement(name = "workflow", type = WorkflowHeader.class)})
-	public List<SimpleResourceHeader> getItems()
-	{
-		return items;
-	}
-
-
-	/**
-	 * @param items the items to set
-	 */
-	public void setItems(List<SimpleResourceHeader> items)
-	{
-		this.items = items;
-	}
+    public void setItems(List<BaseResourceHeader> items) {
+        this.items = items;
+    }
 }

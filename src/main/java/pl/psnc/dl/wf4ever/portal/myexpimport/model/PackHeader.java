@@ -8,31 +8,27 @@ import java.net.URI;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
+ * Short myExperiment pack metadata.
+ * 
  * @author Piotr Hołubowicz
- *
+ * 
  */
 @XmlRootElement(name = "pack")
-public class PackHeader
-	extends ResourceHeader
-{
+public class PackHeader extends BaseResourceHeader {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 3146768347985843474L;
+    /** id. */
+    private static final long serialVersionUID = 3146768347985843474L;
 
 
-	@Override
-	public URI getResourceUrl()
-	{
-		return URI.create(getUri().toString() + "&elements=internal-pack-items,id,title");
-	}
+    @Override
+    public URI getResourceUrl() {
+        return URI.create(getUri().toString() + "&elements=internal-pack-items,id,title");
+    }
 
 
-	@Override
-	public Class<Pack> getResourceClass()
-	{
-		return Pack.class;
-	}
+    @Override
+    public Class<Pack> getResourceClass() {
+        return Pack.class;
+    }
 
 }

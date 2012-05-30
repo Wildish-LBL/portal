@@ -7,17 +7,15 @@ import java.io.Serializable;
 import java.net.URI;
 
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlValue;
 
 /**
- * Represents complete metadata and data of a myExperiment pack/file/workflow.
- * 
- * For example http://www.myexperiment.org/workflow.xml?id=2648&all_elements=yes
+ * Represents short metadata of a myExperiment pack/file/workflow, as it appears in XML describing another resource.
  * 
  * @author Piotr Hołubowicz
  * 
  */
-public abstract class BaseResource implements Serializable {
+public abstract class BaseResourceHeader implements Serializable {
 
     /** id. */
     private static final long serialVersionUID = -9038815722609845400L;
@@ -31,14 +29,11 @@ public abstract class BaseResource implements Serializable {
     /** Resource title. */
     private String title;
 
-    /** Resource id in myExperiment. */
-    private int id;
-
 
     /**
      * Default constructor.
      */
-    public BaseResource() {
+    public BaseResourceHeader() {
 
     }
 
@@ -65,7 +60,7 @@ public abstract class BaseResource implements Serializable {
     }
 
 
-    @XmlElement
+    @XmlValue
     public String getTitle() {
         return title;
     }
@@ -76,13 +71,19 @@ public abstract class BaseResource implements Serializable {
     }
 
 
-    @XmlElement
-    public int getId() {
-        return id;
-    }
+    /**
+     * Return URI for a complete metadata resource.
+     * 
+     * @return URI
+     */
+    public abstract URI getResourceUrl();
 
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    /**
+     * Return a class of complete metadata resource, for deserialization.
+     * 
+     * @return Java class
+     */
+    public abstract Class<? extends BaseResource> getResourceClass();
+
 }

@@ -21,7 +21,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 
-import pl.psnc.dl.wf4ever.portal.myexpimport.model.ResourceHeader;
+import pl.psnc.dl.wf4ever.portal.myexpimport.model.BaseResourceHeader;
 
 /**
  * @author Piotr Hołubowicz
@@ -39,8 +39,8 @@ public class ResourceListPanel
 
 
 	@SuppressWarnings("serial")
-	public ResourceListPanel(String id, String name, final List< ? extends ResourceHeader> resources,
-			final List< ? extends ResourceHeader> selectedResources)
+	public ResourceListPanel(String id, String name, final List< ? extends BaseResourceHeader> resources,
+			final List< ? extends BaseResourceHeader> selectedResources)
 	{
 		super(id);
 		this.resourceName = name;
@@ -57,16 +57,16 @@ public class ResourceListPanel
 		form = new Form<Void>("form");
 		resourceList.add(form);
 		@SuppressWarnings("unchecked")
-		CheckGroup<ResourceHeader> group = new CheckGroup<ResourceHeader>("group",
-				(List<ResourceHeader>) selectedResources);
+		CheckGroup<BaseResourceHeader> group = new CheckGroup<BaseResourceHeader>("group",
+				(List<BaseResourceHeader>) selectedResources);
 		form.add(group);
-		ListView<ResourceHeader> list = new ListView<ResourceHeader>("resourceListView", resources) {
+		ListView<BaseResourceHeader> list = new ListView<BaseResourceHeader>("resourceListView", resources) {
 
 			@Override
-			protected void populateItem(ListItem<ResourceHeader> item)
+			protected void populateItem(ListItem<BaseResourceHeader> item)
 			{
-				ResourceHeader resource = item.getModelObject();
-				Check<ResourceHeader> check = new Check<ResourceHeader>("checkbox", item.getModel());
+				BaseResourceHeader resource = item.getModelObject();
+				Check<BaseResourceHeader> check = new Check<BaseResourceHeader>("checkbox", item.getModel());
 				item.add(check);
 				Label label = new Label("title", resource.getTitle());
 				label.add(new AttributeModifier("for", new Model<String>(check.getMarkupId())));
@@ -97,7 +97,7 @@ public class ResourceListPanel
 			@Override
 			public void onClick(AjaxRequestTarget target)
 			{
-				((List<ResourceHeader>) selectedResources).addAll(resources);
+				((List<BaseResourceHeader>) selectedResources).addAll(resources);
 				target.add(resourceList);
 			}
 		});

@@ -12,46 +12,37 @@ import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
+ * myExperiment pack complete metadata.
+ * 
  * @author Piotr Hołubowicz
- *
+ * 
  */
 @XmlRootElement(name = "pack")
-public class Pack
-	extends BaseResource
-{
+public class Pack extends BaseResource {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 3146768347985843474L;
+    /** id. */
+    private static final long serialVersionUID = 3146768347985843474L;
 
-	private List<InternalPackItemHeader> resources = new ArrayList<InternalPackItemHeader>();
+    /** Internal pack resource. */
+    private List<InternalPackItemHeader> resources = new ArrayList<InternalPackItemHeader>();
 
 
-	/**
-	 * @return the resources
-	 */
-	@XmlElementWrapper(name = "internal-pack-items")
-	@XmlElements({ @XmlElement(name = "file", type = InternalPackItemHeader.class),
-			@XmlElement(name = "workflow", type = InternalPackItemHeader.class)})
-	public List<InternalPackItemHeader> getResources()
-	{
-		return resources;
-	}
+    @XmlElementWrapper(name = "internal-pack-items")
+    @XmlElements({ @XmlElement(name = "file", type = InternalPackItemHeader.class),
+            @XmlElement(name = "workflow", type = InternalPackItemHeader.class) })
+    public List<InternalPackItemHeader> getResources() {
+        return resources;
+    }
 
 
-	/**
-	 * @param resources the resources to set
-	 */
-	public void setResources(List<InternalPackItemHeader> resources)
-	{
-		this.resources = resources;
-	}
+    public void setResources(List<InternalPackItemHeader> resources) {
+        this.resources = resources;
+    }
 
-	@Override
-	public String toString()
-	{
-		return String.format("pack \"%s\"", getId());
-	}
+
+    @Override
+    public String toString() {
+        return String.format("pack \"%s\"", getId());
+    }
 
 }

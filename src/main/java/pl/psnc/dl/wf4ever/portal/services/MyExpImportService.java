@@ -35,9 +35,7 @@ import pl.psnc.dl.wf4ever.portal.myexpimport.model.InternalPackItem;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.InternalPackItemHeader;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.Pack;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.PackHeader;
-import pl.psnc.dl.wf4ever.portal.myexpimport.model.ResourceHeader;
-import pl.psnc.dl.wf4ever.portal.myexpimport.model.SimpleResource;
-import pl.psnc.dl.wf4ever.portal.myexpimport.model.SimpleResourceHeader;
+import pl.psnc.dl.wf4ever.portal.myexpimport.model.BaseResourceHeader;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.User;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.Workflow;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.WorkflowHeader;
@@ -365,7 +363,7 @@ public final class MyExpImportService {
         private void importFiles(List<FileHeader> fileHeaders) {
             for (FileHeader header : fileHeaders) {
                 try {
-                    SimpleResource r = importFile(header);
+                    File r = importFile(header);
                     downloadResourceMetadata(r);
                 } catch (Exception e) {
                     LOG.error("When importing simple resource " + header.getResource(), e);
@@ -506,8 +504,8 @@ public final class MyExpImportService {
         private void importInternalPackItem(Pack pack, InternalPackItemHeader packItemHeader)
                 throws JAXBException, OAuthException, URISyntaxException, IOException {
             InternalPackItem internalItem = (InternalPackItem) getResource(packItemHeader, InternalPackItem.class);
-            SimpleResourceHeader resourceHeader = internalItem.getItem();
-            SimpleResource r;
+            BaseResourceHeader resourceHeader = internalItem.getItem();
+            BaseResource r;
             if (resourceHeader instanceof FileHeader) {
                 r = importFile((FileHeader) resourceHeader);
             } else {
@@ -530,9 +528,9 @@ public final class MyExpImportService {
          * @throws URISyntaxException
          *             when the resource URI cannot be created
          */
-        private SimpleResource importFile(FileHeader res)
+        private File importFile(FileHeader res)
                 throws OAuthException, JAXBException, URISyntaxException {
-            SimpleResource r = (SimpleResource) getResource(res, File.class);
+            File r = (File) getResource(res, File.class);
             incrementStepsComplete();
 
             model.setMessage(String.format("Uploading %s", r.getFilename()));
@@ -557,7 +555,7 @@ public final class MyExpImportService {
          * @throws JAXBException
          *             when there is a problem with parsing the resource metadata
          */
-        private BaseResource getResource(ResourceHeader res, Class<? extends BaseResource> resourceClass)
+        private BaseResource getResource(BaseResourceHeader res, Class<? extends BaseResource> resourceClass)
                 throws OAuthException, JAXBException {
             model.setMessage(String.format("Downloading %s", res.getResourceUrl()));
             Response response = OAuthHelpService.sendRequest(service, Verb.GET, res.getResourceUrl(), myExpToken);
@@ -585,10 +583,15 @@ public final class MyExpImportService {
             // and the filename can be extracted from it
             String rdf = response.getBody();
             URI annTargetURI;
-            if (res instanceof SimpleResource) {
-                annTargetURI = researchObjectURI.resolve(((SimpleResource) res).getFilenameURI());
-            } else {
+            if (res instanceof Pack) {
                 annTargetURI = researchObjectURI;
+            } else if (res instanceof File) {
+                annTargetURI = researchObjectURI.resolve(((File) res).getFilenameURI());
+            } else {
+                LOG.warn("Cannot annotate workflow because its URI is unknown");
+                errors.add(String.format("Cannot annotate workflow %s because its URI is unknown", res.getUri()));
+                incrementStepsComplete();
+                return;
             }
             URI bodyURI = ROService.createAnnotationBodyURI(researchObjectURI, annTargetURI);
             annBodies.put(bodyURI, createAnnotationBody(annTargetURI, rdf));

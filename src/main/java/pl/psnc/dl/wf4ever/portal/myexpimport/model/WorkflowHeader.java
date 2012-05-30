@@ -8,30 +8,26 @@ import java.net.URI;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
+ * Short myExperiment workflow metadata.
+ * 
  * @author Piotr Hołubowicz
- *
+ * 
  */
 @XmlRootElement(name = "workflow")
-public class WorkflowHeader
-	extends SimpleResourceHeader
-{
+public class WorkflowHeader extends BaseResourceHeader {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 3019438116219497825L;
+    /** id. */
+    private static final long serialVersionUID = 3019438116219497825L;
 
 
-	@Override
-	public URI getResourceUrl()
-	{
-		return URI.create(getUri().toString() + "&elements=content,content-uri,content-type,id,title");
-	}
+    @Override
+    public URI getResourceUrl() {
+        return URI.create(getUri().toString() + "&elements=content-uri,content-type,id,title");
+    }
 
 
-	@Override
-	public Class<Workflow> getResourceClass()
-	{
-		return Workflow.class;
-	}
+    @Override
+    public Class<Workflow> getResourceClass() {
+        return Workflow.class;
+    }
 }
