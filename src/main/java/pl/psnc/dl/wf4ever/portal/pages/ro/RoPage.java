@@ -385,26 +385,6 @@ public class RoPage extends TemplatePage {
 
 
     /**
-     * @param roPage
-     */
-    void onMetadataDownload(RDFFormat format) {
-        throw new RestartResponseException(RoPage.class, getPageParameters().add("redirectTo",
-            roURI.resolve(".ro/manifest." + format.getDefaultFileExtension() + "?original=manifest.rdf").toString())
-                .add("redirectDelay", 1));
-    }
-
-
-    /**
-     * @param roPage
-     * @throws URISyntaxException
-     */
-    void onResourceDownload(URI downloadURI) {
-        throw new RestartResponseException(RoPage.class, getPageParameters().add("redirectTo", downloadURI.toString())
-                .add("redirectDelay", 1));
-    }
-
-
-    /**
      * @param statements
      * @throws URISyntaxException
      * @throws Exception
@@ -506,5 +486,15 @@ public class RoPage extends TemplatePage {
 
     public MyFeedbackPanel getFeedbackPanel() {
         return feedbackPanel;
+    }
+
+
+    public String getROZipLink() {
+        return roURI.toString().replaceFirst("/ROs/", "/zippedROs/");
+    }
+
+
+    public String getROMetadataLink(RDFFormat format) {
+        return roURI.resolve(".ro/manifest." + format.getDefaultFileExtension() + "?original=manifest.rdf").toString();
     }
 }
