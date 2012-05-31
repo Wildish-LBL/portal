@@ -27,14 +27,31 @@ import pl.psnc.dl.wf4ever.portal.model.RoEvoNode.EvoClassModifier;
 import pl.psnc.dl.wf4ever.portal.services.RoEvoService;
 
 /**
+ * A panel for displaying the RO evolution surroundings.
+ * 
  * @author Piotr Hołubowicz
  * 
  */
 public class RoEvoBox extends Panel {
 
+    /** id. */
     private static final long serialVersionUID = -3775797988389365540L;
 
 
+    /**
+     * Constructor.
+     * 
+     * @param id
+     *            wicket id
+     * @param sparqlEndpointURI
+     *            RODL SPARQL endpoint URI
+     * @param researchObjectURI
+     *            RO URI
+     * @throws IOException
+     *             when there are problems with connecting to the SPARQL endpoint
+     * @throws URISyntaxException
+     *             when data from the SPARQL endpoint contain invalid URIs
+     */
     @SuppressWarnings("serial")
     public RoEvoBox(String id, URI sparqlEndpointURI, final URI researchObjectURI)
             throws IOException, URISyntaxException {
@@ -182,6 +199,16 @@ public class RoEvoBox extends Panel {
     }
 
 
+    /**
+     * Used for topological sorting of ROs.
+     * 
+     * @param node
+     *            visited node
+     * @param preorder
+     *            preorder list of nodes
+     * @param postorder
+     *            postorder list of nodes
+     */
     private void visit(RoEvoNode node, List<RoEvoNode> preorder, List<RoEvoNode> postorder) {
         preorder.add(node);
         for (RoEvoNode n : node.getPreviousSnapshots()) {
@@ -203,6 +230,16 @@ public class RoEvoBox extends Panel {
     }
 
 
+    /**
+     * Create the RO node for the visualization.
+     * 
+     * @param item
+     *            list item containing the node
+     * @param researchObjectURI
+     *            RO URI
+     * @param x
+     *            the horizontal position of the node, in px
+     */
     private void populateRoEvoNode(ListItem<RoEvoNode> item, final URI researchObjectURI, int x) {
         RoEvoNode node = item.getModelObject();
         item.add(new Label("labelOrIdentifier", new PropertyModel<>(node, "labelOrIdentifier")));
@@ -218,6 +255,17 @@ public class RoEvoBox extends Panel {
     }
 
 
+    /**
+     * Create a JavaScript code that connects 2 nodes.
+     * 
+     * @param source
+     *            source node
+     * @param target
+     *            target node
+     * @param label
+     *            connection label
+     * @return JavaScript code
+     */
     protected String createConnection(RoEvoNode source, RoEvoNode target, String label) {
 
         StringBuilder sb = new StringBuilder();

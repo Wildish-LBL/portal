@@ -177,7 +177,7 @@ class UploadResourceModal extends Panel {
                             try {
                                 roPage.onResourceAdd(target, uploadedFile, selectedTypes);
                                 target.appendJavaScript("$('#upload-resource-modal').modal('hide')");
-                            } catch (IOException | URISyntaxException e) {
+                            } catch (IOException e) {
                                 error(e);
                             }
                         }

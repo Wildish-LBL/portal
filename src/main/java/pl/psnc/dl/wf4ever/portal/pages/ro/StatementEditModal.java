@@ -181,8 +181,9 @@ class StatementEditModal extends Panel {
      * @return the selectedProperty
      */
     public URI getSelectedProperty() {
-        if (selectedProperty == null && getModelObject() != null)
+        if (selectedProperty == null && getModelObject() != null) {
             return getModelObject().getPropertyURI();
+        }
         return selectedProperty;
     }
 
@@ -193,8 +194,9 @@ class StatementEditModal extends Panel {
      */
     public void setSelectedProperty(URI selectedProperty) {
         this.selectedProperty = selectedProperty;
-        if (selectedProperty != null)
+        if (selectedProperty != null) {
             getModelObject().setPropertyURI(selectedProperty);
+        }
     }
 
 
@@ -202,8 +204,9 @@ class StatementEditModal extends Panel {
      * @return the selectedProperty
      */
     public URI getCustomProperty() {
-        if (getModelObject() != null)
+        if (getModelObject() != null) {
             return getModelObject().getPropertyURI();
+        }
         return null;
     }
 
@@ -213,8 +216,9 @@ class StatementEditModal extends Panel {
      *            the selectedProperty to set
      */
     public void setCustomProperty(URI customProperty) {
-        if (selectedProperty == null && customProperty != null)
+        if (selectedProperty == null && customProperty != null) {
             getModelObject().setPropertyURI(customProperty);
+        }
     }
 
 

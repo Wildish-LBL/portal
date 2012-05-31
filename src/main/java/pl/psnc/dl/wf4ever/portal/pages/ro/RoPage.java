@@ -58,37 +58,69 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 import com.sun.jersey.api.client.ClientResponse;
 
+/**
+ * The Research Object page.
+ * 
+ * @author piotrekhol
+ * 
+ */
 public class RoPage extends TemplatePage {
 
+    /** id. */
     private static final long serialVersionUID = 1L;
 
-    private static final Logger log = Logger.getLogger(RoPage.class);
+    /** Logger. */
+    private static final Logger LOG = Logger.getLogger(RoPage.class);
 
+    /** RO URI. */
     URI roURI;
 
+    /** Resources aggregated by the RO. */
     Map<URI, AggregatedResource> resources;
 
+    /** Can the user edit the RO. */
     boolean canEdit = false;
 
+    /** The part showing the RO structure. */
     final RoViewerBox roViewerBox;
 
+    /** The part showing the RO annotations. */
     final AnnotatingBox annotatingBox;
 
+    /** The conceptual model of RO resource. */
     private RoTreeModel conceptualResourcesTree;
 
+    /** The physical model of RO resource. */
     private RoTreeModel physicalResourcesTree;
 
+    /** The modal window for editing annotations. */
     final StatementEditModal stmtEditForm;
 
+    /** The modal window for editing relations. */
     final RelationEditModal relEditForm;
 
+    /** The modal window for importing annotations. */
     private final ImportAnnotationModal importAnnotationModal;
 
+    /** The modal window for adding resources. */
     private UploadResourceModal uploadResourceModal;
 
+    /** The feedback panel. */
     private MyFeedbackPanel feedbackPanel;
 
 
+    /**
+     * Constructor.
+     * 
+     * @param parameters
+     *            page parameters
+     * @throws URISyntaxException
+     *             if URIs returned by the RODL are incorrect
+     * @throws OAuthException
+     *             if it cannot connect to RODL
+     * @throws IOException
+     *             if it cannot connect to RODL
+     */
     @SuppressWarnings("serial")
     public RoPage(final PageParameters parameters)
             throws URISyntaxException, OAuthException, IOException {
@@ -156,7 +188,7 @@ public class RoPage extends TemplatePage {
                         target.add(roViewerBox);
                     }
                 } catch (URISyntaxException e) {
-                    log.error(e);
+                    LOG.error(e);
                     error(e);
                 }
                 target.add(feedbackPanel);
@@ -173,20 +205,11 @@ public class RoPage extends TemplatePage {
     }
 
 
-    /**
-     * @return the conceptualResourcesTree
-     * @throws URISyntaxException
-     */
-    public RoTreeModel getConceptualResourcesTree()
-            throws URISyntaxException {
+    public RoTreeModel getConceptualResourcesTree() {
         return conceptualResourcesTree;
     }
 
 
-    /**
-     * @param conceptualResourcesTree
-     *            the conceptualResourcesTree to set
-     */
     public void setConceptualResourcesTree(RoTreeModel conceptualResourcesTree) {
         this.conceptualResourcesTree = conceptualResourcesTree;
     }
@@ -202,9 +225,29 @@ public class RoPage extends TemplatePage {
     }
 
 
+    /**
+     * A utility class for creating an external link to a property of a statement.
+     * 
+     * @author piotrekhol
+     * 
+     */
     @SuppressWarnings("serial")
     class ExternalLinkFragment extends Fragment {
 
+        /**
+         * Constructor.
+         * 
+         * @param id
+         *            wicket id
+         * @param markupId
+         *            fragment wicket id
+         * @param markupProvider
+         *            which component defines the fragment
+         * @param model
+         *            statement model
+         * @param property
+         *            property of a statement
+         */
         public ExternalLinkFragment(String id, String markupId, MarkupContainer markupProvider,
                 CompoundPropertyModel<Statement> model, String property) {
             super(id, markupId, markupProvider, model);
@@ -213,9 +256,27 @@ public class RoPage extends TemplatePage {
     }
 
 
+    /**
+     * A utility class for creating links to resources inside the RO.
+     * 
+     * @author piotrekhol
+     * 
+     */
     @SuppressWarnings("serial")
     class InternalLinkFragment extends Fragment {
 
+        /**
+         * Constructor.
+         * 
+         * @param id
+         *            wicket id
+         * @param markupId
+         *            fragment wicket id
+         * @param markupProvider
+         *            which component defines the fragment
+         * @param statement
+         *            the statement for which the link is created
+         */
         public InternalLinkFragment(String id, String markupId, MarkupContainer markupProvider, Statement statement) {
             super(id, markupId, markupProvider);
             String internalName = "./" + roURI.relativize(statement.getSubjectURI()).toString();
@@ -231,9 +292,27 @@ public class RoPage extends TemplatePage {
     }
 
 
+    /**
+     * A utility class for creating a link for editing a statement.
+     * 
+     * @author piotrekhol
+     * 
+     */
     @SuppressWarnings("serial")
     class EditLinkFragment extends Fragment {
 
+        /**
+         * Constructor.
+         * 
+         * @param id
+         *            wicket id
+         * @param markupId
+         *            fragment wicket id
+         * @param markupProvider
+         *            which component defines the fragment
+         * @param link
+         *            link defining the action upon click
+         */
         public EditLinkFragment(String id, String markupId, MarkupContainer markupProvider,
                 AjaxFallbackLink<String> link) {
             super(id, markupId, markupProvider);
@@ -243,16 +322,20 @@ public class RoPage extends TemplatePage {
 
 
     /**
+     * Called when the user wants to add a local resource.
+     * 
      * @param target
+     *            response target
      * @param uploadedFile
+     *            the uploaded file
      * @param selectedResourceGroups
+     *            resource groups of the file
      * @throws IOException
-     * @throws URISyntaxException
-     * @throws Exception
+     *             error connecting to RODL
      */
     void onResourceAdd(AjaxRequestTarget target, final FileUpload uploadedFile,
             Set<ResourceGroup> selectedResourceGroups)
-            throws IOException, URISyntaxException {
+            throws IOException {
         URI resourceURI = roURI.resolve(UrlEncoder.PATH_INSTANCE.encode(uploadedFile.getClientFileName(), "UTF-8"));
         ClientResponse response = ROSRService.uploadResource(resourceURI, uploadedFile.getInputStream(),
             uploadedFile.getContentType(), MySession.get().getdLibraAccessToken());
@@ -466,7 +549,7 @@ public class RoPage extends TemplatePage {
         ClientResponse response = ROSRService.addAnnotation(rodlURI, roURI, annURI, aggregatedResource.getURI(),
             bodyURI, session.getUserURI(), session.getdLibraAccessToken());
         if (response.getStatus() != HttpServletResponse.SC_OK) {
-            log.error(response.getEntity(String.class));
+            LOG.error(response.getEntity(String.class));
             throw new IOException(response.getClientResponseStatus().getReasonPhrase());
         }
 
@@ -476,7 +559,7 @@ public class RoPage extends TemplatePage {
                 .getdLibraAccessToken());
         if (response.getStatus() != HttpServletResponse.SC_CREATED) {
             ROSRService.deleteAnnotationAndBody(roURI, annURI, session.getdLibraAccessToken());
-            log.error(response.getEntity(String.class));
+            LOG.error(response.getEntity(String.class));
             throw new IOException(response.getClientResponseStatus().getReasonPhrase());
         }
 

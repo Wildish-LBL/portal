@@ -45,16 +45,18 @@ public class MyQueryFactory {
      */
     public static String getxMostRecentROs(int limit)
             throws IOException {
-        if (xMostRecentROs == null)
+        if (xMostRecentROs == null) {
             xMostRecentROs = loadQuery("xMostRecentROs.sparql");
+        }
         return String.format(xMostRecentROs, limit);
     }
 
 
     public static String getAllROs()
             throws IOException {
-        if (allROs == null)
+        if (allROs == null) {
             allROs = loadQuery("allROs.sparql");
+        }
         return allROs;
     }
 
@@ -69,64 +71,72 @@ public class MyQueryFactory {
      */
     public static Query getResourcesCount(String resourceClass)
             throws IOException {
-        if (resourcesCount == null)
+        if (resourcesCount == null) {
             resourcesCount = loadQuery("resourcesCount.sparql");
+        }
         return QueryFactory.create(String.format(resourcesCount, resourceClass), Syntax.syntaxARQ);
     }
 
 
     public static Query getWorkflowOutputs(String researchObject)
             throws IOException {
-        if (workflowOutputs == null)
+        if (workflowOutputs == null) {
             workflowOutputs = loadQuery("workflowOutputs.sparql");
+        }
         return QueryFactory.create(String.format(workflowOutputs, researchObject), Syntax.syntaxARQ);
     }
 
 
     public static Query getWorkflowInputs(String researchObject)
             throws IOException {
-        if (workflowInputs == null)
+        if (workflowInputs == null) {
             workflowInputs = loadQuery("workflowInputs.sparql");
+        }
         return QueryFactory.create(String.format(workflowInputs, researchObject), Syntax.syntaxARQ);
     }
 
 
     public static Query getProvenanceTraces(String researchObject)
             throws IOException {
-        if (provenanceTraces == null)
+        if (provenanceTraces == null) {
             provenanceTraces = loadQuery("provenanceTraces.sparql");
+        }
         return QueryFactory.create(String.format(provenanceTraces, researchObject), Syntax.syntaxARQ);
     }
 
 
     public static Query getSnapshotEvolution(String researchObject)
             throws IOException {
-        if (snapshotEvolution == null)
+        if (snapshotEvolution == null) {
             snapshotEvolution = loadQuery("snapshotEvolution.sparql");
+        }
         return QueryFactory.create(String.format(snapshotEvolution, researchObject), Syntax.syntaxARQ);
     }
 
 
     public static Query getLiveEvolution(String researchObject)
             throws IOException {
-        if (liveEvolution == null)
+        if (liveEvolution == null) {
             liveEvolution = loadQuery("liveEvolution.sparql");
+        }
         return QueryFactory.create(String.format(liveEvolution, researchObject), Syntax.syntaxARQ);
     }
 
 
     public static Query getArchivedEvolution(String researchObject)
             throws IOException {
-        if (archivedEvolution == null)
+        if (archivedEvolution == null) {
             archivedEvolution = loadQuery("archivedEvolution.sparql");
+        }
         return QueryFactory.create(String.format(archivedEvolution, researchObject), Syntax.syntaxARQ);
     }
 
 
     public static Query getResourceClass(String researchObject)
             throws IOException {
-        if (resourceClass == null)
+        if (resourceClass == null) {
             resourceClass = loadQuery("resourceClass.sparql");
+        }
         return QueryFactory.create(String.format(resourceClass, researchObject), Syntax.syntaxARQ);
     }
 

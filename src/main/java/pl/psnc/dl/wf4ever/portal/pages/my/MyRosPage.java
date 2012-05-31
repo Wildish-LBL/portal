@@ -234,8 +234,9 @@ public class MyRosPage extends TemplatePage {
 
 
     public String getDeleteCnt() {
-        if (selectedResearchObjects.size() == 1)
+        if (selectedResearchObjects.size() == 1) {
             return "1 Research Object";
+        }
         return selectedResearchObjects.size() + " Research Objects";
     }
 

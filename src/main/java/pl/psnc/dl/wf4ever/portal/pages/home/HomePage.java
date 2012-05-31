@@ -58,7 +58,7 @@ public class HomePage extends TemplatePage {
 
     private static final long serialVersionUID = 1L;
 
-    private final static Logger logger = Logger.getLogger(HomePage.class);
+    private static final Logger logger = Logger.getLogger(HomePage.class);
 
     private int roCnt;
 
@@ -267,8 +267,9 @@ public class HomePage extends TemplatePage {
         WebApplication webApplication = (WebApplication) Application.get();
         IRequestLogger requestLogger = webApplication.getRequestLogger();
 
-        if (requestLogger == null)
+        if (requestLogger == null) {
             requestLogger = new RequestLogger();
+        }
         return requestLogger;
     }
 
