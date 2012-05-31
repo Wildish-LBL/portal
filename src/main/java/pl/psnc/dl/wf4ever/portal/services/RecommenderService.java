@@ -19,22 +19,20 @@ import com.sun.jersey.api.client.WebResource;
  * @author piotrhol
  * 
  */
-public class RecommenderService
-{
+public class RecommenderService {
 
-	public static List<Recommendation> getRecommendations(URI baseURI, String myExpId, int limit)
-		throws Exception
-	{
-		Client client = Client.create();
-		WebResource webResource = client.resource(baseURI.toString()).path("recommendation").path("user").path(myExpId)
-				.queryParam("max", "" + limit);
-		ClientResponse response = webResource.get(ClientResponse.class);
-		if (response.getStatus() != HttpServletResponse.SC_OK) {
-			throw new Exception("Wrong response status: " + response.getClientResponseStatus());
-		}
+    public static List<Recommendation> getRecommendations(URI baseURI, String myExpId, int limit)
+            throws Exception {
+        Client client = Client.create();
+        WebResource webResource = client.resource(baseURI.toString()).path("recommendation").path("user").path(myExpId)
+                .queryParam("max", "" + limit);
+        ClientResponse response = webResource.get(ClientResponse.class);
+        if (response.getStatus() != HttpServletResponse.SC_OK) {
+            throw new Exception("Wrong response status: " + response.getClientResponseStatus());
+        }
 
-		Recommendations recs = response.getEntity(Recommendations.class);
-		return recs.getRecommendations();
-	}
+        Recommendations recs = response.getEntity(Recommendations.class);
+        return recs.getRecommendations();
+    }
 
 }

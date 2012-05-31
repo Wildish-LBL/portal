@@ -17,69 +17,62 @@ import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
  * @author piotrhol
  * 
  */
-public class RoTree
-	extends Tree
-{
+public class RoTree extends Tree {
 
-	private static final long serialVersionUID = 7615686756338665378L;
+    private static final long serialVersionUID = 7615686756338665378L;
 
-	/**
-	 * Reference to the css file.
-	 */
-	private static final ResourceReference CSS = new PackageResourceReference(RoTree.class, "res/tree.css");
+    /**
+     * Reference to the css file.
+     */
+    private static final ResourceReference CSS = new PackageResourceReference(RoTree.class, "res/tree.css");
 
 
-	/** Reference to the icon of tree item (not a folder) */
-	//	private static final ResourceReference WORKFLOW = new PackageResourceReference(RoTree.class, "res/workflow.png");
-	//
-	//	private static final ResourceReference EXTERNAL = new PackageResourceReference(RoTree.class, "res/external.png");
+    /** Reference to the icon of tree item (not a folder) */
+    //	private static final ResourceReference WORKFLOW = new PackageResourceReference(RoTree.class, "res/workflow.png");
+    //
+    //	private static final ResourceReference EXTERNAL = new PackageResourceReference(RoTree.class, "res/external.png");
 
-	public RoTree(String id, IModel< ? extends TreeModel> model)
-	{
-		super(id, model);
-	}
-
-
-	@Override
-	public RoTreeModel getModelObject()
-	{
-		return (RoTreeModel) super.getModelObject();
-	}
+    public RoTree(String id, IModel<? extends TreeModel> model) {
+        super(id, model);
+    }
 
 
-	@Override
-	protected ResourceReference getCSS()
-	{
-		return CSS;
-	}
+    @Override
+    public RoTreeModel getModelObject() {
+        return (RoTreeModel) super.getModelObject();
+    }
 
 
-	@Override
-	protected ResourceReference getNodeIcon(TreeNode node)
-	{
-		//		Object object = ((DefaultMutableTreeNode) node).getUserObject();
-		//		if (object instanceof AggregatedResource) {
-		//			AggregatedResource res = (AggregatedResource) object;
-		//			if (res.getType() == Type.WORKFLOW) {
-		//				return WORKFLOW;
-		//			}
-		//			if (res.getType() == Type.WEB_SERVICE) {
-		//				return EXTERNAL;
-		//			}
-		//		}
-		return super.getNodeIcon(node);
-	}
+    @Override
+    protected ResourceReference getCSS() {
+        return CSS;
+    }
 
 
-	@Override
-	protected void onConfigure()
-	{
-		super.onConfigure();
-		getTreeState().collapseAll();
-		if (getModelObject() != null) {
-			getTreeState().expandNode(getModelObject().getRoot());
-			//			getTreeState().selectNode(getModelObject().getRoot(), true);
-		}
-	}
+    @Override
+    protected ResourceReference getNodeIcon(TreeNode node) {
+        //		Object object = ((DefaultMutableTreeNode) node).getUserObject();
+        //		if (object instanceof AggregatedResource) {
+        //			AggregatedResource res = (AggregatedResource) object;
+        //			if (res.getType() == Type.WORKFLOW) {
+        //				return WORKFLOW;
+        //			}
+        //			if (res.getType() == Type.WEB_SERVICE) {
+        //				return EXTERNAL;
+        //			}
+        //		}
+        return super.getNodeIcon(node);
+    }
+
+
+    @Override
+    protected void onConfigure() {
+        super.onConfigure();
+        getTreeState().collapseAll();
+        if (getModelObject() != null) {
+            getTreeState().expandNode(getModelObject().getRoot());
+            //			getTreeState().selectNode(getModelObject().getRoot(), true);
+        }
+    }
 
 }

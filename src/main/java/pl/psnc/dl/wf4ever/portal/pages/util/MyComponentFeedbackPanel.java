@@ -10,19 +10,16 @@ import org.apache.wicket.markup.html.panel.ComponentFeedbackPanel;
  * @author piotrhol
  * 
  */
-public class MyComponentFeedbackPanel
-	extends ComponentFeedbackPanel
-{
+public class MyComponentFeedbackPanel extends ComponentFeedbackPanel {
 
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = 2434655818879345187L;
+    private static final long serialVersionUID = 2434655818879345187L;
 
 
-	public MyComponentFeedbackPanel(String id, Component filter)
-	{
-		super(id, filter);
-	}
+    public MyComponentFeedbackPanel(String id, Component filter) {
+        super(id, filter);
+    }
 
 }

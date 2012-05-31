@@ -9,29 +9,25 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 /**
  * @author Piotr Hołubowicz
- *
+ * 
  */
-public class ErrorPage
-	extends TemplatePage
-{
+public class ErrorPage extends TemplatePage {
 
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = -3233388849667095897L;
+    private static final long serialVersionUID = -3233388849667095897L;
 
-	public static final String MESSAGE = "message";
+    public static final String MESSAGE = "message";
 
 
-	public ErrorPage(PageParameters pageParameters)
-	{
-		super(pageParameters);
+    public ErrorPage(PageParameters pageParameters) {
+        super(pageParameters);
 
-		if (pageParameters.get(MESSAGE) != null) {
-			add(new Label("message", new Model<String>(pageParameters.get(MESSAGE).toString())));
-		}
-		else {
-			add(new Label("message"));
-		}
-	}
+        if (pageParameters.get(MESSAGE) != null) {
+            add(new Label("message", new Model<String>(pageParameters.get(MESSAGE).toString())));
+        } else {
+            add(new Label("message"));
+        }
+    }
 }

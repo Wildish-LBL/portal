@@ -179,8 +179,8 @@ class RoViewerBox extends WebMarkupContainer {
         };
         downloadResource = new ExternalLink("downloadResource", new PropertyModel<String>(this,
                 "selectedItem.downloadURI"));
-        downloadResource.setBeforeDisabledLink(null);
-        downloadResource.setAfterDisabledLink(null);
+        downloadResource.setBeforeDisabledLink("");
+        downloadResource.setAfterDisabledLink("");
 
         downloadROZipped = new ExternalLink("downloadROZipped", new PropertyModel<String>(roPage, "ROZipLink"));
         downloadROMetadata = new MyAjaxButton("downloadMetadata", roForm) {

@@ -436,7 +436,7 @@ public class RoPage extends TemplatePage {
             RoFactory.createAnnotations(rodlURI, roURI, this.annotatingBox.getModelObject().getURI(), MySession.get()
                     .getUsernames()));
         target.add(roViewerBox.infoPanel);
-        target.add(annotatingBox.annotationsDiv);
+        target.add(annotatingBox);
     }
 
 
@@ -453,7 +453,7 @@ public class RoPage extends TemplatePage {
         AggregatedResource objectAR = resources.get(statement.getObjectURI());
         RoFactory.addRelation(subjectAR, statement.getPropertyURI(), objectAR);
         target.add(roViewerBox.infoPanel);
-        target.add(annotatingBox.annotationsDiv);
+        target.add(annotatingBox);
     }
 
 

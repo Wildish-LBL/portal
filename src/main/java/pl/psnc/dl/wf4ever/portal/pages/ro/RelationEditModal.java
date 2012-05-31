@@ -31,13 +31,20 @@ import pl.psnc.dl.wf4ever.portal.pages.util.URIConverter;
 
 import com.hp.hpl.jena.vocabulary.DCTerms;
 
+/**
+ * A modal window for adding/editing relations, i.e. statements about the selected resource and another internal RO
+ * resource.
+ * 
+ * @author piotrekhol
+ * 
+ */
 class RelationEditModal extends Panel {
 
-    /**
-	 * 
-	 */
+    /** id. */
     private static final long serialVersionUID = -805443481947725257L;
-    public static final URI[] defaultRelations = { URI.create(DCTerms.source.getURI()),
+
+    /** A list of properties to choose from. */
+    public static final URI[] DEFAULT_RELATIONS = { URI.create(DCTerms.source.getURI()),
             URI.create(DCTerms.references.getURI()), URI.create(DCTerms.isReferencedBy.getURI()),
             URI.create(DCTerms.hasVersion.getURI()), URI.create(DCTerms.isVersionOf.getURI()),
             URI.create(DCTerms.isReplacedBy.getURI()), URI.create(DCTerms.replaces.getURI()),
@@ -48,29 +55,46 @@ class RelationEditModal extends Panel {
             URI.create("http://purl.org/wf4ever/wfprov#wasOutputFrom"),
             URI.create("http://purl.org/wf4ever/wfprov#usedInput") };
 
-    private final TextField<String> subjectURI;
-
-    private final TextField<URI> relationURI;
-
+    /** Selected property. */
     private URI selectedRelation;
 
+    /** Window title. */
     private String title;
 
+    /** Form aggregating input fields. */
     private Form<Statement> form;
 
+    /** Tree with RO resources. */
     private RoTree tree;
 
+    /** Div to show while the resources tree is loading. */
     private Fragment treeLoading;
 
+    /** The owning page. */
     private RoPage roPage;
 
+    /** Window feedback panel. */
     private MyFeedbackPanel feedbackPanel;
 
+    /** List of relations, in case more than one is added. */
     private List<Statement> statements = new ArrayList<>();
 
+    /** Button for adding more relations. */
     private MyAjaxButton anotherButton;
 
 
+    /**
+     * Constructor.
+     * 
+     * @param id
+     *            wicket id
+     * @param roPage
+     *            owning page
+     * @param model
+     *            model of currently added/edited relation
+     * @param tempRoTreeId
+     *            wicket id of a fragment to show while the resources tree is loading
+     */
     @SuppressWarnings("serial")
     public RelationEditModal(String id, final RoPage roPage, CompoundPropertyModel<Statement> model, String tempRoTreeId) {
         super(id, model);
@@ -85,11 +109,12 @@ class RelationEditModal extends Panel {
 
         form.add(new Label("title", new PropertyModel<String>(this, "title")));
 
-        subjectURI = new TextField<String>("subjectURI", new PropertyModel<String>(this, "subjectURIShort"));
+        TextField<String> subjectURI = new TextField<String>("subjectURI", new PropertyModel<String>(this,
+                "subjectURIShort"));
         subjectURI.setEnabled(false);
         form.add(subjectURI);
 
-        List<URI> choices = Arrays.asList(defaultRelations);
+        List<URI> choices = Arrays.asList(DEFAULT_RELATIONS);
         DropDownChoice<URI> relations = new DropDownChoice<URI>("relationURI", new PropertyModel<URI>(this,
                 "selectedRelation"), choices);
         relations.setNullValid(true);
@@ -98,7 +123,8 @@ class RelationEditModal extends Panel {
         final WebMarkupContainer relationURIDiv = new WebMarkupContainer("customRelationURIDiv");
         form.add(relationURIDiv);
 
-        relationURI = new TextField<URI>("customRelationURI", new PropertyModel<URI>(this, "customRelation"), URI.class) {
+        TextField<URI> relationURI = new TextField<URI>("customRelationURI", new PropertyModel<URI>(this,
+                "customRelation"), URI.class) {
 
             @SuppressWarnings("unchecked")
             @Override
@@ -208,79 +234,103 @@ class RelationEditModal extends Panel {
     }
 
 
+    /**
+     * Call when the RO tree is ready to be displayed.
+     */
     public void onRoTreeLoaded() {
         treeLoading.replaceWith(tree);
     }
 
 
     /**
-     * @return the selectedProperty
+     * Relation selected from the list or the property of the relation that is edited.
+     * 
+     * @return property URI
      */
     public URI getSelectedRelation() {
-        if (selectedRelation == null && getModelObject() != null)
+        if (selectedRelation == null && getModelObject() != null) {
             return getModelObject().getPropertyURI();
+        }
         return selectedRelation;
     }
 
 
     /**
+     * Set relation from the list and, if the statement is edited, the statement property.
+     * 
      * @param selectedRelation
-     *            the selectedProperty to set
+     *            relation URI
      */
     public void setSelectedRelation(URI selectedRelation) {
         this.selectedRelation = selectedRelation;
-        if (selectedRelation != null)
+        if (selectedRelation != null) {
             getModelObject().setPropertyURI(selectedRelation);
+        }
     }
 
 
     /**
-     * @return the selectedProperty
+     * Get user custom relation property URI.
+     * 
+     * @return property URI or null
      */
     public URI getCustomRelation() {
-        if (getModelObject() != null)
+        if (getModelObject() != null) {
             return getModelObject().getPropertyURI();
+        }
         return null;
     }
 
 
     /**
-     * @param selectedRelation
-     *            the selectedProperty to set
+     * Set custom user relation property, provided that there is no relation property selected from the list.
+     * 
+     * @param customRelation
+     *            custom relation property URI
      */
     public void setCustomRelation(URI customRelation) {
-        if (selectedRelation == null && customRelation != null)
+        if (selectedRelation == null && customRelation != null) {
             getModelObject().setPropertyURI(customRelation);
+        }
     }
 
 
-    /**
-     * @return the title
-     */
     public String getTitle() {
         return title;
     }
 
 
-    /**
-     * @param title
-     *            the title to set
-     */
     private void setTitle(String title) {
         this.title = title;
     }
 
 
+    /**
+     * Get the statement that is added/edited.
+     * 
+     * @return a statement
+     */
     public Statement getModelObject() {
         return form.getModelObject();
     }
 
 
+    /**
+     * Set the statement that is added/edited.
+     * 
+     * @param stmt
+     *            statement
+     */
     public void setModelObject(Statement stmt) {
         form.setModelObject(stmt);
     }
 
 
+    /**
+     * A short version of the selected resource URI.
+     * 
+     * @return resource URI relative to RO URI
+     */
     public String getSubjectURIShort() {
         if (getModelObject() == null) {
             return null;
@@ -290,12 +340,18 @@ class RelationEditModal extends Panel {
 
 
     // FIXME not the best design probably, these modals might use some refactoring
+    /**
+     * Set window title to "Add relation", enable adding multiple relations.
+     */
     public void setAddMode() {
         setTitle("Add relation");
         getAnotherButton().setVisible(true);
     }
 
 
+    /**
+     * Set window title to "Edit relation", disable adding multiple relations.
+     */
     public void setEditMode() {
         setTitle("Edit relation");
         getAnotherButton().setVisible(false);

@@ -7,24 +7,20 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 /**
  * @author Piotr Hołubowicz
- *
+ * 
  */
-public class HelpPage
-	extends TemplatePage
-{
+public class HelpPage extends TemplatePage {
 
-	private static final long serialVersionUID = 2960549491810135112L;
+    private static final long serialVersionUID = 2960549491810135112L;
 
 
-	public HelpPage(PageParameters pageParameters)
-	{
-		super(pageParameters);
-	}
+    public HelpPage(PageParameters pageParameters) {
+        super(pageParameters);
+    }
 
 
-	public HelpPage()
-	{
-		this(new PageParameters());
-	}
+    public HelpPage() {
+        this(new PageParameters());
+    }
 
 }

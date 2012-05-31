@@ -32,132 +32,118 @@ import pl.psnc.dl.wf4ever.portal.services.OAuthHelpService;
  * @author Piotr Hołubowicz
  * 
  */
-public class OAuthPage
-	extends WebPage
-{
+public class OAuthPage extends WebPage {
 
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = -3233388849667095897L;
+    private static final long serialVersionUID = -3233388849667095897L;
 
-	private static final Logger log = Logger.getLogger(OAuthPage.class);
-
-
-	public OAuthPage(PageParameters pageParameters)
-		throws URISyntaxException
-	{
-		super(pageParameters);
-
-		MySession session = MySession.get();
-		PortalApplication app = (PortalApplication) getApplication();
-
-		if (session.getdLibraAccessToken() == null) {
-			OAuthService service = DlibraApi.getOAuthService(app.getDLibraClientId(), app.getCallbackURL());
-			Token token = retrieveDlibraAccessToken(pageParameters, service);
-			session.setdLibraAccessToken(token);
-			if (token != null) {
-				log.info("Successfully received dLibra access token");
-			}
-		}
-		else if (session.getMyExpAccessToken() == null) {
-			OAuthService service = MyExpApi.getOAuthService(app.getMyExpConsumerKey(), app.getMyExpConsumerSecret(),
-				app.getCallbackURL());
-			Token token = retrieveMyExpAccessToken(pageParameters, service);
-			session.setMyExpAccessToken(token);
-			if (token != null) {
-				log.info("Successfully received myExperiment access token");
-			}
-		}
-		if (!continueToOriginalDestination()) {
-			log.warn("Could not find the original destination");
-			throw new RestartResponseException(getApplication().getHomePage());
-		}
-	}
+    private static final Logger log = Logger.getLogger(OAuthPage.class);
 
 
-	/**
-	 * @param pageParameters
-	 * @param service
-	 * @return
-	 */
-	private Token retrieveMyExpAccessToken(PageParameters pageParameters, OAuthService service)
-	{
-		Token accessToken = null;
-		if (!pageParameters.get(MyExpApi.OAUTH_VERIFIER).isEmpty()) {
-			Verifier verifier = new Verifier(pageParameters.get(MyExpApi.OAUTH_VERIFIER).toString());
-			Token requestToken = MySession.get().getRequestToken();
-			log.debug("Request token: " + requestToken.toString() + " verifier: " + verifier.getValue() + " service: "
-					+ service.getAuthorizationUrl(requestToken));
-			accessToken = service.getAccessToken(requestToken, verifier);
-		}
-		return accessToken;
-	}
+    public OAuthPage(PageParameters pageParameters)
+            throws URISyntaxException {
+        super(pageParameters);
+
+        MySession session = MySession.get();
+        PortalApplication app = (PortalApplication) getApplication();
+
+        if (session.getdLibraAccessToken() == null) {
+            OAuthService service = DlibraApi.getOAuthService(app.getDLibraClientId(), app.getCallbackURL());
+            Token token = retrieveDlibraAccessToken(pageParameters, service);
+            session.setdLibraAccessToken(token);
+            if (token != null) {
+                log.info("Successfully received dLibra access token");
+            }
+        } else if (session.getMyExpAccessToken() == null) {
+            OAuthService service = MyExpApi.getOAuthService(app.getMyExpConsumerKey(), app.getMyExpConsumerSecret(),
+                app.getCallbackURL());
+            Token token = retrieveMyExpAccessToken(pageParameters, service);
+            session.setMyExpAccessToken(token);
+            if (token != null) {
+                log.info("Successfully received myExperiment access token");
+            }
+        }
+        if (!continueToOriginalDestination()) {
+            log.warn("Could not find the original destination");
+            throw new RestartResponseException(getApplication().getHomePage());
+        }
+    }
 
 
-	/**
-	 * @param pageParameters
-	 * @param service
-	 * @return
-	 * @throws URISyntaxException
-	 */
-	private Token retrieveDlibraAccessToken(PageParameters pageParameters, OAuthService service)
-		throws URISyntaxException
-	{
-		Token accessToken = null;
-		// TODO in the OAuth 2.0 implicit grant flow the access token is sent
-		// in URL fragment - how to retrieve it in Wicket?
-		if (!pageParameters.get("access_token").isEmpty() && !pageParameters.get("token_type").isEmpty()) {
-			if (pageParameters.get("token_type").equals("bearer")) {
-				accessToken = new Token(pageParameters.get("access_token").toString(), null);
-			}
-			else {
-				error("Unsupported token type: " + pageParameters.get("token_type").toString());
-			}
-		}
-		else if (!pageParameters.get("code").isEmpty()) {
-			URI uri = new URI(new DlibraApi().getAccessTokenEndpoint() + "?grant_type=authorization_code&code="
-					+ pageParameters.get("code").toString());
-			ObjectMapper mapper = new ObjectMapper();
-			String body = null;
-			try {
-				Response response;
-				try {
-					response = OAuthHelpService.sendRequest(service, Verb.GET, uri);
-					body = response.getBody();
-					@SuppressWarnings("unchecked")
-					Map<String, String> responseData = mapper.readValue(body, Map.class);
-					if (responseData.containsKey("access_token") && responseData.containsKey("token_type")) {
-						if (responseData.get("token_type").equalsIgnoreCase("bearer")) {
-							accessToken = new Token(responseData.get("access_token"), null);
-						}
-						else {
-							error("Unsupported access token type: " + responseData.get("token_type"));
-						}
-					}
-					else {
-						error("Missing keys from access token endpoint response");
-					}
-				}
-				catch (OAuthException e) {
-					body = e.getResponse().getBody();
-					@SuppressWarnings("unchecked")
-					Map<String, String> responseData = mapper.readValue(body, Map.class);
-					error(String.format("Access token endpoint returned error %s (%s)", responseData.get("error"),
-						responseData.get("error_description")));
-				}
-			}
-			catch (JsonParseException e) {
-				error("Error in parsing access token endpoint response: " + body);
-			}
-			catch (JsonMappingException e) {
-				error("Error in parsing access token endpoint response: " + body);
-			}
-			catch (IOException e) {
-				error("Error in parsing access token endpoint response: " + body);
-			}
-		}
-		return accessToken;
-	}
+    /**
+     * @param pageParameters
+     * @param service
+     * @return
+     */
+    private Token retrieveMyExpAccessToken(PageParameters pageParameters, OAuthService service) {
+        Token accessToken = null;
+        if (!pageParameters.get(MyExpApi.OAUTH_VERIFIER).isEmpty()) {
+            Verifier verifier = new Verifier(pageParameters.get(MyExpApi.OAUTH_VERIFIER).toString());
+            Token requestToken = MySession.get().getRequestToken();
+            log.debug("Request token: " + requestToken.toString() + " verifier: " + verifier.getValue() + " service: "
+                    + service.getAuthorizationUrl(requestToken));
+            accessToken = service.getAccessToken(requestToken, verifier);
+        }
+        return accessToken;
+    }
+
+
+    /**
+     * @param pageParameters
+     * @param service
+     * @return
+     * @throws URISyntaxException
+     */
+    private Token retrieveDlibraAccessToken(PageParameters pageParameters, OAuthService service)
+            throws URISyntaxException {
+        Token accessToken = null;
+        // TODO in the OAuth 2.0 implicit grant flow the access token is sent
+        // in URL fragment - how to retrieve it in Wicket?
+        if (!pageParameters.get("access_token").isEmpty() && !pageParameters.get("token_type").isEmpty()) {
+            if (pageParameters.get("token_type").equals("bearer")) {
+                accessToken = new Token(pageParameters.get("access_token").toString(), null);
+            } else {
+                error("Unsupported token type: " + pageParameters.get("token_type").toString());
+            }
+        } else if (!pageParameters.get("code").isEmpty()) {
+            URI uri = new URI(new DlibraApi().getAccessTokenEndpoint() + "?grant_type=authorization_code&code="
+                    + pageParameters.get("code").toString());
+            ObjectMapper mapper = new ObjectMapper();
+            String body = null;
+            try {
+                Response response;
+                try {
+                    response = OAuthHelpService.sendRequest(service, Verb.GET, uri);
+                    body = response.getBody();
+                    @SuppressWarnings("unchecked")
+                    Map<String, String> responseData = mapper.readValue(body, Map.class);
+                    if (responseData.containsKey("access_token") && responseData.containsKey("token_type")) {
+                        if (responseData.get("token_type").equalsIgnoreCase("bearer")) {
+                            accessToken = new Token(responseData.get("access_token"), null);
+                        } else {
+                            error("Unsupported access token type: " + responseData.get("token_type"));
+                        }
+                    } else {
+                        error("Missing keys from access token endpoint response");
+                    }
+                } catch (OAuthException e) {
+                    body = e.getResponse().getBody();
+                    @SuppressWarnings("unchecked")
+                    Map<String, String> responseData = mapper.readValue(body, Map.class);
+                    error(String.format("Access token endpoint returned error %s (%s)", responseData.get("error"),
+                        responseData.get("error_description")));
+                }
+            } catch (JsonParseException e) {
+                error("Error in parsing access token endpoint response: " + body);
+            } catch (JsonMappingException e) {
+                error("Error in parsing access token endpoint response: " + body);
+            } catch (IOException e) {
+                error("Error in parsing access token endpoint response: " + body);
+            }
+        }
+        return accessToken;
+    }
 
 }

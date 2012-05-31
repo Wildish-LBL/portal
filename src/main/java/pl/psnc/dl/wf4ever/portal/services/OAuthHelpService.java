@@ -17,147 +17,139 @@ import org.scribe.oauth.OAuthService;
  * @author Piotr Hołubowicz
  * 
  */
-public class OAuthHelpService
-{
+public class OAuthHelpService {
 
-	private static final Logger log = Logger.getLogger(OAuthHelpService.class);
-
-
-	/**
-	 * Sends an unsigned request with no body.
-	 * 
-	 * @param service
-	 * @param verb
-	 * @param url
-	 * @param token
-	 * @return
-	 * @throws OAuthException
-	 */
-	public static Response sendRequest(OAuthService service, Verb verb, URI uri)
-		throws OAuthException
-	{
-		OAuthRequest request = new OAuthRequest(verb, uri.toString());
-		Response response = request.send();
-		validateResponseCode(verb, response);
-		return response;
-	}
+    private static final Logger log = Logger.getLogger(OAuthHelpService.class);
 
 
-	/**
-	 * Executes a request with no body.
-	 * 
-	 * @param service
-	 * @param verb
-	 * @param url
-	 * @param token
-	 * @return
-	 * @throws OAuthException
-	 */
-	public static Response sendRequest(OAuthService service, Verb verb, URI uri, Token token)
-		throws OAuthException
-	{
-		OAuthRequest request = new OAuthRequest(verb, uri.toString());
-		service.signRequest(token, request);
-		Response response = request.send();
-		validateResponseCode(verb, response);
-		return response;
-	}
+    /**
+     * Sends an unsigned request with no body.
+     * 
+     * @param service
+     * @param verb
+     * @param url
+     * @param token
+     * @return
+     * @throws OAuthException
+     */
+    public static Response sendRequest(OAuthService service, Verb verb, URI uri)
+            throws OAuthException {
+        OAuthRequest request = new OAuthRequest(verb, uri.toString());
+        Response response = request.send();
+        validateResponseCode(verb, response);
+        return response;
+    }
 
 
-	/**
-	 * Executes a request with no body but with content negotiation. Makes sense to use
-	 * only with GET.
-	 * 
-	 * @param service
-	 * @param verb
-	 * @param url
-	 * @param token
-	 * @param accept
-	 * @return
-	 * @throws OAuthException
-	 */
-	public static Response sendRequest(OAuthService service, Verb verb, URI uri, Token token, String accept)
-		throws OAuthException
-	{
-		if (verb != Verb.GET) {
-			log.warn("Using accept header with " + verb + " request.");
-		}
-		OAuthRequest request = new OAuthRequest(verb, uri.toString());
-		request.addHeader("Accept", accept);
-		service.signRequest(token, request);
-		Response response = request.send();
-		validateResponseCode(verb, response);
-		return response;
-	}
+    /**
+     * Executes a request with no body.
+     * 
+     * @param service
+     * @param verb
+     * @param url
+     * @param token
+     * @return
+     * @throws OAuthException
+     */
+    public static Response sendRequest(OAuthService service, Verb verb, URI uri, Token token)
+            throws OAuthException {
+        OAuthRequest request = new OAuthRequest(verb, uri.toString());
+        service.signRequest(token, request);
+        Response response = request.send();
+        validateResponseCode(verb, response);
+        return response;
+    }
 
 
-	/**
-	 * Executes a request with body, content type must also be specified.
-	 * 
-	 * @param service
-	 * @param verb
-	 * @param url
-	 * @param token
-	 * @param payload
-	 * @param contentType
-	 * @return
-	 * @throws OAuthException
-	 */
-	public static Response sendRequest(OAuthService service, Verb verb, URI uri, Token token, byte[] payload,
-			String contentType)
-		throws OAuthException
-	{
-		OAuthRequest request = new OAuthRequest(verb, uri.toString());
-		request.addPayload(payload);
-		request.addHeader("Content-type", contentType);
-		service.signRequest(token, request);
-		Response response = request.send();
-		validateResponseCode(verb, response);
-		return response;
-	}
+    /**
+     * Executes a request with no body but with content negotiation. Makes sense to use only with GET.
+     * 
+     * @param service
+     * @param verb
+     * @param url
+     * @param token
+     * @param accept
+     * @return
+     * @throws OAuthException
+     */
+    public static Response sendRequest(OAuthService service, Verb verb, URI uri, Token token, String accept)
+            throws OAuthException {
+        if (verb != Verb.GET) {
+            log.warn("Using accept header with " + verb + " request.");
+        }
+        OAuthRequest request = new OAuthRequest(verb, uri.toString());
+        request.addHeader("Accept", accept);
+        service.signRequest(token, request);
+        Response response = request.send();
+        validateResponseCode(verb, response);
+        return response;
+    }
 
 
-	/**
-	 * @param verb
-	 * @param response
-	 * @throws OAuthException
-	 */
-	private static void validateResponseCode(Verb verb, Response response)
-		throws OAuthException
-	{
-		switch (verb) {
-			case GET:
-				if (response.getCode() != HttpURLConnection.HTTP_OK) {
-					throw prepareException(response);
-				}
-				break;
-			case PUT:
-				if (response.getCode() != HttpURLConnection.HTTP_OK
-						&& response.getCode() != HttpURLConnection.HTTP_CREATED) {
-					throw prepareException(response);
-				}
-				break;
-			case POST:
-				if (response.getCode() != HttpURLConnection.HTTP_CREATED) {
-					throw prepareException(response);
-				}
-				break;
-			case DELETE:
-				if (response.getCode() != HttpURLConnection.HTTP_NO_CONTENT) {
-					throw prepareException(response);
-				}
-				break;
-			default:
-				break;
-		}
-	}
+    /**
+     * Executes a request with body, content type must also be specified.
+     * 
+     * @param service
+     * @param verb
+     * @param url
+     * @param token
+     * @param payload
+     * @param contentType
+     * @return
+     * @throws OAuthException
+     */
+    public static Response sendRequest(OAuthService service, Verb verb, URI uri, Token token, byte[] payload,
+            String contentType)
+            throws OAuthException {
+        OAuthRequest request = new OAuthRequest(verb, uri.toString());
+        request.addPayload(payload);
+        request.addHeader("Content-type", contentType);
+        service.signRequest(token, request);
+        Response response = request.send();
+        validateResponseCode(verb, response);
+        return response;
+    }
 
 
-	private static OAuthException prepareException(Response response)
-	{
-		if (response.getCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
-			return new OAuthException(response, "the access token has been rejected");
-		}
-		return new OAuthException(response);
-	}
+    /**
+     * @param verb
+     * @param response
+     * @throws OAuthException
+     */
+    private static void validateResponseCode(Verb verb, Response response)
+            throws OAuthException {
+        switch (verb) {
+            case GET:
+                if (response.getCode() != HttpURLConnection.HTTP_OK) {
+                    throw prepareException(response);
+                }
+                break;
+            case PUT:
+                if (response.getCode() != HttpURLConnection.HTTP_OK
+                        && response.getCode() != HttpURLConnection.HTTP_CREATED) {
+                    throw prepareException(response);
+                }
+                break;
+            case POST:
+                if (response.getCode() != HttpURLConnection.HTTP_CREATED) {
+                    throw prepareException(response);
+                }
+                break;
+            case DELETE:
+                if (response.getCode() != HttpURLConnection.HTTP_NO_CONTENT) {
+                    throw prepareException(response);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+
+    private static OAuthException prepareException(Response response) {
+        if (response.getCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
+            return new OAuthException(response, "the access token has been rejected");
+        }
+        return new OAuthException(response);
+    }
 }

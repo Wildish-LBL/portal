@@ -14,14 +14,30 @@ import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
+/**
+ * A modal window for downloading RO metadata.
+ * 
+ * @author piotrekhol
+ * 
+ */
 @SuppressWarnings("serial")
 class DownloadMetadataModal extends Panel {
 
+    /** RDF format selected by the user. */
     private RDFFormat format = RDFFormat.RDFXML;
 
+    /** Modal window feedback panel. */
     private MyFeedbackPanel feedbackPanel;
 
 
+    /**
+     * Constructor.
+     * 
+     * @param id
+     *            wicket id
+     * @param roPage
+     *            owning page
+     */
     public DownloadMetadataModal(String id, final RoPage roPage) {
         super(id);
         Form<?> form = new Form<Void>("downloadMetadataForm");
