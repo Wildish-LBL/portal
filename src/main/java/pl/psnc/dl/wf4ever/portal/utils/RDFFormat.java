@@ -25,9 +25,7 @@ import java.util.Locale;
  */
 public class RDFFormat implements Serializable {
 
-    /**
-	 * 
-	 */
+    /** id. */
     private static final long serialVersionUID = -5372582127420247056L;
 
     /*-----------*
@@ -68,7 +66,9 @@ public class RDFFormat implements Serializable {
      */
     public static final RDFFormat TRIG = new RDFFormat("TriG", "application/x-trig", Charset.forName("UTF-8"), "trig",
             true, true);
-
+    /**
+     * RDFA.
+     */
     public static final RDFFormat RDFA = new RDFFormat("RDFa", "application/xhtml+xml", Charset.forName("UTF-8"),
             "xhtml", false, false);
 
@@ -126,6 +126,10 @@ public class RDFFormat implements Serializable {
      * @param fileExtensions
      *            The file format's file extension(s), e.g. <tt>txt</tt> for plain text files. The first item in the
      *            list is interpreted as the default file extension for the format.
+     * @param supportsNamespaces
+     *            ?
+     * @param supportsContexts
+     *            Does it support quads, i.e. named graphs.
      */
     public RDFFormat(String name, Collection<String> mimeTypes, Charset charset, Collection<String> fileExtensions,
             boolean supportsNamespaces, boolean supportsContexts) {
@@ -154,6 +158,10 @@ public class RDFFormat implements Serializable {
      *            The default character encoding of the RDF file format. Specify <tt>null</tt> if not applicable.
      * @param fileExtension
      *            The (default) file extension for the RDF file format, e.g. <tt>rdf</tt> for RDF/XML files.
+     * @param supportsNamespaces
+     *            ?
+     * @param supportsContexts
+     *            Does it support quads, i.e. named graphs.
      */
     public RDFFormat(String name, String mimeType, Charset charset, String fileExtension, boolean supportsNamespaces,
             boolean supportsContexts) {
@@ -173,6 +181,10 @@ public class RDFFormat implements Serializable {
      * @param fileExtensions
      *            The RDF format's file extensions, e.g. <tt>rdf</tt> for RDF/XML files. The first item in the list is
      *            interpreted as the default file extension for the format.
+     * @param supportsNamespaces
+     *            ?
+     * @param supportsContexts
+     *            Does it support quads, i.e. named graphs.
      */
     public RDFFormat(String name, String mimeType, Charset charset, Collection<String> fileExtensions,
             boolean supportsNamespaces, boolean supportsContexts) {
@@ -180,6 +192,9 @@ public class RDFFormat implements Serializable {
     }
 
 
+    /**
+     * Default constructor.
+     */
     public RDFFormat() {
 
     }
@@ -332,6 +347,10 @@ public class RDFFormat implements Serializable {
 
     /**
      * Compares RDFFormat objects based on their {@link #getName() name}, ignoring case.
+     * 
+     * @param other
+     *            the other object
+     * @return true or false
      */
     @Override
     public boolean equals(Object other) {
@@ -388,15 +407,17 @@ public class RDFFormat implements Serializable {
     /**
      * Tries to match the specified MIME type with the MIME types of the supplied file formats.
      * 
+     * @param <FF>
+     *            RDFFormat or its subclass.
      * @param mimeType
      *            A MIME type, e.g. "text/plain".
-     * @param RDFFormats
+     * @param rdfFormats
      *            The file formats to match the MIME type against.
      * @return A RDFFormat object if the MIME type was recognized, or <tt>null</tt> otherwise.
      * @see #matchMIMEType(String, Iterable, RDFFormat)
      */
-    public static <FF extends RDFFormat> FF matchMIMEType(String mimeType, Iterable<FF> RDFFormats) {
-        return matchMIMEType(mimeType, RDFFormats, null);
+    public static <FF extends RDFFormat> FF matchMIMEType(String mimeType, Iterable<FF> rdfFormats) {
+        return matchMIMEType(mimeType, rdfFormats, null);
     }
 
 
@@ -404,26 +425,28 @@ public class RDFFormat implements Serializable {
      * Tries to match the specified MIME type with the MIME types of the supplied file formats. The supplied fallback
      * format will be returned when no matching format was found.
      * 
+     * @param <FF>
+     *            RDFFormat or its subclass.
      * @param mimeType
      *            A MIME type, e.g. "text/plain".
-     * @param RDFFormats
+     * @param rdfFormats
      *            The file formats to match the MIME type against.
      * @param fallback
      *            The file format to return if no matching format can be found.
      * @return A RDFFormat that matches the MIME type, or the fallback format if the extension was not recognized.
      */
-    public static <FF extends RDFFormat> FF matchMIMEType(String mimeType, Iterable<FF> RDFFormats, FF fallback) {
+    public static <FF extends RDFFormat> FF matchMIMEType(String mimeType, Iterable<FF> rdfFormats, FF fallback) {
         // First try to match with the default MIME type
-        for (FF RDFFormat : RDFFormats) {
-            if (RDFFormat.hasDefaultMIMEType(mimeType)) {
-                return RDFFormat;
+        for (FF rdfFormat : rdfFormats) {
+            if (rdfFormat.hasDefaultMIMEType(mimeType)) {
+                return rdfFormat;
             }
         }
 
         // Try alternative MIME types too
-        for (FF RDFFormat : RDFFormats) {
-            if (RDFFormat.hasMIMEType(mimeType)) {
-                return RDFFormat;
+        for (FF rdfFormat : rdfFormats) {
+            if (rdfFormat.hasMIMEType(mimeType)) {
+                return rdfFormat;
             }
         }
 
@@ -434,15 +457,17 @@ public class RDFFormat implements Serializable {
     /**
      * Tries to match the specified file name with the file extensions of the supplied file formats.
      * 
+     * @param <FF>
+     *            RDFFormat or its subclass.
      * @param fileName
      *            A file name.
-     * @param RDFFormats
+     * @param rdfFormats
      *            The file formats to match the file name extension against.
      * @return A RDFFormat that matches the file name extension, or <tt>null</tt> otherwise.
      * @see #matchFileName(String, Iterable, RDFFormat)
      */
-    public static <FF extends RDFFormat> FF matchFileName(String fileName, Iterable<FF> RDFFormats) {
-        return matchFileName(fileName, RDFFormats, null);
+    public static <FF extends RDFFormat> FF matchFileName(String fileName, Iterable<FF> rdfFormats) {
+        return matchFileName(fileName, rdfFormats, null);
     }
 
 
@@ -451,16 +476,18 @@ public class RDFFormat implements Serializable {
      * try to match "extensions" recursively, allowing it to find the file type of e.g. compressed files (e.g.
      * "example.rdf.gz"). The supplied fallback format will be returned when the file name extension was not recognized.
      * 
+     * @param <FF>
+     *            RDFFormat or its subclass.
      * @param fileName
      *            A file name.
-     * @param RDFFormats
+     * @param rdfFormats
      *            The file formats to match the file name extension against.
      * @param fallback
      *            The file format to return if no matching format can be found.
      * @return A RDFFormat that matches the file name extension, or the fallback format if the extension was not
      *         recognized.
      */
-    public static <FF extends RDFFormat> FF matchFileName(String fileName, Iterable<FF> RDFFormats, FF fallback) {
+    public static <FF extends RDFFormat> FF matchFileName(String fileName, Iterable<FF> rdfFormats, FF fallback) {
         // Strip any directory info from the file name
         int lastPathSepIdx = Math.max(fileName.lastIndexOf('/'), fileName.lastIndexOf('\\'));
         if (lastPathSepIdx >= 0) {
@@ -472,16 +499,16 @@ public class RDFFormat implements Serializable {
             String ext = fileName.substring(dotIdx + 1);
 
             // First try to match with the default file extension of the formats
-            for (FF RDFFormat : RDFFormats) {
-                if (RDFFormat.hasDefaultFileExtension(ext)) {
-                    return RDFFormat;
+            for (FF rdfFormat : rdfFormats) {
+                if (rdfFormat.hasDefaultFileExtension(ext)) {
+                    return rdfFormat;
                 }
             }
 
             // Try alternative file extensions too
-            for (FF RDFFormat : RDFFormats) {
-                if (RDFFormat.hasFileExtension(ext)) {
-                    return RDFFormat;
+            for (FF rdfFormat : rdfFormats) {
+                if (rdfFormat.hasFileExtension(ext)) {
+                    return rdfFormat;
                 }
             }
 
@@ -502,7 +529,7 @@ public class RDFFormat implements Serializable {
      * List of known RDF file formats.
      */
     // FIXME: remove/deprecate this list?
-    private static List<RDFFormat> RDF_FORMATS = new ArrayList<RDFFormat>(8);
+    private static final List<RDFFormat> RDF_FORMATS = new ArrayList<RDFFormat>(8);
 
     /*--------------------*
      * Static initializer *
@@ -526,6 +553,8 @@ public class RDFFormat implements Serializable {
 
     /**
      * Returns all known/registered RDF formats.
+     * 
+     * @return a collection of RDF formats
      */
     public static Collection<RDFFormat> values() {
         return Collections.unmodifiableList(RDF_FORMATS);
@@ -541,6 +570,9 @@ public class RDFFormat implements Serializable {
      *            The MIME type of the RDF file format, e.g. <tt>application/rdf+xml</tt> for the RDF/XML file format.
      * @param fileExt
      *            The (default) file extension for the RDF file format, e.g. <tt>rdf</tt> for RDF/XML files.
+     * @param charset
+     *            The default charset of the file format
+     * @return the registered RDF file format
      */
     public static RDFFormat register(String name, String mimeType, String fileExt, Charset charset) {
         RDFFormat rdfFormat = new RDFFormat(name, mimeType, charset, fileExt, false, false);
@@ -551,6 +583,9 @@ public class RDFFormat implements Serializable {
 
     /**
      * Registers the specified RDF file format.
+     * 
+     * @param rdfFormat
+     *            RDF file format
      */
     public static void register(RDFFormat rdfFormat) {
         RDF_FORMATS.add(rdfFormat);
@@ -577,6 +612,8 @@ public class RDFFormat implements Serializable {
      * 
      * @param mimeType
      *            A file name.
+     * @param fallback
+     *            RDF file format to use if nothing matches
      * @return An RDFFormat that matches the MIME type, or the fallback format if the extension was not recognized.
      * @see #forMIMEType(String)
      * @see #getMIMETypes()
@@ -606,6 +643,8 @@ public class RDFFormat implements Serializable {
      * 
      * @param fileName
      *            A file name.
+     * @param fallback
+     *            RDF file format to use if nothing matches
      * @return An RDFFormat that matches the file name extension, or the fallback format if the extension was not
      *         recognized.
      * @see #forFileName(String)
@@ -638,79 +677,46 @@ public class RDFFormat implements Serializable {
      * Methods *
      *---------*/
 
-    /**
-     * @return the mimeTypes
-     */
     public List<String> getMimeTypes() {
         return mimeTypes;
     }
 
 
-    /**
-     * @param mimeTypes
-     *            the mimeTypes to set
-     */
     public void setMimeTypes(List<String> mimeTypes) {
         this.mimeTypes = mimeTypes;
     }
 
 
-    /**
-     * @return the supportsNamespaces
-     */
     public boolean isSupportsNamespaces() {
         return supportsNamespaces;
     }
 
 
-    /**
-     * @param supportsNamespaces
-     *            the supportsNamespaces to set
-     */
     public void setSupportsNamespaces(boolean supportsNamespaces) {
         this.supportsNamespaces = supportsNamespaces;
     }
 
 
-    /**
-     * @return the supportsContexts
-     */
     public boolean isSupportsContexts() {
         return supportsContexts;
     }
 
 
-    /**
-     * @param supportsContexts
-     *            the supportsContexts to set
-     */
     public void setSupportsContexts(boolean supportsContexts) {
         this.supportsContexts = supportsContexts;
     }
 
 
-    /**
-     * @param name
-     *            the name to set
-     */
     public void setName(String name) {
         this.name = name;
     }
 
 
-    /**
-     * @param charset
-     *            the charset to set
-     */
     public void setCharset(Charset charset) {
         this.charset = charset.name();
     }
 
 
-    /**
-     * @param fileExtensions
-     *            the fileExtensions to set
-     */
     public void setFileExtensions(List<String> fileExtensions) {
         this.fileExtensions = fileExtensions;
     }
