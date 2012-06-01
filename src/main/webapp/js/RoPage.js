@@ -30,14 +30,8 @@ $(document).ready(function() {
 	$('#import-annotation-modal').modal({
 		backdrop : 'static',
 		show : false
-	})
-});
-
-// this should be called when a tab is changed.
-$('a[data-toggle="tab"]').on('shown', function (e) {
-	  e.target // activated tab
-	  e.relatedTarget // previous tab
 	});
+});
 	
 function showStmtEdit(content) {
 	$('#objectValue').wysiwyg('destroy');

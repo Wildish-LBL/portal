@@ -15,3 +15,6 @@ jsPlumb.ready(function() {
 	} ] ];
 
 });
+$(document).ready(function() {
+	$('div[rel="popover"]').popover();
+});

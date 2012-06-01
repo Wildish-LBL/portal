@@ -367,8 +367,18 @@ public class RoPage extends TemplatePage {
     }
 
 
+    /**
+     * Called when a user wants to a delete an aggregated resource.
+     * 
+     * @param resource
+     *            remote or local resource
+     * @param target
+     *            request target
+     * @throws IOException
+     *             when cannot connect to RODL
+     */
     public void onResourceDelete(AggregatedResource resource, AjaxRequestTarget target)
-            throws URISyntaxException, IOException {
+            throws IOException {
         ClientResponse response = ROSRService.deleteResource(resource.getURI(), MySession.get().getdLibraAccessToken());
         if (response.getStatus() != HttpServletResponse.SC_NO_CONTENT) {
             if (response.getStatus() == HttpServletResponse.SC_NOT_FOUND) {
@@ -389,6 +399,16 @@ public class RoPage extends TemplatePage {
     }
 
 
+    /**
+     * Called when a user wants to delete a remote resource.
+     * 
+     * @param resource
+     *            a remote resource
+     * @param target
+     *            request target
+     * @throws IOException
+     *             can't connect to RODL
+     */
     private void onRemoteResourceDelete(AggregatedResource resource, AjaxRequestTarget target)
             throws IOException {
         OntModel manifestModel = ROSRService.createManifestModel(roURI);
@@ -425,15 +445,35 @@ public class RoPage extends TemplatePage {
     }
 
 
+    /**
+     * Called when the currently selected aggregated resource has changed.
+     * 
+     * @param target
+     *            request target
+     */
     public void onResourceSelected(AjaxRequestTarget target) {
         annotatingBox.selectedStatements.clear();
         target.add(annotatingBox);
     }
 
 
+    /**
+     * Called when a remote resource is added.
+     * 
+     * @param target
+     *            request target
+     * @param resourceURI
+     *            remote resource URI
+     * @param downloadURI
+     *            remote resource downloadURI (unused)
+     * @param selectedTypes
+     *            resource groups that this resource belongs to
+     * @throws IOException
+     *             can't connect to RODL
+     */
     public void onRemoteResourceAdded(AjaxRequestTarget target, URI resourceURI, URI downloadURI,
             Set<ResourceGroup> selectedTypes)
-            throws URISyntaxException, IOException {
+            throws IOException {
         URI absoluteResourceURI = roURI.resolve(resourceURI);
         //		URI absoluteDownloadURI = (downloadURI != null ? roURI.resolve(downloadURI) : null);
         OntModel manifestModel = ROSRService.createManifestModel(roURI);
@@ -468,9 +508,14 @@ public class RoPage extends TemplatePage {
 
 
     /**
+     * Called when the user wants to create a new annotation.
+     * 
      * @param statements
+     *            a list of statements to be put in the annotation
      * @throws URISyntaxException
-     * @throws Exception
+     *             URIs retrieved from RODL are incorrect
+     * @throws IOException
+     *             requests to RODL returned incorrect responses
      */
     void onStatementAdd(List<Statement> statements)
             throws URISyntaxException, IOException {
@@ -495,8 +540,12 @@ public class RoPage extends TemplatePage {
 
 
     /**
+     * User has edited a statement of an annotation.
+     * 
      * @param statement
-     * @throws Exception
+     *            the statement
+     * @throws IOException
+     *             requests to RODL returned incorrect responses
      */
     void onStatementEdit(Statement statement)
             throws IOException {
@@ -511,10 +560,13 @@ public class RoPage extends TemplatePage {
 
 
     /**
+     * Called after an annotation has been created or edited.
+     * 
      * @param target
-     * @param form
+     *            request target.
      */
     void onStatementAddedEdited(AjaxRequestTarget target) {
+        //FIXME isn't it the same as the next one?
         this.annotatingBox.getModelObject().setAnnotations(
             RoFactory.createAnnotations(rodlURI, roURI, this.annotatingBox.getModelObject().getURI(), MySession.get()
                     .getUsernames()));
@@ -524,9 +576,12 @@ public class RoPage extends TemplatePage {
 
 
     /**
+     * Called when a relation is added or edited.
+     * 
      * @param statement
+     *            the relation
      * @param target
-     * @param form
+     *            request target
      */
     void onRelationAddedEdited(Statement statement, AjaxRequestTarget target) {
         this.annotatingBox.getModelObject().setAnnotations(
@@ -540,6 +595,20 @@ public class RoPage extends TemplatePage {
     }
 
 
+    /**
+     * Called when an annotation body has been uploaded.
+     * 
+     * @param target
+     *            request target
+     * @param uploadedFile
+     *            uploaded file
+     * @param aggregatedResource
+     *            resource annotated
+     * @throws IOException
+     *             problems with connecting to RODL
+     * @throws URISyntaxException
+     *             problems with creating the annotation
+     */
     public void onAnnotationImport(AjaxRequestTarget target, FileUpload uploadedFile,
             AggregatedResource aggregatedResource)
             throws IOException, URISyntaxException {
@@ -577,6 +646,13 @@ public class RoPage extends TemplatePage {
     }
 
 
+    /**
+     * Return a link to a format-specific version of the manifest.
+     * 
+     * @param format
+     *            RDF format
+     * @return a URI as string of the resource
+     */
     public String getROMetadataLink(RDFFormat format) {
         return roURI.resolve(".ro/manifest." + format.getDefaultFileExtension() + "?original=manifest.rdf").toString();
     }

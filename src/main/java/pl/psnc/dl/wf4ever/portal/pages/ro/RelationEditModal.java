@@ -20,14 +20,13 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.util.convert.IConverter;
 
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.Statement;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
+import pl.psnc.dl.wf4ever.portal.pages.util.RequiredURITextField;
 import pl.psnc.dl.wf4ever.portal.pages.util.RoTree;
-import pl.psnc.dl.wf4ever.portal.pages.util.URIConverter;
 
 import com.hp.hpl.jena.vocabulary.DCTerms;
 
@@ -123,15 +122,8 @@ class RelationEditModal extends Panel {
         final WebMarkupContainer relationURIDiv = new WebMarkupContainer("customRelationURIDiv");
         form.add(relationURIDiv);
 
-        TextField<URI> relationURI = new TextField<URI>("customRelationURI", new PropertyModel<URI>(this,
-                "customRelation"), URI.class) {
-
-            @SuppressWarnings("unchecked")
-            @Override
-            public <C> IConverter<C> getConverter(Class<C> type) {
-                return (IConverter<C>) new URIConverter();
-            }
-        };
+        TextField<URI> relationURI = new RequiredURITextField("customRelationURI", new PropertyModel<URI>(this,
+                "customRelation"));
         relationURIDiv.add(relationURI);
 
         tree = new RoTree("objectTree", new PropertyModel<TreeModel>(roPage, "conceptualResourcesTree"));

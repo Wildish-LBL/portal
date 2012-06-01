@@ -249,6 +249,13 @@ public class RoEvoBox extends Panel {
         }
         item.add(new AttributeAppender("style", "left: " + x + "px;"));
         item.add(new AttributeAppender("class", cssClasses.toString()));
+        item.add(new AttributeAppender("rel", "popover"));
+        item.add(new AttributeAppender("data-content", node.getUri()));
+        if (node.isResearchObject()) {
+            item.add(new AttributeAppender("data-original-title", "Research Object"));
+        } else {
+            item.add(new AttributeAppender("data-original-title", "An external resource"));
+        }
         item.add(new WebMarkupContainer("roMark").setVisible(node.isResearchObject()));
         node.setComponent(item);
         item.setOutputMarkupId(true);
@@ -280,4 +287,5 @@ public class RoEvoBox extends Panel {
         sb.append(connId + ".hideOverlay('label');");
         return sb.toString();
     }
+
 }

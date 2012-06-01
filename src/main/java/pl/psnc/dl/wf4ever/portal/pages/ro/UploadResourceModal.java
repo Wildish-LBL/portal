@@ -2,7 +2,6 @@ package pl.psnc.dl.wf4ever.portal.pages.ro;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -18,7 +17,6 @@ import org.apache.wicket.markup.html.form.CheckGroup;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.Radio;
 import org.apache.wicket.markup.html.form.RadioGroup;
-import org.apache.wicket.markup.html.form.RequiredTextField;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
@@ -27,38 +25,63 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.util.convert.IConverter;
 import org.apache.wicket.util.lang.Bytes;
 
 import pl.psnc.dl.wf4ever.portal.model.ResourceGroup;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
-import pl.psnc.dl.wf4ever.portal.pages.util.URIConverter;
+import pl.psnc.dl.wf4ever.portal.pages.util.RequiredURITextField;
 
+/**
+ * A modal for adding resources to the RO.
+ * 
+ * @author piotrekhol
+ * 
+ */
 @SuppressWarnings("serial")
 class UploadResourceModal extends Panel {
 
+    /** Type of resource. */
     private enum ResourceType {
+        /** A file uploaded by the user. */
         LOCAL,
+        /** A reference to an external resource. */
         REMOTE
     }
 
 
+    /** Type of currently added resource. */
     private ResourceType resourceType = ResourceType.LOCAL;
 
+    /** Resource URI. */
     private URI resourceURI;
 
+    /** Download URI, currently not used. */
     private URI downloadURI;
 
+    /** Div with remote resource URI. */
     private final WebMarkupContainer resourceDiv;
 
+    /** Div with remote resource download URI. */
     private final WebMarkupContainer downloadDiv;
 
+    /** Div for uploading files. */
     private final WebMarkupContainer fileDiv;
 
+    /** Feedback panel. */
     private MyFeedbackPanel feedbackPanel;
 
 
+    /**
+     * Constructor.
+     * 
+     * @param id
+     *            wicket id
+     * @param roPage
+     *            owning page
+     * @param set
+     *            set of resource groups to choose from
+     */
     public UploadResourceModal(String id, final RoPage roPage, final Set<ResourceGroup> set) {
         super(id);
         Form<?> form = new Form<Void>("uploadResourceForm");
@@ -123,26 +146,12 @@ class UploadResourceModal extends Panel {
         final FileUploadField fileUpload = new FileUploadField("fileUpload");
         fileDiv.add(fileUpload);
 
-        final TextField<URI> resourceURIField = new RequiredTextField<URI>("resourceURI", new PropertyModel<URI>(this,
-                "resourceURI"), URI.class) {
-
-            @SuppressWarnings("unchecked")
-            @Override
-            public <C> IConverter<C> getConverter(Class<C> type) {
-                return (IConverter<C>) new URIConverter();
-            }
-        };
+        TextField<URI> resourceURIField = new RequiredURITextField("resourceURI", new PropertyModel<URI>(this,
+                "resourceURI"));
         resourceDiv.add(resourceURIField);
 
-        final TextField<URI> downloadURIField = new TextField<URI>("downloadURI", new PropertyModel<URI>(this,
-                "downloadURI"), URI.class) {
-
-            @SuppressWarnings("unchecked")
-            @Override
-            public <C> IConverter<C> getConverter(Class<C> type) {
-                return (IConverter<C>) new URIConverter();
-            }
-        };
+        TextField<URI> downloadURIField = new RequiredURITextField("downloadURI", new PropertyModel<URI>(this,
+                "downloadURI"));
         downloadDiv.add(downloadURIField);
 
         List<ResourceGroup> types = new ArrayList<>(set);
@@ -186,7 +195,7 @@ class UploadResourceModal extends Panel {
                         try {
                             roPage.onRemoteResourceAdded(target, resourceURI, downloadURI, selectedTypes);
                             target.appendJavaScript("$('#upload-resource-modal').modal('hide')");
-                        } catch (URISyntaxException | IOException e) {
+                        } catch (IOException e) {
                             error(e);
                         }
                         break;
