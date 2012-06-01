@@ -50,8 +50,10 @@
 }
 
 .evo .nodeInside {
-	height: 50px;
+	height: 54px;
 	width: 60px;
+	display: block;
+	color: inherit;
 	position: absolute;
 	top: 7px;
 	left: 10px;

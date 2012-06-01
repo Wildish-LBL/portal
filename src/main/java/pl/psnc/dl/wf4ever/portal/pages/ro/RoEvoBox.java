@@ -16,7 +16,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -242,7 +242,8 @@ public class RoEvoBox extends Panel {
      */
     private void populateRoEvoNode(ListItem<RoEvoNode> item, final URI researchObjectURI, int x) {
         RoEvoNode node = item.getModelObject();
-        item.add(new Label("labelOrIdentifier", new PropertyModel<>(node, "labelOrIdentifier")));
+        item.add(new ExternalLink("labelOrIdentifier", new PropertyModel<String>(node, "uri.toString"),
+                new PropertyModel<>(node, "labelOrIdentifier")));
         StringBuilder cssClasses = new StringBuilder();
         if (researchObjectURI.equals(item.getModelObject().getUri())) {
             cssClasses.append(" active");
