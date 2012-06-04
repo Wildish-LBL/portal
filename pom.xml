@@ -197,7 +197,7 @@
 		<dependency>
 			<groupId>org.purl.wf4ever</groupId>
 			<artifactId>rosrs-client-common</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.2</version>
 		</dependency>
 	</dependencies>
 	<build>

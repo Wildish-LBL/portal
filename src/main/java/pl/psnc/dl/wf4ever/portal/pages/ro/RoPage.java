@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.swing.tree.TreeModel;
@@ -108,6 +110,12 @@ public class RoPage extends TemplatePage {
     /** The feedback panel. */
     private MyFeedbackPanel feedbackPanel;
 
+    /** Regex pattern for parsing Link HTTP headers. */
+    private static final Pattern LINK_HEADER = Pattern.compile("<(.+)>; rel=(.+)");
+
+    /** Template for HTML Link Headers. */
+    private static final String HTML_LINK_TEMPLATE = "<link rel=\"%s\" href=\"%s\"/>";
+
 
     /**
      * Constructor.
@@ -202,6 +210,23 @@ public class RoPage extends TemplatePage {
             }
 
         });
+    }
+
+
+    @Override
+    public void renderHead(IHeaderResponse response) {
+        super.renderHead(response);
+        ClientResponse head = ROSRService.getResourceHead(roURI.resolve(".ro/manifest.rdf"));
+        List<String> links = head.getHeaders().get("Link");
+        if (links != null) {
+            for (String link : links) {
+                Matcher m = LINK_HEADER.matcher(link);
+                if (m.matches()) {
+                    response.renderString(String.format(HTML_LINK_TEMPLATE, m.group(2), m.group(1)));
+                }
+            }
+        }
+        head.close();
     }
 
 
