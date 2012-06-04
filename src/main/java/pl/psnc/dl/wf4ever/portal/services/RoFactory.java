@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -148,10 +147,10 @@ public final class RoFactory {
         ResearchObject researchObject = createResearchObject(model, rodlURI, researchObjectURI, true, usernames);
         resources.put(researchObjectURI, researchObject);
         Individual ro = model.getIndividual(researchObjectURI.toString());
-        NodeIterator it = model.listObjectsOfProperty(ro, Vocab.aggregates);
+        NodeIterator it = model.listObjectsOfProperty(ro, Vocab.ORE_AGGREGATES);
         while (it.hasNext()) {
             Individual res = it.next().as(Individual.class);
-            if (res.hasRDFType(Vocab.roResource)) {
+            if (res.hasRDFType(Vocab.RO_RESOURCE)) {
                 AggregatedResource resource = createResource(model, rodlURI, researchObjectURI, new URI(res.getURI()),
                     true, usernames);
                 resources.put(resource.getURI(), resource);
@@ -223,7 +222,7 @@ public final class RoFactory {
             LOG.trace("Could not parse dcterms:creator for " + resourceURI, e);
         }
         try {
-            size = res.getPropertyValue(Vocab.filesize).asLiteral().getLong();
+            size = res.getPropertyValue(Vocab.FILESIZE).asLiteral().getLong();
         } catch (Exception e) {
             LOG.trace("Could not parse filesize for " + resourceURI, e);
         }
@@ -400,9 +399,9 @@ public final class RoFactory {
                 if (usernames.containsKey(uri)) {
                     // 1. already fetched
                     LOG.trace("Retrieving username from cache for user: " + uri);
-                } else if (creator.asResource().hasProperty(Vocab.foafName)) {
+                } else if (creator.asResource().hasProperty(Vocab.FOAF_NAME)) {
                     // 2. FOAF data defined inline
-                    usernames.put(uri, new Creator(creator.as(Individual.class).getPropertyValue(Vocab.foafName)
+                    usernames.put(uri, new Creator(creator.as(Individual.class).getPropertyValue(Vocab.FOAF_NAME)
                             .asLiteral().getString()));
                 } else {
                     //3. load in a separate thread
@@ -608,21 +607,42 @@ public final class RoFactory {
         List<Annotation> anns = new ArrayList<>();
 
         Individual res = model.getIndividual(resourceURI.toString());
-        ResIterator it = model.listSubjectsWithProperty(Vocab.annotatesAggregatedResource, res);
+        ResIterator it = model.listSubjectsWithProperty(Vocab.ORE_ANNOTATES_AGGREGATED_RESOURCE, res);
         while (it.hasNext()) {
             Individual ann = it.next().as(Individual.class);
-            if (!ann.hasRDFType(Vocab.aggregatedAnnotation)) {
+            if (!ann.hasRDFType(Vocab.RO_AGGREGATED_ANNOTATION)) {
                 continue;
             }
             try {
-                Calendar created = ((XSDDateTime) ann.getPropertyValue(DCTerms.created).asLiteral().getValue())
-                        .asCalendar();
-                Creator creator = getCreator(rodlURI, usernames, ann.getPropertyResourceValue(DCTerms.creator));
-                Resource body = ann.getPropertyResourceValue(Vocab.aoBody);
-                String name = UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.relativize(new URI(ann.getURI()))
-                        .toString(), "UTF-8");
-                anns.add(new Annotation(new URI(ann.getURI()), created, Arrays.asList(creator), name, new URI(body
-                        .getURI())));
+                Resource body = ann.getPropertyResourceValue(Vocab.AO_BODY);
+                Calendar created = null;
+                List<Creator> creators = new ArrayList<>();
+
+                try {
+                    created = ((XSDDateTime) res.getPropertyValue(DCTerms.created).asLiteral().getValue()).asCalendar();
+                } catch (Exception e) {
+                    LOG.trace("Could not parse dcterms:created for " + resourceURI, e);
+                }
+                try {
+                    NodeIterator it2 = res.listPropertyValues(DCTerms.creator);
+                    while (it2.hasNext()) {
+                        RDFNode node = it2.next();
+                        creators.add(getCreator(rodlURI, usernames, node));
+                    }
+                } catch (Exception e) {
+                    LOG.trace("Could not parse dcterms:creator for " + resourceURI, e);
+                }
+                URI annURI;
+                String name;
+                if (ann.isURIResource()) {
+                    annURI = new URI(ann.getURI());
+                    name = UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.relativize(annURI).toString(), "UTF-8");
+                } else {
+                    annURI = new URI(ann.getId().getLabelString());
+                    name = ann.getId().getLabelString();
+                }
+                URI bodyURI = body.isURIResource() ? new URI(body.getURI()) : new URI(body.getId().getLabelString());
+                anns.add(new Annotation(annURI, created, creators, name, bodyURI));
             } catch (Exception e) {
                 LOG.warn("Could not add annotation " + ann.getURI() + ": " + e.getMessage());
             }

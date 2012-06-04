@@ -73,8 +73,8 @@ public class Creator implements Serializable {
                     OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
                     userModel.read(uri.toString(), null);
                     Resource r2 = userModel.createResource(uri.toString());
-                    if (r2 != null && r2.hasProperty(Vocab.foafName)) {
-                        setValue(r2.as(Individual.class).getPropertyValue(Vocab.foafName).asLiteral().getString());
+                    if (r2 != null && r2.hasProperty(Vocab.FOAF_NAME)) {
+                        setValue(r2.as(Individual.class).getPropertyValue(Vocab.FOAF_NAME).asLiteral().getString());
                         isLoading = false;
                     }
                 } catch (Exception e) {
@@ -85,8 +85,8 @@ public class Creator implements Serializable {
                     OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
                     userModel.read(ROSRService.getUser(rodlURI, uri), null);
                     Resource r2 = userModel.createResource(uri.toString());
-                    if (r2 != null && r2.hasProperty(Vocab.foafName)) {
-                        setValue(r2.as(Individual.class).getPropertyValue(Vocab.foafName).asLiteral().getString());
+                    if (r2 != null && r2.hasProperty(Vocab.FOAF_NAME)) {
+                        setValue(r2.as(Individual.class).getPropertyValue(Vocab.FOAF_NAME).asLiteral().getString());
                         isLoading = false;
                     }
                 }

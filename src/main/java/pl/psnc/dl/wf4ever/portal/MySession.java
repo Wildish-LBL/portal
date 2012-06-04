@@ -255,11 +255,11 @@ public class MySession extends AbstractAuthenticatedWebSession {
             OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
             userModel.read(ROSRService.getWhoAmi(((PortalApplication) PortalApplication.get()).getRodlURI(),
                 getdLibraAccessToken()), null);
-            ExtendedIterator<Individual> it = userModel.listIndividuals(Vocab.foafAgent);
+            ExtendedIterator<Individual> it = userModel.listIndividuals(Vocab.FOAF_AGENT);
             Individual user = it.next();
-            if (user != null && user.hasProperty(Vocab.foafName)) {
+            if (user != null && user.hasProperty(Vocab.FOAF_NAME)) {
                 userURI = new URI(user.getURI());
-                username = user.as(Individual.class).getPropertyValue(Vocab.foafName).asLiteral().getString();
+                username = user.as(Individual.class).getPropertyValue(Vocab.FOAF_NAME).asLiteral().getString();
             }
         } catch (Exception e) {
             LOG.error("Error when retrieving user data: " + e.getMessage());

@@ -679,7 +679,7 @@ public final class MyExpImportService {
         Resource target = body.createResource(targetURI.toString());
 
         // source
-        Resource source = me.listObjectsOfProperty(Vocab.foafPrimaryTopic).next().asResource();
+        Resource source = me.listObjectsOfProperty(Vocab.FOAF_PRIMARY_TOPIC).next().asResource();
         target.addProperty(DCTerms.source, source);
 
         // title
@@ -719,7 +719,7 @@ public final class MyExpImportService {
             LOG.error("UTF-8 is not supported", e);
         }
 
-        Resource source = me.listObjectsOfProperty(Vocab.foafPrimaryTopic).next().asResource();
+        Resource source = me.listObjectsOfProperty(Vocab.FOAF_PRIMARY_TOPIC).next().asResource();
 
         // creator
         Property owner = me.createProperty("http://rdfs.org/sioc/ns#has_owner");

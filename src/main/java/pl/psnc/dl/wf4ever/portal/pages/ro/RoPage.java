@@ -361,7 +361,7 @@ public class RoPage extends TemplatePage {
         target.add(roViewerBox);
 
         resources.put(resourceURI, resource);
-        RoFactory.addRelation(resources.get(roURI), Vocab.aggregates, resource);
+        RoFactory.addRelation(resources.get(roURI), Vocab.ORE_AGGREGATES, resource);
 
         roViewerBox.renderJSComponents(resources, target);
     }
@@ -416,18 +416,18 @@ public class RoPage extends TemplatePage {
         Resource ro = manifestModel.createResource(roURI.toString());
         URI absoluteResourceURI = roURI.resolve(resource.getURI());
         Individual individual = manifestModel.createResource(absoluteResourceURI.toString()).as(Individual.class);
-        if (!ro.hasProperty(Vocab.aggregates, individual)) {
+        if (!ro.hasProperty(Vocab.ORE_AGGREGATES, individual)) {
             throw new IOException("Not found");
         }
 
-        manifestModel.remove(ro, Vocab.aggregates, individual);
+        manifestModel.remove(ro, Vocab.ORE_AGGREGATES, individual);
 
-        ResIterator it2 = manifestModel.listSubjectsWithProperty(Vocab.annotatesAggregatedResource, individual);
+        ResIterator it2 = manifestModel.listSubjectsWithProperty(Vocab.ORE_ANNOTATES_AGGREGATED_RESOURCE, individual);
         while (it2.hasNext()) {
             Resource ann = it2.next();
-            manifestModel.remove(ann, Vocab.annotatesAggregatedResource, individual);
-            if (!ann.hasProperty(Vocab.annotatesAggregatedResource)) {
-                Resource annBody = ann.getPropertyResourceValue(Vocab.aoBody);
+            manifestModel.remove(ann, Vocab.ORE_ANNOTATES_AGGREGATED_RESOURCE, individual);
+            if (!ann.hasProperty(Vocab.ORE_ANNOTATES_AGGREGATED_RESOURCE)) {
+                Resource annBody = ann.getPropertyResourceValue(Vocab.AO_BODY);
                 if (annBody != null && annBody.isURIResource()) {
                     URI annBodyURI = URI.create(annBody.getURI());
                     ROSRService.deleteResource(annBodyURI, ((MySession) getSession()).getdLibraAccessToken());
@@ -480,9 +480,9 @@ public class RoPage extends TemplatePage {
         // HACK this shouldn't be added by portal but rather by RODL
         Resource ro = manifestModel.createResource(roURI.toString());
         Individual individual = manifestModel.createResource(absoluteResourceURI.toString()).as(Individual.class);
-        ro.addProperty(Vocab.aggregates, individual);
+        ro.addProperty(Vocab.ORE_AGGREGATES, individual);
         individual.addProperty(DCTerms.creator, manifestModel.createResource(MySession.get().getUserURI().toString()));
-        individual.addRDFType(Vocab.roResource);
+        individual.addRDFType(Vocab.RO_RESOURCE);
         for (ResourceGroup resourceGroup : selectedTypes) {
             individual.addRDFType(manifestModel.createResource(resourceGroup.getRdfClasses().iterator().next()
                     .toString()));
@@ -501,7 +501,7 @@ public class RoPage extends TemplatePage {
         target.add(roViewerBox);
 
         resources.put(absoluteResourceURI, resource);
-        RoFactory.addRelation(resources.get(roURI), Vocab.aggregates, resource);
+        RoFactory.addRelation(resources.get(roURI), Vocab.ORE_AGGREGATES, resource);
 
         roViewerBox.renderJSComponents(resources, target);
     }

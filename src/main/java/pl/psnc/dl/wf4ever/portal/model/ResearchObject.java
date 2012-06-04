@@ -37,14 +37,6 @@ public class ResearchObject extends AggregatedResource {
     }
 
 
-    /**
-     * Default constructor.
-     */
-    public ResearchObject() {
-        super();
-    }
-
-
     @Override
     public URI getDownloadURI() {
         return getURI();
