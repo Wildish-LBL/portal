@@ -25,6 +25,7 @@ import org.apache.wicket.request.UrlDecoder;
 import org.apache.wicket.util.crypt.Base64;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
+import org.purl.wf4ever.rosrs.client.common.AnonId;
 import org.purl.wf4ever.rosrs.client.common.ROSRService;
 import org.purl.wf4ever.rosrs.client.common.Vocab;
 
@@ -632,17 +633,15 @@ public final class RoFactory {
                 } catch (Exception e) {
                     LOG.trace("Could not parse dcterms:creator for " + resourceURI, e);
                 }
-                URI annURI;
-                String name;
                 if (ann.isURIResource()) {
-                    annURI = new URI(ann.getURI());
-                    name = UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.relativize(annURI).toString(), "UTF-8");
+                    URI annURI = new URI(ann.getURI());
+                    String name = UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.relativize(annURI).toString(),
+                        "UTF-8");
+                    anns.add(new Annotation(annURI, created, creators, name, new URI(body.getURI())));
                 } else {
-                    annURI = new URI(ann.getId().getLabelString());
-                    name = ann.getId().getLabelString();
+                    anns.add(new Annotation(new AnonId(ann.getId()), created, creators, ann.getId().getLabelString(),
+                            new URI(body.getURI())));
                 }
-                URI bodyURI = body.isURIResource() ? new URI(body.getURI()) : new URI(body.getId().getLabelString());
-                anns.add(new Annotation(annURI, created, creators, name, bodyURI));
             } catch (Exception e) {
                 LOG.warn("Could not add annotation " + ann.getURI() + ": " + e.getMessage());
             }
