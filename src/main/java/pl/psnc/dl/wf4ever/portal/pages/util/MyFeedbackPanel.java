@@ -51,11 +51,16 @@ public class MyFeedbackPanel extends Panel implements IFeedback {
      */
     private final class MessageListView extends ListView<FeedbackMessage> {
 
+        /** id. */
         private static final long serialVersionUID = 1L;
 
 
         /**
+         * Constructor.
+         * 
          * @see org.apache.wicket.Component#Component(String)
+         * @param id
+         *            id
          */
         public MessageListView(final String id) {
             super(id);
@@ -93,14 +98,19 @@ public class MyFeedbackPanel extends Panel implements IFeedback {
     }
 
 
+    /** id. */
     private static final long serialVersionUID = 1L;
 
-    /** Message view */
+    /** Message view. */
     private final MessageListView messageListView;
 
 
     /**
+     * Constructor.
+     * 
      * @see org.apache.wicket.Component#Component(String)
+     * @param id
+     *            id
      */
     public MyFeedbackPanel(final String id) {
         this(id, null);
@@ -108,10 +118,14 @@ public class MyFeedbackPanel extends Panel implements IFeedback {
 
 
     /**
+     * Constructor.
+     * 
      * @see org.apache.wicket.Component#Component(String)
      * 
      * @param id
+     *            id
      * @param filter
+     *            filter
      */
     public MyFeedbackPanel(final String id, IFeedbackMessageFilter filter) {
         super(id);
@@ -178,6 +192,8 @@ public class MyFeedbackPanel extends Panel implements IFeedback {
 
 
     /**
+     * Returns model for feedback messages on which you can install filters and other properties.
+     * 
      * @return Model for feedback messages on which you can install filters and other properties
      */
     public final FeedbackMessagesModel getFeedbackMessagesModel() {
@@ -186,6 +202,8 @@ public class MyFeedbackPanel extends Panel implements IFeedback {
 
 
     /**
+     * Returns the current message filter.
+     * 
      * @return The current message filter
      */
     public final IFeedbackMessageFilter getFilter() {
@@ -194,6 +212,8 @@ public class MyFeedbackPanel extends Panel implements IFeedback {
 
 
     /**
+     * Returns the current sorting comparator.
+     * 
      * @return The current sorting comparator
      */
     public final Comparator<FeedbackMessage> getSortingComparator() {
@@ -201,9 +221,6 @@ public class MyFeedbackPanel extends Panel implements IFeedback {
     }
 
 
-    /**
-     * @see org.apache.wicket.Component#isVersioned()
-     */
     @Override
     public boolean isVersioned() {
         return false;
@@ -211,7 +228,7 @@ public class MyFeedbackPanel extends Panel implements IFeedback {
 
 
     /**
-     * Sets a filter to use on the feedback messages model
+     * Sets a filter to use on the feedback messages model.
      * 
      * @param filter
      *            The message filter to install on the feedback messages model
@@ -225,6 +242,8 @@ public class MyFeedbackPanel extends Panel implements IFeedback {
 
 
     /**
+     * Sets the maximum number of feedback messages that this feedback panel should show at one time.
+     * 
      * @param maxMessages
      *            The maximum number of feedback messages that this feedback panel should show at one time
      * 

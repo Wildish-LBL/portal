@@ -10,14 +10,26 @@ import org.apache.wicket.model.IModel;
 
 import pl.psnc.dl.wf4ever.portal.model.Creator;
 
+/**
+ * A set of {@link CreatorPanel} separated by commas.
+ * 
+ * @author piotrekhol
+ * 
+ */
 public class CreatorsPanel extends Panel {
 
-    /**
-	 * 
-	 */
+    /** id. */
     private static final long serialVersionUID = -2077084041006536701L;
 
 
+    /**
+     * Constructor.
+     * 
+     * @param id
+     *            wicket id
+     * @param model
+     *            a model of a list of {@link Creator}
+     */
     @SuppressWarnings("serial")
     public CreatorsPanel(String id, IModel<List<Creator>> model) {
         super(id, model);

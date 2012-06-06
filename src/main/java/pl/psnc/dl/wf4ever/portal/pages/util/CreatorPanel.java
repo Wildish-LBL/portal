@@ -1,6 +1,5 @@
 package pl.psnc.dl.wf4ever.portal.pages.util;
 
-import org.apache.log4j.Logger;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -12,17 +11,26 @@ import org.apache.wicket.util.time.Duration;
 
 import pl.psnc.dl.wf4ever.portal.model.Creator;
 
+/**
+ * A utility panel that displays a small spinning circle while the username is being resolved.
+ * 
+ * @author piotrekhol
+ * 
+ */
 public class CreatorPanel extends Panel {
 
-    @SuppressWarnings("unused")
-    private static final Logger log = Logger.getLogger(CreatorPanel.class);
-
-    /**
-	 * 
-	 */
+    /** id. */
     private static final long serialVersionUID = -2077084041006536701L;
 
 
+    /**
+     * Constructor.
+     * 
+     * @param id
+     *            wicket id
+     * @param model
+     *            {@link Creator} model
+     */
     @SuppressWarnings("serial")
     public CreatorPanel(String id, IModel<Creator> model) {
         super(id, model);

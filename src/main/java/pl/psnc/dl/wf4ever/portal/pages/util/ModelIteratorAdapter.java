@@ -8,18 +8,21 @@ import java.util.Iterator;
 import org.apache.wicket.model.IModel;
 
 /**
+ * Improved version of Wicket's class.
+ * 
+ * @param <T>
+ *            class of objects over which to iterate
+ * 
  * @author piotrhol
- * 
- *         Improved version of Wicket's class
- * 
  */
 public abstract class ModelIteratorAdapter<T> implements Iterator<IModel<T>> {
 
+    /** Don't remember what that was... */
     private final Iterator<? extends T> delegate;
 
 
     /**
-     * Constructor
+     * Constructor.
      * 
      * @param delegate
      *            iterator that will be wrapped
@@ -29,27 +32,18 @@ public abstract class ModelIteratorAdapter<T> implements Iterator<IModel<T>> {
     }
 
 
-    /**
-     * @see java.util.Iterator#hasNext()
-     */
     @Override
     public boolean hasNext() {
         return delegate.hasNext();
     }
 
 
-    /**
-     * @see java.util.Iterator#next()
-     */
     @Override
     public IModel<T> next() {
         return model(delegate.next());
     }
 
 
-    /**
-     * @see java.util.Iterator#remove()
-     */
     @Override
     public void remove() {
         delegate.remove();

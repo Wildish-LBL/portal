@@ -1,6 +1,3 @@
-/**
- * 
- */
 package pl.psnc.dl.wf4ever.portal.pages.util;
 
 import javax.swing.tree.TreeModel;
@@ -14,11 +11,14 @@ import org.apache.wicket.request.resource.ResourceReference;
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 
 /**
+ * An extended {@link Tree}.
+ * 
  * @author piotrhol
  * 
  */
 public class RoTree extends Tree {
 
+    /** id. */
     private static final long serialVersionUID = 7615686756338665378L;
 
     /**
@@ -27,11 +27,14 @@ public class RoTree extends Tree {
     private static final ResourceReference CSS = new PackageResourceReference(RoTree.class, "res/tree.css");
 
 
-    /** Reference to the icon of tree item (not a folder) */
-    //	private static final ResourceReference WORKFLOW = new PackageResourceReference(RoTree.class, "res/workflow.png");
-    //
-    //	private static final ResourceReference EXTERNAL = new PackageResourceReference(RoTree.class, "res/external.png");
-
+    /**
+     * Constructor.
+     * 
+     * @param id
+     *            wicket id
+     * @param model
+     *            tree model
+     */
     public RoTree(String id, IModel<? extends TreeModel> model) {
         super(id, model);
     }

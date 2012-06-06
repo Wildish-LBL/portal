@@ -7,8 +7,15 @@ import java.util.Locale;
 import org.apache.wicket.util.convert.ConversionException;
 import org.apache.wicket.util.convert.IConverter;
 
+/**
+ * URI converter that validates URIs.
+ * 
+ * @author piotrekhol
+ * 
+ */
 public class URIConverter implements IConverter<URI> {
 
+    /** id. */
     private static final long serialVersionUID = -309855395859299167L;
 
 

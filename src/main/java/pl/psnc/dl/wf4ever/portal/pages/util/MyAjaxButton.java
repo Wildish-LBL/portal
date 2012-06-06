@@ -1,6 +1,3 @@
-/**
- * 
- */
 package pl.psnc.dl.wf4ever.portal.pages.util;
 
 import org.apache.wicket.Component;
@@ -15,17 +12,25 @@ import org.apache.wicket.markup.html.form.Form;
 import pl.psnc.dl.wf4ever.portal.MySession;
 
 /**
+ * A specific {@link AjaxButton} that performs certain JavaScript functions during actions.
+ * 
  * @author piotrhol
  * 
  */
 public abstract class MyAjaxButton extends AjaxButton {
 
-    /**
-	 * 
-	 */
+    /** id. */
     private static final long serialVersionUID = 6819868729651344345L;
 
 
+    /**
+     * Constructor.
+     * 
+     * @param id
+     *            wicket id
+     * @param form
+     *            owning form
+     */
     @SuppressWarnings("serial")
     public MyAjaxButton(String id, Form<?> form) {
         super(id, form);
