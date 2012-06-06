@@ -26,17 +26,33 @@ import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 
+/**
+ * A RODL SPARQL web interface.
+ * 
+ * @author piotrekhol
+ * 
+ */
 public class SparqlEndpointPage extends TemplatePage {
 
+    /** id. */
     private static final long serialVersionUID = 1L;
 
+    /** User query. */
     private String query;
 
+    /** The URL to execute the query in RODL. */
     private String url;
 
+    /** The query result. */
     private String result;
 
 
+    /**
+     * Constructor.
+     * 
+     * @param parameters
+     *            page params
+     */
     @SuppressWarnings("serial")
     public SparqlEndpointPage(final PageParameters parameters) {
         super(parameters);
@@ -125,7 +141,16 @@ public class SparqlEndpointPage extends TemplatePage {
     }
 
 
-    protected URL getEndpointUrl()
+    /**
+     * Create a RODL SPARQL query URL.
+     * 
+     * @return the URL
+     * @throws URISyntaxException
+     *             the URI could not be created
+     * @throws MalformedURLException
+     *             the URI is not a valid URL
+     */
+    private URL getEndpointUrl()
             throws URISyntaxException, MalformedURLException {
         URI uri = ((PortalApplication) getApplication()).getSparqlEndpointURI();
         return new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), "query=" + query, uri.getFragment()).toURL();
@@ -152,52 +177,31 @@ public class SparqlEndpointPage extends TemplatePage {
     }
 
 
-    /**
-     * @return the query
-     */
     public String getQuery() {
         return query;
     }
 
 
-    /**
-     * @param query
-     *            the query to set
-     */
     public void setQuery(String query) {
         this.query = query;
     }
 
 
-    /**
-     * @return the result
-     */
     public String getResult() {
         return result;
     }
 
 
-    /**
-     * @param result
-     *            the result to set
-     */
     public void setResult(String result) {
         this.result = result;
     }
 
 
-    /**
-     * @return the url
-     */
     public String getUrl() {
         return url;
     }
 
 
-    /**
-     * @param url
-     *            the url to set
-     */
     public void setUrl(String url) {
         this.url = url;
     }

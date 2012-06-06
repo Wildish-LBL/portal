@@ -156,8 +156,8 @@ class AnnotatingBox extends Panel {
                     }
                 }
                 AnnotatingBox.this.getModelObject().setAnnotations(
-                    RoFactory.createAnnotations(roPage.rodlURI, AnnotatingBox.this.roPage.roURI, AnnotatingBox.this
-                            .getModelObject().getURI(), MySession.get().getUsernames()));
+                    RoFactory.createAnnotations(roPage.getRodlURI(), AnnotatingBox.this.roPage.roURI,
+                        AnnotatingBox.this.getModelObject().getURI(), MySession.get().getUsernames()));
                 selectedStatements.clear();
                 target.add(roPage.getFeedbackPanel());
                 target.add(AnnotatingBox.this);

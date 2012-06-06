@@ -2,7 +2,6 @@ package pl.psnc.dl.wf4ever.portal.pages;
 
 import java.net.URI;
 
-import org.apache.log4j.Logger;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -20,16 +19,29 @@ import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.pages.home.HomePage;
 import pl.psnc.dl.wf4ever.portal.pages.my.MyRosPage;
 
+/**
+ * The common base of all HTML pages.
+ * 
+ * @author piotrekhol
+ * 
+ */
 public class TemplatePage extends WebPage {
 
+    /** id. */
     private static final long serialVersionUID = 1L;
 
-    @SuppressWarnings("unused")
-    private static final Logger log = Logger.getLogger(TemplatePage.class);
-
-    public URI rodlURI = ((PortalApplication) getApplication()).getRodlURI();
+    /** RODL base URI. */
+    protected URI rodlURI = ((PortalApplication) getApplication()).getRodlURI();
 
 
+    /**
+     * Constructor.
+     * 
+     * TODO: are the redirection params used?
+     * 
+     * @param parameters
+     *            may contain redirection params
+     */
     public TemplatePage(final PageParameters parameters) {
         getSession().bind();
         MySession.get().persist();
@@ -75,6 +87,11 @@ public class TemplatePage extends WebPage {
     }
 
 
+    /**
+     * The content of the sign in button.
+     * 
+     * @return "Sign out" or "Sign in"
+     */
     public String getSignInButtonText() {
         if (MySession.get().isSignedIn()) {
             return "Sign out";
@@ -84,11 +101,21 @@ public class TemplatePage extends WebPage {
     }
 
 
+    /**
+     * The sign in button tooltip.
+     * 
+     * @return "Signed in as X" or "Click to sign in!"
+     */
     public String getSignInTwipsy() {
         if (MySession.get().isSignedIn()) {
             return "Signed in as " + MySession.get().getUsername();
         } else {
             return "Click to sign in!";
         }
+    }
+
+
+    public URI getRodlURI() {
+        return rodlURI;
     }
 }
