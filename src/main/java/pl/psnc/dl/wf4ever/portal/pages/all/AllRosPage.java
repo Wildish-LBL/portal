@@ -1,6 +1,8 @@
 package pl.psnc.dl.wf4ever.portal.pages.all;
 
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -36,15 +38,33 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Literal;
 
+/**
+ * A page with a list of all ROs in RODL.
+ * 
+ * @author piotrekhol
+ * 
+ */
 public class AllRosPage extends TemplatePage {
 
+    /** id. */
     private static final long serialVersionUID = 1L;
 
-    private static final Logger log = Logger.getLogger(AllRosPage.class);
+    /** Logger. */
+    private static final Logger LOG = Logger.getLogger(AllRosPage.class);
 
 
+    /**
+     * Constructor.
+     * 
+     * @param parameters
+     *            page params
+     * @throws IOException
+     *             can't connect to RODL
+     * @throws URISyntaxException
+     *             RODL returned an invalid RO URI
+     */
     public AllRosPage(final PageParameters parameters)
-            throws Exception {
+            throws IOException, URISyntaxException {
         super(parameters);
 
         add(new MyFeedbackPanel("feedbackPanel"));
@@ -73,7 +93,7 @@ public class AllRosPage extends TemplatePage {
                 try {
                     created = ISODateTimeFormat.dateTime().parseDateTime(date.toString()).toGregorianCalendar();
                 } catch (IllegalArgumentException e) {
-                    log.warn("Don't know how to parse date: " + date);
+                    LOG.warn("Don't know how to parse date: " + date);
                 }
             }
             ResearchObject ro = new ResearchObject(uri, created, authors);

@@ -22,6 +22,7 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.list.PropertyListView;
 import org.apache.wicket.model.CompoundPropertyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.protocol.http.IRequestLogger;
 import org.apache.wicket.protocol.http.RequestLogger;
@@ -54,30 +55,53 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.sun.syndication.io.FeedException;
 
+/**
+ * The home page.
+ * 
+ * @author piotrekhol
+ * 
+ */
 public class HomePage extends TemplatePage {
 
+    /** id. */
     private static final long serialVersionUID = 1L;
 
-    private static final Logger logger = Logger.getLogger(HomePage.class);
+    /** Logger. */
+    private static final Logger LOG = Logger.getLogger(HomePage.class);
 
+    /** Number of ROs in RODL. */
     private int roCnt;
 
+    /** Number of resources in RODL. */
     private int resourceCnt;
 
+    /** Number of annotations in RODL. */
     private int annCnt;
 
+    /** Search results. */
     private List<SearchResult> searchResults;
 
+    /** Recommendations. */
     private List<Recommendation> recommendations;
 
+    /** Search keywords input by users. */
     private String searchKeywords;
 
+    /** User myExp id used for recommendations. */
     private String myExpId;
 
 
+    /**
+     * Constructor.
+     * 
+     * @param parameters
+     *            page params
+     * @throws IOException
+     *             can't connect to RODL
+     */
     @SuppressWarnings("serial")
     public HomePage(final PageParameters parameters)
-            throws Exception {
+            throws IOException {
         super(parameters);
         setDefaultModel(new CompoundPropertyModel<HomePage>(this));
 
@@ -118,19 +142,7 @@ public class HomePage extends TemplatePage {
 
         add(new ExternalLink("recentROsRSSFeed", RSSService.RECENT_ROS_FILENAME));
 
-        ListView<ResearchObject> list = new PropertyListView<ResearchObject>("10recentROsListView", roHeaders) {
-
-            @Override
-            protected void populateItem(ListItem<ResearchObject> item) {
-                ResearchObject ro = item.getModelObject();
-                BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);
-                link.getPageParameters().add("ro", UrlEncoder.QUERY_INSTANCE.encode(ro.getURI().toString(), "UTF-8"));
-                link.add(new Label("name"));
-                item.add(link);
-                item.add(new CreatorsPanel("creator", new PropertyModel<List<Creator>>(ro, "creators")));
-                item.add(new Label("createdFormatted"));
-            }
-        };
+        ListView<ResearchObject> list = new RecentROsListView("10recentROsListView", roHeaders);
         list.setReuseItems(true);
         add(list);
 
@@ -143,34 +155,8 @@ public class HomePage extends TemplatePage {
         final WebMarkupContainer noResults = new WebMarkupContainer("noResults");
         searchResultsDiv.add(noResults);
 
-        ListView<SearchResult> searchResultsList = new PropertyListView<SearchResult>("searchResultsListView",
-                new PropertyModel<List<SearchResult>>(this, "searchResults")) {
-
-            @Override
-            protected void populateItem(ListItem<SearchResult> item) {
-                final SearchResult result = item.getModelObject();
-                BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);
-                link.getPageParameters().add("ro",
-                    UrlEncoder.QUERY_INSTANCE.encode(result.getResearchObject().getURI().toString(), "UTF-8"));
-                link.add(new Label("researchObject.name"));
-                item.add(link);
-                item.add(new Label("researchObject.title"));
-                item.add(new Label("scoreInPercent"));
-                item.add(new CreatorsPanel("researchObject.creator", new PropertyModel<List<Creator>>(result,
-                        "researchObject.creators")));
-                item.add(new Label("researchObject.createdFormatted"));
-                Label bar = new Label("percentBar", "");
-                bar.add(new Behavior() {
-
-                    @Override
-                    public void onComponentTag(final Component component, final ComponentTag tag) {
-                        super.onComponentTag(component, tag);
-                        tag.put("style", "width: " + Math.min(100, result.getScoreInPercent()) + "%");
-                    }
-                });
-                item.add(bar);
-            }
-        };
+        ListView<SearchResult> searchResultsList = new SearchResultsListView("searchResultsListView",
+                new PropertyModel<List<SearchResult>>(this, "searchResults"));
         searchResultsList.setReuseItems(true);
         searchResultsDiv.add(searchResultsList);
 
@@ -199,7 +185,7 @@ public class HomePage extends TemplatePage {
                         target.add(searchResultsDiv);
                         target.appendJavaScript("$('#searchResultsLink').click();");
                     } catch (IllegalArgumentException | FeedException | IOException | URISyntaxException e) {
-                        logger.error(e);
+                        LOG.error(e);
                         error(e.getMessage());
                     }
                     target.add(feedbackPanel);
@@ -250,7 +236,7 @@ public class HomePage extends TemplatePage {
                         noRecommendations.setVisible(recs == null || recs.isEmpty());
                         target.add(recommendationsDiv);
                     } catch (Exception e) {
-                        logger.error(e);
+                        LOG.error(e);
                         error(e.getMessage());
                     }
                 } else {
@@ -263,6 +249,13 @@ public class HomePage extends TemplatePage {
     }
 
 
+    /**
+     * Get a request logger, used to track active sessions.
+     * 
+     * TODO: does it work?
+     * 
+     * @return a request logger
+     */
     IRequestLogger getRequestLogger() {
         WebApplication webApplication = (WebApplication) Application.get();
         IRequestLogger requestLogger = webApplication.getRequestLogger();
@@ -274,121 +267,169 @@ public class HomePage extends TemplatePage {
     }
 
 
-    /**
-     * @return the roCnt
-     */
     public int getRoCnt() {
         return roCnt;
     }
 
 
-    /**
-     * @param roCnt
-     *            the roCnt to set
-     */
     public void setRoCnt(int roCnt) {
         this.roCnt = roCnt;
     }
 
 
-    /**
-     * @return the resourceCnt
-     */
     public int getResourceCnt() {
         return resourceCnt;
     }
 
 
-    /**
-     * @param resourceCnt
-     *            the resourceCnt to set
-     */
     public void setResourceCnt(int resourceCnt) {
         this.resourceCnt = resourceCnt;
     }
 
 
-    /**
-     * @return the annCnt
-     */
     public int getAnnCnt() {
         return annCnt;
     }
 
 
-    /**
-     * @param annCnt
-     *            the annCnt to set
-     */
     public void setAnnCnt(int annCnt) {
         this.annCnt = annCnt;
     }
 
 
-    /**
-     * @return the searchResults
-     */
     public List<SearchResult> getSearchResults() {
         return searchResults;
     }
 
 
-    /**
-     * @param searchResults
-     *            the searchResults to set
-     */
     public void setSearchResults(List<SearchResult> searchResults) {
         this.searchResults = searchResults;
     }
 
 
-    /**
-     * @return the searchKeywords
-     */
     public String getSearchKeywords() {
         return searchKeywords;
     }
 
 
-    /**
-     * @param searchKeywords
-     *            the searchKeywords to set
-     */
     public void setSearchKeywords(String searchKeywords) {
         this.searchKeywords = searchKeywords;
     }
 
 
-    /**
-     * @return the myExpId
-     */
     public String getMyExpId() {
         return myExpId;
     }
 
 
-    /**
-     * @param myExpId
-     *            the myExpId to set
-     */
     public void setMyExpId(String myExpId) {
         this.myExpId = myExpId;
     }
 
 
-    /**
-     * @return the recommendations
-     */
     public List<Recommendation> getRecommendations() {
         return recommendations;
     }
 
 
-    /**
-     * @param recommendations
-     *            the recommendations to set
-     */
     public void setRecommendations(List<Recommendation> recommendations) {
         this.recommendations = recommendations;
+    }
+
+
+    /**
+     * A {@link PropertyListView} of search results.
+     * 
+     * @author piotrekhol
+     * 
+     */
+    private final class SearchResultsListView extends PropertyListView<SearchResult> {
+
+        /** id. */
+        private static final long serialVersionUID = 915182420617753899L;
+
+
+        /**
+         * Constructor.
+         * 
+         * @param id
+         *            wicket id
+         * @param model
+         *            model of search results
+         */
+        private SearchResultsListView(String id, IModel<? extends List<? extends SearchResult>> model) {
+            super(id, model);
+        }
+
+
+        @Override
+        protected void populateItem(ListItem<SearchResult> item) {
+            final SearchResult result = item.getModelObject();
+            BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);
+            link.getPageParameters().add("ro",
+                UrlEncoder.QUERY_INSTANCE.encode(result.getResearchObject().getURI().toString(), "UTF-8"));
+            link.add(new Label("researchObject.name"));
+            item.add(link);
+            item.add(new Label("researchObject.title"));
+            item.add(new Label("scoreInPercent"));
+            item.add(new CreatorsPanel("researchObject.creator", new PropertyModel<List<Creator>>(result,
+                    "researchObject.creators")));
+            item.add(new Label("researchObject.createdFormatted"));
+            Label bar = new Label("percentBar", "");
+            bar.add(new Behavior() {
+
+                /**
+                 * 
+                 */
+                private static final long serialVersionUID = -5409800651205755103L;
+
+
+                @Override
+                public void onComponentTag(final Component component, final ComponentTag tag) {
+                    super.onComponentTag(component, tag);
+                    tag.put("style", "width: " + Math.min(100, result.getScoreInPercent()) + "%");
+                }
+            });
+            item.add(bar);
+        }
+    }
+
+
+    /**
+     * A {@link PropertyListView} that displays most recent ROs. ROs that have unparseable creation dates are not
+     * included.
+     * 
+     * @author piotrekhol
+     * 
+     */
+    private final class RecentROsListView extends PropertyListView<ResearchObject> {
+
+        /** id. */
+        private static final long serialVersionUID = -6714165053677665740L;
+
+
+        /**
+         * Constructor.
+         * 
+         * @param id
+         *            wicket id
+         * @param list
+         *            list of research objects to display
+         */
+        private RecentROsListView(String id, List<? extends ResearchObject> list) {
+            super(id, list);
+        }
+
+
+        @Override
+        protected void populateItem(ListItem<ResearchObject> item) {
+            ResearchObject ro = item.getModelObject();
+            BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);
+            link.getPageParameters().add("ro", UrlEncoder.QUERY_INSTANCE.encode(ro.getURI().toString(), "UTF-8"));
+            link.add(new Label("name"));
+            item.add(link);
+            item.add(new CreatorsPanel("creator", new PropertyModel<List<Creator>>(ro, "creators")));
+            item.add(new Label("createdFormatted"));
+        }
     }
 }

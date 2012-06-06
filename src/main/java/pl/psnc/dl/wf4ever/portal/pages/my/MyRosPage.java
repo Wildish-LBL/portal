@@ -40,25 +40,45 @@ import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.services.RoFactory;
 
+/**
+ * A page with user's own Research Objects.
+ * 
+ * @author piotrekhol
+ * 
+ */
 @AuthorizeInstantiation("USER")
 public class MyRosPage extends TemplatePage {
 
+    /** id. */
     private static final long serialVersionUID = 1L;
 
-    private static final Logger log = Logger.getLogger(MyRosPage.class);
+    /** Logger. */
+    private static final Logger LOG = Logger.getLogger(MyRosPage.class);
 
+    /** ROs selected by the user. */
     final List<ResearchObject> selectedResearchObjects = new ArrayList<ResearchObject>();
 
+    /** New RO id. */
     private String roId;
 
+    /** Feedback panel for adding ROs. */
     private MyFeedbackPanel addFeedbackPanel;
 
+    /** Default feedback panel. */
     private MyFeedbackPanel deleteFeedbackPanel;
 
 
+    /**
+     * Constructor.
+     * 
+     * @param parameters
+     *            page params
+     * @throws URISyntaxException
+     *             can't connect to RODL
+     */
     @SuppressWarnings("serial")
     public MyRosPage(final PageParameters parameters)
-            throws Exception {
+            throws URISyntaxException {
         super(parameters);
 
         List<URI> uris = ROSRService.getROList(rodlURI, MySession.get().getdLibraAccessToken());
@@ -78,36 +98,7 @@ public class MyRosPage extends TemplatePage {
         form.add(new MyFeedbackPanel("feedbackPanel"));
         CheckGroup<ResearchObject> group = new CheckGroup<ResearchObject>("group", selectedResearchObjects);
         form.add(group);
-        RefreshingView<ResearchObject> list = new RefreshingView<ResearchObject>("rosListView") {
-
-            private static final long serialVersionUID = -6310254217773728128L;
-
-
-            @Override
-            protected void populateItem(Item<ResearchObject> item) {
-                AggregatedResource researchObject = (AggregatedResource) item.getDefaultModelObject();
-                item.add(new Check<ResearchObject>("checkbox", item.getModel()));
-                BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);
-                link.getPageParameters().add("ro",
-                    UrlEncoder.QUERY_INSTANCE.encode(researchObject.getURI().toString(), "UTF-8"));
-                link.add(new Label("URI"));
-                item.add(link);
-                item.add(new Label("createdFormatted"));
-            }
-
-
-            @Override
-            protected Iterator<IModel<ResearchObject>> getItemModels() {
-                return new ModelIteratorAdapter<ResearchObject>(researchObjects.iterator()) {
-
-                    @Override
-                    protected IModel<ResearchObject> model(ResearchObject ro) {
-                        return new CompoundPropertyModel<ResearchObject>(ro);
-                    }
-                };
-            }
-
-        };
+        RefreshingView<ResearchObject> list = new MyROsRefreshingView("rosListView", researchObjects);
         group.add(list);
 
         final Label deleteCntLabel = new Label("deleteCnt", new PropertyModel<String>(this, "deleteCnt"));
@@ -126,7 +117,7 @@ public class MyRosPage extends TemplatePage {
                         validatable.error(new ValidationError().setMessage("This ID is already in use"));
                     }
                 } catch (Exception e) {
-                    log.error(e);
+                    LOG.error(e);
                     // assume it's ok
                 }
             }
@@ -233,6 +224,11 @@ public class MyRosPage extends TemplatePage {
     }
 
 
+    /**
+     * The message to display when deleting ROs.
+     * 
+     * @return the message
+     */
     public String getDeleteCnt() {
         if (selectedResearchObjects.size() == 1) {
             return "1 Research Object";
@@ -241,20 +237,67 @@ public class MyRosPage extends TemplatePage {
     }
 
 
-    /**
-     * @return the roId
-     */
     public String getRoId() {
         return roId;
     }
 
 
-    /**
-     * @param roId
-     *            the roId to set
-     */
     public void setRoId(String roId) {
         this.roId = roId;
     }
 
+
+    /**
+     * The ROs refreshing view.
+     * 
+     * @author piotrekhol
+     * 
+     */
+    private final class MyROsRefreshingView extends RefreshingView<ResearchObject> {
+
+        /** id. */
+        private static final long serialVersionUID = -6310254217773728128L;
+
+        /** ROs. */
+        private final List<ResearchObject> researchObjects;
+
+
+        /**
+         * Constructor.
+         * 
+         * @param id
+         *            wicket id
+         * @param researchObjects
+         *            list of ROs
+         */
+        private MyROsRefreshingView(String id, List<ResearchObject> researchObjects) {
+            super(id);
+            this.researchObjects = researchObjects;
+        }
+
+
+        @Override
+        protected void populateItem(Item<ResearchObject> item) {
+            AggregatedResource researchObject = (AggregatedResource) item.getDefaultModelObject();
+            item.add(new Check<ResearchObject>("checkbox", item.getModel()));
+            BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);
+            link.getPageParameters().add("ro",
+                UrlEncoder.QUERY_INSTANCE.encode(researchObject.getURI().toString(), "UTF-8"));
+            link.add(new Label("URI"));
+            item.add(link);
+            item.add(new Label("createdFormatted"));
+        }
+
+
+        @Override
+        protected Iterator<IModel<ResearchObject>> getItemModels() {
+            return new ModelIteratorAdapter<ResearchObject>(researchObjects.iterator()) {
+
+                @Override
+                protected IModel<ResearchObject> model(ResearchObject ro) {
+                    return new CompoundPropertyModel<ResearchObject>(ro);
+                }
+            };
+        }
+    }
 }
