@@ -33,58 +33,96 @@ import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.RoTree;
 import pl.psnc.dl.wf4ever.portal.services.RoFactory;
 
+/**
+ * The part of RO page that displays the RO structure.
+ * 
+ * @author piotrekhol
+ * 
+ */
 @SuppressWarnings("serial")
 class RoViewerBox extends WebMarkupContainer {
 
-    private static final Logger log = Logger.getLogger(RoViewerBox.class);
+    /** Logger. */
+    private static final Logger LOG = Logger.getLogger(RoViewerBox.class);
 
-    /**
-	 * 
-	 */
+    /** The owning page. */
     private final RoPage roPage;
 
+    /** Conceptual RO resources tree. */
     private RoTree conceptualTree;
 
+    /** Physical RO resources tree. */
     private RoTree physicalTree;
 
+    /** Interactive RO resources network. */
     private WebMarkupContainer interactiveView;
 
+    /** The abstract resource information panel. */
     Panel infoPanel;
 
+    /** The aggregated resource information panel. */
     private final ItemInfoPanel itemInfo;
 
+    /** The resource group information panel. */
     private final InfoPanel resourceGroupInfo;
 
+    /** The RO/resource manipulation buttons. */
     final WebMarkupContainer actionButtons;
 
+    /** A spinning circle. */
     private Fragment conceptualTreeLoading;
 
+    /** A spinning circle. */
     private Fragment physicalTreeLoading;
 
+    /** A spinning circle. */
     private Fragment interactiveViewLoading;
 
+    /** The function that created the interactive view. */
     final AbstractDefaultAjaxBehavior interactiveViewCallback;
 
+    /** Delete resource button. */
     private MyAjaxButton deleteResource;
 
+    /** Add resource button. */
     private MyAjaxButton addResource;
 
+    /** Selected item - resource, RO, resource group. */
     private Object selectedItem;
 
+    /** Download RO metadata button. */
     private AjaxButton downloadROMetadata;
 
+    /** Edit resource button. */
     private MyAjaxButton editResource;
 
+    /** Download resource button. */
     private ExternalLink downloadResource;
 
+    /** Download RO ZIP button. */
     private ExternalLink downloadROZipped;
 
+    /** The JSON source for the interactive view. */
     private transient String json;
 
-    /** http://www.colourlovers.com/palette/1473/Ocean_Five */
-    public static String[] interactiveViewColors = { "#00A0B0", "#6A4A3C", "#CC333F", "#EB6841", "#EDC951" };
+    /** Taken from http://www.colourlovers.com/palette/1473/Ocean_Five. */
+    private static final String[] COLOR_PALETTE = { "#00A0B0", "#6A4A3C", "#CC333F", "#EB6841", "#EDC951" };
 
 
+    /**
+     * Constructor.
+     * 
+     * @param roPage
+     *            the owning page
+     * @param itemModel
+     *            the RO model
+     * @param conceptualTreeModel
+     *            the conceptual tree model
+     * @param physicalTreeModel
+     *            the physical tree model
+     * @param tempRoTreeId
+     *            the spinning circle wicket id
+     */
     public RoViewerBox(final RoPage roPage, final CompoundPropertyModel<AggregatedResource> itemModel,
             IModel<? extends TreeModel> conceptualTreeModel, PropertyModel<TreeModel> physicalTreeModel,
             String tempRoTreeId) {
@@ -108,7 +146,7 @@ class RoViewerBox extends WebMarkupContainer {
                 if (conceptualTree.getTreeState().isNodeSelected(node)) {
                     onResourceSelected(itemModel, resourceGroupModel, target, object);
                 } else {
-                    onResourceDeselected(itemModel, resourceGroupModel, target, object);
+                    onResourceDeselected(itemModel, resourceGroupModel, target);
                 }
             }
 
@@ -124,7 +162,7 @@ class RoViewerBox extends WebMarkupContainer {
                 if (physicalTree.getTreeState().isNodeSelected(node)) {
                     onResourceSelected(itemModel, resourceGroupModel, target, object);
                 } else {
-                    onResourceDeselected(itemModel, resourceGroupModel, target, object);
+                    onResourceDeselected(itemModel, resourceGroupModel, target);
                 }
             }
 
@@ -216,29 +254,7 @@ class RoViewerBox extends WebMarkupContainer {
         actionButtons.add(downloadROMetadata);
         roForm.add(actionButtons);
 
-        interactiveViewCallback = new AbstractDefaultAjaxBehavior() {
-
-            protected void respond(final AjaxRequestTarget target) {
-                String nodeId = RequestCycle.get().getRequest().getQueryParameters().getParameterValue("id").toString();
-                boolean selected = RequestCycle.get().getRequest().getQueryParameters().getParameterValue("selected")
-                        .toBoolean(false);
-                try {
-                    URI resourceURI = new URI(new String(Base64.decodeBase64(nodeId)));
-                    if (RoViewerBox.this.roPage.resources.containsKey(resourceURI)) {
-                        if (selected) {
-                            onResourceSelected(itemModel, resourceGroupModel, target,
-                                RoViewerBox.this.roPage.resources.get(resourceURI));
-                        } else {
-                            onResourceDeselected(itemModel, resourceGroupModel, target,
-                                RoViewerBox.this.roPage.resources.get(resourceURI));
-                        }
-                    }
-                } catch (URISyntaxException e) {
-                    log.error("Could not parse node id", e);
-                }
-                target.add(roPage.getFeedbackPanel());
-            }
-        };
+        interactiveViewCallback = new InteractiveViewAjaxBehavior(roPage, itemModel, resourceGroupModel);
         add(interactiveViewCallback);
     }
 
@@ -258,7 +274,7 @@ class RoViewerBox extends WebMarkupContainer {
                         renderJSComponents(roPage.resources, target);
                     }
                 } catch (IOException e) {
-                    log.error(e);
+                    LOG.error(e);
                 }
                 target.add(roPage.getFeedbackPanel());
             }
@@ -279,6 +295,14 @@ class RoViewerBox extends WebMarkupContainer {
     }
 
 
+    /**
+     * Set the info panel to an aggregated resource panel.
+     * 
+     * @param itemModel
+     *            selected resource model
+     * @param res
+     *            selected resource
+     */
     private void setInfoPanel(final CompoundPropertyModel<AggregatedResource> itemModel, AggregatedResource res) {
         itemModel.setObject(res);
         if (infoPanel != itemInfo) {
@@ -288,6 +312,14 @@ class RoViewerBox extends WebMarkupContainer {
     }
 
 
+    /**
+     * Set the info panel to a resource group panel.
+     * 
+     * @param resourceGroupModel
+     *            selected resource group model
+     * @param res
+     *            selected resource group
+     */
     private void setInfoPanel(final CompoundPropertyModel<ResourceGroup> resourceGroupModel, ResourceGroup res) {
         resourceGroupModel.setObject(res);
         if (infoPanel != resourceGroupInfo) {
@@ -297,6 +329,9 @@ class RoViewerBox extends WebMarkupContainer {
     }
 
 
+    /**
+     * Update the RO structure visualizations.
+     */
     public void onRoTreeLoaded() {
         conceptualTreeLoading.replaceWith(conceptualTree);
         physicalTreeLoading.replaceWith(physicalTree);
@@ -304,6 +339,18 @@ class RoViewerBox extends WebMarkupContainer {
     }
 
 
+    /**
+     * Update the panel when a resource is selected by the user.
+     * 
+     * @param itemModel
+     *            selected resource model
+     * @param resourceGroupModel
+     *            selected resource group model
+     * @param target
+     *            request target
+     * @param item
+     *            selected resource/resource group
+     */
     private void onResourceSelected(final CompoundPropertyModel<AggregatedResource> itemModel,
             final CompoundPropertyModel<ResourceGroup> resourceGroupModel, AjaxRequestTarget target, Object item) {
         this.selectedItem = item;
@@ -318,8 +365,18 @@ class RoViewerBox extends WebMarkupContainer {
     }
 
 
+    /**
+     * Update the panel when a resource is deselected by the user.
+     * 
+     * @param itemModel
+     *            selected resource model
+     * @param resourceGroupModel
+     *            selected resource group model
+     * @param target
+     *            request target
+     */
     private void onResourceDeselected(CompoundPropertyModel<AggregatedResource> itemModel,
-            CompoundPropertyModel<ResourceGroup> resourceGroupModel, AjaxRequestTarget target, Object object) {
+            CompoundPropertyModel<ResourceGroup> resourceGroupModel, AjaxRequestTarget target) {
         this.selectedItem = null;
         setInfoPanel(itemModel, (AggregatedResource) null);
         roPage.onResourceSelected(target);
@@ -328,9 +385,19 @@ class RoViewerBox extends WebMarkupContainer {
     }
 
 
+    /**
+     * Perform actions after the RO structure has loaded.
+     * 
+     * @param resources
+     *            RO resources
+     * @param target
+     *            request target
+     * @throws IOException
+     *             Jackson error
+     */
     public void renderJSComponents(Map<URI, AggregatedResource> resources, AjaxRequestTarget target)
             throws IOException {
-        json = RoFactory.createRoJSON(resources, interactiveViewColors);
+        json = RoFactory.createRoJSON(resources, COLOR_PALETTE);
         String callback = getInteractiveViewCallbackUrl().toString();
         target.appendJavaScript("var json = " + json + "; init(json, '" + callback + "');");
     }
@@ -355,4 +422,62 @@ class RoViewerBox extends WebMarkupContainer {
         this.selectedItem = selectedItem;
     }
 
+
+    /**
+     * The AJAX behavior that creates the interactive view.
+     * 
+     * @author piotrekhol
+     * 
+     */
+    private final class InteractiveViewAjaxBehavior extends AbstractDefaultAjaxBehavior {
+
+        /** The owning page. */
+        private final RoPage roPage;
+
+        /** The RO model. */
+        private final CompoundPropertyModel<AggregatedResource> itemModel;
+
+        /** Resource groups. */
+        private final CompoundPropertyModel<ResourceGroup> resourceGroupModel;
+
+
+        /**
+         * Constructor.
+         * 
+         * @param roPage
+         *            the owning page
+         * @param itemModel
+         *            the RO model
+         * @param resourceGroupModel
+         *            the resource groups
+         */
+        private InteractiveViewAjaxBehavior(RoPage roPage, CompoundPropertyModel<AggregatedResource> itemModel,
+                CompoundPropertyModel<ResourceGroup> resourceGroupModel) {
+            this.roPage = roPage;
+            this.itemModel = itemModel;
+            this.resourceGroupModel = resourceGroupModel;
+        }
+
+
+        @Override
+        protected void respond(final AjaxRequestTarget target) {
+            String nodeId = RequestCycle.get().getRequest().getQueryParameters().getParameterValue("id").toString();
+            boolean selected = RequestCycle.get().getRequest().getQueryParameters().getParameterValue("selected")
+                    .toBoolean(false);
+            try {
+                URI resourceURI = new URI(new String(Base64.decodeBase64(nodeId)));
+                if (RoViewerBox.this.roPage.resources.containsKey(resourceURI)) {
+                    if (selected) {
+                        onResourceSelected(itemModel, resourceGroupModel, target,
+                            RoViewerBox.this.roPage.resources.get(resourceURI));
+                    } else {
+                        onResourceDeselected(itemModel, resourceGroupModel, target);
+                    }
+                }
+            } catch (URISyntaxException e) {
+                LOG.error("Could not parse node id", e);
+            }
+            target.add(roPage.getFeedbackPanel());
+        }
+    }
 }

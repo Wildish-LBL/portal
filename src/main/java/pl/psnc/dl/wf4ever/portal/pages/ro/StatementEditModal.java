@@ -25,36 +25,61 @@ import pl.psnc.dl.wf4ever.portal.pages.util.URIConverter;
 
 import com.hp.hpl.jena.vocabulary.DCTerms;
 
+/**
+ * Annotation statement edition modal.
+ * 
+ * @author piotrekhol
+ * 
+ */
 class StatementEditModal extends Panel {
 
-    /**
-	 * 
-	 */
+    /** id. */
     private static final long serialVersionUID = -805443481947725257L;
-    public static final URI[] defaultProperties = { URI.create(DCTerms.type.getURI()),
+
+    /** Default properties to suggest to the user. */
+    public static final URI[] DEFAULT_PROPERTIES = { URI.create(DCTerms.type.getURI()),
             URI.create(DCTerms.subject.getURI()), URI.create(DCTerms.description.getURI()),
             URI.create(DCTerms.format.getURI()), URI.create(DCTerms.title.getURI()),
             URI.create(DCTerms.created.getURI()) };
 
+    /** Literal statement object. */
     private final TextArea<String> value;
 
+    /** Resource statement object. */
     private final TextField<URI> objectURI;
 
+    /** Statement property URI. */
     private final TextField<URI> propertyURI;
 
+    /** A property selected from DEFAULT_PROPERTIES. */
     private URI selectedProperty;
 
+    /** Window title. */
     private String title;
 
+    /** The form. */
     private Form<Statement> form;
 
+    /** Feedback panel. */
     private MyFeedbackPanel feedbackPanel;
 
+    /** List of statements for a bulk creation. */
     private List<Statement> statements = new ArrayList<>();
 
+    /** A button for a bulk creation. */
     private MyAjaxButton anotherButton;
 
 
+    /**
+     * Constructor.
+     * 
+     * @param id
+     *            wicket id
+     * @param roPage
+     *            owning page
+     * @param model
+     *            statement model, with a non-null object for editing
+     */
     @SuppressWarnings("serial")
     public StatementEditModal(String id, final RoPage roPage, CompoundPropertyModel<Statement> model) {
         super(id, model);
@@ -68,7 +93,7 @@ class StatementEditModal extends Panel {
 
         form.add(new Label("title", new PropertyModel<String>(this, "title")));
 
-        List<URI> choices = Arrays.asList(defaultProperties);
+        List<URI> choices = Arrays.asList(DEFAULT_PROPERTIES);
         DropDownChoice<URI> properties = new DropDownChoice<URI>("propertyURI", new PropertyModel<URI>(this,
                 "selectedProperty"), choices);
         properties.setNullValid(true);
@@ -178,7 +203,9 @@ class StatementEditModal extends Panel {
 
 
     /**
-     * @return the selectedProperty
+     * Get the statement property, a default or custom one.
+     * 
+     * @return property URI
      */
     public URI getSelectedProperty() {
         if (selectedProperty == null && getModelObject() != null) {
@@ -189,8 +216,10 @@ class StatementEditModal extends Panel {
 
 
     /**
+     * Set the statement property.
+     * 
      * @param selectedProperty
-     *            the selectedProperty to set
+     *            property URI
      */
     public void setSelectedProperty(URI selectedProperty) {
         this.selectedProperty = selectedProperty;
@@ -201,7 +230,9 @@ class StatementEditModal extends Panel {
 
 
     /**
-     * @return the selectedProperty
+     * Get the custom property.
+     * 
+     * @return property URI or null
      */
     public URI getCustomProperty() {
         if (getModelObject() != null) {
@@ -212,8 +243,10 @@ class StatementEditModal extends Panel {
 
 
     /**
-     * @param selectedProperty
-     *            the selectedProperty to set
+     * Set the custom property.
+     * 
+     * @param customProperty
+     *            property URI or null
      */
     public void setCustomProperty(URI customProperty) {
         if (selectedProperty == null && customProperty != null) {
@@ -222,18 +255,11 @@ class StatementEditModal extends Panel {
     }
 
 
-    /**
-     * @return the title
-     */
     public String getTitle() {
         return title;
     }
 
 
-    /**
-     * @param title
-     *            the title to set
-     */
     private void setTitle(String title) {
         this.title = title;
     }
@@ -244,11 +270,20 @@ class StatementEditModal extends Panel {
     }
 
 
+    /**
+     * Utility method for setting the model object.
+     * 
+     * @param stmt
+     *            a statement
+     */
     public void setModelObject(Statement stmt) {
         form.setModelObject(stmt);
     }
 
 
+    /**
+     * Prepare the window for adding statements.
+     */
     // FIXME not the best design probably, these modals might use some refactoring
     public void setAddMode() {
         setTitle("Add annotation");
@@ -256,6 +291,9 @@ class StatementEditModal extends Panel {
     }
 
 
+    /**
+     * Prepare the window for editing statements.
+     */
     public void setEditMode() {
         setTitle("Edit annotation");
         getAnotherButton().setVisible(false);
