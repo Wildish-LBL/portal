@@ -1,6 +1,3 @@
-/**
- * 
- */
 package pl.psnc.dl.wf4ever.portal.services;
 
 import java.io.IOException;
@@ -10,7 +7,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.purl.wf4ever.rosrs.client.common.Vocab;
 
 import pl.psnc.dl.wf4ever.portal.model.RoEvoNode;
@@ -32,16 +28,35 @@ import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 /**
+ * RoEvo description generation service.
+ * 
  * @author piotrekhol
  * 
  */
-public class RoEvoService {
+public final class RoEvoService {
 
-    @SuppressWarnings("unused")
-    private static final Logger log = Logger.getLogger(RoEvoService.class);
+    /**
+     * Constructor.
+     */
+    private RoEvoService() {
+        // nope
+    }
 
 
-    public static Collection<RoEvoNode> describeSnapshot(URI sparqlEndpointURI, URI researchObjectURI)
+    /**
+     * Generate a description of a RO.
+     * 
+     * @param sparqlEndpointURI
+     *            RODL SPARQL endpoint URI
+     * @param researchObjectURI
+     *            RO URI
+     * @return a collection of {@link RoEvoNode}
+     * @throws IOException
+     *             can't connect to RODL
+     * @throws URISyntaxException
+     *             the URIs in the SPARQL response are incorrect
+     */
+    public static Collection<RoEvoNode> describeRO(URI sparqlEndpointURI, URI researchObjectURI)
             throws IOException, URISyntaxException {
         OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
         QueryExecution x = QueryExecutionFactory.sparqlService(sparqlEndpointURI.toString(),
@@ -108,6 +123,17 @@ public class RoEvoService {
     }
 
 
+    /**
+     * Create a {@link RoEvoNode}.
+     * 
+     * @param nodes
+     *            other nodes to reuse one if applicable
+     * @param objectURIString
+     *            URI
+     * @return a node
+     * @throws URISyntaxException
+     *             the URI is incorrect
+     */
     private static RoEvoNode createNode(Map<URI, RoEvoNode> nodes, String objectURIString)
             throws URISyntaxException {
         URI objectURI = new URI(objectURIString);

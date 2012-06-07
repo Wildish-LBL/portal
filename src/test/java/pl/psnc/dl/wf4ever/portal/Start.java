@@ -8,8 +8,30 @@ import org.eclipse.jetty.server.ssl.SslSocketConnector;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppContext;
 
-public class Start {
+/**
+ * Run the application in embedded jetty.
+ * 
+ * @author piotrekhol
+ * 
+ */
+public final class Start {
 
+    /**
+     * Constructor.
+     */
+    private Start() {
+        // nope
+    }
+
+
+    /**
+     * Run.
+     * 
+     * @param args
+     *            command line params
+     * @throws Exception
+     *             oops
+     */
     public static void main(String[] args)
             throws Exception {
         int timeout = (int) Duration.ONE_HOUR.getMilliseconds();

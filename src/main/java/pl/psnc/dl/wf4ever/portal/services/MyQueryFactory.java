@@ -1,6 +1,3 @@
-/**
- * 
- */
 package pl.psnc.dl.wf4ever.portal.services;
 
 import java.io.IOException;
@@ -13,35 +10,54 @@ import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.Syntax;
 
 /**
+ * A utility class for loading SPARQL queries.
+ * 
  * @author piotrek
  * 
  */
-public class MyQueryFactory {
+public final class MyQueryFactory {
 
+    /** most recent ROs. */
     private static String xMostRecentROs = null;
 
+    /** resources count. */
     private static String resourcesCount = null;
 
-    private static String workflowOutputs = null;
-
-    private static String workflowInputs = null;
-
+    /** get provenance traces. */
     private static String provenanceTraces;
 
+    /** get all ROs. */
     private static String allROs;
 
+    /** describe snapshot evolution. */
     private static String snapshotEvolution;
 
+    /** describe live RO evolution. */
     private static String liveEvolution;
 
+    /** describe archived RO evolution. */
     private static String archivedEvolution;
 
+    /** check resource class. */
     private static String resourceClass;
 
 
     /**
-     * @return the xMostRecentROs
+     * Constructor.
+     */
+    private MyQueryFactory() {
+        //nope
+    }
+
+
+    /**
+     * Load the most recent ROs query.
+     * 
+     * @param limit
+     *            how many ROs
+     * @return SPARQL query
      * @throws IOException
+     *             can't load the query file
      */
     public static String getxMostRecentROs(int limit)
             throws IOException {
@@ -52,6 +68,13 @@ public class MyQueryFactory {
     }
 
 
+    /**
+     * Load all ROs query.
+     * 
+     * @return SPARQL query
+     * @throws IOException
+     *             can't load the query file
+     */
     public static String getAllROs()
             throws IOException {
         if (allROs == null) {
@@ -62,12 +85,13 @@ public class MyQueryFactory {
 
 
     /**
-     * Returns the query for the quantity of resources of a given class in the triplestore
+     * Returns the query for the quantity of resources of a given class in the triplestore.
      * 
      * @param resourceClass
      *            where ro: is the Wf4Ever RO prefix
      * @return the query in the ARQ extension format (with "count")
      * @throws IOException
+     *             can't load the query file
      */
     public static Query getResourcesCount(String resourceClass)
             throws IOException {
@@ -78,24 +102,15 @@ public class MyQueryFactory {
     }
 
 
-    public static Query getWorkflowOutputs(String researchObject)
-            throws IOException {
-        if (workflowOutputs == null) {
-            workflowOutputs = loadQuery("workflowOutputs.sparql");
-        }
-        return QueryFactory.create(String.format(workflowOutputs, researchObject), Syntax.syntaxARQ);
-    }
-
-
-    public static Query getWorkflowInputs(String researchObject)
-            throws IOException {
-        if (workflowInputs == null) {
-            workflowInputs = loadQuery("workflowInputs.sparql");
-        }
-        return QueryFactory.create(String.format(workflowInputs, researchObject), Syntax.syntaxARQ);
-    }
-
-
+    /**
+     * Get provenance traces.
+     * 
+     * @param researchObject
+     *            the RO URI
+     * @return SPARQL query
+     * @throws IOException
+     *             can't load the query file
+     */
     public static Query getProvenanceTraces(String researchObject)
             throws IOException {
         if (provenanceTraces == null) {
@@ -105,6 +120,15 @@ public class MyQueryFactory {
     }
 
 
+    /**
+     * Get the snapshot evolution.
+     * 
+     * @param researchObject
+     *            the RO URI
+     * @return SPARQL query
+     * @throws IOException
+     *             can't load the query file
+     */
     public static Query getSnapshotEvolution(String researchObject)
             throws IOException {
         if (snapshotEvolution == null) {
@@ -114,6 +138,15 @@ public class MyQueryFactory {
     }
 
 
+    /**
+     * Get the live RO evolution.
+     * 
+     * @param researchObject
+     *            the RO URI
+     * @return SPARQL query
+     * @throws IOException
+     *             can't load the query file
+     */
     public static Query getLiveEvolution(String researchObject)
             throws IOException {
         if (liveEvolution == null) {
@@ -123,6 +156,15 @@ public class MyQueryFactory {
     }
 
 
+    /**
+     * Get the archived RO evolution.
+     * 
+     * @param researchObject
+     *            the RO URI
+     * @return SPARQL query
+     * @throws IOException
+     *             can't load the query file
+     */
     public static Query getArchivedEvolution(String researchObject)
             throws IOException {
         if (archivedEvolution == null) {
@@ -132,6 +174,15 @@ public class MyQueryFactory {
     }
 
 
+    /**
+     * Get the resource class.
+     * 
+     * @param researchObject
+     *            the RO URI
+     * @return SPARQL query
+     * @throws IOException
+     *             can't load the query file
+     */
     public static Query getResourceClass(String researchObject)
             throws IOException {
         if (resourceClass == null) {
@@ -141,6 +192,15 @@ public class MyQueryFactory {
     }
 
 
+    /**
+     * Load a query from a file.
+     * 
+     * @param file
+     *            filename
+     * @return query as string
+     * @throws IOException
+     *             can't load the query file
+     */
     private static String loadQuery(String file)
             throws IOException {
         InputStream is = MyQueryFactory.class.getClassLoader().getResourceAsStream("sparql/" + file);

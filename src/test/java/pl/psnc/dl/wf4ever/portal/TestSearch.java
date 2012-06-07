@@ -7,7 +7,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.List;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import pl.psnc.dl.wf4ever.portal.model.SearchResult;
@@ -15,14 +14,26 @@ import pl.psnc.dl.wf4ever.portal.services.SearchService;
 
 import com.sun.syndication.io.FeedException;
 
+/**
+ * Test the search service.
+ * 
+ * @author piotrekhol
+ * 
+ */
 public class TestSearch {
 
-    @BeforeClass
-    public static void setUpBeforeClass()
-            throws Exception {
-    }
-
-
+    /**
+     * Does it return anything?
+     * 
+     * @throws IOException
+     *             any error
+     * @throws FeedException
+     *             any error
+     * @throws MalformedURLException
+     *             any error
+     * @throws IllegalArgumentException
+     *             any error
+     */
     @Test
     public final void testFindByKeywords()
             throws IllegalArgumentException, MalformedURLException, FeedException, IOException {

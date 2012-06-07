@@ -3,7 +3,6 @@
  */
 package pl.psnc.dl.wf4ever.portal.services;
 
-import org.apache.log4j.Logger;
 import org.scribe.builder.api.DefaultApi20;
 import org.scribe.model.OAuthConfig;
 import org.scribe.oauth.OAuthService;
@@ -12,15 +11,22 @@ import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.utils.OAuth20ServiceImpl;
 
 /**
+ * RODL OAuth API.
+ * 
  * @author Piotr Hołubowicz
  * 
  */
 public class DlibraApi extends DefaultApi20 {
 
-    @SuppressWarnings("unused")
-    private static final Logger log = Logger.getLogger(DlibraApi.class);
-
-
+    /**
+     * Factory method.
+     * 
+     * @param clientId
+     *            OAuth client id
+     * @param callbackURL
+     *            OAuth callback URL
+     * @return the OAuth service
+     */
     public static OAuthService getOAuthService(String clientId, String callbackURL) {
         //		return new ServiceBuilder().provider(DlibraApi.class)
         //				.apiKey(DlibraApi.CONSUMER_KEY)

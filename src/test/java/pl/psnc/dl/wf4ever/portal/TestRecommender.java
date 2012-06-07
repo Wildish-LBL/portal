@@ -5,21 +5,26 @@ import static org.junit.Assert.assertNotNull;
 import java.net.URI;
 import java.util.List;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import pl.psnc.dl.wf4ever.portal.model.Recommendation;
 import pl.psnc.dl.wf4ever.portal.services.RecommenderService;
 
+/**
+ * Test the recommendation service.
+ * 
+ * @author piotrekhol
+ * 
+ */
 public class TestRecommender {
 
-    @BeforeClass
-    public static void setUpBeforeClass()
-            throws Exception {
-    }
-
-
-    //	@Test
+    /**
+     * Does it return anything?
+     * 
+     * @throws Exception
+     *             any error
+     */
+    @Test
     public final void testRecommend()
             throws Exception {
         List<Recommendation> recs = RecommenderService.getRecommendations(

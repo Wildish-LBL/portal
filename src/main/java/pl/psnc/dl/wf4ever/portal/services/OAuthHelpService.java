@@ -1,6 +1,3 @@
-/**
- * 
- */
 package pl.psnc.dl.wf4ever.portal.services;
 
 import java.net.HttpURLConnection;
@@ -14,23 +11,37 @@ import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
 
 /**
+ * Utility service for OAuth communication.
+ * 
  * @author Piotr Hołubowicz
  * 
  */
-public class OAuthHelpService {
+public final class OAuthHelpService {
 
-    private static final Logger log = Logger.getLogger(OAuthHelpService.class);
+    /** Logger. */
+    private static final Logger LOG = Logger.getLogger(OAuthHelpService.class);
+
+
+    /**
+     * Constructor.
+     */
+    private OAuthHelpService() {
+        // nope
+    }
 
 
     /**
      * Sends an unsigned request with no body.
      * 
      * @param service
+     *            OAuth service
      * @param verb
-     * @param url
-     * @param token
-     * @return
+     *            HTTP method
+     * @param uri
+     *            URL to call
+     * @return a response
      * @throws OAuthException
+     *             a OAuth problem
      */
     public static Response sendRequest(OAuthService service, Verb verb, URI uri)
             throws OAuthException {
@@ -45,11 +56,16 @@ public class OAuthHelpService {
      * Executes a request with no body.
      * 
      * @param service
+     *            OAuth service
      * @param verb
-     * @param url
+     *            HTTP method
+     * @param uri
+     *            URL to call
      * @param token
-     * @return
+     *            access token
+     * @return a response
      * @throws OAuthException
+     *             a OAuth problem
      */
     public static Response sendRequest(OAuthService service, Verb verb, URI uri, Token token)
             throws OAuthException {
@@ -65,17 +81,23 @@ public class OAuthHelpService {
      * Executes a request with no body but with content negotiation. Makes sense to use only with GET.
      * 
      * @param service
+     *            OAuth service
      * @param verb
-     * @param url
+     *            HTTP method
+     * @param uri
+     *            URL to call
      * @param token
+     *            access token
      * @param accept
-     * @return
+     *            Accept header
+     * @return a response
      * @throws OAuthException
+     *             a OAuth problem
      */
     public static Response sendRequest(OAuthService service, Verb verb, URI uri, Token token, String accept)
             throws OAuthException {
         if (verb != Verb.GET) {
-            log.warn("Using accept header with " + verb + " request.");
+            LOG.warn("Using accept header with " + verb + " request.");
         }
         OAuthRequest request = new OAuthRequest(verb, uri.toString());
         request.addHeader("Accept", accept);
@@ -90,13 +112,20 @@ public class OAuthHelpService {
      * Executes a request with body, content type must also be specified.
      * 
      * @param service
+     *            OAuth service
      * @param verb
-     * @param url
+     *            HTTP method
+     * @param uri
+     *            URL to call
      * @param token
+     *            access token
      * @param payload
+     *            body
      * @param contentType
-     * @return
+     *            Content-type header
+     * @return a response
      * @throws OAuthException
+     *             a OAuth problem
      */
     public static Response sendRequest(OAuthService service, Verb verb, URI uri, Token token, byte[] payload,
             String contentType)
@@ -112,9 +141,14 @@ public class OAuthHelpService {
 
 
     /**
+     * Check the OAuth response.
+     * 
      * @param verb
+     *            HTTP method
      * @param response
+     *            the response
      * @throws OAuthException
+     *             the response is incorrect
      */
     private static void validateResponseCode(Verb verb, Response response)
             throws OAuthException {
@@ -146,6 +180,13 @@ public class OAuthHelpService {
     }
 
 
+    /**
+     * Create an OAuth exception.
+     * 
+     * @param response
+     *            response
+     * @return exception
+     */
     private static OAuthException prepareException(Response response) {
         if (response.getCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
             return new OAuthException(response, "the access token has been rejected");

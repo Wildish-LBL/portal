@@ -71,7 +71,7 @@ public class RoEvoBox extends Panel {
         WebMarkupContainer forks = new WebMarkupContainer("forks");
         add(forks);
 
-        Collection<RoEvoNode> nodes = RoEvoService.describeSnapshot(sparqlEndpointURI, researchObjectURI);
+        Collection<RoEvoNode> nodes = RoEvoService.describeRO(sparqlEndpointURI, researchObjectURI);
         List<RoEvoNode> preorder = new ArrayList<>();
         final List<RoEvoNode> postorder = new ArrayList<>();
         for (RoEvoNode node : nodes) {
