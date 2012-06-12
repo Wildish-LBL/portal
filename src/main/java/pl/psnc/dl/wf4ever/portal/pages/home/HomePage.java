@@ -27,7 +27,6 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.protocol.http.IRequestLogger;
 import org.apache.wicket.protocol.http.RequestLogger;
 import org.apache.wicket.protocol.http.WebApplication;
-import org.apache.wicket.request.UrlEncoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
@@ -366,8 +365,7 @@ public class HomePage extends TemplatePage {
         protected void populateItem(ListItem<SearchResult> item) {
             final SearchResult result = item.getModelObject();
             BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);
-            link.getPageParameters().add("ro",
-                UrlEncoder.QUERY_INSTANCE.encode(result.getResearchObject().getURI().toString(), "UTF-8"));
+            link.getPageParameters().add("ro", result.getResearchObject().getURI().toString());
             link.add(new Label("researchObject.name"));
             item.add(link);
             item.add(new Label("researchObject.title"));
@@ -425,7 +423,7 @@ public class HomePage extends TemplatePage {
         protected void populateItem(ListItem<ResearchObject> item) {
             ResearchObject ro = item.getModelObject();
             BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);
-            link.getPageParameters().add("ro", UrlEncoder.QUERY_INSTANCE.encode(ro.getURI().toString(), "UTF-8"));
+            link.getPageParameters().add("ro", ro.getURI().toString());
             link.add(new Label("name"));
             item.add(link);
             item.add(new CreatorsPanel("creator", new PropertyModel<List<Creator>>(ro, "creators")));

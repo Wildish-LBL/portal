@@ -16,7 +16,6 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.list.PropertyListView;
 import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.request.UrlEncoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.joda.time.format.ISODateTimeFormat;
 
@@ -110,7 +109,7 @@ public class AllRosPage extends TemplatePage {
             protected void populateItem(ListItem<ResearchObject> item) {
                 ResearchObject ro = item.getModelObject();
                 BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);
-                link.getPageParameters().add("ro", UrlEncoder.QUERY_INSTANCE.encode(ro.getURI().toString(), "UTF-8"));
+                link.getPageParameters().add("ro", ro.getURI().toString());
                 link.add(new Label("name"));
                 item.add(link);
                 item.add(new Label("resourcesCnt", "" + resCnts.get(ro)));

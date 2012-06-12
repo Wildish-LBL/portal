@@ -20,7 +20,6 @@ import org.apache.wicket.markup.repeater.RefreshingView;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.request.UrlEncoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
@@ -281,8 +280,7 @@ public class MyRosPage extends TemplatePage {
             AggregatedResource researchObject = (AggregatedResource) item.getDefaultModelObject();
             item.add(new Check<ResearchObject>("checkbox", item.getModel()));
             BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);
-            link.getPageParameters().add("ro",
-                UrlEncoder.QUERY_INSTANCE.encode(researchObject.getURI().toString(), "UTF-8"));
+            link.getPageParameters().add("ro", researchObject.getURI().toString());
             link.add(new Label("URI"));
             item.add(link);
             item.add(new Label("createdFormatted"));
