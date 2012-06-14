@@ -45,10 +45,7 @@ public final class OAuthHelpService {
      */
     public static Response sendRequest(OAuthService service, Verb verb, URI uri)
             throws OAuthException {
-        OAuthRequest request = new OAuthRequest(verb, uri.toString());
-        Response response = request.send();
-        validateResponseCode(verb, response);
-        return response;
+        return sendRequest(service, verb, uri, null);
     }
 
 
@@ -70,7 +67,9 @@ public final class OAuthHelpService {
     public static Response sendRequest(OAuthService service, Verb verb, URI uri, Token token)
             throws OAuthException {
         OAuthRequest request = new OAuthRequest(verb, uri.toString());
-        service.signRequest(token, request);
+        if (token != null) {
+            service.signRequest(token, request);
+        }
         Response response = request.send();
         validateResponseCode(verb, response);
         return response;
@@ -101,7 +100,9 @@ public final class OAuthHelpService {
         }
         OAuthRequest request = new OAuthRequest(verb, uri.toString());
         request.addHeader("Accept", accept);
-        service.signRequest(token, request);
+        if (token != null) {
+            service.signRequest(token, request);
+        }
         Response response = request.send();
         validateResponseCode(verb, response);
         return response;
@@ -133,7 +134,9 @@ public final class OAuthHelpService {
         OAuthRequest request = new OAuthRequest(verb, uri.toString());
         request.addPayload(payload);
         request.addHeader("Content-type", contentType);
-        service.signRequest(token, request);
+        if (token != null) {
+            service.signRequest(token, request);
+        }
         Response response = request.send();
         validateResponseCode(verb, response);
         return response;
