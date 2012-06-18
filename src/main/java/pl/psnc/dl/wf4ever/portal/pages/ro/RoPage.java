@@ -505,7 +505,8 @@ public class RoPage extends TemplatePage {
         Resource ro = manifestModel.createResource(roURI.toString());
         Individual individual = manifestModel.createResource(absoluteResourceURI.toString()).as(Individual.class);
         ro.addProperty(Vocab.ORE_AGGREGATES, individual);
-        individual.addProperty(DCTerms.creator, manifestModel.createResource(MySession.get().getUserURI().toString()));
+        individual.addProperty(DCTerms.creator,
+            manifestModel.createResource(MySession.get().getUser().getURI().toString()));
         individual.addRDFType(Vocab.RO_RESOURCE);
         for (ResourceGroup resourceGroup : selectedTypes) {
             individual.addRDFType(manifestModel.createResource(resourceGroup.getRdfClasses().iterator().next()
@@ -547,7 +548,7 @@ public class RoPage extends TemplatePage {
         URI annURI = ROService.createAnnotationURI(null, roURI);
         URI bodyURI = ROService.createAnnotationBodyURI(roURI, statements.get(0).getSubjectURI());
         ClientResponse res = ROSRService.addAnnotation(rodlURI, roURI, annURI, statements.get(0).getSubjectURI(),
-            bodyURI, MySession.get().getUserURI(), dLibraToken);
+            bodyURI, MySession.get().getUser().getURI(), dLibraToken);
         if (res.getStatus() != HttpServletResponse.SC_OK) {
             throw new IOException("Error when adding annotation: " + res.getClientResponseStatus());
         }
@@ -640,7 +641,7 @@ public class RoPage extends TemplatePage {
         URI annURI = ROService.createAnnotationURI(null, roURI);
         URI bodyURI = ROService.createAnnotationBodyURI(roURI, aggregatedResource.getURI());
         ClientResponse response = ROSRService.addAnnotation(rodlURI, roURI, annURI, aggregatedResource.getURI(),
-            bodyURI, session.getUserURI(), session.getdLibraAccessToken());
+            bodyURI, session.getUser().getURI(), session.getdLibraAccessToken());
         if (response.getStatus() != HttpServletResponse.SC_OK) {
             LOG.error(response.getEntity(String.class));
             throw new IOException(response.getClientResponseStatus().getReasonPhrase());

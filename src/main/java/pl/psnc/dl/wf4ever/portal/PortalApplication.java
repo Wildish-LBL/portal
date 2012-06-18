@@ -80,6 +80,9 @@ public class PortalApplication extends AuthenticatedWebApplication {
     /** Wf-RO transformation service URI. */
     private URI wf2ROService;
 
+    /** RODL admin token. */
+    private String adminToken;
+
     /** How are resources displayed depending on their RDF classes. */
     private final Set<ResourceGroup> resourceGroups = new HashSet<>();
 
@@ -162,6 +165,7 @@ public class PortalApplication extends AuthenticatedWebApplication {
             myExpConsumerSecret = props.getProperty("myExpConsumerSecret");
             dLibraClientId = props.getProperty("dLibraClientId");
             callbackURL = props.getProperty("callbackURL");
+            adminToken = props.getProperty("adminToken");
 
             AuthenticatePage.setAuthorizationURL(DlibraApi.getOAuthService(getDLibraClientId(), getCallbackURL())
                     .getAuthorizationUrl(null));
@@ -231,6 +235,11 @@ public class PortalApplication extends AuthenticatedWebApplication {
 
     public String getCallbackURL() {
         return callbackURL;
+    }
+
+
+    public String getAdminToken() {
+        return adminToken;
     }
 
 

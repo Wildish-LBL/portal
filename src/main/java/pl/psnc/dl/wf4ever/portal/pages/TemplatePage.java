@@ -108,7 +108,7 @@ public class TemplatePage extends WebPage {
      */
     public String getSignInTwipsy() {
         if (MySession.get().isSignedIn()) {
-            return "Signed in as " + MySession.get().getUsername();
+            return "Signed in as " + MySession.get().getUser().getUsername();
         } else {
             return "Click to sign in!";
         }
