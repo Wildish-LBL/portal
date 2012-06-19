@@ -7,6 +7,7 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.purl.wf4ever.rosrs.client.common.users.UserManagementService;
@@ -24,13 +25,13 @@ import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
  * 
  */
 @AuthorizeInstantiation("USER")
-public class DlibraRegistrationPage extends TemplatePage {
+public class ProfilePage extends TemplatePage {
 
     /** id. */
     private static final long serialVersionUID = 1L;
 
     /** Logger. */
-    private static final Logger LOG = Logger.getLogger(DlibraRegistrationPage.class);
+    private static final Logger LOG = Logger.getLogger(ProfilePage.class);
 
 
     /**
@@ -41,12 +42,16 @@ public class DlibraRegistrationPage extends TemplatePage {
      *            The request parameters (which are the response parameters from the OP).
      */
     @SuppressWarnings("serial")
-    public DlibraRegistrationPage(PageParameters pageParameters) {
+    public ProfilePage(PageParameters pageParameters) {
         super(pageParameters);
 
         final MyFeedbackPanel feedbackPanel = new MyFeedbackPanel("feedbackPanel");
         feedbackPanel.setOutputMarkupId(true);
         add(feedbackPanel);
+
+        add(new BookmarkablePageLink<Void>("profile", ProfilePage.class));
+        add(new BookmarkablePageLink<Void>("tokens", AccessTokensPage.class));
+        add(new BookmarkablePageLink<Void>("generate", GenerateAccessTokenPage.class));
 
         final User user = ((MySession) getSession()).getUser();
 
