@@ -3,10 +3,6 @@
  */
 package pl.psnc.dl.wf4ever.portal.pages.users;
 
-import java.net.URI;
-
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.log4j.Logger;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.request.IRequestCycle;
@@ -19,7 +15,7 @@ import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.users.AuthCodeData;
 import pl.psnc.dl.wf4ever.portal.services.HibernateService;
 
-import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
 
 /**
  * This is the OAuth 2.0 access token endpoint.
@@ -111,21 +107,18 @@ public class OAuthAccessTokenEndpointPage extends WebPage {
         } else {
             try {
                 PortalApplication app = ((PortalApplication) getApplication());
-                ClientResponse response = UserManagementService.createAccessToken(app.getRodlURI(),
-                    app.getAdminToken(), data.getUserId(), data.getClientId());
-                if (response.getStatus() == HttpServletResponse.SC_CREATED) {
-                    URI at = response.getLocation();
-                    String[] segments = at.getPath().split("/");
-                    String token = segments[segments.length - 1];
+                try {
+                    String token = UserManagementService.createAccessToken(app.getRodlURI(), app.getAdminToken(),
+                        data.getUserId(), data.getClientId());
                     json = String.format("{\"access_token\": \"%s\", \"token_type\": \"bearer\"}", token);
                     status = 200;
                     HibernateService.deleteCode(data);
-                } else {
-                    json = String.format("{\"error\": \"invalid_request\", \"error_description\": \"%s\"}",
-                        response.getClientResponseStatus());
+                } catch (UniformInterfaceException e) {
+                    json = String.format("{\"error\": \"invalid_request\", \"error_description\": \"%s\"}", e
+                            .getResponse().getClientResponseStatus());
                     status = 500;
+                    e.getResponse().close();
                 }
-                response.close();
             } catch (Exception e) {
                 json = String.format("{\"error\": \"invalid_request\", \"error_description\": \"%s\"}", e.getMessage());
                 status = 500;

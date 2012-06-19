@@ -7,6 +7,7 @@ import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.purl.wf4ever.rosrs.client.common.users.UserManagementService;
+import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
@@ -14,6 +15,7 @@ import pl.psnc.dl.wf4ever.portal.model.users.OpenIdUser;
 import pl.psnc.dl.wf4ever.portal.services.OpenIdService;
 
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
 
 /**
  * This page receives responses from OpenID Providers.
@@ -84,6 +86,14 @@ public class OpenIDEndpoint extends WebPage {
             } catch (Exception e) {
                 getSession().error(e.getMessage() != null ? e.getMessage() : "Unknown error");
             }
+        }
+        try {
+            String token = UserManagementService.createAccessToken(app.getRodlURI(), app.getAdminToken(),
+                user.getOpenId(), app.getDLibraClientId());
+            ((MySession) getSession()).setdLibraAccessToken(new Token(token, null));
+        } catch (UniformInterfaceException e) {
+            getSession().error(e.getResponse().getClientResponseStatus());
+            LOG.error(e.getResponse().getClientResponseStatus());
         }
     }
 }

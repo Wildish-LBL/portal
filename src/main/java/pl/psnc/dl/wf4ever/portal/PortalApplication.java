@@ -115,6 +115,7 @@ public class PortalApplication extends AuthenticatedWebApplication {
         loadProperties("portal.properties");
         loadTokens("tokens.properties");
         loadResourceGroups("resourceGroups.properties");
+        loadAdminTokens("admintoken.properties");
 
         RSSService.start(null, sparqlEndpoint, rodlURI);
 
@@ -166,12 +167,28 @@ public class PortalApplication extends AuthenticatedWebApplication {
             myExpConsumerSecret = props.getProperty("myExpConsumerSecret");
             dLibraClientId = props.getProperty("dLibraClientId");
             callbackURL = props.getProperty("callbackURL");
-            adminToken = props.getProperty("adminToken");
 
             AuthenticatePage.setAuthorizationURL(DlibraApi.getOAuthService(getDLibraClientId(), getCallbackURL())
                     .getAuthorizationUrl(null));
         } catch (Exception e) {
             LOG.error("Failed to load tokens: " + e.getMessage());
+        }
+    }
+
+
+    /**
+     * Load RODL admin tokens.
+     * 
+     * @param propertiesFile
+     *            filename
+     */
+    private void loadAdminTokens(String propertiesFile) {
+        Properties props = new Properties();
+        try {
+            props.load(getClass().getClassLoader().getResourceAsStream(propertiesFile));
+            adminToken = props.getProperty("adminToken");
+        } catch (Exception e) {
+            LOG.error("Failed to load admin tokens: " + e.getMessage());
         }
     }
 

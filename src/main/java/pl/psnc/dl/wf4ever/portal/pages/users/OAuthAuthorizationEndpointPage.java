@@ -3,11 +3,7 @@
  */
 package pl.psnc.dl.wf4ever.portal.pages.users;
 
-import java.io.IOException;
-import java.net.URI;
 import java.util.UUID;
-
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.MarkupContainer;
@@ -27,7 +23,7 @@ import pl.psnc.dl.wf4ever.portal.model.users.AuthCodeData;
 import pl.psnc.dl.wf4ever.portal.pages.TemplatePage;
 import pl.psnc.dl.wf4ever.portal.services.HibernateService;
 
-import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
 
 /**
  * This is the OAuth 2.0 authorization endpoint. On this page the user accepts to give authorization.
@@ -122,29 +118,22 @@ public class OAuthAuthorizationEndpointPage extends TemplatePage {
      * @param client
      *            OAuth client
      * @return URL as a String with data as query params
-     * @throws IOException
-     *             could not connect to RODL
+     * @throws UniformInterfaceException
+     *             wrong response status
      */
     private String prepareTokenResponse(OAuthClient client)
-            throws IOException {
+            throws UniformInterfaceException {
         User user = ((MySession) getSession()).getUser();
         PortalApplication app = ((PortalApplication) getApplication());
-        ClientResponse response = UserManagementService.createAccessToken(app.getRodlURI(), app.getAdminToken(), user
-                .getURI().toString(), client.getClientId());
-        if (response.getStatus() == HttpServletResponse.SC_CREATED) {
-            URI at = response.getLocation();
-            String[] segments = at.getPath().split("/");
-            String token = segments[segments.length - 1];
-            String url = client.getRedirectionURI() + "#";
-            url += ("access_token=" + token);
-            url += "&token_type=bearer";
-            if (state != null) {
-                url += ("&state=" + state);
-            }
-            return url;
-        } else {
-            throw new IOException(response.getClientResponseStatus().toString());
+        String token = UserManagementService.createAccessToken(app.getRodlURI(), app.getAdminToken(), user.getURI()
+                .toString(), client.getClientId());
+        String url = client.getRedirectionURI() + "#";
+        url += ("access_token=" + token);
+        url += "&token_type=bearer";
+        if (state != null) {
+            url += ("&state=" + state);
         }
+        return url;
     }
 
 

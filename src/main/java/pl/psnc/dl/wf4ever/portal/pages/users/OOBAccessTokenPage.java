@@ -1,9 +1,5 @@
 package pl.psnc.dl.wf4ever.portal.pages.users;
 
-import java.net.URI;
-
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.log4j.Logger;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -15,7 +11,7 @@ import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.User;
 import pl.psnc.dl.wf4ever.portal.pages.TemplatePage;
 
-import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
 
 /**
  * This page displayes the OOB access token to the user.
@@ -49,15 +45,12 @@ public class OOBAccessTokenPage extends TemplatePage {
         String token;
 
         PortalApplication app = ((PortalApplication) getApplication());
-        ClientResponse response = UserManagementService.createAccessToken(app.getRodlURI(), app.getAdminToken(), user
-                .getURI().toString(), clientId);
-        if (response.getStatus() == HttpServletResponse.SC_CREATED) {
-            URI at = response.getLocation();
-            String[] segments = at.getPath().split("/");
-            token = segments[segments.length - 1];
-        } else {
-            LOG.error(response.getClientResponseStatus().toString());
-            error(response.getClientResponseStatus().toString());
+        try {
+            token = UserManagementService.createAccessToken(app.getRodlURI(), app.getAdminToken(), user.getURI()
+                    .toString(), clientId);
+        } catch (UniformInterfaceException e) {
+            LOG.error(e.getResponse().getClientResponseStatus().toString());
+            error(e.getResponse().getClientResponseStatus().toString());
             token = "--";
         }
 
