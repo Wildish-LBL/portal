@@ -1,34 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wicket:extend xmlns:wicket="http://wicket.apache.org">
-	<div class="post">
-		<h2 class="title">Authentication</h2>
-		<div class="entry">
+	<div style="padding-left: 10px; padding-right: 10px;">
+		<h2>Authentication</h2>
+		<p>
+			Please enter and confirm your OpenID below to register with this site
+			or click an icon below. If you don't know if you have an OpenID you
+			may check it at <a href="http://openid.net/get-an-openid/">OpenID
+				website</a>.
+		</p>
+		<form class="form-horizontal" wicket:id="openIdForm">
 			<p>
-				Please enter and confirm your OpenID below to register with this
-				site or click an icon below. If you don't know if you have an OpenID
-				you may check it at <a href="http://openid.net/get-an-openid/">OpenID
-					website</a>.
+				<label>Your Open ID:</label> <input class="span4" type="text"
+					wicket:id="openId" />
+				<button class="btn" type="submit" wicket:id="confirmOpenIdButton">Confirm
+					OpenID</button>
 			</p>
-			<form wicket:id="openIdForm">
-				<p>
-					<label>Your Open ID:</label> <input class="biginput" type="text"
-						wicket:id="openId" /> <input type="submit"
-						wicket:id="confirmOpenIdButton" value="Confirm OpenID" />
-				</p>
-			</form>
-			<form wicket:id="form">
-				<p>Or sign in with:</p>
-				<table style="width: 300px">
-					<tbody>
-						<tr>
-							<td><a wicket:id="logInWithGoogle"><img
-									src="images/google.png" /></a></td>
-							<td><a wicket:id="logInWithYahoo"><img
-									src="images/yahoo.png" /></a></td>
-						</tr>
-					</tbody>
-				</table>
-			</form>
-		</div>
+		</form>
+		<form wicket:id="form">
+			<p>Or sign in with:</p>
+			<table style="width: 300px">
+				<tbody>
+					<tr>
+						<td><a wicket:id="logInWithGoogle"><img
+								src="images/google.png" /></a></td>
+						<td><a wicket:id="logInWithYahoo"><img
+								src="images/yahoo.png" /></a></td>
+					</tr>
+				</tbody>
+			</table>
+		</form>
 	</div>
 </wicket:extend>

@@ -79,7 +79,7 @@ public class TemplatePage extends WebPage {
                     MySession.get().signOut();
                     throw new RestartResponseException(getApplication().getHomePage());
                 } else {
-                    throw new RestartResponseException(AuthenticatePage.class);
+                    throw new RestartResponseException(((PortalApplication) getApplication()).getSignInPageClass());
                 }
             }
 

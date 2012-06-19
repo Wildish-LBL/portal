@@ -30,6 +30,7 @@ import pl.psnc.dl.wf4ever.portal.pages.all.AllRosPage;
 import pl.psnc.dl.wf4ever.portal.pages.home.HomePage;
 import pl.psnc.dl.wf4ever.portal.pages.my.MyRosPage;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
+import pl.psnc.dl.wf4ever.portal.pages.users.AuthenticationPage;
 import pl.psnc.dl.wf4ever.portal.services.DlibraApi;
 import pl.psnc.dl.wf4ever.portal.services.RSSService;
 
@@ -299,8 +300,8 @@ public class PortalApplication extends AuthenticatedWebApplication {
 
 
     @Override
-    protected Class<? extends WebPage> getSignInPageClass() {
-        return AuthenticatePage.class;
+    public Class<? extends WebPage> getSignInPageClass() {
+        return AuthenticationPage.class;
     }
 
 
