@@ -18,7 +18,7 @@ import pl.psnc.dl.wf4ever.portal.services.HibernateService;
 import com.sun.jersey.api.client.UniformInterfaceException;
 
 /**
- * This is the OAuth 2.0 access token endpoint.
+ * This is the OAuth 2.0 access token endpoint, it exchanges authorization code for access token.
  * 
  * @author Piotr Hołubowicz
  */

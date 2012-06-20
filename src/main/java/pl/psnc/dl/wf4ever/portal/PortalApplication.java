@@ -32,6 +32,7 @@ import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
 import pl.psnc.dl.wf4ever.portal.pages.users.AccessTokensPage;
 import pl.psnc.dl.wf4ever.portal.pages.users.AuthenticationPage;
 import pl.psnc.dl.wf4ever.portal.pages.users.GenerateAccessTokenPage;
+import pl.psnc.dl.wf4ever.portal.pages.users.OAuthAuthorizationEndpointPage;
 import pl.psnc.dl.wf4ever.portal.pages.users.ProfilePage;
 import pl.psnc.dl.wf4ever.portal.services.RSSService;
 
@@ -115,6 +116,7 @@ public class PortalApplication extends AuthenticatedWebApplication {
         mountPage("/profile", ProfilePage.class);
         mountPage("/tokens", AccessTokensPage.class);
         mountPage("/generate", GenerateAccessTokenPage.class);
+        mountPage("/authorize", OAuthAuthorizationEndpointPage.class);
 
         loadProperties("portal.properties");
         loadTokens("tokens.properties");
