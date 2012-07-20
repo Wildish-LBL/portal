@@ -656,7 +656,7 @@ public final class RoFactory {
                 if (a1.getCreated() == null) {
                     return 1;
                 }
-                if (a1.getCreated() == null) {
+                if (a2.getCreated() == null) {
                     return -1;
                 }
                 return a1.getCreated().compareTo(a2.getCreated());
