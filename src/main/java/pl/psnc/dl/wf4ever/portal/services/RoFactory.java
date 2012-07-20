@@ -650,6 +650,15 @@ public final class RoFactory {
 
             @Override
             public int compare(Annotation a1, Annotation a2) {
+                if (a1.getCreated() == null && a2.getCreated() == null) {
+                    return 0;
+                }
+                if (a1.getCreated() == null) {
+                    return 1;
+                }
+                if (a1.getCreated() == null) {
+                    return -1;
+                }
                 return a1.getCreated().compareTo(a2.getCreated());
             }
         });
