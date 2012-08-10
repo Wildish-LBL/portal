@@ -64,6 +64,9 @@ public final class RODLUtilities {
         List<ResearchObject> roHeaders = new ArrayList<>();
         while (results.hasNext()) {
             QuerySolution solution = results.next();
+            if (solution.getResource("ro") == null) {
+                continue;
+            }
             URI uri = URI.create(solution.getResource("ro").getURI());
             Literal creators = solution.getLiteral("creators");
             List<Creator> authors = new ArrayList<>();
