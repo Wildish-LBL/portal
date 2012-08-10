@@ -25,7 +25,6 @@ import org.apache.wicket.request.UrlDecoder;
 import org.apache.wicket.util.crypt.Base64;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
-import org.purl.wf4ever.rosrs.client.common.AnonId;
 import org.purl.wf4ever.rosrs.client.common.ROSRService;
 import org.purl.wf4ever.rosrs.client.common.Vocab;
 
@@ -608,7 +607,7 @@ public final class RoFactory {
         List<Annotation> anns = new ArrayList<>();
 
         Individual res = model.getIndividual(resourceURI.toString());
-        ResIterator it = model.listSubjectsWithProperty(Vocab.ORE_ANNOTATES_AGGREGATED_RESOURCE, res);
+        ResIterator it = model.listSubjectsWithProperty(Vocab.RO_ANNOTATES_AGGREGATED_RESOURCE, res);
         while (it.hasNext()) {
             Individual ann = it.next().as(Individual.class);
             if (!ann.hasRDFType(Vocab.RO_AGGREGATED_ANNOTATION)) {
@@ -633,15 +632,9 @@ public final class RoFactory {
                 } catch (Exception e) {
                     LOG.trace("Could not parse dcterms:creator for " + resourceURI, e);
                 }
-                if (ann.isURIResource()) {
-                    URI annURI = new URI(ann.getURI());
-                    String name = UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.relativize(annURI).toString(),
-                        "UTF-8");
-                    anns.add(new Annotation(annURI, created, creators, name, new URI(body.getURI())));
-                } else {
-                    anns.add(new Annotation(new AnonId(ann.getId()), created, creators, ann.getId().getLabelString(),
-                            new URI(body.getURI())));
-                }
+                URI annURI = new URI(ann.getURI());
+                String name = UrlDecoder.PATH_INSTANCE.decode(researchObjectURI.relativize(annURI).toString(), "UTF-8");
+                anns.add(new Annotation(annURI, created, creators, name, new URI(body.getURI())));
             } catch (Exception e) {
                 LOG.warn("Could not add annotation " + ann.getURI() + ": " + e.getMessage());
             }

@@ -140,15 +140,9 @@ class AnnotatingBox extends Panel {
                     try {
                         if (annotation.getBody().isEmpty()) {
                             ROSRService.deleteResource(annotation.getBodyURI(), dLibraToken);
-                            if (annotation.isURIResource()) {
-                                ROSRService.deleteAnnotationAndBody(AnnotatingBox.this.roPage.roURI,
-                                    annotation.getURI(), dLibraToken);
-                            } else {
-                                ROSRService.deleteAnnotationAndBody(AnnotatingBox.this.roPage.roURI,
-                                    annotation.getId(), dLibraToken);
-                            }
+                            ROSRService.deleteAnnotationAndBody(annotation.getURI(), dLibraToken);
                         } else {
-                            ROSRService.uploadResource(annotation.getBodyURI(),
+                            ROSRService.updateResource(annotation.getBodyURI(),
                                 RoFactory.wrapAnnotationBody(annotation.getBody()), "application/rdf+xml", dLibraToken);
                         }
                     } catch (Exception e) {
