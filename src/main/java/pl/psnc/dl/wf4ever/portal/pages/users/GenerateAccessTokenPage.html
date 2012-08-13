@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wicket:extend xmlns:wicket="http://wicket.apache.org">
+	<div class="row">
+		<div class="span12" wicket:id="feedbackPanel"></div>
+	</div>
+	<div class="row">
+		<div class="span3">
+			<section class="box small">
+				<h3 class="collapsible">
+					Menu <img class="sh_button" src="images/l_open.gif" />
+				</h3>
+				<div class="boxDiv">
+					<ul>
+						<li><a wicket:id="profile">My profile</a></li>
+						<li><a wicket:id="tokens">Access tokens</a></li>
+						<li><a wicket:id="generate">Generate an access token</a></li>
+					</ul>
+				</div>
+			</section>
+		</div>
+
+		<div class="span9">
+			<h2 class="title">Generate an access token</h2>
+			<div class="entry">
+				<form wicket:id="form2">
+					<p>
+						Generate an access token for an Out Of Band application: <select
+							wicket:id="oobClients" />
+					</p>
+					<p>
+						<button class="btn" type="submit">Generate</button>
+					</p>
+				</form>
+			</div>
+		</div>
+	</div>
+</wicket:extend>

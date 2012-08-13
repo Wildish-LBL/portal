@@ -227,6 +227,11 @@ table.resourceList td.link {
 	filter: progid:DXImageTransform.Microsoft.Shadow(color='#cccccc',
 		direction='120', strength='7' );
 }
+
+.text {
+	padding-left: 10px;
+	padding-right: 10px;
+}
 /* left side
    --------- */
 .inspan9 {

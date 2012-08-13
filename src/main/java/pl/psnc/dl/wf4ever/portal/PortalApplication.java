@@ -19,7 +19,6 @@ import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
 
 import pl.psnc.dl.wf4ever.portal.model.ResourceGroup;
-import pl.psnc.dl.wf4ever.portal.pages.AuthenticatePage;
 import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
 import pl.psnc.dl.wf4ever.portal.pages.HelpPage;
@@ -30,7 +29,11 @@ import pl.psnc.dl.wf4ever.portal.pages.all.AllRosPage;
 import pl.psnc.dl.wf4ever.portal.pages.home.HomePage;
 import pl.psnc.dl.wf4ever.portal.pages.my.MyRosPage;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
-import pl.psnc.dl.wf4ever.portal.services.DlibraApi;
+import pl.psnc.dl.wf4ever.portal.pages.users.AccessTokensPage;
+import pl.psnc.dl.wf4ever.portal.pages.users.AuthenticationPage;
+import pl.psnc.dl.wf4ever.portal.pages.users.GenerateAccessTokenPage;
+import pl.psnc.dl.wf4ever.portal.pages.users.OAuthAuthorizationEndpointPage;
+import pl.psnc.dl.wf4ever.portal.pages.users.ProfilePage;
 import pl.psnc.dl.wf4ever.portal.services.RSSService;
 
 /**
@@ -80,6 +83,9 @@ public class PortalApplication extends AuthenticatedWebApplication {
     /** Wf-RO transformation service URI. */
     private URI wf2ROService;
 
+    /** RODL admin token. */
+    private String adminToken;
+
     /** How are resources displayed depending on their RDF classes. */
     private final Set<ResourceGroup> resourceGroups = new HashSet<>();
 
@@ -103,14 +109,19 @@ public class PortalApplication extends AuthenticatedWebApplication {
         mountPage("/sparql", SparqlEndpointPage.class);
         mountPage("/myexpimport", MyExpImportPage.class);
         mountPage("/oauth", OAuthPage.class);
-        mountPage("/authenticate", AuthenticatePage.class);
+        mountPage("/authenticate", AuthenticationPage.class);
         mountPage("/error", ErrorPage.class);
         mountPage("/contact", ContactPage.class);
         mountPage("/help", HelpPage.class);
+        mountPage("/profile", ProfilePage.class);
+        mountPage("/tokens", AccessTokensPage.class);
+        mountPage("/generate", GenerateAccessTokenPage.class);
+        mountPage("/authorize", OAuthAuthorizationEndpointPage.class);
 
         loadProperties("portal.properties");
         loadTokens("tokens.properties");
         loadResourceGroups("resourceGroups.properties");
+        loadAdminTokens("admintoken.properties");
 
         RSSService.start(null, sparqlEndpoint, rodlURI);
 
@@ -162,11 +173,25 @@ public class PortalApplication extends AuthenticatedWebApplication {
             myExpConsumerSecret = props.getProperty("myExpConsumerSecret");
             dLibraClientId = props.getProperty("dLibraClientId");
             callbackURL = props.getProperty("callbackURL");
-
-            AuthenticatePage.setAuthorizationURL(DlibraApi.getOAuthService(getDLibraClientId(), getCallbackURL())
-                    .getAuthorizationUrl(null));
         } catch (Exception e) {
             LOG.error("Failed to load tokens: " + e.getMessage());
+        }
+    }
+
+
+    /**
+     * Load RODL admin tokens.
+     * 
+     * @param propertiesFile
+     *            filename
+     */
+    private void loadAdminTokens(String propertiesFile) {
+        Properties props = new Properties();
+        try {
+            props.load(getClass().getClassLoader().getResourceAsStream(propertiesFile));
+            adminToken = props.getProperty("adminToken");
+        } catch (Exception e) {
+            LOG.error("Failed to load admin tokens: " + e.getMessage());
         }
     }
 
@@ -234,6 +259,11 @@ public class PortalApplication extends AuthenticatedWebApplication {
     }
 
 
+    public String getAdminToken() {
+        return adminToken;
+    }
+
+
     public URI getRodlURI() {
         return rodlURI;
     }
@@ -290,8 +320,8 @@ public class PortalApplication extends AuthenticatedWebApplication {
 
 
     @Override
-    protected Class<? extends WebPage> getSignInPageClass() {
-        return AuthenticatePage.class;
+    public Class<? extends WebPage> getSignInPageClass() {
+        return AuthenticationPage.class;
     }
 
 
