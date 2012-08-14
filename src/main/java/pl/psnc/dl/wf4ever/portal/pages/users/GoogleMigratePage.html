@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wicket:extend xmlns:wicket="http://wicket.apache.org">
+	<div class="text">
+		<h2>Google OpenID</h2>
+		<p>
+			If you logged in using <strong>Google</strong> in the User Management
+			Application before, then your OpenID has changed now and it is
+			necessary to update your OpenID in RODL.
+		</p>
+		<p>Have you used Google to authenticate with the User Management
+			Application before?</p>
+		<form wicket:id="migrateForm" class="form-horizontal">
+			<fieldset>
+				<div class="form-actions">
+					<button wicket:id="migrate" class="btn btn-primary">Yes
+						(convert Google OpenID)</button>
+					<button wicket:id="cancel" class="btn">No</button>
+				</div>
+			</fieldset>
+		</form>
+	</div>
+</wicket:extend>

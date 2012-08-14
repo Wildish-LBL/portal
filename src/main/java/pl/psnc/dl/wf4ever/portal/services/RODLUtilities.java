@@ -2,6 +2,7 @@ package pl.psnc.dl.wf4ever.portal.services;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -9,16 +10,26 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.joda.time.format.ISODateTimeFormat;
+import org.purl.wf4ever.rosrs.client.common.ROSRService;
+import org.purl.wf4ever.rosrs.client.common.Vocab;
+import org.scribe.model.Token;
 
+import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.Creator;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
+import pl.psnc.dl.wf4ever.portal.model.User;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
+import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Literal;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
 /**
  * Various utility methods for RODL, not related directly to its REST APIs.
@@ -89,6 +100,31 @@ public final class RODLUtilities {
             roHeaders.add(new ResearchObject(uri, created, authors));
         }
         return roHeaders;
+    }
+
+
+    /**
+     * Load user URI and username using the RODL access token.
+     * 
+     * @param token
+     *            RODL access token
+     * @return the user data
+     * @throws URISyntaxException
+     *             user URI is incorrect
+     */
+    public static User getUser(Token token)
+            throws URISyntaxException {
+        OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
+        userModel.read(ROSRService.getWhoAmi(((PortalApplication) PortalApplication.get()).getRodlURI(), token), null);
+        ExtendedIterator<Individual> it = userModel.listIndividuals(Vocab.FOAF_AGENT);
+        Individual userInd = it.next();
+        if (userInd != null && userInd.hasProperty(Vocab.FOAF_NAME)) {
+            URI userURI = new URI(userInd.getURI());
+            String username = userInd.as(Individual.class).getPropertyValue(Vocab.FOAF_NAME).asLiteral().getString();
+            return new User(userURI, username);
+        } else {
+            throw new IllegalArgumentException("No user data found");
+        }
     }
 
 }

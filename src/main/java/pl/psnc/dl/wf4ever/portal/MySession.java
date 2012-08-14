@@ -14,18 +14,12 @@ import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.util.cookies.CookieUtils;
 import org.openid4java.discovery.DiscoveryInformation;
-import org.purl.wf4ever.rosrs.client.common.ROSRService;
-import org.purl.wf4ever.rosrs.client.common.Vocab;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.model.Creator;
 import pl.psnc.dl.wf4ever.portal.model.User;
+import pl.psnc.dl.wf4ever.portal.services.RODLUtilities;
 
-import com.hp.hpl.jena.ontology.Individual;
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.ontology.OntModelSpec;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
 /**
  * Custom app session.
@@ -127,7 +121,11 @@ public class MySession extends AbstractAuthenticatedWebSession {
      */
     public void setdLibraAccessToken(Token dLibraAccessToken) {
         this.dLibraAccessToken = dLibraAccessToken;
-        fetchUserData();
+        try {
+            this.user = RODLUtilities.getUser(getdLibraAccessToken());
+        } catch (Exception e) {
+            LOG.error("Error when retrieving user data: " + e.getMessage());
+        }
         dirtydLibra = true;
     }
 
@@ -216,28 +214,6 @@ public class MySession extends AbstractAuthenticatedWebSession {
                 new CookieUtils().save(MYEXP_KEY_SECRET, myExpAccessToken.getSecret());
             }
             dirtyMyExp = false;
-        }
-    }
-
-
-    /**
-     * Load user URI and username using the RODL access token.
-     */
-    private void fetchUserData() {
-        try {
-            OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
-            userModel.read(ROSRService.getWhoAmi(((PortalApplication) PortalApplication.get()).getRodlURI(),
-                getdLibraAccessToken()), null);
-            ExtendedIterator<Individual> it = userModel.listIndividuals(Vocab.FOAF_AGENT);
-            Individual userInd = it.next();
-            if (userInd != null && userInd.hasProperty(Vocab.FOAF_NAME)) {
-                URI userURI = new URI(userInd.getURI());
-                String username = userInd.as(Individual.class).getPropertyValue(Vocab.FOAF_NAME).asLiteral()
-                        .getString();
-                this.user = new User(userURI, username);
-            }
-        } catch (Exception e) {
-            LOG.error("Error when retrieving user data: " + e.getMessage());
         }
     }
 
