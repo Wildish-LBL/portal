@@ -50,7 +50,9 @@ public class OpenIDEndpoint extends WebPage {
             if (openIdUser == null) {
                 session.error("Open ID Confirmation Failed. No information was retrieved from the OpenID Provider.");
             } else {
-                register(openIdUser);
+                if (register(openIdUser) && openIdUser.getOpenId().startsWith("https://www.google.com/")) {
+                    throw new RestartResponseException(GoogleMigratePage.class);
+                }
                 if (!continueToOriginalDestination()) {
                     LOG.warn("Could not find the original destination");
                     throw new RestartResponseException(getApplication().getHomePage());
@@ -66,14 +68,17 @@ public class OpenIDEndpoint extends WebPage {
      * 
      * @param user
      *            openID attributes
+     * @return true if a new account has been created, false otherwise
      */
-    private void register(OpenIdUser user) {
+    private boolean register(OpenIdUser user) {
         PortalApplication app = ((PortalApplication) getApplication());
+        boolean newAccount = false;
         if (!UserManagementService.userExistsInDlibra(app.getRodlURI(), app.getAdminToken(), user.getOpenId())) {
             try {
                 ClientResponse response = UserManagementService.createUser(app.getRodlURI(), app.getAdminToken(),
                     user.getOpenId(), user.getFullName());
                 if (response.getStatus() == HttpServletResponse.SC_CREATED) {
+                    newAccount = true;
                     getSession().info("New account has been created.");
                 } else if (response.getStatus() == HttpServletResponse.SC_CONFLICT) {
                     getSession().info(
@@ -95,5 +100,6 @@ public class OpenIDEndpoint extends WebPage {
             getSession().error(e.getResponse().getClientResponseStatus());
             LOG.error(e.getResponse().getClientResponseStatus());
         }
+        return newAccount;
     }
 }

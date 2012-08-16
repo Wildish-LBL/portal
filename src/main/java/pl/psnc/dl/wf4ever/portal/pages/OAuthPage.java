@@ -57,7 +57,8 @@ public class OAuthPage extends WebPage {
         MySession session = MySession.get();
         PortalApplication app = (PortalApplication) getApplication();
 
-        if (session.getdLibraAccessToken() == null) {
+        if (session.isUpdateURI()) {
+            session.setUpdateURI(false);
             OAuthService service = DlibraApi.getOAuthService(app.getDLibraClientId(), app.getCallbackURL());
             Token token = retrieveDlibraAccessToken(pageParameters, service);
             if (token != null) {

@@ -20,7 +20,6 @@ import pl.psnc.dl.wf4ever.portal.model.Creator;
 import pl.psnc.dl.wf4ever.portal.model.User;
 import pl.psnc.dl.wf4ever.portal.services.RODLUtilities;
 
-
 /**
  * Custom app session.
  * 
@@ -73,6 +72,9 @@ public class MySession extends AbstractAuthenticatedWebSession {
 
     /** RODL user. */
     private User user;
+
+    /** Is user updating his user URI. */
+    private boolean updateURI;
 
 
     /**
@@ -260,6 +262,16 @@ public class MySession extends AbstractAuthenticatedWebSession {
 
     public void setOpenIDCallbackURI(URI openIDCallbackURI) {
         this.openIDCallbackURI = openIDCallbackURI;
+    }
+
+
+    public boolean isUpdateURI() {
+        return updateURI;
+    }
+
+
+    public void setUpdateURI(boolean updateURI) {
+        this.updateURI = updateURI;
     }
 
 }

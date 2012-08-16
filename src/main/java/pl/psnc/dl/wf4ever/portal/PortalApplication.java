@@ -36,6 +36,7 @@ import pl.psnc.dl.wf4ever.portal.pages.users.GoogleMigratePage;
 import pl.psnc.dl.wf4ever.portal.pages.users.OAuthAuthorizationEndpointPage;
 import pl.psnc.dl.wf4ever.portal.pages.users.ProfilePage;
 import pl.psnc.dl.wf4ever.portal.pages.users.UserURIUpdatePage;
+import pl.psnc.dl.wf4ever.portal.services.DlibraApi;
 import pl.psnc.dl.wf4ever.portal.services.RSSService;
 
 /**
@@ -177,6 +178,9 @@ public class PortalApplication extends AuthenticatedWebApplication {
             myExpConsumerSecret = props.getProperty("myExpConsumerSecret");
             dLibraClientId = props.getProperty("dLibraClientId");
             callbackURL = props.getProperty("callbackURL");
+
+            GoogleMigratePage.setAuthorizationURL(DlibraApi.getOAuthService(getDLibraClientId(), getCallbackURL())
+                    .getAuthorizationUrl(null));
         } catch (Exception e) {
             LOG.error("Failed to load tokens: " + e.getMessage());
         }

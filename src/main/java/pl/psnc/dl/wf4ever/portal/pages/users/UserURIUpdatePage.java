@@ -3,8 +3,10 @@ package pl.psnc.dl.wf4ever.portal.pages.users;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -85,6 +87,13 @@ public class UserURIUpdatePage extends TemplatePage {
                     target.add(feedbackPanel);
                 }
                 target.add(statusLabel);
+            }
+
+
+            @Override
+            public void renderHead(final Component component, final IHeaderResponse response) {
+                super.renderHead(component, response);
+                response.renderOnDomReadyJavaScript(getCallbackScript().toString());
             }
         });
     }
