@@ -4,9 +4,8 @@
 	<groupId>pl.psnc.dl.wf4ever</groupId>
 	<artifactId>portal</artifactId>
 	<packaging>war</packaging>
-	<version>0.2.1</version>
-	<!-- TODO project name -->
-	<name>Research Object Digital Library portal</name>
+	<version>0.2.1-SNAPSHOT</version>
+	<name>Research Object Digital Library Portal</name>
 	<description></description>
 	<organization>
 		<name>PSNC</name>
@@ -33,7 +32,9 @@
 	<properties>
 		<wicket.version>1.5.6</wicket.version>
 		<jetty.version>7.5.0.v20110901</jetty.version>
-		<jersey.version>1.13-b01</jersey.version>
+		<jersey.version>1.13</jersey.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 	<repositories>
 		<repository>
@@ -57,16 +58,6 @@
 			<snapshots />
 			<id>dlibra-snapshots</id>
 			<url>http://maven.man.poznan.pl/repository/dlibra-libs-snapshots-public/</url>
-		</repository>
-		<repository>
-			<id>Apache Nexus</id>
-			<url>https://repository.apache.org/content/repositories/snapshots/</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
 		</repository>
 	</repositories>
 	<dependencies>
@@ -275,7 +266,47 @@
 					<downloadSources>true</downloadSources>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.3.2</version>
+			</plugin>
 		</plugins>
 	</build>
+	<scm>
+		<developerConnection>scm:git:git@github.com:wf4ever/portal.git</developerConnection>
+	</scm>
+	<profiles>
+		<profile>
+			<id>buildhive</id>
+			<!-- http://dev-snapshot.blogspot.com/2012/08/use-java-7-on-buildhive.html -->
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-compiler-plugin</artifactId>
+						<version>2.5.1</version>
+						<configuration>
+							<source>1.7</source>
+							<target>1.7</target>
+							<showDeprecation>true</showDeprecation>
+							<showWarnings>true</showWarnings>
+							<encoding>UTF-8</encoding>
+							<executable>/opt/jdk/jdk1.7.0/bin/javac</executable>
+							<fork>true</fork>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<jvm>/opt/jdk/jdk1.7.0/bin/java</jvm>
+							<forkMode>once</forkMode>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 </project>
