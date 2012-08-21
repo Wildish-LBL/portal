@@ -10,7 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.purl.wf4ever.rosrs.client.common.ROSRService;
 
-import pl.psnc.dl.wf4ever.portal.pages.AuthenticatePage;
 import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
 import pl.psnc.dl.wf4ever.portal.pages.HelpPage;
@@ -18,6 +17,8 @@ import pl.psnc.dl.wf4ever.portal.pages.SparqlEndpointPage;
 import pl.psnc.dl.wf4ever.portal.pages.all.AllRosPage;
 import pl.psnc.dl.wf4ever.portal.pages.home.HomePage;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
+import pl.psnc.dl.wf4ever.portal.pages.users.AuthenticationPage;
+import pl.psnc.dl.wf4ever.portal.pages.users.GoogleMigratePage;
 
 /**
  * Simple test using the WicketTester.
@@ -57,8 +58,11 @@ public class TestPages {
         tester.startPage(SparqlEndpointPage.class);
         tester.assertRenderedPage(SparqlEndpointPage.class);
 
-        tester.startPage(AuthenticatePage.class);
-        tester.assertRenderedPage(AuthenticatePage.class);
+        tester.startPage(AuthenticationPage.class);
+        tester.assertRenderedPage(AuthenticationPage.class);
+
+        tester.startPage(GoogleMigratePage.class);
+        tester.assertRenderedPage(GoogleMigratePage.class);
 
         tester.startPage(ErrorPage.class);
         tester.assertRenderedPage(ErrorPage.class);
