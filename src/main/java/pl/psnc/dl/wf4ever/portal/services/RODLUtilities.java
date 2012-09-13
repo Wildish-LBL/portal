@@ -114,8 +114,25 @@ public final class RODLUtilities {
      */
     public static User getUser(Token token)
             throws URISyntaxException {
+        return getUser(token, ((PortalApplication) PortalApplication.get()).getRodlURI());
+    }
+
+
+    /**
+     * Load user URI and username using the RODL access token.
+     * 
+     * @param token
+     *            RODL access token
+     * @param rodl
+     *            RODL URI
+     * @return the user data
+     * @throws URISyntaxException
+     *             user URI is incorrect
+     */
+    public static User getUser(Token token, URI rodl)
+            throws URISyntaxException {
         OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
-        userModel.read(ROSRService.getWhoAmi(((PortalApplication) PortalApplication.get()).getRodlURI(), token), null);
+        userModel.read(ROSRService.getWhoAmi(rodl, token), null);
         ExtendedIterator<Individual> it = userModel.listIndividuals(Vocab.FOAF_AGENT);
         Individual userInd = it.next();
         if (userInd != null && userInd.hasProperty(Vocab.FOAF_NAME)) {

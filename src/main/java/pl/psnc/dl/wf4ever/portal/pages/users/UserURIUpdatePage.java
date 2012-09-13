@@ -14,6 +14,7 @@ import org.purl.wf4ever.rosrs.client.common.users.MigrateService;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
+import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.pages.TemplatePage;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.services.RODLUtilities;
@@ -58,7 +59,8 @@ public class UserURIUpdatePage extends TemplatePage {
 
         String token = pageParameters.get("token").toString();
         try {
-            oldURI = RODLUtilities.getUser(new Token(token, null)).getURI();
+            oldURI = RODLUtilities.getUser(new Token(token, null),
+                ((PortalApplication) PortalApplication.get()).getRodlURI().resolve("../rosrs5/")).getURI();
         } catch (URISyntaxException e) {
             error(e);
         }
