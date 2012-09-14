@@ -8,6 +8,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.tester.WicketTester;
 import org.junit.Before;
 import org.junit.Test;
+import org.purl.wf4ever.rosrs.client.common.ROSRSException;
 import org.purl.wf4ever.rosrs.client.common.ROSRService;
 
 import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
@@ -43,10 +44,12 @@ public class TestPages {
      * 
      * @throws URISyntaxException
      *             RO list returned by RODL is incorrect
+     * @throws ROSRSException
+     *             the list of ROs could not be fetched from ROSRS
      */
     @Test
     public void homepageRendersSuccessfully()
-            throws URISyntaxException {
+            throws URISyntaxException, ROSRSException {
         //start and render the test page
         tester.startPage(HomePage.class);
         //assert rendered page class

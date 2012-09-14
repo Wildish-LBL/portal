@@ -89,12 +89,9 @@ public final class RoFactory {
      * @param usernames
      *            usernames cache
      * @return Research Object
-     * @throws URISyntaxException
-     *             problem with parsing URIs
      */
     public static ResearchObject createResearchObject(URI rodlURI, URI researchObjectURI, boolean includeAnnotations,
-            Map<URI, Creator> usernames)
-            throws URISyntaxException {
+            Map<URI, Creator> usernames) {
         OntModel model = ROSRService.createManifestModel(researchObjectURI);
         return createResearchObject(model, rodlURI, researchObjectURI, includeAnnotations, usernames);
     }
@@ -114,12 +111,9 @@ public final class RoFactory {
      * @param usernames
      *            usernames cache
      * @return Research Object
-     * @throws URISyntaxException
-     *             problem with parsing URIs
      */
     public static ResearchObject createResearchObject(OntModel model, URI rodlURI, URI researchObjectURI,
-            boolean includeAnnotations, Map<URI, Creator> usernames)
-            throws URISyntaxException {
+            boolean includeAnnotations, Map<URI, Creator> usernames) {
         return (ResearchObject) createResource(model, rodlURI, researchObjectURI, researchObjectURI,
             includeAnnotations, usernames);
     }

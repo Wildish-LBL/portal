@@ -10,6 +10,7 @@ import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.purl.wf4ever.rosrs.client.common.ROSRSException;
 import org.purl.wf4ever.rosrs.client.common.users.MigrateService;
 import org.scribe.model.Token;
 
@@ -61,7 +62,7 @@ public class UserURIUpdatePage extends TemplatePage {
         try {
             oldURI = RODLUtilities.getUser(new Token(token, null),
                 ((PortalApplication) PortalApplication.get()).getRodlURI().resolve("../rosrs5/")).getURI();
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | ROSRSException e) {
             error(e);
         }
         newURI = MySession.get().getUser().getURI();

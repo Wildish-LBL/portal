@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.http.HttpStatus;
 import org.apache.log4j.Logger;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
@@ -24,6 +25,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
+import org.purl.wf4ever.rosrs.client.common.ROSRSException;
 import org.purl.wf4ever.rosrs.client.common.ROSRService;
 import org.scribe.model.Token;
 
@@ -38,6 +40,8 @@ import pl.psnc.dl.wf4ever.portal.pages.util.ModelIteratorAdapter;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.services.RoFactory;
+
+import com.sun.jersey.api.client.ClientResponse;
 
 /**
  * A page with user's own Research Objects.
@@ -74,10 +78,12 @@ public class MyRosPage extends TemplatePage {
      *            page params
      * @throws URISyntaxException
      *             can't connect to RODL
+     * @throws ROSRSException
+     *             getting the RO list ends with an unexpected response code
      */
     @SuppressWarnings("serial")
     public MyRosPage(final PageParameters parameters)
-            throws URISyntaxException {
+            throws URISyntaxException, ROSRSException {
         super(parameters);
 
         List<URI> uris = ROSRService.getROList(rodlURI, MySession.get().getdLibraAccessToken());
@@ -191,11 +197,16 @@ public class MyRosPage extends TemplatePage {
                 super.onSubmit(target, addForm);
                 Token dLibraToken = MySession.get().getdLibraAccessToken();
                 try {
-                    URI researchObjectURI = ROSRService.createResearchObject(
-                        ((PortalApplication) getApplication()).getRodlURI(), roId, dLibraToken).getLocation();
-                    researchObjects.add(RoFactory.createResearchObject(rodlURI, researchObjectURI, false, MySession
-                            .get().getUsernames()));
-                } catch (URISyntaxException e) {
+                    ClientResponse response = ROSRService.createResearchObject(
+                        ((PortalApplication) getApplication()).getRodlURI(), roId, dLibraToken);
+                    if (response.getStatus() == HttpStatus.SC_CREATED) {
+                        URI researchObjectURI = response.getLocation();
+                        researchObjects.add(RoFactory.createResearchObject(rodlURI, researchObjectURI, false, MySession
+                                .get().getUsernames()));
+                    } else if (response.getStatus() == HttpStatus.SC_CONFLICT) {
+                        error("This ID is already used.");
+                    }
+                } catch (ROSRSException e) {
                     error("Could not add Research Object: " + roId + " (" + e.getMessage() + ")");
                 }
                 target.add(form);

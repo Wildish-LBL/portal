@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.joda.time.format.ISODateTimeFormat;
+import org.purl.wf4ever.rosrs.client.common.ROSRSException;
 import org.purl.wf4ever.rosrs.client.common.ROSRService;
 import org.purl.wf4ever.rosrs.client.common.Vocab;
 import org.scribe.model.Token;
@@ -111,9 +112,11 @@ public final class RODLUtilities {
      * @return the user data
      * @throws URISyntaxException
      *             user URI is incorrect
+     * @throws ROSRSException
+     *             the user data could not be fetched from ROSRS
      */
     public static User getUser(Token token)
-            throws URISyntaxException {
+            throws URISyntaxException, ROSRSException {
         return getUser(token, ((PortalApplication) PortalApplication.get()).getRodlURI());
     }
 
@@ -128,9 +131,11 @@ public final class RODLUtilities {
      * @return the user data
      * @throws URISyntaxException
      *             user URI is incorrect
+     * @throws ROSRSException
+     *             the user data could not be fetched from ROSRS
      */
     public static User getUser(Token token, URI rodl)
-            throws URISyntaxException {
+            throws URISyntaxException, ROSRSException {
         OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
         userModel.read(ROSRService.getWhoAmi(rodl, token), null);
         ExtendedIterator<Individual> it = userModel.listIndividuals(Vocab.FOAF_AGENT);

@@ -11,13 +11,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.log4j.Logger;
+import org.purl.wf4ever.rosrs.client.common.ROSRSException;
 import org.purl.wf4ever.rosrs.client.common.ROSRService;
 import org.purl.wf4ever.rosrs.client.common.Vocab;
 import org.scribe.model.Response;
@@ -280,16 +280,13 @@ public final class MyExpImportService {
          * @param roId
          *            RO id (last segment of URI)
          * @return RO URI
-         * @throws IllegalStateException
+         * @throws ROSRSException
          *             when the RO could not be created
          */
         private URI createRO(URI rodlURI, String roId)
-                throws IllegalStateException {
+                throws ROSRSException {
             model.setMessage(String.format("Creating a Research Object \"%s\"", roId));
             ClientResponse r = ROSRService.createResearchObject(rodlURI, roId, dLibraToken);
-            if (r.getStatus() != HttpServletResponse.SC_CREATED) {
-                throw new IllegalStateException("Error: " + r.getClientResponseStatus());
-            }
             incrementStepsComplete();
             return r.getLocation();
         }
@@ -458,9 +455,11 @@ public final class MyExpImportService {
          *             when the resource URI cannot be created
          * @throws IOException
          *             when there is a problem with Wf-RO service
+         * @throws ROSRSException
+         *             the resource couldn't be uploaded to ROSRS
          */
         private void importInternalPackItem(Pack pack, InternalPackItemHeader packItemHeader)
-                throws JAXBException, OAuthException, URISyntaxException, IOException {
+                throws JAXBException, OAuthException, URISyntaxException, IOException, ROSRSException {
             InternalPackItem internalItem = (InternalPackItem) getResource(packItemHeader, InternalPackItem.class);
             BaseResourceHeader resourceHeader = internalItem.getItem();
             BaseResource r;
@@ -485,9 +484,11 @@ public final class MyExpImportService {
          *             when there is a problem with parsing the pack item metadata
          * @throws URISyntaxException
          *             when the resource URI cannot be created
+         * @throws ROSRSException
+         *             the resource couldn't be created in ROSRS
          */
         private File importFile(FileHeader res)
-                throws OAuthException, JAXBException, URISyntaxException {
+                throws OAuthException, JAXBException, URISyntaxException, ROSRSException {
             File r = (File) getResource(res, File.class);
             incrementStepsComplete();
 
@@ -531,9 +532,11 @@ public final class MyExpImportService {
          *             when there is a problem with authorization
          * @throws URISyntaxException
          *             when the resource URI cannot be created
+         * @throws ROSRSException
+         *             the annotation couldn't be created in ROSRS
          */
         private void downloadResourceMetadata(BaseResource res)
-                throws OAuthException, URISyntaxException {
+                throws OAuthException, URISyntaxException, ROSRSException {
             model.setMessage(String.format("Downloading metadata file %s", res.getResource()));
             Response response = OAuthHelpService.sendRequest(service, Verb.GET, res.getResource(), myExpToken,
                 "application/rdf+xml");

@@ -34,6 +34,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.UrlEncoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.purl.wf4ever.rosrs.client.common.ROSRSException;
 import org.purl.wf4ever.rosrs.client.common.ROSRService;
 import org.purl.wf4ever.rosrs.client.common.Vocab;
 
@@ -142,8 +143,9 @@ public class RoPage extends TemplatePage {
         add(feedbackPanel);
 
         if (MySession.get().isSignedIn()) {
-            List<URI> uris = ROSRService.getROList(rodlURI, MySession.get().getdLibraAccessToken());
-            canEdit = uris.contains(roURI);
+            //            List<URI> uris = ROSRService.getROList(rodlURI, MySession.get().getdLibraAccessToken());
+            //            canEdit = uris.contains(roURI);
+            canEdit = true;
         }
         add(new Label("title", roURI.toString()));
 
@@ -213,17 +215,21 @@ public class RoPage extends TemplatePage {
     @Override
     public void renderHead(IHeaderResponse response) {
         super.renderHead(response);
-        ClientResponse head = ROSRService.getResourceHead(roURI.resolve(".ro/manifest.rdf"));
-        List<String> links = head.getHeaders().get("Link");
-        if (links != null) {
-            for (String link : links) {
-                Matcher m = LINK_HEADER.matcher(link);
-                if (m.matches()) {
-                    response.renderString(String.format(HTML_LINK_TEMPLATE, m.group(2), m.group(1)));
+        try {
+            ClientResponse head = ROSRService.getResourceHead(roURI.resolve(".ro/manifest.rdf"));
+            List<String> links = head.getHeaders().get("Link");
+            if (links != null) {
+                for (String link : links) {
+                    Matcher m = LINK_HEADER.matcher(link);
+                    if (m.matches()) {
+                        response.renderString(String.format(HTML_LINK_TEMPLATE, m.group(2), m.group(1)));
+                    }
                 }
             }
+            head.close();
+        } catch (ROSRSException e) {
+            LOG.error("Unexpected response when getting RO head", e);
         }
-        head.close();
     }
 
 
@@ -352,18 +358,17 @@ public class RoPage extends TemplatePage {
      *            the uploaded file
      * @param selectedResourceGroups
      *            resource groups of the file
+     * @throws ROSRSException
+     *             unexpected response code
      * @throws IOException
-     *             error connecting to RODL
+     *             can't get the uploaded file
      */
     void onResourceAdd(AjaxRequestTarget target, final FileUpload uploadedFile,
             Set<ResourceGroup> selectedResourceGroups)
-            throws IOException {
+            throws ROSRSException, IOException {
         URI resourceURI = roURI.resolve(UrlEncoder.PATH_INSTANCE.encode(uploadedFile.getClientFileName(), "UTF-8"));
-        ClientResponse response = ROSRService.createResource(roURI, uploadedFile.getClientFileName(),
-            uploadedFile.getInputStream(), uploadedFile.getContentType(), MySession.get().getdLibraAccessToken());
-        if (response.getStatus() != HttpServletResponse.SC_OK && response.getStatus() != HttpServletResponse.SC_CREATED) {
-            throw new IOException(response.getClientResponseStatus().getReasonPhrase());
-        }
+        ROSRService.createResource(roURI, uploadedFile.getClientFileName(), uploadedFile.getInputStream(),
+            uploadedFile.getContentType(), MySession.get().getdLibraAccessToken());
         //        OntModel manifestModel = ROSRService.createManifestModel(roURI);
         //        Individual individual = manifestModel.createResource(resourceURI.toString()).as(Individual.class);
         //        for (ResourceGroup resourceGroup : selectedResourceGroups) {
@@ -398,16 +403,14 @@ public class RoPage extends TemplatePage {
      *            request target
      * @throws IOException
      *             when cannot connect to RODL
+     * @throws ROSRSException
+     *             deleting the resource caused an unexpected response
      */
     public void onResourceDelete(AggregatedResource resource, AjaxRequestTarget target)
-            throws IOException {
+            throws IOException, ROSRSException {
         ClientResponse response = ROSRService.deleteResource(resource.getURI(), MySession.get().getdLibraAccessToken());
         if (response.getStatus() != HttpServletResponse.SC_NO_CONTENT) {
-            if (response.getStatus() == HttpServletResponse.SC_NOT_FOUND) {
-                onRemoteResourceDelete(resource, target);
-            } else {
-                throw new IOException(response.getClientResponseStatus().getReasonPhrase());
-            }
+            onRemoteResourceDelete(resource, target);
         }
         getConceptualResourcesTree().removeAggregatedResource(resource);
         getPhysicalResourcesTree().removeAggregatedResource(resource);
@@ -430,9 +433,11 @@ public class RoPage extends TemplatePage {
      *            request target
      * @throws IOException
      *             can't connect to RODL
+     * @throws ROSRSException
+     *             unexpected response code when deleting the resource
      */
     private void onRemoteResourceDelete(AggregatedResource resource, AjaxRequestTarget target)
-            throws IOException {
+            throws IOException, ROSRSException {
         OntModel manifestModel = ROSRService.createManifestModel(roURI);
         URI absoluteResourceURI = roURI.resolve(resource.getURI());
         Resource individual = manifestModel.createResource(absoluteResourceURI.toString());
@@ -469,11 +474,13 @@ public class RoPage extends TemplatePage {
      * @param selectedTypes
      *            resource groups that this resource belongs to
      * @throws IOException
-     *             can't connect to RODL
+     *             Jackson error
+     * @throws ROSRSException
+     *             aggregating the resource caused unexpected response
      */
     public void onRemoteResourceAdded(AjaxRequestTarget target, URI resourceURI, URI downloadURI,
             Set<ResourceGroup> selectedTypes)
-            throws IOException {
+            throws IOException, ROSRSException {
         URI absoluteResourceURI = roURI.resolve(resourceURI);
         ROSRService.aggregateResource(roURI, resourceURI, MySession.get().getdLibraAccessToken());
 
@@ -498,18 +505,14 @@ public class RoPage extends TemplatePage {
      *            a list of statements to be put in the annotation
      * @throws URISyntaxException
      *             URIs retrieved from RODL are incorrect
-     * @throws IOException
+     * @throws ROSRSException
      *             requests to RODL returned incorrect responses
      */
     void onStatementAdd(List<Statement> statements)
-            throws URISyntaxException, IOException {
+            throws URISyntaxException, ROSRSException {
         InputStream in = RoFactory.wrapAnnotationBody(statements);
-
-        ClientResponse res = ROSRService.addAnnotation(roURI, Arrays.asList(statements.get(0).getSubjectURI()), ".ro/"
+        ROSRService.addAnnotation(roURI, Arrays.asList(statements.get(0).getSubjectURI()), ".ro/"
                 + UUID.randomUUID().toString(), in, "application/rdf+xml", MySession.get().getdLibraAccessToken());
-        if (res.getStatus() != HttpServletResponse.SC_OK) {
-            throw new IOException("Error when adding annotation: " + res.getClientResponseStatus());
-        }
     }
 
 
@@ -518,17 +521,14 @@ public class RoPage extends TemplatePage {
      * 
      * @param statement
      *            the statement
-     * @throws IOException
+     * @throws ROSRSException
      *             requests to RODL returned incorrect responses
      */
     void onStatementEdit(Statement statement)
-            throws IOException {
+            throws ROSRSException {
         Annotation ann = statement.getAnnotation();
-        ClientResponse res = ROSRService.updateResource(ann.getBodyURI(), RoFactory.wrapAnnotationBody(ann.getBody()),
+        ROSRService.updateResource(ann.getBodyURI(), RoFactory.wrapAnnotationBody(ann.getBody()),
             "application/rdf+xml", MySession.get().getdLibraAccessToken());
-        if (res.getStatus() != HttpServletResponse.SC_OK) {
-            throw new IOException("Error when adding statement: " + res.getClientResponseStatus());
-        }
     }
 
 
@@ -578,22 +578,19 @@ public class RoPage extends TemplatePage {
      * @param aggregatedResource
      *            resource annotated
      * @throws IOException
-     *             problems with connecting to RODL
+     *             can't get the uploaded file
      * @throws URISyntaxException
      *             problems with creating the annotation
+     * @throws ROSRSException
+     *             uploading the annotation body returned an unexpected response
      */
     public void onAnnotationImport(AjaxRequestTarget target, FileUpload uploadedFile,
             AggregatedResource aggregatedResource)
-            throws IOException, URISyntaxException {
+            throws IOException, URISyntaxException, ROSRSException {
         String contentType = RDFFormat.forFileName(uploadedFile.getClientFileName(), RDFFormat.RDFXML)
                 .getDefaultMIMEType();
-        ClientResponse response = ROSRService.addAnnotation(roURI, Arrays.asList(aggregatedResource.getURI()),
-            uploadedFile.getClientFileName(), uploadedFile.getInputStream(), contentType, MySession.get()
-                    .getdLibraAccessToken());
-        if (response.getStatus() != HttpServletResponse.SC_OK) {
-            LOG.error(response.getEntity(String.class));
-            throw new IOException(response.getClientResponseStatus().getReasonPhrase());
-        }
+        ROSRService.addAnnotation(roURI, Arrays.asList(aggregatedResource.getURI()), uploadedFile.getClientFileName(),
+            uploadedFile.getInputStream(), contentType, MySession.get().getdLibraAccessToken());
         setResponsePage(RoPage.class, getPageParameters());
     }
 
