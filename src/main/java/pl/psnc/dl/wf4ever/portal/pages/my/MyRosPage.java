@@ -203,6 +203,7 @@ public class MyRosPage extends TemplatePage {
                         URI researchObjectURI = response.getLocation();
                         researchObjects.add(RoFactory.createResearchObject(rodlURI, researchObjectURI, false, MySession
                                 .get().getUsernames()));
+                        target.appendJavaScript("$('#confirm-add-modal').modal('hide')");
                     } else if (response.getStatus() == HttpStatus.SC_CONFLICT) {
                         error("This ID is already used.");
                     }
@@ -211,7 +212,6 @@ public class MyRosPage extends TemplatePage {
                 }
                 target.add(form);
                 target.add(addFeedbackPanel);
-                target.appendJavaScript("$('#confirm-add-modal').modal('hide')");
             }
 
 
