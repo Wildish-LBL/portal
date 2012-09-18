@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import java.net.URI;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import pl.psnc.dl.wf4ever.portal.model.Recommendation;
@@ -25,6 +26,7 @@ public class TestRecommender {
      *             any error
      */
     @Test
+    @Ignore
     public final void testRecommend()
             throws Exception {
         List<Recommendation> recs = RecommenderService.getRecommendations(
