@@ -37,9 +37,6 @@ public class AuthenticationPage extends TemplatePage {
     /** Google OP. */
     private static final String GOOGLE_URL = "https://www.google.com/accounts/o8/id";
 
-    /** Yahoo OP. */
-    private static final String YAHOO_URL = "http://yahoo.com";
-
 
     /**
      * Constructor.
@@ -77,13 +74,6 @@ public class AuthenticationPage extends TemplatePage {
             @Override
             public void onClick() {
                 applyForAuthentication(GOOGLE_URL, callbackUrl);
-            }
-        });
-        form2.add(new Link<String>("logInWithYahoo") {
-
-            @Override
-            public void onClick() {
-                applyForAuthentication(YAHOO_URL, callbackUrl);
             }
         });
 
