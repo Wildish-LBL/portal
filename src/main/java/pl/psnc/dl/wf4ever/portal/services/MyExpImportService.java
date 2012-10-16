@@ -8,20 +8,17 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.log4j.Logger;
+import org.purl.wf4ever.rosrs.client.common.ROSRSException;
 import org.purl.wf4ever.rosrs.client.common.ROSRService;
-import org.purl.wf4ever.rosrs.client.common.ROService;
 import org.purl.wf4ever.rosrs.client.common.Vocab;
 import org.scribe.model.Response;
 import org.scribe.model.Token;
@@ -173,20 +170,8 @@ public final class MyExpImportService {
         /** RO URI. */
         private URI researchObjectURI;
 
-        /** Jena model of the RO manifest. */
-        private OntModel manifest;
-
         /** List of errors that happened during the import. */
         private final List<String> errors = new ArrayList<>();
-
-        /** bodyURI, bodyRDF. */
-        private final Map<URI, Model> annBodies = new HashMap<>();
-
-        /** targetURI, bodyURI. */
-        private final Map<URI, URI> annotations = new HashMap<>();
-
-        /** targetURI, creator name. */
-        private final Map<URI, URI> creators = new HashMap<>();
 
         /** RODL URI. */
         private final URI rodlURI;
@@ -267,9 +252,6 @@ public final class MyExpImportService {
                 importFiles(model.getSelectedFiles());
                 importWorkflows(model.getSelectedWorkflows());
                 importPacks(packs);
-                getManifest(rodlURI);
-                updateManifest();
-                uploadAnnotations();
                 model.setProgressInPercent(100);
                 model.setStatus(ImportStatus.FINISHED);
             }
@@ -298,67 +280,15 @@ public final class MyExpImportService {
          * @param roId
          *            RO id (last segment of URI)
          * @return RO URI
-         * @throws IllegalStateException
+         * @throws ROSRSException
          *             when the RO could not be created
          */
         private URI createRO(URI rodlURI, String roId)
-                throws IllegalStateException {
+                throws ROSRSException {
             model.setMessage(String.format("Creating a Research Object \"%s\"", roId));
             ClientResponse r = ROSRService.createResearchObject(rodlURI, roId, dLibraToken);
-            if (r.getStatus() != HttpServletResponse.SC_CREATED) {
-                throw new IllegalStateException("Error: " + r.getClientResponseStatus());
-            }
             incrementStepsComplete();
             return r.getLocation();
-        }
-
-
-        /**
-         * Create a manifest model.
-         * 
-         * @param rodlURI
-         *            RODL URI
-         */
-        private void getManifest(URI rodlURI) {
-            model.setMessage("Downloading the manifest");
-            manifest = ROSRService.createManifestModel(researchObjectURI);
-            incrementStepsComplete();
-        }
-
-
-        /**
-         * Upload the manifest model.
-         */
-        private void updateManifest() {
-            model.setMessage("Updating the manifest");
-            for (Entry<URI, URI> e : annotations.entrySet()) {
-                try {
-                    URI annURI = ROService.createAnnotationURI(manifest, researchObjectURI);
-                    ROService.addAnnotationToManifestModel(manifest, researchObjectURI, annURI, e.getKey(),
-                        e.getValue(), creators.get(e.getKey()));
-                } catch (Exception ex) {
-                    LOG.error("When adding annotation", ex);
-                    errors.add(String.format("When adding annotation for %s: %s", e.getKey(), ex.getMessage()));
-                }
-            }
-            ROSRService.uploadManifestModel(researchObjectURI, manifest, dLibraToken);
-            incrementStepsComplete();
-        }
-
-
-        /**
-         * Upload annotation bodies.
-         */
-        private void uploadAnnotations() {
-            for (Entry<URI, Model> e : annBodies.entrySet()) {
-                model.setMessage(String.format("Uploading annotation body %s", e.getKey()));
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                e.getValue().write(out);
-                URI annBodyURI = e.getKey();
-                ROSRService.uploadResource(annBodyURI, new ByteArrayInputStream(out.toByteArray()),
-                    "application/rdf+xml", dLibraToken);
-                incrementStepsComplete();
-            }
         }
 
 
@@ -525,9 +455,11 @@ public final class MyExpImportService {
          *             when the resource URI cannot be created
          * @throws IOException
          *             when there is a problem with Wf-RO service
+         * @throws ROSRSException
+         *             the resource couldn't be uploaded to ROSRS
          */
         private void importInternalPackItem(Pack pack, InternalPackItemHeader packItemHeader)
-                throws JAXBException, OAuthException, URISyntaxException, IOException {
+                throws JAXBException, OAuthException, URISyntaxException, IOException, ROSRSException {
             InternalPackItem internalItem = (InternalPackItem) getResource(packItemHeader, InternalPackItem.class);
             BaseResourceHeader resourceHeader = internalItem.getItem();
             BaseResource r;
@@ -552,14 +484,16 @@ public final class MyExpImportService {
          *             when there is a problem with parsing the pack item metadata
          * @throws URISyntaxException
          *             when the resource URI cannot be created
+         * @throws ROSRSException
+         *             the resource couldn't be created in ROSRS
          */
         private File importFile(FileHeader res)
-                throws OAuthException, JAXBException, URISyntaxException {
+                throws OAuthException, JAXBException, URISyntaxException, ROSRSException {
             File r = (File) getResource(res, File.class);
             incrementStepsComplete();
 
             model.setMessage(String.format("Uploading %s", r.getFilename()));
-            ROSRService.uploadResource(researchObjectURI.resolve(r.getFilenameURI()),
+            ROSRService.createResource(researchObjectURI, r.getFilename(),
                 new ByteArrayInputStream(r.getContentDecoded()), r.getContentType(), dLibraToken);
 
             incrementStepsComplete();
@@ -598,9 +532,11 @@ public final class MyExpImportService {
          *             when there is a problem with authorization
          * @throws URISyntaxException
          *             when the resource URI cannot be created
+         * @throws ROSRSException
+         *             the annotation couldn't be created in ROSRS
          */
         private void downloadResourceMetadata(BaseResource res)
-                throws OAuthException, URISyntaxException {
+                throws OAuthException, URISyntaxException, ROSRSException {
             model.setMessage(String.format("Downloading metadata file %s", res.getResource()));
             Response response = OAuthHelpService.sendRequest(service, Verb.GET, res.getResource(), myExpToken,
                 "application/rdf+xml");
@@ -618,11 +554,15 @@ public final class MyExpImportService {
                 incrementStepsComplete();
                 return;
             }
-            URI bodyURI = ROService.createAnnotationBodyURI(researchObjectURI, annTargetURI);
-            annBodies.put(bodyURI, createAnnotationBody(annTargetURI, rdf));
-            annotations.put(annTargetURI, bodyURI);
-            creators.put(annTargetURI, getResourceAuthor(rdf));
+            incrementStepsComplete();
 
+            String bodyPath = ROSRService.createAnnotationBodyPath(researchObjectURI.relativize(annTargetURI)
+                    .toString());
+            model.setMessage(String.format("Uploading annotation body %s", bodyPath));
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            createAnnotationBody(annTargetURI, rdf).write(out);
+            ROSRService.addAnnotation(researchObjectURI, Arrays.asList(annTargetURI), bodyPath,
+                new ByteArrayInputStream(out.toByteArray()), "application/rdf+xml", dLibraToken);
             incrementStepsComplete();
         }
 

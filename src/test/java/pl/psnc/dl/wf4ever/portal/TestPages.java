@@ -8,9 +8,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.tester.WicketTester;
 import org.junit.Before;
 import org.junit.Test;
+import org.purl.wf4ever.rosrs.client.common.ROSRSException;
 import org.purl.wf4ever.rosrs.client.common.ROSRService;
 
-import pl.psnc.dl.wf4ever.portal.pages.AuthenticatePage;
 import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
 import pl.psnc.dl.wf4ever.portal.pages.HelpPage;
@@ -18,6 +18,8 @@ import pl.psnc.dl.wf4ever.portal.pages.SparqlEndpointPage;
 import pl.psnc.dl.wf4ever.portal.pages.all.AllRosPage;
 import pl.psnc.dl.wf4ever.portal.pages.home.HomePage;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
+import pl.psnc.dl.wf4ever.portal.pages.users.AuthenticationPage;
+import pl.psnc.dl.wf4ever.portal.pages.users.GoogleMigratePage;
 
 /**
  * Simple test using the WicketTester.
@@ -42,10 +44,12 @@ public class TestPages {
      * 
      * @throws URISyntaxException
      *             RO list returned by RODL is incorrect
+     * @throws ROSRSException
+     *             the list of ROs could not be fetched from ROSRS
      */
     @Test
     public void homepageRendersSuccessfully()
-            throws URISyntaxException {
+            throws URISyntaxException, ROSRSException {
         //start and render the test page
         tester.startPage(HomePage.class);
         //assert rendered page class
@@ -57,8 +61,11 @@ public class TestPages {
         tester.startPage(SparqlEndpointPage.class);
         tester.assertRenderedPage(SparqlEndpointPage.class);
 
-        tester.startPage(AuthenticatePage.class);
-        tester.assertRenderedPage(AuthenticatePage.class);
+        tester.startPage(AuthenticationPage.class);
+        tester.assertRenderedPage(AuthenticationPage.class);
+
+        tester.startPage(GoogleMigratePage.class);
+        tester.assertRenderedPage(GoogleMigratePage.class);
 
         tester.startPage(ErrorPage.class);
         tester.assertRenderedPage(ErrorPage.class);

@@ -12,7 +12,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.joda.time.DateTime;
-import org.purl.wf4ever.rosrs.client.common.AnonId;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -36,9 +35,6 @@ public class AggregatedResource implements Serializable {
 
     /** Resource URI. */
     protected final URI uri;
-
-    /** Id, if the resource has no URI. */
-    protected final AnonId id;
 
     /** Creation date. */
     protected final Calendar created;
@@ -88,28 +84,6 @@ public class AggregatedResource implements Serializable {
      */
     public AggregatedResource(URI uri, Calendar created, List<Creator> creators, String name) {
         this.uri = uri;
-        this.id = null;
-        this.created = created;
-        this.creators = creators;
-        this.name = name;
-    }
-
-
-    /**
-     * Constructor used when the resource is a blank node.
-     * 
-     * @param id
-     *            blank node id
-     * @param created
-     *            creation date
-     * @param creators
-     *            list of resource creators
-     * @param name
-     *            resource nice name
-     */
-    public AggregatedResource(AnonId id, Calendar created, List<Creator> creators, String name) {
-        this.uri = null;
-        this.id = id;
         this.created = created;
         this.creators = creators;
         this.name = name;
@@ -147,11 +121,6 @@ public class AggregatedResource implements Serializable {
         } else {
             return null;
         }
-    }
-
-
-    public AnonId getId() {
-        return id;
     }
 
 

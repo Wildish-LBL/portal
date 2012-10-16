@@ -13,17 +13,12 @@ import org.apache.wicket.authroles.authentication.AbstractAuthenticatedWebSessio
 import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.util.cookies.CookieUtils;
-import org.purl.wf4ever.rosrs.client.common.ROSRService;
-import org.purl.wf4ever.rosrs.client.common.Vocab;
+import org.openid4java.discovery.DiscoveryInformation;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.model.Creator;
-
-import com.hp.hpl.jena.ontology.Individual;
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.ontology.OntModelSpec;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.util.iterator.ExtendedIterator;
+import pl.psnc.dl.wf4ever.portal.model.User;
+import pl.psnc.dl.wf4ever.portal.services.RODLUtilities;
 
 /**
  * Custom app session.
@@ -54,12 +49,6 @@ public class MySession extends AbstractAuthenticatedWebSession {
     /** Temporary token used for OAuth 1.0 with myExperiment. */
     private Token requestToken;
 
-    /** User RODL URI. */
-    private URI userURI;
-
-    /** Nice username. */
-    private String username;
-
     /** Cookie key. */
     private static final String DLIBRA_KEY = "dlibra";
 
@@ -71,6 +60,21 @@ public class MySession extends AbstractAuthenticatedWebSession {
 
     /** Usernames cache. */
     private final Map<URI, Creator> usernames = new HashMap<>();
+
+    /** OpenID discovery information. */
+    private DiscoveryInformation discoveryInformation;
+
+    /** OpenID request token. */
+    private String rodlRequestToken;
+
+    /** Callback to the application's OpenID endpoint. */
+    private URI openIDCallbackURI;
+
+    /** RODL user. */
+    private User user;
+
+    /** Is user updating his user URI. */
+    private boolean updateURI;
 
 
     /**
@@ -119,7 +123,11 @@ public class MySession extends AbstractAuthenticatedWebSession {
      */
     public void setdLibraAccessToken(Token dLibraAccessToken) {
         this.dLibraAccessToken = dLibraAccessToken;
-        fetchUserData();
+        try {
+            this.user = RODLUtilities.getUser(getdLibraAccessToken());
+        } catch (Exception e) {
+            LOG.error("Error when retrieving user data: " + e.getMessage());
+        }
         dirtydLibra = true;
     }
 
@@ -175,7 +183,7 @@ public class MySession extends AbstractAuthenticatedWebSession {
 
     @Override
     public boolean isSignedIn() {
-        return getdLibraAccessToken() != null;
+        return getdLibraAccessToken() != null && user != null;
     }
 
 
@@ -185,7 +193,7 @@ public class MySession extends AbstractAuthenticatedWebSession {
     public void signOut() {
         dLibraAccessToken = null;
         myExpAccessToken = null;
-        username = null;
+        user = null;
         new CookieUtils().remove(DLIBRA_KEY);
         new CookieUtils().remove(MYEXP_KEY_TOKEN);
         new CookieUtils().remove(MYEXP_KEY_SECRET);
@@ -212,58 +220,8 @@ public class MySession extends AbstractAuthenticatedWebSession {
     }
 
 
-    /**
-     * Nice username.
-     * 
-     * @return the username
-     */
-    public String getUsername() {
-        return username;
-    }
-
-
-    /**
-     * Nice username.
-     * 
-     * @return the userURI
-     */
-    public URI getUserURI() {
-        return userURI;
-    }
-
-
-    /**
-     * Nice username or default.
-     * 
-     * @param defaultValue
-     *            the value to use if username is null
-     * @return the username
-     */
-    public String getUsername(String defaultValue) {
-        if (username != null) {
-            return username;
-        }
-        return defaultValue;
-    }
-
-
-    /**
-     * Load user URI and username using the RODL access token.
-     */
-    private void fetchUserData() {
-        try {
-            OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
-            userModel.read(ROSRService.getWhoAmi(((PortalApplication) PortalApplication.get()).getRodlURI(),
-                getdLibraAccessToken()), null);
-            ExtendedIterator<Individual> it = userModel.listIndividuals(Vocab.FOAF_AGENT);
-            Individual user = it.next();
-            if (user != null && user.hasProperty(Vocab.FOAF_NAME)) {
-                userURI = new URI(user.getURI());
-                username = user.as(Individual.class).getPropertyValue(Vocab.FOAF_NAME).asLiteral().getString();
-            }
-        } catch (Exception e) {
-            LOG.error("Error when retrieving user data: " + e.getMessage());
-        }
+    public User getUser() {
+        return user;
     }
 
 
@@ -274,6 +232,46 @@ public class MySession extends AbstractAuthenticatedWebSession {
      */
     public Map<URI, Creator> getUsernames() {
         return usernames;
+    }
+
+
+    public DiscoveryInformation getDiscoveryInformation() {
+        return discoveryInformation;
+    }
+
+
+    public void setDiscoveryInformation(DiscoveryInformation discoveryInformation) {
+        this.discoveryInformation = discoveryInformation;
+    }
+
+
+    public String getRodlRequestToken() {
+        return rodlRequestToken;
+    }
+
+
+    public void setRodlRequestToken(String rodlRequestToken) {
+        this.rodlRequestToken = rodlRequestToken;
+    }
+
+
+    public URI getOpenIDCallbackURI() {
+        return openIDCallbackURI;
+    }
+
+
+    public void setOpenIDCallbackURI(URI openIDCallbackURI) {
+        this.openIDCallbackURI = openIDCallbackURI;
+    }
+
+
+    public boolean isUpdateURI() {
+        return updateURI;
+    }
+
+
+    public void setUpdateURI(boolean updateURI) {
+        this.updateURI = updateURI;
     }
 
 }

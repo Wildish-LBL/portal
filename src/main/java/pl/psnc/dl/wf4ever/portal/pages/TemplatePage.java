@@ -18,6 +18,7 @@ import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.pages.home.HomePage;
 import pl.psnc.dl.wf4ever.portal.pages.my.MyRosPage;
+import pl.psnc.dl.wf4ever.portal.pages.users.ProfilePage;
 
 /**
  * The common base of all HTML pages.
@@ -64,6 +65,7 @@ public class TemplatePage extends WebPage {
         add(new BookmarkablePageLink<Void>("menu-home", HomePage.class));
         add(new BookmarkablePageLink<Void>("menu-myros", MyRosPage.class));
         add(new BookmarkablePageLink<Void>("menu-sparql", SparqlEndpointPage.class));
+        add(new BookmarkablePageLink<Void>("menu-profile", ProfilePage.class));
 
         WebMarkupContainer signedInAs = new WebMarkupContainer("signedInAs");
         signedInAs.add(new AttributeModifier("data-original-title", new PropertyModel<String>(this, "signInTwipsy")));
@@ -79,7 +81,7 @@ public class TemplatePage extends WebPage {
                     MySession.get().signOut();
                     throw new RestartResponseException(getApplication().getHomePage());
                 } else {
-                    throw new RestartResponseException(AuthenticatePage.class);
+                    throw new RestartResponseException(((PortalApplication) getApplication()).getSignInPageClass());
                 }
             }
 
@@ -108,7 +110,7 @@ public class TemplatePage extends WebPage {
      */
     public String getSignInTwipsy() {
         if (MySession.get().isSignedIn()) {
-            return "Signed in as " + MySession.get().getUsername();
+            return "Signed in as " + MySession.get().getUser().getUsername();
         } else {
             return "Click to sign in!";
         }
@@ -118,4 +120,5 @@ public class TemplatePage extends WebPage {
     public URI getRodlURI() {
         return rodlURI;
     }
+
 }

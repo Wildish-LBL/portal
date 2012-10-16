@@ -10,7 +10,6 @@ import java.util.Calendar;
 import java.util.List;
 
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.purl.wf4ever.rosrs.client.common.AnonId;
 
 import pl.psnc.dl.wf4ever.portal.services.RoFactory;
 
@@ -48,27 +47,6 @@ public class Annotation extends AggregatedResource {
      */
     public Annotation(URI uri, Calendar created, List<Creator> creators, String name, URI bodyURI) {
         super(uri, created, creators, name);
-        this.bodyURI = bodyURI;
-        bodyModel = new AnnotationBodyModel();
-    }
-
-
-    /**
-     * Constructor.
-     * 
-     * @param id
-     *            blank node id
-     * @param created
-     *            creation date
-     * @param creators
-     *            list of creators
-     * @param name
-     *            annotation name
-     * @param bodyURI
-     *            annotation body URI
-     */
-    public Annotation(AnonId id, Calendar created, List<Creator> creators, String name, URI bodyURI) {
-        super(id, created, creators, name);
         this.bodyURI = bodyURI;
         bodyModel = new AnnotationBodyModel();
     }

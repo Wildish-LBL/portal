@@ -1,0 +1,105 @@
+package pl.psnc.dl.wf4ever.portal.pages.users;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.log4j.Logger;
+import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.markup.html.WebPage;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.purl.wf4ever.rosrs.client.common.users.UserManagementService;
+import org.scribe.model.Token;
+
+import pl.psnc.dl.wf4ever.portal.MySession;
+import pl.psnc.dl.wf4ever.portal.PortalApplication;
+import pl.psnc.dl.wf4ever.portal.model.users.OpenIdUser;
+import pl.psnc.dl.wf4ever.portal.services.OpenIdService;
+
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
+
+/**
+ * This page receives responses from OpenID Providers.
+ * 
+ * @author piotrekhol
+ * 
+ */
+public class OpenIDEndpoint extends WebPage {
+
+    /** id. */
+    private static final long serialVersionUID = 6262904394440709890L;
+
+    /** Logger. */
+    private static final Logger LOG = Logger.getLogger(OpenIDEndpoint.class);
+
+
+    /**
+     * Constructor.
+     * 
+     * @param pageParameters
+     *            page parameters provided by the OP
+     */
+    public OpenIDEndpoint(PageParameters pageParameters) {
+        super(pageParameters);
+        String openIdMode = pageParameters.get("openid.mode").toString();
+        MySession session = (MySession) getSession();
+        if ("cancel".equals(openIdMode)) {
+            session.info("The authentication request has been rejected");
+        } else {
+            OpenIdUser openIdUser = OpenIdService.processReturn(session.getDiscoveryInformation(), pageParameters,
+                session.getOpenIDCallbackURI());
+            if (openIdUser == null) {
+                session.error("Open ID Confirmation Failed. No information was retrieved from the OpenID Provider.");
+            } else {
+                if (register(openIdUser) && openIdUser.getOpenId().startsWith("https://www.google.com/")) {
+                    throw new RestartResponseException(GoogleMigratePage.class);
+                }
+                if (!continueToOriginalDestination()) {
+                    LOG.warn("Could not find the original destination");
+                    throw new RestartResponseException(getApplication().getHomePage());
+                }
+            }
+        }
+        throw new RestartResponseException(AuthenticationPage.class);
+    }
+
+
+    /**
+     * Register the user in RODL.
+     * 
+     * @param user
+     *            openID attributes
+     * @return true if a new account has been created, false otherwise
+     */
+    private boolean register(OpenIdUser user) {
+        PortalApplication app = ((PortalApplication) getApplication());
+        boolean newAccount = false;
+        if (!UserManagementService.userExistsInDlibra(app.getRodlURI(), app.getAdminToken(), user.getOpenId())) {
+            try {
+                ClientResponse response = UserManagementService.createUser(app.getRodlURI(), app.getAdminToken(),
+                    user.getOpenId(), user.getFullName());
+                if (response.getStatus() == HttpServletResponse.SC_CREATED) {
+                    newAccount = true;
+                    getSession().info("New account has been created.");
+                } else if (response.getStatus() == HttpServletResponse.SC_CONFLICT) {
+                    getSession().info(
+                        "An account for this username already existed "
+                                + "in dLibra, you have been registered with it.");
+                } else {
+                    getSession().error(response.getClientResponseStatus());
+                }
+                response.close();
+            } catch (Exception e) {
+                getSession().error(e.getMessage() != null ? e.getMessage() : "Unknown error");
+            }
+        }
+        try {
+            String token = UserManagementService.createAccessToken(app.getRodlURI(), app.getAdminToken(),
+                user.getOpenId(), app.getDLibraClientId());
+            ((MySession) getSession()).setdLibraAccessToken(new Token(token, null));
+        } catch (UniformInterfaceException e) {
+            getSession().error(e.getResponse().getClientResponseStatus());
+            LOG.error(e.getResponse().getClientResponseStatus());
+        }
+        return newAccount;
+    }
+}

@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.net.URI;
 
 import org.apache.log4j.Logger;
+import org.purl.wf4ever.rosrs.client.common.ROSRSException;
 import org.purl.wf4ever.rosrs.client.common.ROSRService;
 import org.purl.wf4ever.rosrs.client.common.Vocab;
 
@@ -81,13 +82,17 @@ public class Creator implements Serializable {
                     LOG.debug("No FOAF data under user URI: " + e.getMessage());
                 }
                 if (isLoading) {
-                    // 4. FOAF data in RODL
-                    OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
-                    userModel.read(ROSRService.getUser(rodlURI, uri), null);
-                    Resource r2 = userModel.createResource(uri.toString());
-                    if (r2 != null && r2.hasProperty(Vocab.FOAF_NAME)) {
-                        setValue(r2.as(Individual.class).getPropertyValue(Vocab.FOAF_NAME).asLiteral().getString());
-                        isLoading = false;
+                    try {
+                        // 4. FOAF data in RODL
+                        OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
+                        userModel.read(ROSRService.getUser(rodlURI, uri), null);
+                        Resource r2 = userModel.createResource(uri.toString());
+                        if (r2 != null && r2.hasProperty(Vocab.FOAF_NAME)) {
+                            setValue(r2.as(Individual.class).getPropertyValue(Vocab.FOAF_NAME).asLiteral().getString());
+                            isLoading = false;
+                        }
+                    } catch (ROSRSException e) {
+                        LOG.debug("Can't get FOAF data from ROSRS: " + e.getMessage());
                     }
                 }
                 synchronized (Creator.this) {

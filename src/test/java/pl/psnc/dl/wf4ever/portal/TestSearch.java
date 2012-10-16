@@ -37,7 +37,7 @@ public class TestSearch {
     @Test
     public final void testFindByKeywords()
             throws IllegalArgumentException, MalformedURLException, FeedException, IOException {
-        List<SearchResult> ros = SearchService.findByKeywords(URI.create("http://sandbox.wf4ever-project.org/rosrs5"),
+        List<SearchResult> ros = SearchService.findByKeywords(URI.create("http://sandbox.wf4ever-project.org/rodl"),
             URI.create("http://sandbox.wf4ever-project.org/opensearch/search.rss"), "riders");
         assertNotNull(ros);
     }
