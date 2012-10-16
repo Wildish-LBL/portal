@@ -11,8 +11,6 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.list.OddEvenListItem;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.purl.wf4ever.rosrs.client.common.users.AccessToken;
@@ -74,12 +72,6 @@ public class AccessTokensPage extends TemplatePage {
         add(form);
         list = new ListView<AccessToken>("tokensListView", new PropertyModel<List<AccessToken>>(this, "accessTokens")) {
 
-            @Override
-            protected ListItem<AccessToken> newItem(int index, IModel<AccessToken> itemModel) {
-                return new OddEvenListItem<AccessToken>(index, itemModel);
-            };
-
-
             protected void populateItem(ListItem<AccessToken> item) {
                 final AccessToken token = (AccessToken) item.getModelObject();
                 item.add(new Label("clientName", token.getClient().getName()));
@@ -110,7 +102,6 @@ public class AccessTokensPage extends TemplatePage {
                 });
             }
         };
-        list.setReuseItems(true);
         list.setOutputMarkupId(true);
         form.add(list);
     }

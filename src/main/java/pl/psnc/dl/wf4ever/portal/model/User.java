@@ -46,7 +46,7 @@ public class User implements Serializable {
 
 
     /**
-     * Nice username.
+     * User URI.
      * 
      * @return the userURI
      */

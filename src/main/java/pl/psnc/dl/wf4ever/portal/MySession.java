@@ -183,7 +183,7 @@ public class MySession extends AbstractAuthenticatedWebSession {
 
     @Override
     public boolean isSignedIn() {
-        return getdLibraAccessToken() != null;
+        return getdLibraAccessToken() != null && user != null;
     }
 
 
