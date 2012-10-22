@@ -139,7 +139,6 @@ class AnnotatingBox extends Panel {
                 for (Annotation annotation : annotations) {
                     try {
                         if (annotation.getBody().isEmpty()) {
-                            ROSRService.deleteResource(annotation.getBodyURI(), dLibraToken);
                             ROSRService.deleteAnnotationAndBody(annotation.getURI(), dLibraToken);
                         } else {
                             ROSRService.updateResource(annotation.getBodyURI(),
