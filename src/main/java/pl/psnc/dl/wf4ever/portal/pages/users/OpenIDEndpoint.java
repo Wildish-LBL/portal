@@ -97,8 +97,9 @@ public class OpenIDEndpoint extends WebPage {
                 user.getOpenId(), app.getDLibraClientId());
             ((MySession) getSession()).setdLibraAccessToken(new Token(token, null));
         } catch (UniformInterfaceException e) {
-            getSession().error(e.getResponse().getClientResponseStatus());
-            LOG.error(e.getResponse().getClientResponseStatus());
+            String error = e.getResponse().getClientResponseStatus() + " " + e.getResponse().getEntity(String.class);
+            getSession().error(error);
+            LOG.error("Error when creating access token: " + error);
         }
         return newAccount;
     }
