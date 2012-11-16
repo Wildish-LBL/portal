@@ -77,8 +77,7 @@ public class ImportDataStep extends WizardStep {
                     PortalApplication app = (PortalApplication) getApplication();
                     MySession session = (MySession) getSession();
                     MyExpImportService.startImport(model, app.getRodlURI(), app.getWf2ROService(),
-                        session.getMyExpAccessToken(), session.getdLibraAccessToken(), app.getMyExpConsumerKey(),
-                        app.getMyExpConsumerSecret());
+                        session.getMyExpAccessToken(), app.getMyExpConsumerKey(), app.getMyExpConsumerSecret());
                     importStatus.add(updater);
                     target.add(importStatus);
 

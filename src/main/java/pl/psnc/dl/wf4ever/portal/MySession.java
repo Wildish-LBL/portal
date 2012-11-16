@@ -14,6 +14,8 @@ import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.util.cookies.CookieUtils;
 import org.openid4java.discovery.DiscoveryInformation;
+import org.purl.wf4ever.rosrs.client.common.ROSRService;
+import org.purl.wf4ever.rosrs.client.common.users.UserManagementService;
 import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.model.Creator;
@@ -76,6 +78,12 @@ public class MySession extends AbstractAuthenticatedWebSession {
     /** Is user updating his user URI. */
     private boolean updateURI;
 
+    /** ROSRS client. */
+    private ROSRService rosrs;
+
+    /** UMS client. */
+    private UserManagementService ums;
+
 
     /**
      * Constructor.
@@ -85,8 +93,10 @@ public class MySession extends AbstractAuthenticatedWebSession {
      */
     public MySession(Request request) {
         super(request);
+        PortalApplication app = (PortalApplication) getApplication();
+        this.ums = new UserManagementService(app.getRodlURI(), app.getAdminToken());
         if (new CookieUtils().load(DLIBRA_KEY) != null) {
-            setdLibraAccessToken(new Token(new CookieUtils().load(DLIBRA_KEY), null));
+            signIn(new CookieUtils().load(DLIBRA_KEY));
         }
         if (new CookieUtils().load(MYEXP_KEY_TOKEN) != null && new CookieUtils().load(MYEXP_KEY_SECRET) != null) {
             myExpAccessToken = new Token(new CookieUtils().load(MYEXP_KEY_TOKEN),
@@ -105,15 +115,14 @@ public class MySession extends AbstractAuthenticatedWebSession {
     }
 
 
-    /**
-     * RODL access token.
-     * 
-     * @return the dLibraAccessToken
-     */
-    public Token getdLibraAccessToken() {
-        return dLibraAccessToken;
-    }
-
+    //    /**
+    //     * RODL access token.
+    //     * 
+    //     * @return the dLibraAccessToken
+    //     */
+    //    public Token getdLibraAccessToken() {
+    //        return dLibraAccessToken;
+    //    }
 
     /**
      * RODL access token.
@@ -121,10 +130,20 @@ public class MySession extends AbstractAuthenticatedWebSession {
      * @param dLibraAccessToken
      *            the dLibraAccessToken to set
      */
-    public void setdLibraAccessToken(Token dLibraAccessToken) {
-        this.dLibraAccessToken = dLibraAccessToken;
+    //    public void setdLibraAccessToken(Token dLibraAccessToken) {
+    //        this.dLibraAccessToken = dLibraAccessToken;
+    //        try {
+    //            this.user = RODLUtilities.getUser(getdLibraAccessToken());
+    //        } catch (Exception e) {
+    //            LOG.error("Error when retrieving user data: " + e.getMessage());
+    //        }
+    //        dirtydLibra = true;
+    //    }
+
+    public void signIn(String dLibraAccessToken) {
+        this.rosrs = new ROSRService(((PortalApplication) getApplication()).getRodlURI(), dLibraAccessToken);
         try {
-            this.user = RODLUtilities.getUser(getdLibraAccessToken());
+            this.user = RODLUtilities.getUser(dLibraAccessToken);
         } catch (Exception e) {
             LOG.error("Error when retrieving user data: " + e.getMessage());
         }
@@ -183,7 +202,7 @@ public class MySession extends AbstractAuthenticatedWebSession {
 
     @Override
     public boolean isSignedIn() {
-        return getdLibraAccessToken() != null && user != null;
+        return getRosrs() != null && user != null;
     }
 
 
@@ -274,4 +293,13 @@ public class MySession extends AbstractAuthenticatedWebSession {
         this.updateURI = updateURI;
     }
 
+
+    public ROSRService getRosrs() {
+        return rosrs;
+    }
+
+
+    public UserManagementService getUms() {
+        return ums;
+    }
 }

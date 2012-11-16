@@ -19,7 +19,6 @@ import javax.xml.transform.stream.StreamSource;
 import org.apache.log4j.Logger;
 import org.purl.wf4ever.rosrs.client.common.ROSRSException;
 import org.purl.wf4ever.rosrs.client.common.ROSRService;
-import org.purl.wf4ever.rosrs.client.common.Vocab;
 import org.scribe.model.Response;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
@@ -87,9 +86,8 @@ public final class MyExpImportService {
      *            myExp consumer secret
      */
     public static void startImport(ImportModel model, URI rodlURI, URI wf2ROService, Token myExpAccessToken,
-            Token dLibraAccessToken, String consumerKey, String consumerSecret) {
-        new ImportThread(model, rodlURI, wf2ROService, myExpAccessToken, dLibraAccessToken, consumerKey, consumerSecret)
-                .start();
+            String consumerKey, String consumerSecret) {
+        new ImportThread(model, rodlURI, wf2ROService, myExpAccessToken, consumerKey, consumerSecret).start();
     }
 
 
@@ -158,9 +156,6 @@ public final class MyExpImportService {
         /** myExperiment OAuth access token. */
         private final Token myExpToken;
 
-        /** RODL OAuth access token. */
-        private final Token dLibraToken;
-
         /** Total number of steps to be done during import. */
         private int stepsTotal = 0;
 
@@ -178,6 +173,9 @@ public final class MyExpImportService {
 
         /** Wf-RO transformation service URI. */
         private final URI wf2ROService;
+
+        /** ROSRS client. */
+        private ROSRService rosrs;
 
 
         /**
@@ -198,14 +196,14 @@ public final class MyExpImportService {
          * @param consumerSecret
          *            myExp consumer secret
          */
-        public ImportThread(ImportModel importModel, URI rodlURI, URI wf2ROService, Token myExpAccessToken,
-                Token dLibraToken, String consumerKey, String consumerSecret) {
+        public ImportThread(ImportModel importModel, ROSRService rosrs, URI rodlURI, URI wf2ROService,
+                Token myExpAccessToken, String consumerKey, String consumerSecret) {
             super();
             model = importModel;
             this.rodlURI = rodlURI;
             this.wf2ROService = wf2ROService;
             myExpToken = myExpAccessToken;
-            this.dLibraToken = dLibraToken;
+            this.rosrs = rosrs;
             service = MyExpApi.getOAuthService(consumerKey, consumerSecret);
         }
 

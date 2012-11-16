@@ -9,7 +9,9 @@ import java.net.URI;
 import org.apache.log4j.Logger;
 import org.purl.wf4ever.rosrs.client.common.ROSRSException;
 import org.purl.wf4ever.rosrs.client.common.ROSRService;
-import org.purl.wf4ever.rosrs.client.common.Vocab;
+
+import pl.psnc.dl.wf4ever.portal.MySession;
+import pl.psnc.dl.wf4ever.vocabulary.FOAF;
 
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
@@ -65,6 +67,7 @@ public class Creator implements Serializable {
         this.uri = uri;
         this.value = uri.toString();
         isLoading = true;
+        final ROSRService rosrs = MySession.get().getRosrs();
 
         new Thread() {
 
@@ -74,8 +77,8 @@ public class Creator implements Serializable {
                     OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
                     userModel.read(uri.toString(), null);
                     Resource r2 = userModel.createResource(uri.toString());
-                    if (r2 != null && r2.hasProperty(Vocab.FOAF_NAME)) {
-                        setValue(r2.as(Individual.class).getPropertyValue(Vocab.FOAF_NAME).asLiteral().getString());
+                    if (r2 != null && r2.hasProperty(FOAF.name)) {
+                        setValue(r2.as(Individual.class).getPropertyValue(FOAF.name).asLiteral().getString());
                         isLoading = false;
                     }
                 } catch (Exception e) {
@@ -85,10 +88,10 @@ public class Creator implements Serializable {
                     try {
                         // 4. FOAF data in RODL
                         OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
-                        userModel.read(ROSRService.getUser(rodlURI, uri), null);
+                        userModel.read(rosrs.getUser(uri), null);
                         Resource r2 = userModel.createResource(uri.toString());
-                        if (r2 != null && r2.hasProperty(Vocab.FOAF_NAME)) {
-                            setValue(r2.as(Individual.class).getPropertyValue(Vocab.FOAF_NAME).asLiteral().getString());
+                        if (r2 != null && r2.hasProperty(FOAF.name)) {
+                            setValue(r2.as(Individual.class).getPropertyValue(FOAF.name).asLiteral().getString());
                             isLoading = false;
                         }
                     } catch (ROSRSException e) {

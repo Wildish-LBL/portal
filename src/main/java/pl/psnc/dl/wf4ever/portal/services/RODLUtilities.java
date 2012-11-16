@@ -12,13 +12,12 @@ import org.apache.log4j.Logger;
 import org.joda.time.format.ISODateTimeFormat;
 import org.purl.wf4ever.rosrs.client.common.ROSRSException;
 import org.purl.wf4ever.rosrs.client.common.ROSRService;
-import org.purl.wf4ever.rosrs.client.common.Vocab;
-import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.Creator;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.model.User;
+import pl.psnc.dl.wf4ever.vocabulary.FOAF;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.ontology.Individual;
@@ -115,7 +114,7 @@ public final class RODLUtilities {
      * @throws ROSRSException
      *             the user data could not be fetched from ROSRS
      */
-    public static User getUser(Token token)
+    public static User getUser(String token)
             throws URISyntaxException, ROSRSException {
         return getUser(token, ((PortalApplication) PortalApplication.get()).getRodlURI());
     }
@@ -134,15 +133,16 @@ public final class RODLUtilities {
      * @throws ROSRSException
      *             the user data could not be fetched from ROSRS
      */
-    public static User getUser(Token token, URI rodl)
+    public static User getUser(String token, URI rodl)
             throws URISyntaxException, ROSRSException {
         OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
-        userModel.read(ROSRService.getWhoAmi(rodl, token), null);
-        ExtendedIterator<Individual> it = userModel.listIndividuals(Vocab.FOAF_AGENT);
+        ROSRService rosrs = new ROSRService(rodl, token);
+        userModel.read(rosrs.getWhoAmi(), null);
+        ExtendedIterator<Individual> it = userModel.listIndividuals(FOAF.Agent);
         Individual userInd = it.next();
-        if (userInd != null && userInd.hasProperty(Vocab.FOAF_NAME)) {
+        if (userInd != null && userInd.hasProperty(FOAF.name)) {
             URI userURI = new URI(userInd.getURI());
-            String username = userInd.as(Individual.class).getPropertyValue(Vocab.FOAF_NAME).asLiteral().getString();
+            String username = userInd.as(Individual.class).getPropertyValue(FOAF.name).asLiteral().getString();
             return new User(userURI, username);
         } else {
             throw new IllegalArgumentException("No user data found");

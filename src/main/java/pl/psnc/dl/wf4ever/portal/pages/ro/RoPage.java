@@ -36,7 +36,6 @@ import org.apache.wicket.request.UrlEncoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.purl.wf4ever.rosrs.client.common.ROSRSException;
 import org.purl.wf4ever.rosrs.client.common.ROSRService;
-import org.purl.wf4ever.rosrs.client.common.Vocab;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
@@ -52,6 +51,7 @@ import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.services.RoFactory;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
+import pl.psnc.dl.wf4ever.vocabulary.ORE;
 
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.ResIterator;
@@ -216,7 +216,7 @@ public class RoPage extends TemplatePage {
     public void renderHead(IHeaderResponse response) {
         super.renderHead(response);
         try {
-            ClientResponse head = ROSRService.getResourceHead(roURI.resolve(".ro/manifest.rdf"));
+            ClientResponse head = MySession.get().getRosrs().getResourceHead(roURI.resolve(".ro/manifest.rdf"));
             List<String> links = head.getHeaders().get("Link");
             if (links != null) {
                 for (String link : links) {
@@ -367,8 +367,11 @@ public class RoPage extends TemplatePage {
             Set<ResourceGroup> selectedResourceGroups)
             throws ROSRSException, IOException {
         URI resourceURI = roURI.resolve(UrlEncoder.PATH_INSTANCE.encode(uploadedFile.getClientFileName(), "UTF-8"));
-        ROSRService.createResource(roURI, uploadedFile.getClientFileName(), uploadedFile.getInputStream(),
-            uploadedFile.getContentType(), MySession.get().getdLibraAccessToken());
+        MySession
+                .get()
+                .getRosrs()
+                .createResource(roURI, uploadedFile.getClientFileName(), uploadedFile.getInputStream(),
+                    uploadedFile.getContentType());
         //        OntModel manifestModel = ROSRService.createManifestModel(roURI);
         //        Individual individual = manifestModel.createResource(resourceURI.toString()).as(Individual.class);
         //        for (ResourceGroup resourceGroup : selectedResourceGroups) {
@@ -388,7 +391,7 @@ public class RoPage extends TemplatePage {
         target.add(roViewerBox);
 
         resources.put(resourceURI, resource);
-        RoFactory.addRelation(resources.get(roURI), Vocab.ORE_AGGREGATES, resource);
+        RoFactory.addRelation(resources.get(roURI), ORE.aggregates, resource);
 
         roViewerBox.renderJSComponents(resources, target);
     }
@@ -408,7 +411,7 @@ public class RoPage extends TemplatePage {
      */
     public void onResourceDelete(AggregatedResource resource, AjaxRequestTarget target)
             throws IOException, ROSRSException {
-        ClientResponse response = ROSRService.deleteResource(resource.getURI(), MySession.get().getdLibraAccessToken());
+        ClientResponse response = MySession.get().getRosrs().deleteResource(resource.getURI());
         if (response.getStatus() != HttpServletResponse.SC_NO_CONTENT) {
             onRemoteResourceDelete(resource, target);
         }
@@ -441,12 +444,12 @@ public class RoPage extends TemplatePage {
         OntModel manifestModel = ROSRService.createManifestModel(roURI);
         URI absoluteResourceURI = roURI.resolve(resource.getURI());
         Resource individual = manifestModel.createResource(absoluteResourceURI.toString());
-        ResIterator it = manifestModel.listSubjectsWithProperty(Vocab.ORE_PROXY_FOR, individual);
+        ResIterator it = manifestModel.listSubjectsWithProperty(ORE.proxyFor, individual);
         if (!it.hasNext()) {
             throw new IOException("Not found");
         }
         Resource proxy = it.next();
-        ROSRService.deleteResource(URI.create(proxy.getURI()), MySession.get().getdLibraAccessToken());
+        MySession.get().getRosrs().deleteResource(URI.create(proxy.getURI()));
     }
 
 
@@ -482,7 +485,7 @@ public class RoPage extends TemplatePage {
             Set<ResourceGroup> selectedTypes)
             throws IOException, ROSRSException {
         URI absoluteResourceURI = roURI.resolve(resourceURI);
-        ROSRService.aggregateResource(roURI, resourceURI, MySession.get().getdLibraAccessToken());
+        MySession.get().getRosrs().aggregateResource(roURI, resourceURI);
 
         AggregatedResource resource = RoFactory.createResource(rodlURI, roURI, absoluteResourceURI, true, MySession
                 .get().getUsernames());
@@ -492,7 +495,7 @@ public class RoPage extends TemplatePage {
         target.add(roViewerBox);
 
         resources.put(absoluteResourceURI, resource);
-        RoFactory.addRelation(resources.get(roURI), Vocab.ORE_AGGREGATES, resource);
+        RoFactory.addRelation(resources.get(roURI), ORE.aggregates, resource);
 
         roViewerBox.renderJSComponents(resources, target);
     }
@@ -511,8 +514,11 @@ public class RoPage extends TemplatePage {
     void onStatementAdd(List<Statement> statements)
             throws URISyntaxException, ROSRSException {
         InputStream in = RoFactory.wrapAnnotationBody(statements);
-        ROSRService.addAnnotation(roURI, Arrays.asList(statements.get(0).getSubjectURI()), ".ro/"
-                + UUID.randomUUID().toString(), in, "application/rdf+xml", MySession.get().getdLibraAccessToken());
+        MySession
+                .get()
+                .getRosrs()
+                .addAnnotation(roURI, Arrays.asList(statements.get(0).getSubjectURI()),
+                    ".ro/" + UUID.randomUUID().toString(), in, "application/rdf+xml");
     }
 
 
@@ -527,8 +533,8 @@ public class RoPage extends TemplatePage {
     void onStatementEdit(Statement statement)
             throws ROSRSException {
         Annotation ann = statement.getAnnotation();
-        ROSRService.updateResource(ann.getBodyURI(), RoFactory.wrapAnnotationBody(ann.getBody()),
-            "application/rdf+xml", MySession.get().getdLibraAccessToken());
+        MySession.get().getRosrs()
+                .updateResource(ann.getBodyURI(), RoFactory.wrapAnnotationBody(ann.getBody()), "application/rdf+xml");
     }
 
 
@@ -589,8 +595,11 @@ public class RoPage extends TemplatePage {
             throws IOException, URISyntaxException, ROSRSException {
         String contentType = RDFFormat.forFileName(uploadedFile.getClientFileName(), RDFFormat.RDFXML)
                 .getDefaultMIMEType();
-        ROSRService.addAnnotation(roURI, Arrays.asList(aggregatedResource.getURI()), uploadedFile.getClientFileName(),
-            uploadedFile.getInputStream(), contentType, MySession.get().getdLibraAccessToken());
+        MySession
+                .get()
+                .getRosrs()
+                .addAnnotation(roURI, Arrays.asList(aggregatedResource.getURI()), uploadedFile.getClientFileName(),
+                    uploadedFile.getInputStream(), contentType);
         setResponsePage(RoPage.class, getPageParameters());
     }
 

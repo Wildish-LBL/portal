@@ -26,7 +26,6 @@ import org.apache.wicket.util.crypt.Base64;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.purl.wf4ever.rosrs.client.common.ROSRService;
-import org.purl.wf4ever.rosrs.client.common.Vocab;
 
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
@@ -36,6 +35,10 @@ import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.model.ResourceGroup;
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 import pl.psnc.dl.wf4ever.portal.model.Statement;
+import pl.psnc.dl.wf4ever.vocabulary.AO;
+import pl.psnc.dl.wf4ever.vocabulary.FOAF;
+import pl.psnc.dl.wf4ever.vocabulary.ORE;
+import pl.psnc.dl.wf4ever.vocabulary.RO;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.ontology.ConversionException;
@@ -142,10 +145,10 @@ public final class RoFactory {
         ResearchObject researchObject = createResearchObject(model, rodlURI, researchObjectURI, true, usernames);
         resources.put(researchObjectURI, researchObject);
         Individual ro = model.getIndividual(researchObjectURI.toString());
-        NodeIterator it = model.listObjectsOfProperty(ro, Vocab.ORE_AGGREGATES);
+        NodeIterator it = model.listObjectsOfProperty(ro, ORE.aggregates);
         while (it.hasNext()) {
             Individual res = it.next().as(Individual.class);
-            if (res.hasRDFType(Vocab.RO_RESOURCE)) {
+            if (res.hasRDFType(RO.Resource)) {
                 AggregatedResource resource = createResource(model, rodlURI, researchObjectURI, new URI(res.getURI()),
                     true, usernames);
                 resources.put(resource.getURI(), resource);
@@ -217,7 +220,7 @@ public final class RoFactory {
             LOG.trace("Could not parse dcterms:creator for " + resourceURI, e);
         }
         try {
-            size = res.getPropertyValue(Vocab.FILESIZE).asLiteral().getLong();
+            size = res.getPropertyValue(RO.filesize).asLiteral().getLong();
         } catch (Exception e) {
             LOG.trace("Could not parse filesize for " + resourceURI, e);
         }
@@ -394,10 +397,10 @@ public final class RoFactory {
                 if (usernames.containsKey(uri)) {
                     // 1. already fetched
                     LOG.trace("Retrieving username from cache for user: " + uri);
-                } else if (creator.asResource().hasProperty(Vocab.FOAF_NAME)) {
+                } else if (creator.asResource().hasProperty(FOAF.name)) {
                     // 2. FOAF data defined inline
-                    usernames.put(uri, new Creator(creator.as(Individual.class).getPropertyValue(Vocab.FOAF_NAME)
-                            .asLiteral().getString()));
+                    usernames.put(uri, new Creator(creator.as(Individual.class).getPropertyValue(FOAF.name).asLiteral()
+                            .getString()));
                 } else {
                     //3. load in a separate thread
                     usernames.put(uri, new Creator(rodlURI, uri));
@@ -607,14 +610,14 @@ public final class RoFactory {
         List<Annotation> anns = new ArrayList<>();
 
         Individual res = model.getIndividual(resourceURI.toString());
-        ResIterator it = model.listSubjectsWithProperty(Vocab.RO_ANNOTATES_AGGREGATED_RESOURCE, res);
+        ResIterator it = model.listSubjectsWithProperty(RO.annotatesAggregatedResource, res);
         while (it.hasNext()) {
             Individual ann = it.next().as(Individual.class);
-            if (!ann.hasRDFType(Vocab.RO_AGGREGATED_ANNOTATION)) {
+            if (!ann.hasRDFType(RO.AggregatedAnnotation)) {
                 continue;
             }
             try {
-                Resource body = ann.getPropertyResourceValue(Vocab.AO_BODY);
+                Resource body = ann.getPropertyResourceValue(AO.body);
                 Calendar created = null;
                 List<Creator> creators = new ArrayList<>();
 

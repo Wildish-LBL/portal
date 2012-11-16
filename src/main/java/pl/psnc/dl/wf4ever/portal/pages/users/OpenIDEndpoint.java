@@ -6,8 +6,6 @@ import org.apache.log4j.Logger;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.purl.wf4ever.rosrs.client.common.users.UserManagementService;
-import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
@@ -72,11 +70,11 @@ public class OpenIDEndpoint extends WebPage {
      */
     private boolean register(OpenIdUser user) {
         PortalApplication app = ((PortalApplication) getApplication());
+        MySession session = (MySession) getSession();
         boolean newAccount = false;
-        if (!UserManagementService.userExistsInDlibra(app.getRodlURI(), app.getAdminToken(), user.getOpenId())) {
+        if (!session.getUms().userExistsInDlibra(user.getOpenId())) {
             try {
-                ClientResponse response = UserManagementService.createUser(app.getRodlURI(), app.getAdminToken(),
-                    user.getOpenId(), user.getFullName());
+                ClientResponse response = session.getUms().createUser(user.getOpenId(), user.getFullName());
                 if (response.getStatus() == HttpServletResponse.SC_CREATED) {
                     newAccount = true;
                     getSession().info("New account has been created.");
@@ -93,9 +91,8 @@ public class OpenIDEndpoint extends WebPage {
             }
         }
         try {
-            String token = UserManagementService.createAccessToken(app.getRodlURI(), app.getAdminToken(),
-                user.getOpenId(), app.getDLibraClientId());
-            ((MySession) getSession()).setdLibraAccessToken(new Token(token, null));
+            String token = session.getUms().createAccessToken(user.getOpenId(), app.getDLibraClientId());
+            session.signIn(token);
         } catch (UniformInterfaceException e) {
             String error = e.getResponse().getClientResponseStatus() + " " + e.getResponse().getEntity(String.class);
             getSession().error(error);
