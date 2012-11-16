@@ -38,6 +38,7 @@ import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 import pl.psnc.dl.wf4ever.portal.model.Statement;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
+import com.hp.hpl.jena.ontology.ConversionException;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
@@ -528,7 +529,12 @@ public final class RoFactory {
         resourceAR.getRelations().put(propertyName, objectAR);
         objectAR.getInverseRelations().put(propertyName, resourceAR);
 
-        Property inverse = property.as(OntProperty.class).getInverse();
+        Property inverse = null;
+        try {
+            inverse = property.as(OntProperty.class).getInverse();
+        } catch (ConversionException e) {
+            LOG.debug("Property " + property.getURI() + " is not an OntProperty");
+        }
         String inversePropertyName = (inverse != null ? RoFactory.splitCamelCase(inverse.getLocalName()).toLowerCase()
                 : "(inverse of) " + propertyName);
         objectAR.getRelations().put(inversePropertyName, resourceAR);
