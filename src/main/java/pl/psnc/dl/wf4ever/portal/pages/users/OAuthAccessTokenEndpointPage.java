@@ -11,7 +11,7 @@ import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.purl.wf4ever.rosrs.client.common.users.UserManagementService;
 
-import pl.psnc.dl.wf4ever.portal.PortalApplication;
+import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.model.users.AuthCodeData;
 import pl.psnc.dl.wf4ever.portal.services.HibernateService;
 
@@ -78,6 +78,7 @@ public class OAuthAccessTokenEndpointPage extends WebPage {
      *            page parameters with the request details
      */
     private void prepareResponse(PageParameters pageParameters) {
+        UserManagementService ums = MySession.get().getUms();
         String error = null;
         String errorDesc = null;
         AuthCodeData data = null;
@@ -106,10 +107,8 @@ public class OAuthAccessTokenEndpointPage extends WebPage {
             status = 400;
         } else {
             try {
-                PortalApplication app = ((PortalApplication) getApplication());
                 try {
-                    String token = UserManagementService.createAccessToken(app.getRodlURI(), app.getAdminToken(),
-                        data.getUserId(), data.getClientId());
+                    String token = ums.createAccessToken(data.getUserId(), data.getClientId());
                     json = String.format("{\"access_token\": \"%s\", \"token_type\": \"bearer\"}", token);
                     status = 200;
                     HibernateService.deleteCode(data);

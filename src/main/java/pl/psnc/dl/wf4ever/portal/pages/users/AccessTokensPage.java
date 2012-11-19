@@ -17,7 +17,6 @@ import org.purl.wf4ever.rosrs.client.common.users.AccessToken;
 import org.purl.wf4ever.rosrs.client.common.users.UserManagementService;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
-import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.User;
 import pl.psnc.dl.wf4ever.portal.pages.TemplatePage;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
@@ -62,11 +61,11 @@ public class AccessTokensPage extends TemplatePage {
         add(new BookmarkablePageLink<Void>("tokens", AccessTokensPage.class));
         add(new BookmarkablePageLink<Void>("generate", GenerateAccessTokenPage.class));
 
-        final User user = ((MySession) getSession()).getUser();
+        MySession session = (MySession) getSession();
+        final User user = session.getUser();
+        final UserManagementService ums = session.getUms();
 
-        PortalApplication app = ((PortalApplication) getApplication());
-        accessTokens = UserManagementService.getAccessTokens(app.getRodlURI(), app.getAdminToken(), user.getURI()
-                .toString());
+        accessTokens = ums.getAccessTokens(user.getURI().toString());
 
         final Form<?> form = new Form<Void>("form");
         add(form);
@@ -88,10 +87,8 @@ public class AccessTokensPage extends TemplatePage {
 
                     @Override
                     protected void onSubmit(AjaxRequestTarget target, Form<?> arg1) {
-                        PortalApplication app = ((PortalApplication) getApplication());
                         try {
-                            UserManagementService.deleteAccessToken(app.getRodlURI(), app.getAdminToken(),
-                                token.getToken());
+                            ums.deleteAccessToken(token.getToken());
                             accessTokens.remove(token);
                             target.add(form);
                         } catch (Exception e) {

@@ -76,7 +76,8 @@ public class TestPages {
         tester.startPage(HelpPage.class);
         tester.assertRenderedPage(HelpPage.class);
 
-        List<URI> ros = ROSRService.getROList(((PortalApplication) tester.getApplication()).getRodlURI());
+        ROSRService rosrs = new ROSRService(((PortalApplication) tester.getApplication()).getRodlURI(), null);
+        List<URI> ros = rosrs.getROList(true);
         if (!ros.isEmpty()) {
             URI ro = ros.get(0);
             PageParameters parameters = new PageParameters();

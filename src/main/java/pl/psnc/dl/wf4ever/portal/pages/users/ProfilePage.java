@@ -10,10 +10,8 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.purl.wf4ever.rosrs.client.common.users.UserManagementService;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
-import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.User;
 import pl.psnc.dl.wf4ever.portal.pages.TemplatePage;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
@@ -53,7 +51,8 @@ public class ProfilePage extends TemplatePage {
         add(new BookmarkablePageLink<Void>("tokens", AccessTokensPage.class));
         add(new BookmarkablePageLink<Void>("generate", GenerateAccessTokenPage.class));
 
-        final User user = ((MySession) getSession()).getUser();
+        final MySession session = (MySession) getSession();
+        final User user = session.getUser();
 
         Form<User> form = new Form<User>("form", new CompoundPropertyModel<User>(user));
         form.setOutputMarkupId(true);
@@ -65,9 +64,8 @@ public class ProfilePage extends TemplatePage {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                PortalApplication app = ((PortalApplication) getApplication());
                 try {
-                    UserManagementService.deleteUser(app.getRodlURI(), app.getAdminToken(), user.getURI().toString());
+                    session.getUms().deleteUser(user.getURI().toString());
                     getSession().info("Account has been deleted.");
                     throw new RestartResponseException(getApplication().getHomePage());
                 } catch (Exception e) {

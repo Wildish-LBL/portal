@@ -37,6 +37,7 @@ import pl.psnc.dl.wf4ever.portal.myexpimport.model.Workflow;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.WorkflowHeader;
 import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportModel;
 import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportModel.ImportStatus;
+import pl.psnc.dl.wf4ever.vocabulary.FOAF;
 
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
@@ -85,9 +86,10 @@ public final class MyExpImportService {
      * @param consumerSecret
      *            myExp consumer secret
      */
-    public static void startImport(ImportModel model, URI rodlURI, URI wf2ROService, Token myExpAccessToken,
+    public static void startImport(ImportModel model, ROSRService rosrs, URI wf2ROService, Token myExpAccessToken,
             String consumerKey, String consumerSecret) {
-        new ImportThread(model, rodlURI, wf2ROService, myExpAccessToken, consumerKey, consumerSecret).start();
+        new ImportThread(model, rosrs, wf2ROService, wf2ROService, myExpAccessToken, consumerKey, consumerSecret)
+                .start();
     }
 
 
@@ -284,7 +286,7 @@ public final class MyExpImportService {
         private URI createRO(URI rodlURI, String roId)
                 throws ROSRSException {
             model.setMessage(String.format("Creating a Research Object \"%s\"", roId));
-            ClientResponse r = ROSRService.createResearchObject(rodlURI, roId, dLibraToken);
+            ClientResponse r = rosrs.createResearchObject(roId);
             incrementStepsComplete();
             return r.getLocation();
         }
@@ -346,7 +348,7 @@ public final class MyExpImportService {
             Workflow w = (Workflow) getResource(header, Workflow.class);
             model.setMessage(String.format("Transforming workflow %s", w.getResource()));
             Wf2ROService.transformWorkflow(wf2ROService, URI.create(w.getContentUri()), w.getContentType(),
-                researchObjectURI, dLibraToken.getToken());
+                researchObjectURI, rosrs.getToken());
             incrementStepsComplete();
             return w;
         }
@@ -491,8 +493,8 @@ public final class MyExpImportService {
             incrementStepsComplete();
 
             model.setMessage(String.format("Uploading %s", r.getFilename()));
-            ROSRService.createResource(researchObjectURI, r.getFilename(),
-                new ByteArrayInputStream(r.getContentDecoded()), r.getContentType(), dLibraToken);
+            rosrs.createResource(researchObjectURI, r.getFilename(), new ByteArrayInputStream(r.getContentDecoded()),
+                r.getContentType());
 
             incrementStepsComplete();
             return r;
@@ -559,8 +561,8 @@ public final class MyExpImportService {
             model.setMessage(String.format("Uploading annotation body %s", bodyPath));
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             createAnnotationBody(annTargetURI, rdf).write(out);
-            ROSRService.addAnnotation(researchObjectURI, Arrays.asList(annTargetURI), bodyPath,
-                new ByteArrayInputStream(out.toByteArray()), "application/rdf+xml", dLibraToken);
+            rosrs.addAnnotation(researchObjectURI, Arrays.asList(annTargetURI), bodyPath,
+                new ByteArrayInputStream(out.toByteArray()), "application/rdf+xml");
             incrementStepsComplete();
         }
 
@@ -617,7 +619,7 @@ public final class MyExpImportService {
         Resource target = body.createResource(targetURI.toString());
 
         // source
-        Resource source = me.listObjectsOfProperty(Vocab.FOAF_PRIMARY_TOPIC).next().asResource();
+        Resource source = me.listObjectsOfProperty(FOAF.primaryTopic).next().asResource();
         target.addProperty(DCTerms.source, source);
 
         // title
@@ -657,7 +659,7 @@ public final class MyExpImportService {
             LOG.error("UTF-8 is not supported", e);
         }
 
-        Resource source = me.listObjectsOfProperty(Vocab.FOAF_PRIMARY_TOPIC).next().asResource();
+        Resource source = me.listObjectsOfProperty(FOAF.primaryTopic).next().asResource();
 
         // creator
         Property owner = me.createProperty("http://rdfs.org/sioc/ns#has_owner");

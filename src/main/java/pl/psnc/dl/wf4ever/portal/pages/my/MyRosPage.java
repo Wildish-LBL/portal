@@ -27,10 +27,8 @@ import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
 import org.purl.wf4ever.rosrs.client.common.ROSRSException;
 import org.purl.wf4ever.rosrs.client.common.ROSRService;
-import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
-import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.pages.MyExpImportPage;
@@ -86,7 +84,8 @@ public class MyRosPage extends TemplatePage {
             throws URISyntaxException, ROSRSException {
         super(parameters);
 
-        List<URI> uris = ROSRService.getROList(rodlURI, MySession.get().getdLibraAccessToken());
+        final ROSRService rosrs = MySession.get().getRosrs();
+        List<URI> uris = rosrs.getROList(false);
         final List<ResearchObject> researchObjects = new ArrayList<ResearchObject>();
         for (URI uri : uris) {
             try {
@@ -117,8 +116,7 @@ public class MyRosPage extends TemplatePage {
             @Override
             public void validate(IValidatable<String> validatable) {
                 try {
-                    if (!ROSRService.isRoIdFree(((PortalApplication) getApplication()).getRodlURI(),
-                        validatable.getValue())) {
+                    if (!rosrs.isRoIdFree(validatable.getValue())) {
                         validatable.error(new ValidationError().setMessage("This ID is already in use"));
                     }
                 } catch (Exception e) {
@@ -157,10 +155,9 @@ public class MyRosPage extends TemplatePage {
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 super.onSubmit(target, form);
-                Token dLibraToken = MySession.get().getdLibraAccessToken();
                 for (AggregatedResource ro : selectedResearchObjects) {
                     try {
-                        ROSRService.deleteResearchObject(ro.getURI(), dLibraToken);
+                        rosrs.deleteResearchObject(ro.getURI());
                         researchObjects.remove(ro);
                     } catch (Exception e) {
                         error("Could not delete Research Object: " + ro.getURI() + " (" + e.getMessage() + ")");
@@ -195,10 +192,8 @@ public class MyRosPage extends TemplatePage {
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> addForm) {
                 super.onSubmit(target, addForm);
-                Token dLibraToken = MySession.get().getdLibraAccessToken();
                 try {
-                    ClientResponse response = ROSRService.createResearchObject(
-                        ((PortalApplication) getApplication()).getRodlURI(), roId, dLibraToken);
+                    ClientResponse response = rosrs.createResearchObject(roId);
                     if (response.getStatus() == HttpStatus.SC_CREATED) {
                         URI researchObjectURI = response.getLocation();
                         researchObjects.add(RoFactory.createResearchObject(rodlURI, researchObjectURI, false, MySession

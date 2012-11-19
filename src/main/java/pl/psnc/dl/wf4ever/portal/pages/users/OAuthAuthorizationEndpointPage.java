@@ -14,10 +14,8 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.request.http.handler.RedirectRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.purl.wf4ever.rosrs.client.common.users.OAuthClient;
-import org.purl.wf4ever.rosrs.client.common.users.UserManagementService;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
-import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.User;
 import pl.psnc.dl.wf4ever.portal.model.users.AuthCodeData;
 import pl.psnc.dl.wf4ever.portal.pages.TemplatePage;
@@ -88,9 +86,7 @@ public class OAuthAuthorizationEndpointPage extends TemplatePage {
         } else {
             String clientId = pageParameters.get("client_id").toString();
             try {
-                PortalApplication app = ((PortalApplication) getApplication());
-                OAuthClient tentativeClient = UserManagementService.getClient(app.getRodlURI(), app.getAdminToken(),
-                    clientId);
+                OAuthClient tentativeClient = ((MySession) getSession()).getUms().getClient(clientId);
                 if (pageParameters.get("redirect_uri").isNull()) {
                     LOG.warn("Missing redirect URI.");
                 } else {
@@ -124,9 +120,8 @@ public class OAuthAuthorizationEndpointPage extends TemplatePage {
     private String prepareTokenResponse(OAuthClient client)
             throws UniformInterfaceException {
         User user = ((MySession) getSession()).getUser();
-        PortalApplication app = ((PortalApplication) getApplication());
-        String token = UserManagementService.createAccessToken(app.getRodlURI(), app.getAdminToken(), user.getURI()
-                .toString(), client.getClientId());
+        String token = ((MySession) getSession()).getUms().createAccessToken(user.getURI().toString(),
+            client.getClientId());
         String url = client.getRedirectionURI() + "#";
         url += ("access_token=" + token);
         url += "&token_type=bearer";

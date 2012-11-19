@@ -20,7 +20,6 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.common.ROSRService;
-import org.scribe.model.Token;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
@@ -125,7 +124,7 @@ class AnnotatingBox extends Panel {
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 super.onSubmit(target, form);
-                Token dLibraToken = getSession().getdLibraAccessToken();
+                ROSRService rosrs = MySession.get().getRosrs();
                 List<Annotation> annotations = new ArrayList<Annotation>();
                 for (Statement statement : selectedStatements) {
                     statement.getAnnotation().getBody().remove(statement);
@@ -139,10 +138,10 @@ class AnnotatingBox extends Panel {
                 for (Annotation annotation : annotations) {
                     try {
                         if (annotation.getBody().isEmpty()) {
-                            ROSRService.deleteAnnotationAndBody(annotation.getURI(), dLibraToken);
+                            rosrs.deleteAnnotationAndBody(annotation.getURI());
                         } else {
-                            ROSRService.updateResource(annotation.getBodyURI(),
-                                RoFactory.wrapAnnotationBody(annotation.getBody()), "application/rdf+xml", dLibraToken);
+                            rosrs.updateResource(annotation.getBodyURI(),
+                                RoFactory.wrapAnnotationBody(annotation.getBody()), "application/rdf+xml");
                         }
                     } catch (Exception e) {
                         error(e);

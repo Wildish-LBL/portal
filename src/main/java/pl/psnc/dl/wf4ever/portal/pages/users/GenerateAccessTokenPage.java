@@ -15,7 +15,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.purl.wf4ever.rosrs.client.common.users.OAuthClient;
 import org.purl.wf4ever.rosrs.client.common.users.UserManagementService;
 
-import pl.psnc.dl.wf4ever.portal.PortalApplication;
+import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.pages.TemplatePage;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 
@@ -56,11 +56,11 @@ public class GenerateAccessTokenPage extends TemplatePage {
         add(new BookmarkablePageLink<Void>("tokens", AccessTokensPage.class));
         add(new BookmarkablePageLink<Void>("generate", GenerateAccessTokenPage.class));
 
-        PortalApplication app = ((PortalApplication) getApplication());
+        UserManagementService ums = MySession.get().getUms();
 
         List<OAuthClient> oobClients = null;
         try {
-            oobClients = UserManagementService.getClients(app.getRodlURI(), app.getAdminToken());
+            oobClients = ums.getClients();
             Iterator<OAuthClient> i = oobClients.iterator();
             while (i.hasNext()) {
                 OAuthClient client = i.next();

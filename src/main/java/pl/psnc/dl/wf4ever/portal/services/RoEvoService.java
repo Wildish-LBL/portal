@@ -7,11 +7,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.purl.wf4ever.rosrs.client.common.Vocab;
-
 import pl.psnc.dl.wf4ever.portal.model.RoEvoNode;
 import pl.psnc.dl.wf4ever.portal.model.RoEvoNode.EvoClass;
 import pl.psnc.dl.wf4ever.portal.model.RoEvoNode.EvoClassModifier;
+import pl.psnc.dl.wf4ever.vocabulary.PROV;
+import pl.psnc.dl.wf4ever.vocabulary.RO;
+import pl.psnc.dl.wf4ever.vocabulary.ROEVO;
 
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
@@ -66,11 +67,11 @@ public final class RoEvoService {
         Query query = null;
         Individual i = model.getIndividual(researchObjectURI.toString());
         if (i != null) {
-            if (i.hasRDFType(Vocab.ROEVO_SNAPSHOT_RO)) {
+            if (i.hasRDFType(ROEVO.SnapshotRO)) {
                 query = MyQueryFactory.getSnapshotEvolution(researchObjectURI.toString());
-            } else if (i.hasRDFType(Vocab.ROEVO_LIVE_RO)) {
+            } else if (i.hasRDFType(ROEVO.LiveRO)) {
                 query = MyQueryFactory.getLiveEvolution(researchObjectURI.toString());
-            } else if (i.hasRDFType(Vocab.ROEVO_ARCHIVED_RO)) {
+            } else if (i.hasRDFType(ROEVO.ArchivedRO)) {
                 query = MyQueryFactory.getArchivedEvolution(researchObjectURI.toString());
             }
         }
@@ -94,25 +95,25 @@ public final class RoEvoService {
             RDFNode object = statement.getObject();
             if (property.equals(RDFS.label)) {
                 node.setLabel(object.asLiteral().getString());
-            } else if (property.equals(Vocab.ROEVO_IS_SNAPSHOT_OF) && object.isURIResource()) {
+            } else if (property.equals(ROEVO.isSnapshotOf) && object.isURIResource()) {
                 node.getItsLiveROs().add(createNode(nodes, object.asResource().getURI()));
-            } else if (property.equals(Vocab.ROEVO_HAS_PREVIOUS_VERSION) && object.isURIResource()) {
+            } else if (property.equals(PROV.wasRevisionOf) && object.isURIResource()) {
                 node.getPreviousSnapshots().add(createNode(nodes, object.asResource().getURI()));
-            } else if (property.equals(Vocab.ROEVO_DERIVED_FROM) && object.isURIResource()) {
+            } else if (property.equals(PROV.wasDerivedFrom) && object.isURIResource()) {
                 RoEvoNode source = createNode(nodes, object.asResource().getURI());
                 node.getDerivedResources().add(source);
                 source.setEvoClassModifier(EvoClassModifier.SOURCE);
                 node.setEvoClassModifier(EvoClassModifier.FORK);
             } else if (property.equals(RDF.type)) {
-                if (object.equals(Vocab.RO_RESEARCH_OBJECT)) {
+                if (object.equals(RO.ResearchObject)) {
                     node.setResearchObject(true);
-                } else if (object.equals(Vocab.ROEVO_SNAPSHOT_RO)) {
+                } else if (object.equals(ROEVO.SnapshotRO)) {
                     node.setResearchObject(true);
                     node.setEvoClass(EvoClass.SNAPSHOT);
-                } else if (object.equals(Vocab.ROEVO_LIVE_RO)) {
+                } else if (object.equals(ROEVO.LiveRO)) {
                     node.setResearchObject(true);
                     node.setEvoClass(EvoClass.LIVE);
-                } else if (object.equals(Vocab.ROEVO_ARCHIVED_RO)) {
+                } else if (object.equals(ROEVO.ArchivedRO)) {
                     node.setResearchObject(true);
                     node.setEvoClass(EvoClass.ARCHIVED);
                 }
