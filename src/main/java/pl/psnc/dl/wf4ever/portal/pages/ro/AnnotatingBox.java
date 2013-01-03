@@ -19,7 +19,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
-import org.purl.wf4ever.rosrs.client.common.ROSRService;
+import org.purl.wf4ever.rosrs.client.ROSRService;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;

@@ -10,8 +10,8 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.joda.time.format.ISODateTimeFormat;
-import org.purl.wf4ever.rosrs.client.common.ROSRSException;
-import org.purl.wf4ever.rosrs.client.common.ROSRService;
+import org.purl.wf4ever.rosrs.client.ROSRSException;
+import org.purl.wf4ever.rosrs.client.ROSRService;
 
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.Creator;

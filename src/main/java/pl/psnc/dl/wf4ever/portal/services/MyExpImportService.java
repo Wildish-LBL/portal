@@ -9,6 +9,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
@@ -17,8 +18,8 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.log4j.Logger;
-import org.purl.wf4ever.rosrs.client.common.ROSRSException;
-import org.purl.wf4ever.rosrs.client.common.ROSRService;
+import org.purl.wf4ever.rosrs.client.ROSRSException;
+import org.purl.wf4ever.rosrs.client.ROSRService;
 import org.scribe.model.Response;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
@@ -493,8 +494,8 @@ public final class MyExpImportService {
             incrementStepsComplete();
 
             model.setMessage(String.format("Uploading %s", r.getFilename()));
-            rosrs.createResource(researchObjectURI, r.getFilename(), new ByteArrayInputStream(r.getContentDecoded()),
-                r.getContentType());
+            rosrs.aggregateInternalResource(researchObjectURI, r.getFilename(),
+                new ByteArrayInputStream(r.getContentDecoded()), r.getContentType());
 
             incrementStepsComplete();
             return r;
@@ -561,7 +562,7 @@ public final class MyExpImportService {
             model.setMessage(String.format("Uploading annotation body %s", bodyPath));
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             createAnnotationBody(annTargetURI, rdf).write(out);
-            rosrs.addAnnotation(researchObjectURI, Arrays.asList(annTargetURI), bodyPath,
+            rosrs.addAnnotation(researchObjectURI, new HashSet<>(Arrays.asList(annTargetURI)), bodyPath,
                 new ByteArrayInputStream(out.toByteArray()), "application/rdf+xml");
             incrementStepsComplete();
         }

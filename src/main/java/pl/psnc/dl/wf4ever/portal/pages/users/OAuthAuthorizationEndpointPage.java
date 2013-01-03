@@ -13,7 +13,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.request.http.handler.RedirectRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.purl.wf4ever.rosrs.client.common.users.OAuthClient;
+import org.purl.wf4ever.rosrs.client.users.OAuthClient;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.model.User;

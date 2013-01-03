@@ -12,8 +12,8 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.purl.wf4ever.rosrs.client.common.users.OAuthClient;
-import org.purl.wf4ever.rosrs.client.common.users.UserManagementService;
+import org.purl.wf4ever.rosrs.client.users.OAuthClient;
+import org.purl.wf4ever.rosrs.client.users.UserManagementService;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.pages.TemplatePage;

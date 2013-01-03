@@ -8,8 +8,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.tester.WicketTester;
 import org.junit.Before;
 import org.junit.Test;
-import org.purl.wf4ever.rosrs.client.common.ROSRSException;
-import org.purl.wf4ever.rosrs.client.common.ROSRService;
+import org.purl.wf4ever.rosrs.client.ROSRSException;
+import org.purl.wf4ever.rosrs.client.ROSRService;
 
 import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;

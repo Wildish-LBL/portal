@@ -10,8 +10,8 @@ import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.purl.wf4ever.rosrs.client.common.ROSRSException;
-import org.purl.wf4ever.rosrs.client.common.users.MigrateService;
+import org.purl.wf4ever.rosrs.client.ROSRSException;
+import org.purl.wf4ever.rosrs.client.users.MigrateService;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;

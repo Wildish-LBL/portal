@@ -7,8 +7,8 @@ import java.io.Serializable;
 import java.net.URI;
 
 import org.apache.log4j.Logger;
-import org.purl.wf4ever.rosrs.client.common.ROSRSException;
-import org.purl.wf4ever.rosrs.client.common.ROSRService;
+import org.purl.wf4ever.rosrs.client.ROSRSException;
+import org.purl.wf4ever.rosrs.client.ROSRService;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.vocabulary.FOAF;

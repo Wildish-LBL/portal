@@ -25,7 +25,7 @@ import org.apache.wicket.request.UrlDecoder;
 import org.apache.wicket.util.crypt.Base64;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
-import org.purl.wf4ever.rosrs.client.common.ROSRService;
+import org.purl.wf4ever.rosrs.client.ROSRService;
 
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
