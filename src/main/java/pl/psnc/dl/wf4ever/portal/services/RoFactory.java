@@ -41,11 +41,8 @@ import pl.psnc.dl.wf4ever.vocabulary.ORE;
 import pl.psnc.dl.wf4ever.vocabulary.RO;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
-import com.hp.hpl.jena.ontology.ConversionException;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.ontology.OntModelSpec;
-import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QuerySolution;
@@ -53,12 +50,10 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.NodeIterator;
-import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.shared.DoesNotExistException;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 
 /**
@@ -277,32 +272,6 @@ public final class RoFactory {
 
 
     /**
-     * Create a {@link RoTreeModel} where resource groups are folders and resources are assigned to each resource group
-     * they belong to, or to root node if they have no resource groups.
-     * 
-     * @param researchObjectURI
-     *            RO URI
-     * @param resources
-     *            aggregated resources
-     * @return a tree model
-     */
-    public static RoTreeModel createConceptualResourcesTree(URI researchObjectURI,
-            Map<URI, AggregatedResource> resources) {
-        ResearchObject ro = (ResearchObject) resources.get(researchObjectURI);
-        RoTreeModel treeModel = new RoTreeModel(ro);
-
-        // TODO take care of proxies
-        for (AggregatedResource resource : resources.values()) {
-            if (resource.equals(ro)) {
-                continue;
-            }
-            treeModel.addAggregatedResource(resource, true);
-        }
-        return treeModel;
-    }
-
-
-    /**
      * Create a {@link RoTreeModel} where all resources are assigned to the root node.
      * 
      * @param researchObjectURI
@@ -312,9 +281,8 @@ public final class RoFactory {
      * @return a tree model
      */
 
-    public static RoTreeModel createPhysicalResourcesTree(URI researchObjectURI, Map<URI, AggregatedResource> resources) {
-        ResearchObject ro = (ResearchObject) resources.get(researchObjectURI);
-        RoTreeModel treeModel = new RoTreeModel(resources.get(researchObjectURI));
+    public static RoTreeModel createPhysicalResourcesTree(org.purl.wf4ever.rosrs.client.ResearchObject researchObject) {
+        RoTreeModel treeModel = new RoTreeModel(researchObject);
 
         // TODO take care of proxies & folders
         for (AggregatedResource resource : resources.values()) {
@@ -482,91 +450,6 @@ public final class RoFactory {
         } catch (IOException e) {
             LOG.error(e.getMessage());
         }
-    }
-
-
-    /**
-     * Discover relations between a set of aggregated resources.
-     * 
-     * @param model
-     *            Jena model in which to look for relations
-     * @param researchObjectURI
-     *            RO URI
-     * @param resources
-     *            aggregated resources
-     */
-    public static void createRelations(OntModel model, URI researchObjectURI, Map<URI, AggregatedResource> resources) {
-        for (AggregatedResource resourceAR : resources.values()) {
-            Individual resource = model.getIndividual(resourceAR.getURI().toString());
-            StmtIterator it = model.listStatements(resource, null, (Resource) null);
-            while (it.hasNext()) {
-                com.hp.hpl.jena.rdf.model.Statement statement = it.next();
-                if (statement.getObject().isURIResource()) {
-                    URI objectURI = URI.create(statement.getObject().asResource().getURI());
-                    if (resources.containsKey(objectURI)) {
-                        AggregatedResource objectAR = resources.get(objectURI);
-                        Property property = statement.getPredicate();
-                        addRelation(resourceAR, property, objectAR);
-                    }
-                }
-            }
-        }
-    }
-
-
-    /**
-     * Store a relation between 2 aggregated resources. A relation is stored in subject's
-     * {@link AggregatedResource#getRelations()} and in object's {@link AggregatedResource#getInverseRelations()}. An
-     * inverse relation is stored the other way round. If no inverse relation can be found, the name of the relation
-     * with a prefix "(inverse of) " is used.
-     * 
-     * @param resourceAR
-     *            subject resource
-     * @param property
-     *            RDF property
-     * @param objectAR
-     *            object resource
-     */
-    public static void addRelation(AggregatedResource resourceAR, Property property, AggregatedResource objectAR) {
-        String propertyName = RoFactory.splitCamelCase(property.getLocalName()).toLowerCase();
-        resourceAR.getRelations().put(propertyName, objectAR);
-        objectAR.getInverseRelations().put(propertyName, resourceAR);
-
-        Property inverse = null;
-        try {
-            inverse = property.as(OntProperty.class).getInverse();
-        } catch (ConversionException e) {
-            LOG.debug("Property " + property.getURI() + " is not an OntProperty");
-        }
-        String inversePropertyName = (inverse != null ? RoFactory.splitCamelCase(inverse.getLocalName()).toLowerCase()
-                : "(inverse of) " + propertyName);
-        objectAR.getRelations().put(inversePropertyName, resourceAR);
-        resourceAR.getInverseRelations().put(inversePropertyName, objectAR);
-
-    }
-
-
-    /**
-     * Store a relation when no RDF property is known, tries to create a property before calling
-     * {@link RoFactory#addRelation(AggregatedResource, Property, AggregatedResource)}.
-     * 
-     * @param resourceAR
-     *            subject resource
-     * @param propertyURI
-     *            property URI
-     * @param objectAR
-     *            object resource
-     */
-    public static void addRelation(AggregatedResource resourceAR, URI propertyURI, AggregatedResource objectAR) {
-        OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM_RDFS_INF);
-        Property property = model.createProperty(propertyURI.toString());
-        try {
-            model.read(property.getNameSpace());
-        } catch (DoesNotExistException e) {
-            // do nothing, model will be empty
-            LOG.trace("Could not load model for property URI " + propertyURI, e);
-        }
-        addRelation(resourceAR, property, objectAR);
     }
 
 

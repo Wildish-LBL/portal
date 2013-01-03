@@ -26,6 +26,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.lang.Bytes;
+import org.purl.wf4ever.rosrs.client.ROException;
 import org.purl.wf4ever.rosrs.client.ROSRSException;
 
 import pl.psnc.dl.wf4ever.portal.model.ResourceGroup;
@@ -187,16 +188,16 @@ class UploadResourceModal extends Panel {
                             try {
                                 roPage.onResourceAdd(target, uploadedFile, selectedTypes);
                                 target.appendJavaScript("$('#upload-resource-modal').modal('hide')");
-                            } catch (IOException | ROSRSException e) {
+                            } catch (IOException | ROSRSException | ROException e) {
                                 error(e);
                             }
                         }
                         break;
                     case REMOTE:
                         try {
-                            roPage.onRemoteResourceAdded(target, resourceURI, downloadURI, selectedTypes);
+                            roPage.onRemoteResourceAdded(target, resourceURI);
                             target.appendJavaScript("$('#upload-resource-modal').modal('hide')");
-                        } catch (IOException | ROSRSException e) {
+                        } catch (ROSRSException | ROException e) {
                             error(e);
                         }
                         break;

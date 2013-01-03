@@ -7,14 +7,11 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.swing.tree.TreeModel;
 
 import org.apache.log4j.Logger;
@@ -33,18 +30,16 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.request.UrlEncoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.purl.wf4ever.rosrs.client.ROException;
 import org.purl.wf4ever.rosrs.client.ROSRSException;
-import org.purl.wf4ever.rosrs.client.ROSRService;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
+import org.purl.wf4ever.rosrs.client.Resource;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.Annotation;
-import pl.psnc.dl.wf4ever.portal.model.Creator;
 import pl.psnc.dl.wf4ever.portal.model.ResourceGroup;
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 import pl.psnc.dl.wf4ever.portal.model.Statement;
@@ -54,11 +49,7 @@ import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.services.RoFactory;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
-import pl.psnc.dl.wf4ever.vocabulary.ORE;
 
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.rdf.model.ResIterator;
-import com.hp.hpl.jena.rdf.model.Resource;
 import com.sun.jersey.api.client.ClientResponse;
 
 /**
@@ -79,7 +70,7 @@ public class RoPage extends TemplatePage {
     URI roURI;
 
     /** Resources aggregated by the RO. */
-    Map<URI, AggregatedResource> resources;
+    //    Map<URI, AggregatedResource> resources;
 
     /** Can the user edit the RO. */
     boolean canEdit = false;
@@ -89,9 +80,6 @@ public class RoPage extends TemplatePage {
 
     /** The part showing the RO annotations. */
     final AnnotatingBox annotatingBox;
-
-    /** The conceptual model of RO resource. */
-    private RoTreeModel conceptualResourcesTree;
 
     /** The physical model of RO resource. */
     private RoTreeModel physicalResourcesTree;
@@ -110,6 +98,8 @@ public class RoPage extends TemplatePage {
 
     /** The feedback panel. */
     private MyFeedbackPanel feedbackPanel;
+
+    protected ResearchObject researchObject;
 
     /** Regex pattern for parsing Link HTTP headers. */
     private static final Pattern LINK_HEADER = Pattern.compile("<(.+)>; rel=(.+)");
@@ -154,8 +144,8 @@ public class RoPage extends TemplatePage {
 
         final CompoundPropertyModel<AggregatedResource> itemModel = new CompoundPropertyModel<AggregatedResource>(
                 (AggregatedResource) null);
-        roViewerBox = new RoViewerBox(this, itemModel, new PropertyModel<TreeModel>(this, "conceptualResourcesTree"),
-                new PropertyModel<TreeModel>(this, "physicalResourcesTree"), "loadingROFragment");
+        roViewerBox = new RoViewerBox(this, itemModel, new PropertyModel<TreeModel>(this, "physicalResourcesTree"),
+                "loadingROFragment");
         add(roViewerBox);
         annotatingBox = new AnnotatingBox(this, itemModel);
         add(annotatingBox);
@@ -180,30 +170,27 @@ public class RoPage extends TemplatePage {
             @Override
             protected void respond(AjaxRequestTarget target) {
                 try {
-                    if (getConceptualResourcesTree() == null || getPhysicalResourcesTree() == null) {
-                        PortalApplication app = ((PortalApplication) getApplication());
-                        Map<URI, Creator> usernames = MySession.get().getUsernames();
+                    if (getPhysicalResourcesTree() == null) {
+                        //                        PortalApplication app = ((PortalApplication) getApplication());
+                        //                        Map<URI, Creator> usernames = MySession.get().getUsernames();
 
                         //new
-                        ResearchObject researchObject = new ResearchObject(roURI, MySession.get().getRosrs());
+                        researchObject = new ResearchObject(roURI, MySession.get().getRosrs());
                         researchObject.load();
                         //new end
 
-                        OntModel model = ROSRService.createManifestAndAnnotationsModel(roURI);
-                        resources = RoFactory.getAggregatedResources(model, rodlURI, roURI, usernames);
-                        RoFactory.assignResourceGroupsToResources(model, roURI, app.getResourceGroups(), resources);
-                        setConceptualResourcesTree(RoFactory.createConceptualResourcesTree(roURI, resources));
-                        setPhysicalResourcesTree(RoFactory.createPhysicalResourcesTree(roURI, resources));
+                        //                        OntModel model = ROSRService.createManifestAndAnnotationsModel(roURI);
+                        //                        resources = RoFactory.getAggregatedResources(model, rodlURI, roURI, usernames);
+                        //                        RoFactory.assignResourceGroupsToResources(model, roURI, app.getResourceGroups(), resources);
+                        setPhysicalResourcesTree(RoFactory.createPhysicalResourcesTree(researchObject));
 
-                        RoFactory.createRelations(model, roURI, resources);
-                        // FIXME this has been turned off because it takes too much time and is generally a hack
-                        //						RoFactory.createStabilities(model, roURI, resources);
+                        //                        RoFactory.createRelations(model, roURI, resources);
 
                         roViewerBox.onRoTreeLoaded();
                         relEditForm.onRoTreeLoaded();
                         target.add(roViewerBox);
                     }
-                } catch (URISyntaxException | ROSRSException | ROException e) {
+                } catch (ROSRSException | ROException e) {
                     LOG.error(e);
                     error(e);
                 }
@@ -239,16 +226,6 @@ public class RoPage extends TemplatePage {
         } catch (ROSRSException e) {
             LOG.error("Unexpected response when getting RO head", e);
         }
-    }
-
-
-    public RoTreeModel getConceptualResourcesTree() {
-        return conceptualResourcesTree;
-    }
-
-
-    public void setConceptualResourcesTree(RoTreeModel conceptualResourcesTree) {
-        this.conceptualResourcesTree = conceptualResourcesTree;
     }
 
 
@@ -371,38 +348,16 @@ public class RoPage extends TemplatePage {
      *             unexpected response code
      * @throws IOException
      *             can't get the uploaded file
+     * @throws ROException
      */
     void onResourceAdd(AjaxRequestTarget target, final FileUpload uploadedFile,
             Set<ResourceGroup> selectedResourceGroups)
-            throws ROSRSException, IOException {
-        URI resourceURI = roURI.resolve(UrlEncoder.PATH_INSTANCE.encode(uploadedFile.getClientFileName(), "UTF-8"));
-        MySession
-                .get()
-                .getRosrs()
-                .aggregateInternalResource(roURI, uploadedFile.getClientFileName(), uploadedFile.getInputStream(),
-                    uploadedFile.getContentType());
-        //        OntModel manifestModel = ROSRService.createManifestModel(roURI);
-        //        Individual individual = manifestModel.createResource(resourceURI.toString()).as(Individual.class);
-        //        for (ResourceGroup resourceGroup : selectedResourceGroups) {
-        //            individual.addRDFType(manifestModel.createResource(resourceGroup.getRdfClasses().iterator().next()
-        //                    .toString()));
-        //        }
-        //        response = ROSRService.uploadManifestModel(roURI, manifestModel, MySession.get().getdLibraAccessToken());
-        //        if (response.getStatus() != HttpServletResponse.SC_OK) {
-        //            throw new IOException(response.getClientResponseStatus().getReasonPhrase());
-        //        }
+            throws ROSRSException, IOException, ROException {
+        org.purl.wf4ever.rosrs.client.Resource resource = researchObject.aggregate(uploadedFile.getClientFileName(),
+            uploadedFile.getInputStream(), uploadedFile.getContentType());
 
-        AggregatedResource resource = RoFactory.createResource(rodlURI, roURI, resourceURI, true, MySession.get()
-                .getUsernames());
-        resource.getMatchingGroups().addAll(selectedResourceGroups);
-        getConceptualResourcesTree().addAggregatedResource(resource, true);
-        getPhysicalResourcesTree().addAggregatedResource(resource, false);
+        getPhysicalResourcesTree().addAggregatedResource(resource);
         target.add(roViewerBox);
-
-        resources.put(resourceURI, resource);
-        RoFactory.addRelation(resources.get(roURI), ORE.aggregates, resource);
-
-        roViewerBox.renderJSComponents(resources, target);
     }
 
 
@@ -418,47 +373,11 @@ public class RoPage extends TemplatePage {
      * @throws ROSRSException
      *             deleting the resource caused an unexpected response
      */
-    public void onResourceDelete(AggregatedResource resource, AjaxRequestTarget target)
+    public void onResourceDelete(org.purl.wf4ever.rosrs.client.Resource resource, AjaxRequestTarget target)
             throws IOException, ROSRSException {
-        ClientResponse response = MySession.get().getRosrs().deleteResource(resource.getURI());
-        if (response.getStatus() != HttpServletResponse.SC_NO_CONTENT) {
-            onRemoteResourceDelete(resource, target);
-        }
-        getConceptualResourcesTree().removeAggregatedResource(resource);
+        resource.delete();
         getPhysicalResourcesTree().removeAggregatedResource(resource);
-
-        resources.remove(resource.getURI());
-        for (Entry<String, AggregatedResource> entry : resource.getInverseRelations().entries()) {
-            entry.getValue().getRelations().remove(entry.getKey(), resource);
-        }
-        roViewerBox.renderJSComponents(resources, target);
         target.add(roViewerBox);
-    }
-
-
-    /**
-     * Called when a user wants to delete a remote resource.
-     * 
-     * @param resource
-     *            a remote resource
-     * @param target
-     *            request target
-     * @throws IOException
-     *             can't connect to RODL
-     * @throws ROSRSException
-     *             unexpected response code when deleting the resource
-     */
-    private void onRemoteResourceDelete(AggregatedResource resource, AjaxRequestTarget target)
-            throws IOException, ROSRSException {
-        OntModel manifestModel = ROSRService.createManifestModel(roURI);
-        URI absoluteResourceURI = roURI.resolve(resource.getURI());
-        Resource individual = manifestModel.createResource(absoluteResourceURI.toString());
-        ResIterator it = manifestModel.listSubjectsWithProperty(ORE.proxyFor, individual);
-        if (!it.hasNext()) {
-            throw new IOException("Not found");
-        }
-        Resource proxy = it.next();
-        MySession.get().getRosrs().deleteResource(URI.create(proxy.getURI()));
     }
 
 
@@ -481,32 +400,17 @@ public class RoPage extends TemplatePage {
      *            request target
      * @param resourceURI
      *            remote resource URI
-     * @param downloadURI
-     *            remote resource downloadURI (unused)
-     * @param selectedTypes
-     *            resource groups that this resource belongs to
-     * @throws IOException
-     *             Jackson error
      * @throws ROSRSException
      *             aggregating the resource caused unexpected response
+     * @throws ROException
      */
-    public void onRemoteResourceAdded(AjaxRequestTarget target, URI resourceURI, URI downloadURI,
-            Set<ResourceGroup> selectedTypes)
-            throws IOException, ROSRSException {
+    public void onRemoteResourceAdded(AjaxRequestTarget target, URI resourceURI)
+            throws ROSRSException, ROException {
         URI absoluteResourceURI = roURI.resolve(resourceURI);
-        MySession.get().getRosrs().aggregateExternalResource(roURI, resourceURI);
-
-        AggregatedResource resource = RoFactory.createResource(rodlURI, roURI, absoluteResourceURI, true, MySession
-                .get().getUsernames());
-        resource.getMatchingGroups().addAll(selectedTypes);
-        getConceptualResourcesTree().addAggregatedResource(resource, true);
-        getPhysicalResourcesTree().addAggregatedResource(resource, false);
+        Resource resource = researchObject.aggregate(absoluteResourceURI);
+        getPhysicalResourcesTree().addAggregatedResource(resource);
         target.add(roViewerBox);
 
-        resources.put(absoluteResourceURI, resource);
-        RoFactory.addRelation(resources.get(roURI), ORE.aggregates, resource);
-
-        roViewerBox.renderJSComponents(resources, target);
     }
 
 

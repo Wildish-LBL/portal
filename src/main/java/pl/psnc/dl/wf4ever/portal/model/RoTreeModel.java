@@ -4,11 +4,12 @@
 package pl.psnc.dl.wf4ever.portal.model;
 
 import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+
+import org.purl.wf4ever.rosrs.client.Resource;
+import org.purl.wf4ever.rosrs.client.Thing;
 
 /**
  * Tree model used for RO resources visualization.
@@ -28,7 +29,7 @@ public class RoTreeModel extends DefaultTreeModel {
      * @param root
      *            the Research Object
      */
-    public RoTreeModel(AggregatedResource root) {
+    public RoTreeModel(Thing root) {
         super(new DefaultMutableTreeNode(root));
     }
 
@@ -42,31 +43,29 @@ public class RoTreeModel extends DefaultTreeModel {
      * @param addToGroups
      *            should it be added to groups that it belongs to
      */
-    public void addAggregatedResource(AggregatedResource resource, boolean addToGroups) {
-        if (!addToGroups || resource.getMatchingGroups().isEmpty()) {
-            DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.getRoot();
-            root.add(new DefaultMutableTreeNode(resource));
-            return;
-        }
-
+    public void addAggregatedResource(Resource resource) {
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.getRoot();
-        Set<ResourceGroup> notFound = new HashSet<>(resource.getMatchingGroups());
-        @SuppressWarnings("unchecked")
-        Enumeration<DefaultMutableTreeNode> e = root.breadthFirstEnumeration();
-        while (e.hasMoreElements()) {
-            DefaultMutableTreeNode node = e.nextElement();
-            if (node.getUserObject() instanceof ResourceGroup
-                    && resource.getMatchingGroups().contains(node.getUserObject())) {
-                node.add(new DefaultMutableTreeNode(resource));
-                notFound.remove(node.getUserObject());
-            }
-        }
+        root.add(new DefaultMutableTreeNode(resource));
 
-        for (ResourceGroup resourceGroup : notFound) {
-            DefaultMutableTreeNode node = new DefaultMutableTreeNode(resourceGroup);
-            node.add(new DefaultMutableTreeNode(resource));
-            root.insert(node, 0);
-        }
+        //add to groups, for later use with folders
+        //        DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.getRoot();
+        //        Set<ResourceGroup> notFound = new HashSet<>(resource.getMatchingGroups());
+        //        @SuppressWarnings("unchecked")
+        //        Enumeration<DefaultMutableTreeNode> e = root.breadthFirstEnumeration();
+        //        while (e.hasMoreElements()) {
+        //            DefaultMutableTreeNode node = e.nextElement();
+        //            if (node.getUserObject() instanceof ResourceGroup
+        //                    && resource.getMatchingGroups().contains(node.getUserObject())) {
+        //                node.add(new DefaultMutableTreeNode(resource));
+        //                notFound.remove(node.getUserObject());
+        //            }
+        //        }
+        //
+        //        for (ResourceGroup resourceGroup : notFound) {
+        //            DefaultMutableTreeNode node = new DefaultMutableTreeNode(resourceGroup);
+        //            node.add(new DefaultMutableTreeNode(resource));
+        //            root.insert(node, 0);
+        //        }
     }
 
 
@@ -76,7 +75,7 @@ public class RoTreeModel extends DefaultTreeModel {
      * @param resource
      *            resource to remove
      */
-    public void removeAggregatedResource(AggregatedResource resource) {
+    public void removeAggregatedResource(Resource resource) {
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.getRoot();
         @SuppressWarnings("unchecked")
         Enumeration<DefaultMutableTreeNode> e = root.breadthFirstEnumeration();

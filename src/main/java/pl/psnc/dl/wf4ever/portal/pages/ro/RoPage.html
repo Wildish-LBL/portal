@@ -20,24 +20,7 @@
 	<!-- RO viewer -->
 	<div class="row" wicket:id="roViewerBox">
 		<div class="span7 separated">
-			<ul class="nav nav-tabs">
-				<li class="active"><a data-toggle="tab"
-					id="interactiveViewLink" href="#interactiveView">Interactive</a></li>
-				<li><a data-toggle="tab" id="conceptualViewLink"
-					href="#conceptualView">Conceptual</a></li>
-				<li><a data-toggle="tab" id="physicalViewLink"
-					href="#physicalView">Physical</a></li>
-			</ul>
-			<div class="tab-content" style="display: block">
-				<div wicket:id="interactiveView" class="tab-pane active"
-					id="interactiveView">
-					<div id="infovis" style="width: 540px; height: 400px;"></div>
-					<div id="log"></div>
-				</div>
-				<div wicket:id="treeTable" class="tab-pane" id="conceptualView"></div>
-				<div wicket:id="physicalTreeTable" class="tab-pane"
-					id="physicalView"></div>
-			</div>
+			<div wicket:id="physicalTreeTable" class="tab-pane" id="physicalView"></div>
 
 			<form class="form-stacked" wicket:id="roForm">
 				<div wicket:id="actionButtons">
