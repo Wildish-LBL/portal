@@ -141,7 +141,9 @@ public class MySession extends AbstractAuthenticatedWebSession {
     //    }
 
     public void signIn(String dLibraAccessToken) {
-        this.rosrs = new ROSRService(((PortalApplication) getApplication()).getRodlURI(), dLibraAccessToken);
+        //HACK
+        this.rosrs = new ROSRService(((PortalApplication) getApplication()).getRodlURI().resolve("ROs/"),
+                dLibraAccessToken);
         try {
             this.user = RODLUtilities.getUser(dLibraAccessToken);
         } catch (Exception e) {

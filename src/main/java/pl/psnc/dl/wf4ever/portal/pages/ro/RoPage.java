@@ -35,8 +35,10 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.UrlEncoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.purl.wf4ever.rosrs.client.ROException;
 import org.purl.wf4ever.rosrs.client.ROSRSException;
 import org.purl.wf4ever.rosrs.client.ROSRService;
+import org.purl.wf4ever.rosrs.client.ResearchObject;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
@@ -181,6 +183,12 @@ public class RoPage extends TemplatePage {
                     if (getConceptualResourcesTree() == null || getPhysicalResourcesTree() == null) {
                         PortalApplication app = ((PortalApplication) getApplication());
                         Map<URI, Creator> usernames = MySession.get().getUsernames();
+
+                        //new
+                        ResearchObject researchObject = new ResearchObject(roURI, MySession.get().getRosrs());
+                        researchObject.load();
+                        //new end
+
                         OntModel model = ROSRService.createManifestAndAnnotationsModel(roURI);
                         resources = RoFactory.getAggregatedResources(model, rodlURI, roURI, usernames);
                         RoFactory.assignResourceGroupsToResources(model, roURI, app.getResourceGroups(), resources);
@@ -195,7 +203,7 @@ public class RoPage extends TemplatePage {
                         relEditForm.onRoTreeLoaded();
                         target.add(roViewerBox);
                     }
-                } catch (URISyntaxException e) {
+                } catch (URISyntaxException | ROSRSException | ROException e) {
                     LOG.error(e);
                     error(e);
                 }
