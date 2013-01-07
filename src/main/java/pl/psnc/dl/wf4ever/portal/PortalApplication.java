@@ -2,12 +2,8 @@ package pl.psnc.dl.wf4ever.portal;
 
 import java.net.URI;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.Session;
@@ -18,7 +14,6 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
 
-import pl.psnc.dl.wf4ever.portal.model.ResourceGroup;
 import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
 import pl.psnc.dl.wf4ever.portal.pages.HelpPage;
@@ -89,9 +84,6 @@ public class PortalApplication extends AuthenticatedWebApplication {
     /** RODL admin token. */
     private String adminToken;
 
-    /** How are resources displayed depending on their RDF classes. */
-    private final Set<ResourceGroup> resourceGroups = new HashSet<>();
-
 
     @Override
     public Class<? extends WebPage> getHomePage() {
@@ -125,7 +117,6 @@ public class PortalApplication extends AuthenticatedWebApplication {
 
         loadProperties("portal.properties");
         loadTokens("tokens.properties");
-        loadResourceGroups("resourceGroups.properties");
         loadAdminTokens("admintoken.properties");
 
         RSSService.start(null, sparqlEndpoint, rodlURI);
@@ -204,49 +195,6 @@ public class PortalApplication extends AuthenticatedWebApplication {
     }
 
 
-    /**
-     * Load resource groups.
-     * 
-     * @param propertiesFile
-     *            filename
-     */
-    private void loadResourceGroups(String propertiesFile) {
-        Properties props = new Properties();
-        try {
-            props.load(getClass().getClassLoader().getResourceAsStream(propertiesFile));
-            Set<String> entries = props.stringPropertyNames();
-            Map<String, ResourceGroup> groups = new HashMap<>();
-            for (String entry : entries) {
-                if (entry.endsWith(".classes")) {
-                    String[] classes = props.getProperty(entry, "").split(",");
-                    for (String clazz : classes) {
-                        if (!clazz.trim().isEmpty()) {
-                            URI classURI = URI.create(clazz.trim());
-                            if (classURI != null) {
-                                String key = entry.substring(0, entry.length() - ".classes".length());
-                                if (!groups.containsKey(key)) {
-                                    groups.put(key, new ResourceGroup(key));
-                                }
-                                groups.get(key).getRdfClasses().add(classURI);
-                            }
-                        }
-                    }
-                } else if (entry.endsWith(".description")) {
-                    String desc = props.getProperty(entry, "");
-                    String key = entry.substring(0, entry.length() - ".description".length());
-                    if (!groups.containsKey(key)) {
-                        groups.put(key, new ResourceGroup(key));
-                    }
-                    groups.get(key).setDescription(desc);
-                }
-            }
-            resourceGroups.addAll(groups.values());
-        } catch (Exception e) {
-            LOG.error("Failed to load resourceGroups: " + e.getMessage());
-        }
-    }
-
-
     public String getDLibraClientId() {
         return dLibraClientId;
     }
@@ -289,11 +237,6 @@ public class PortalApplication extends AuthenticatedWebApplication {
 
     public URL getRecommenderEndpointURL() {
         return recommenderEndpointURL;
-    }
-
-
-    public Set<ResourceGroup> getResourceGroups() {
-        return resourceGroups;
     }
 
 

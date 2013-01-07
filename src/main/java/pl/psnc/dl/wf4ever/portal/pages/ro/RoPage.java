@@ -7,7 +7,6 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,23 +30,21 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.purl.wf4ever.rosrs.client.Annotation;
 import org.purl.wf4ever.rosrs.client.ROException;
 import org.purl.wf4ever.rosrs.client.ROSRSException;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.Resource;
+import org.purl.wf4ever.rosrs.client.Statement;
+import org.purl.wf4ever.rosrs.client.Thing;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
-import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
-import pl.psnc.dl.wf4ever.portal.model.Annotation;
-import pl.psnc.dl.wf4ever.portal.model.ResourceGroup;
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
-import pl.psnc.dl.wf4ever.portal.model.Statement;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
 import pl.psnc.dl.wf4ever.portal.pages.TemplatePage;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
-import pl.psnc.dl.wf4ever.portal.services.RoFactory;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
 import com.sun.jersey.api.client.ClientResponse;
@@ -142,8 +139,7 @@ public class RoPage extends TemplatePage {
         }
         add(new Label("title", roURI.toString()));
 
-        final CompoundPropertyModel<AggregatedResource> itemModel = new CompoundPropertyModel<AggregatedResource>(
-                (AggregatedResource) null);
+        final CompoundPropertyModel<Thing> itemModel = new CompoundPropertyModel<Thing>((Thing) null);
         roViewerBox = new RoViewerBox(this, itemModel, new PropertyModel<TreeModel>(this, "physicalResourcesTree"),
                 "loadingROFragment");
         add(roViewerBox);
@@ -151,8 +147,7 @@ public class RoPage extends TemplatePage {
         add(annotatingBox);
         annotatingBox.selectedStatements.clear();
         add(new DownloadMetadataModal("downloadMetadataModal", this));
-        uploadResourceModal = new UploadResourceModal("uploadResourceModal", this,
-                ((PortalApplication) getApplication()).getResourceGroups());
+        uploadResourceModal = new UploadResourceModal("uploadResourceModal", this);
         add(uploadResourceModal);
         stmtEditForm = new StatementEditModal("statementEditModal", RoPage.this, new CompoundPropertyModel<Statement>(
                 (Statement) null));
@@ -182,7 +177,11 @@ public class RoPage extends TemplatePage {
                         //                        OntModel model = ROSRService.createManifestAndAnnotationsModel(roURI);
                         //                        resources = RoFactory.getAggregatedResources(model, rodlURI, roURI, usernames);
                         //                        RoFactory.assignResourceGroupsToResources(model, roURI, app.getResourceGroups(), resources);
-                        setPhysicalResourcesTree(RoFactory.createPhysicalResourcesTree(researchObject));
+                        RoTreeModel treeModel = new RoTreeModel(researchObject);
+                        for (Resource resource : researchObject.getResources().values()) {
+                            treeModel.addAggregatedResource(resource);
+                        }
+                        setPhysicalResourcesTree(treeModel);
 
                         //                        RoFactory.createRelations(model, roURI, resources);
 
@@ -350,8 +349,7 @@ public class RoPage extends TemplatePage {
      *             can't get the uploaded file
      * @throws ROException
      */
-    void onResourceAdd(AjaxRequestTarget target, final FileUpload uploadedFile,
-            Set<ResourceGroup> selectedResourceGroups)
+    void onResourceAdd(AjaxRequestTarget target, final FileUpload uploadedFile)
             throws ROSRSException, IOException, ROException {
         org.purl.wf4ever.rosrs.client.Resource resource = researchObject.aggregate(uploadedFile.getClientFileName(),
             uploadedFile.getInputStream(), uploadedFile.getContentType());
@@ -423,15 +421,12 @@ public class RoPage extends TemplatePage {
      *             URIs retrieved from RODL are incorrect
      * @throws ROSRSException
      *             requests to RODL returned incorrect responses
+     * @throws ROException
      */
     void onStatementAdd(List<Statement> statements)
-            throws URISyntaxException, ROSRSException {
-        InputStream in = RoFactory.wrapAnnotationBody(statements);
-        MySession
-                .get()
-                .getRosrs()
-                .addAnnotation(roURI, new HashSet<>(Arrays.asList(statements.get(0).getSubjectURI())),
-                    ".ro/" + UUID.randomUUID().toString(), in, "application/rdf+xml");
+            throws URISyntaxException, ROSRSException, ROException {
+        InputStream in = Annotation.wrapAnnotationBody(statements);
+        researchObject.annotate(".ro/" + UUID.randomUUID().toString(), in, RDFFormat.RDFXML.getDefaultMIMEType());
     }
 
 
@@ -445,9 +440,7 @@ public class RoPage extends TemplatePage {
      */
     void onStatementEdit(Statement statement)
             throws ROSRSException {
-        Annotation ann = statement.getAnnotation();
-        MySession.get().getRosrs()
-                .updateResource(ann.getBodyURI(), RoFactory.wrapAnnotationBody(ann.getBody()), "application/rdf+xml");
+        statement.getAnnotation().update();
     }
 
 
@@ -459,10 +452,9 @@ public class RoPage extends TemplatePage {
      */
     void onStatementAddedEdited(AjaxRequestTarget target) {
         //FIXME isn't it the same as the next one?
-        this.annotatingBox.getModelObject().setAnnotations(
-            RoFactory.createAnnotations(rodlURI, roURI, this.annotatingBox.getModelObject().getURI(), MySession.get()
-                    .getUsernames()));
-        target.add(roViewerBox.infoPanel);
+        //        this.annotatingBox.getModelObject().setAnnotations(
+        //            RoFactory.createAnnotations(rodlURI, roURI, this.annotatingBox.getModelObject().getUri(), MySession.get()
+        //                    .getUsernames()));
         target.add(annotatingBox);
     }
 
@@ -476,13 +468,9 @@ public class RoPage extends TemplatePage {
      *            request target
      */
     void onRelationAddedEdited(Statement statement, AjaxRequestTarget target) {
-        this.annotatingBox.getModelObject().setAnnotations(
-            RoFactory.createAnnotations(rodlURI, roURI, this.annotatingBox.getModelObject().getURI(), MySession.get()
-                    .getUsernames()));
-        AggregatedResource subjectAR = resources.get(statement.getSubjectURI());
-        AggregatedResource objectAR = resources.get(statement.getObjectURI());
-        RoFactory.addRelation(subjectAR, statement.getPropertyURI(), objectAR);
-        target.add(roViewerBox.infoPanel);
+        //        this.annotatingBox.getModelObject().setAnnotations(
+        //            this.annotatingBox.getModelObject().RoFactory.createAnnotations(rodlURI, roURI, this.annotatingBox
+        //                    .getModelObject().getUri(), MySession.get().getUsernames()));
         target.add(annotatingBox);
     }
 
@@ -503,15 +491,14 @@ public class RoPage extends TemplatePage {
      * @throws ROSRSException
      *             uploading the annotation body returned an unexpected response
      */
-    public void onAnnotationImport(AjaxRequestTarget target, FileUpload uploadedFile,
-            AggregatedResource aggregatedResource)
+    public void onAnnotationImport(AjaxRequestTarget target, FileUpload uploadedFile, Thing aggregatedResource)
             throws IOException, URISyntaxException, ROSRSException {
         String contentType = RDFFormat.forFileName(uploadedFile.getClientFileName(), RDFFormat.RDFXML)
                 .getDefaultMIMEType();
         MySession
                 .get()
                 .getRosrs()
-                .addAnnotation(roURI, new HashSet<>(Arrays.asList(aggregatedResource.getURI())),
+                .addAnnotation(roURI, new HashSet<>(Arrays.asList(aggregatedResource.getUri())),
                     uploadedFile.getClientFileName(), uploadedFile.getInputStream(), contentType);
         setResponsePage(RoPage.class, getPageParameters());
     }

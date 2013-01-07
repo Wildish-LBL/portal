@@ -8,8 +8,8 @@ import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.lang.Bytes;
+import org.purl.wf4ever.rosrs.client.Thing;
 
-import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 
@@ -39,7 +39,7 @@ class ImportAnnotationModal extends Panel {
      * @param itemModel
      *            selected resource model
      */
-    public ImportAnnotationModal(String id, final RoPage roPage, final IModel<AggregatedResource> itemModel) {
+    public ImportAnnotationModal(String id, final RoPage roPage, final IModel<Thing> itemModel) {
         super(id);
 
         Form<?> form = new Form<Void>("uploadResourceForm");

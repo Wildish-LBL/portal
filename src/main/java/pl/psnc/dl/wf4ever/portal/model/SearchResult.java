@@ -5,6 +5,8 @@ package pl.psnc.dl.wf4ever.portal.model;
 
 import java.io.Serializable;
 
+import org.purl.wf4ever.rosrs.client.ResearchObject;
+
 /**
  * RODL search service result.
  * 

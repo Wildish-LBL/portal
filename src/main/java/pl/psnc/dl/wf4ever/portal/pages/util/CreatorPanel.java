@@ -8,8 +8,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.time.Duration;
-
-import pl.psnc.dl.wf4ever.portal.model.Creator;
+import org.purl.wf4ever.rosrs.client.Creator;
 
 /**
  * A utility panel that displays a small spinning circle while the username is being resolved.

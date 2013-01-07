@@ -12,9 +12,8 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.protocol.http.WebApplication;
-
-import pl.psnc.dl.wf4ever.portal.model.Creator;
-import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
+import org.purl.wf4ever.rosrs.client.Creator;
+import org.purl.wf4ever.rosrs.client.ResearchObject;
 
 import com.sun.syndication.feed.synd.SyndContent;
 import com.sun.syndication.feed.synd.SyndContentImpl;
@@ -156,12 +155,12 @@ public final class RSSService {
             for (ResearchObject ro : ros) {
                 SyndEntry entry = new SyndEntryImpl();
                 entry.setTitle(ro.getName());
-                entry.setLink(ro.getURI().toString());
+                entry.setLink(ro.getUri().toString());
                 if (ro.getCreated() != null) {
-                    entry.setUpdatedDate(ro.getCreated().getTime());
+                    entry.setUpdatedDate(ro.getCreated().toDate());
                 }
                 SyndContent description = new SyndContentImpl();
-                description.setValue(ro.getTitle());
+                description.setValue(ro.getName());
                 description.setType("text");
                 entry.setDescription(description);
                 List<SyndPerson> authors = new ArrayList<>();

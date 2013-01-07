@@ -28,12 +28,12 @@ import org.apache.wicket.protocol.http.IRequestLogger;
 import org.apache.wicket.protocol.http.RequestLogger;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.purl.wf4ever.rosrs.client.Creator;
+import org.purl.wf4ever.rosrs.client.ResearchObject;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
-import pl.psnc.dl.wf4ever.portal.model.Creator;
 import pl.psnc.dl.wf4ever.portal.model.Recommendation;
-import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.model.SearchResult;
 import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
 import pl.psnc.dl.wf4ever.portal.pages.HelpPage;
@@ -365,7 +365,7 @@ public class HomePage extends TemplatePage {
         protected void populateItem(ListItem<SearchResult> item) {
             final SearchResult result = item.getModelObject();
             BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);
-            link.getPageParameters().add("ro", result.getResearchObject().getURI().toString());
+            link.getPageParameters().add("ro", result.getResearchObject().getUri().toString());
             link.add(new Label("researchObject.name"));
             item.add(link);
             item.add(new Label("researchObject.title"));
@@ -423,7 +423,7 @@ public class HomePage extends TemplatePage {
         protected void populateItem(ListItem<ResearchObject> item) {
             ResearchObject ro = item.getModelObject();
             BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);
-            link.getPageParameters().add("ro", ro.getURI().toString());
+            link.getPageParameters().add("ro", ro.getUri().toString());
             link.add(new Label("name"));
             item.add(link);
             item.add(new CreatorsPanel("creator", new PropertyModel<List<Creator>>(ro, "creators")));

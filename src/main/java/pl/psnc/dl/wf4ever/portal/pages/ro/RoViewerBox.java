@@ -11,14 +11,12 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
+import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.Resource;
+import org.purl.wf4ever.rosrs.client.Thing;
 
-import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
-import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
-import pl.psnc.dl.wf4ever.portal.model.ResourceGroup;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.RoTree;
 
@@ -41,14 +39,8 @@ class RoViewerBox extends WebMarkupContainer {
     /** Physical RO resources tree. */
     private RoTree physicalTree;
 
-    /** The abstract resource information panel. */
-    Panel infoPanel;
-
     /** The aggregated resource information panel. */
     private final ItemInfoPanel itemInfo;
-
-    /** The resource group information panel. */
-    private final InfoPanel resourceGroupInfo;
 
     /** The RO/resource manipulation buttons. */
     final WebMarkupContainer actionButtons;
@@ -62,8 +54,8 @@ class RoViewerBox extends WebMarkupContainer {
     /** Add resource button. */
     private MyAjaxButton addResource;
 
-    /** Selected item - resource, RO, resource group. */
-    private Object selectedItem;
+    /** Selected item. */
+    private Thing selectedItem;
 
     /** Download RO metadata button. */
     private AjaxButton downloadROMetadata;
@@ -92,34 +84,30 @@ class RoViewerBox extends WebMarkupContainer {
      * @param tempRoTreeId
      *            the spinning circle wicket id
      */
-    public RoViewerBox(final RoPage roPage, final CompoundPropertyModel<AggregatedResource> itemModel,
+    public RoViewerBox(final RoPage roPage, final CompoundPropertyModel<Thing> itemModel,
             PropertyModel<TreeModel> physicalTreeModel, String tempRoTreeId) {
         super("roViewerBox", itemModel);
         this.roPage = roPage;
         setOutputMarkupId(true);
-
-        final CompoundPropertyModel<ResourceGroup> resourceGroupModel = new CompoundPropertyModel<ResourceGroup>(
-                (ResourceGroup) null);
-        itemInfo = new ItemInfoPanel("itemInfo", itemModel);
-        resourceGroupInfo = new InfoPanel("itemInfo", resourceGroupModel);
-        infoPanel = itemInfo;
-        add(infoPanel);
 
         physicalTreeLoading = new Fragment("physicalTreeTable", tempRoTreeId, this.roPage);
         physicalTree = new RoTree("physicalTreeTable", physicalTreeModel) {
 
             @Override
             protected void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node) {
-                Object object = ((DefaultMutableTreeNode) node).getUserObject();
+                Thing object = (Thing) ((DefaultMutableTreeNode) node).getUserObject();
                 if (physicalTree.getTreeState().isNodeSelected(node)) {
-                    onResourceSelected(itemModel, resourceGroupModel, target, object);
+                    onResourceSelected(itemModel, target, object);
                 } else {
-                    onResourceDeselected(itemModel, resourceGroupModel, target);
+                    onResourceDeselected(itemModel, target);
                 }
             }
 
         };
         add(physicalTreeLoading);
+
+        itemInfo = new ItemInfoPanel("itemInfo", itemModel);
+        add(itemInfo);
 
         Form<?> roForm = new Form<Void>("roForm");
         add(roForm);
@@ -183,13 +171,11 @@ class RoViewerBox extends WebMarkupContainer {
             @Override
             protected void onConfigure() {
                 super.onConfigure();
-                boolean nonROResource = selectedItem instanceof AggregatedResource
-                        && !(selectedItem instanceof ResearchObject);
+                boolean nonROResource = !(selectedItem instanceof ResearchObject);
                 addResource.setEnabled(roPage.canEdit);
                 editResource.setEnabled(roPage.canEdit && nonROResource);
                 deleteResource.setEnabled(roPage.canEdit && nonROResource);
-                downloadResource.setEnabled(nonROResource
-                        && ((AggregatedResource) selectedItem).getDownloadURI() != null);
+                downloadResource.setEnabled(nonROResource);
             }
         };
         actionButtons.setOutputMarkupId(true);
@@ -200,40 +186,6 @@ class RoViewerBox extends WebMarkupContainer {
         actionButtons.add(downloadROZipped);
         actionButtons.add(downloadROMetadata);
         roForm.add(actionButtons);
-    }
-
-
-    /**
-     * Set the info panel to an aggregated resource panel.
-     * 
-     * @param itemModel
-     *            selected resource model
-     * @param res
-     *            selected resource
-     */
-    private void setInfoPanel(final CompoundPropertyModel<AggregatedResource> itemModel, AggregatedResource res) {
-        itemModel.setObject(res);
-        if (infoPanel != itemInfo) {
-            infoPanel.replaceWith(itemInfo);
-            infoPanel = itemInfo;
-        }
-    }
-
-
-    /**
-     * Set the info panel to a resource group panel.
-     * 
-     * @param resourceGroupModel
-     *            selected resource group model
-     * @param res
-     *            selected resource group
-     */
-    private void setInfoPanel(final CompoundPropertyModel<ResourceGroup> resourceGroupModel, ResourceGroup res) {
-        resourceGroupModel.setObject(res);
-        if (infoPanel != resourceGroupInfo) {
-            infoPanel.replaceWith(resourceGroupInfo);
-            infoPanel = resourceGroupInfo;
-        }
     }
 
 
@@ -257,17 +209,12 @@ class RoViewerBox extends WebMarkupContainer {
      * @param item
      *            selected resource/resource group
      */
-    private void onResourceSelected(final CompoundPropertyModel<AggregatedResource> itemModel,
-            final CompoundPropertyModel<ResourceGroup> resourceGroupModel, AjaxRequestTarget target, Object item) {
+    private void onResourceSelected(final CompoundPropertyModel<Thing> itemModel, AjaxRequestTarget target, Thing item) {
         this.selectedItem = item;
-        if (item instanceof AggregatedResource) {
-            setInfoPanel(itemModel, (AggregatedResource) item);
-        } else if (item instanceof ResourceGroup) {
-            setInfoPanel(resourceGroupModel, (ResourceGroup) item);
-        }
+        itemModel.setObject(selectedItem);
         roPage.onResourceSelected(target);
         target.add(actionButtons);
-        target.add(infoPanel);
+        target.add(itemInfo);
     }
 
 
@@ -281,13 +228,12 @@ class RoViewerBox extends WebMarkupContainer {
      * @param target
      *            request target
      */
-    private void onResourceDeselected(CompoundPropertyModel<AggregatedResource> itemModel,
-            CompoundPropertyModel<ResourceGroup> resourceGroupModel, AjaxRequestTarget target) {
+    private void onResourceDeselected(CompoundPropertyModel<Thing> itemModel, AjaxRequestTarget target) {
         this.selectedItem = null;
-        setInfoPanel(itemModel, (AggregatedResource) null);
+        itemModel.setObject(selectedItem);
         roPage.onResourceSelected(target);
         target.add(actionButtons);
-        target.add(infoPanel);
+        target.add(itemInfo);
     }
 
 
@@ -301,7 +247,7 @@ class RoViewerBox extends WebMarkupContainer {
     }
 
 
-    public void setSelectedItem(Object selectedItem) {
+    public void setSelectedItem(Thing selectedItem) {
         this.selectedItem = selectedItem;
     }
 

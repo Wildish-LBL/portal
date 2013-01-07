@@ -9,15 +9,19 @@ import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.jdom.Element;
+import org.joda.time.DateTime;
+import org.purl.wf4ever.rosrs.client.Creator;
+import org.purl.wf4ever.rosrs.client.ResearchObject;
+import org.purl.wf4ever.rosrs.client.users.UserManagementService;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
-import pl.psnc.dl.wf4ever.portal.model.Creator;
-import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.model.SearchResult;
 
 import com.sun.jersey.api.uri.UriBuilderImpl;
@@ -83,11 +87,13 @@ public final class SearchService {
 
         List<SyndEntry> entries = feed.getEntries();
         List<SearchResult> ros = new ArrayList<>();
+        UserManagementService ums = MySession.get().getUms();
+        Map<URI, Creator> usernames = MySession.get().getUsernames();
         for (SyndEntry entry : entries) {
             URI researchObjectURI = null;
-            Calendar created = null;
+            DateTime created = null;
             String title = null;
-            List<Creator> creators = new ArrayList<>();
+            Set<Creator> creators = new HashSet<>();
             double score = -1;
             List<Element> dlMarkup = (List<Element>) entry.getForeignMarkup();
             for (Element element : dlMarkup) {
@@ -101,13 +107,11 @@ public final class SearchService {
                                 researchObjectURI = URI.create(element.getValue());
                                 break;
                             case "Creator":
-                                creators.add(RoFactory.getCreator(rodlURI, MySession.get().getUsernames(),
-                                    element.getValue()));
+                                creators.add(Creator.get(ums, usernames, element.getValue()));
                                 break;
                             case "Created":
                                 try {
-                                    created = Calendar.getInstance();
-                                    created.setTime(SDF.parse(element.getValue()));
+                                    created = new DateTime(SDF.parse(element.getValue()).getTime());
                                 } catch (ParseException e) {
                                     LOG.warn("Incorrect date", e);
                                     created = null;
@@ -129,8 +133,10 @@ public final class SearchService {
             }
 
             if (researchObjectURI != null && score != -1) {
-                ResearchObject ro = new ResearchObject(researchObjectURI, created, creators);
-                ro.setTitle(title);
+                ResearchObject ro = new ResearchObject(researchObjectURI, null);
+                ro.setCreated(created);
+                ro.setCreators(creators);
+                //                ro.setTitle(title);
                 ros.add(new SearchResult(ro, score));
             }
         }

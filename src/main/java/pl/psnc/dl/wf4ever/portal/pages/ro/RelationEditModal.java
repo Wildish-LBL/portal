@@ -20,9 +20,9 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
+import org.purl.wf4ever.rosrs.client.Statement;
+import org.purl.wf4ever.rosrs.client.Thing;
 
-import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
-import pl.psnc.dl.wf4ever.portal.model.Statement;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.pages.util.RequiredURITextField;
@@ -140,7 +140,7 @@ class RelationEditModal extends Panel {
                 }
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getTreeState().getSelectedNodes()
                         .iterator().next();
-                if (!(node.getUserObject() instanceof AggregatedResource)) {
+                if (!(node.getUserObject() instanceof Thing)) {
                     form.error("You must select a resource");
                 }
             }
@@ -158,9 +158,9 @@ class RelationEditModal extends Panel {
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 super.onSubmit(target, form);
                 Statement statement = RelationEditModal.this.getModelObject();
-                AggregatedResource res = (AggregatedResource) ((DefaultMutableTreeNode) tree.getTreeState()
-                        .getSelectedNodes().iterator().next()).getUserObject();
-                statement.setObjectURI(res.getURI());
+                Thing res = (Thing) ((DefaultMutableTreeNode) tree.getTreeState().getSelectedNodes().iterator().next())
+                        .getUserObject();
+                statement.setObjectURI(res.getUri());
 
                 try {
                     if (statement.getAnnotation() == null) {
@@ -192,9 +192,9 @@ class RelationEditModal extends Panel {
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 super.onSubmit(target, form);
                 Statement statement = RelationEditModal.this.getModelObject();
-                AggregatedResource res = (AggregatedResource) ((DefaultMutableTreeNode) tree.getTreeState()
-                        .getSelectedNodes().iterator().next()).getUserObject();
-                statement.setObjectURI(res.getURI());
+                Thing res = (Thing) ((DefaultMutableTreeNode) tree.getTreeState().getSelectedNodes().iterator().next())
+                        .getUserObject();
+                statement.setObjectURI(res.getUri());
                 statements.add(statement);
                 try {
                     RelationEditModal.this.setModelObject(new Statement(statement.getSubjectURI(), null));

@@ -2,26 +2,16 @@ package pl.psnc.dl.wf4ever.portal.pages.ro;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxEventBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Check;
-import org.apache.wicket.markup.html.form.CheckGroup;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.Radio;
 import org.apache.wicket.markup.html.form.RadioGroup;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
@@ -29,7 +19,6 @@ import org.apache.wicket.util.lang.Bytes;
 import org.purl.wf4ever.rosrs.client.ROException;
 import org.purl.wf4ever.rosrs.client.ROSRSException;
 
-import pl.psnc.dl.wf4ever.portal.model.ResourceGroup;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.pages.util.RequiredURITextField;
@@ -84,7 +73,7 @@ class UploadResourceModal extends Panel {
      * @param set
      *            set of resource groups to choose from
      */
-    public UploadResourceModal(String id, final RoPage roPage, final Set<ResourceGroup> set) {
+    public UploadResourceModal(String id, final RoPage roPage) {
         super(id);
         Form<?> form = new Form<Void>("uploadResourceForm");
         add(form);
@@ -156,25 +145,6 @@ class UploadResourceModal extends Panel {
                 "downloadURI"));
         downloadDiv.add(downloadURIField);
 
-        List<ResourceGroup> types = new ArrayList<>(set);
-
-        final Set<ResourceGroup> selectedTypes = new HashSet<>();
-        CheckGroup<ResourceGroup> group = new CheckGroup<ResourceGroup>("group", selectedTypes);
-        form.add(group);
-        ListView<ResourceGroup> list = new ListView<ResourceGroup>("resourceTypes", types) {
-
-            @Override
-            protected void populateItem(ListItem<ResourceGroup> item) {
-                Check<ResourceGroup> check = new Check<ResourceGroup>("checkbox", item.getModel());
-                item.add(check);
-                item.add(new AttributeModifier("for", new Model<String>(check.getMarkupId())));
-                item.setEscapeModelStrings(false);
-                item.add(new Label("title", item.getModelObject().getTitle()));
-            }
-        };
-        list.setReuseItems(true);
-        group.add(list);
-
         form.add(new MyAjaxButton("confirmUploadResource", form) {
 
             @Override
@@ -186,7 +156,7 @@ class UploadResourceModal extends Panel {
                         final FileUpload uploadedFile = fileUpload.getFileUpload();
                         if (uploadedFile != null) {
                             try {
-                                roPage.onResourceAdd(target, uploadedFile, selectedTypes);
+                                roPage.onResourceAdd(target, uploadedFile);
                                 target.appendJavaScript("$('#upload-resource-modal').modal('hide')");
                             } catch (IOException | ROSRSException | ROException e) {
                                 error(e);

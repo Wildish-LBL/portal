@@ -4,18 +4,21 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
+import org.purl.wf4ever.rosrs.client.Creator;
 import org.purl.wf4ever.rosrs.client.ROSRSException;
-import org.purl.wf4ever.rosrs.client.ROSRService;
+import org.purl.wf4ever.rosrs.client.ResearchObject;
+import org.purl.wf4ever.rosrs.client.users.UserManagementService;
 
+import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
-import pl.psnc.dl.wf4ever.portal.model.Creator;
-import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.model.User;
 import pl.psnc.dl.wf4ever.vocabulary.FOAF;
 
@@ -73,6 +76,7 @@ public final class RODLUtilities {
             MyQueryFactory.getxMostRecentROs(cnt));
         ResultSet results = x.execSelect();
         List<ResearchObject> roHeaders = new ArrayList<>();
+        UserManagementService ums = MySession.get().getUms();
         while (results.hasNext()) {
             QuerySolution solution = results.next();
             if (solution.getResource("ro") == null) {
@@ -80,24 +84,28 @@ public final class RODLUtilities {
             }
             URI uri = URI.create(solution.getResource("ro").getURI());
             Literal creators = solution.getLiteral("creators");
-            List<Creator> authors = new ArrayList<>();
+            Set<Creator> authors = new HashSet<>();
             if (creators != null) {
                 for (String creator : creators.getString().split(", ")) {
-                    authors.add(RoFactory.getCreator(rodlURI, usernames, creator));
+                    authors.add(Creator.get(ums, usernames, creator));
                 }
             }
-            Calendar created = null;
+            DateTime created = null;
             Object date = solution.getLiteral("created").getValue();
             if (date instanceof XSDDateTime) {
-                created = ((XSDDateTime) date).asCalendar();
+                created = new DateTime(((XSDDateTime) date).asCalendar().getTimeInMillis());
             } else {
                 try {
-                    created = ISODateTimeFormat.dateTime().parseDateTime(date.toString()).toGregorianCalendar();
+                    created = new DateTime(ISODateTimeFormat.dateTime().parseDateTime(date.toString())
+                            .toGregorianCalendar().getTimeInMillis());
                 } catch (IllegalArgumentException e) {
                     LOG.warn("Don't know how to parse date: " + date);
                 }
             }
-            roHeaders.add(new ResearchObject(uri, created, authors));
+            ResearchObject ro = new ResearchObject(uri, null);
+            ro.setCreated(created);
+            ro.setCreators(authors);
+            roHeaders.add(ro);
         }
         return roHeaders;
     }
@@ -136,8 +144,7 @@ public final class RODLUtilities {
     public static User getUser(String token, URI rodl)
             throws URISyntaxException, ROSRSException {
         OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
-        ROSRService rosrs = new ROSRService(rodl, token);
-        userModel.read(rosrs.getWhoAmi(), null);
+        userModel.read(MySession.get().getUms().getWhoAmi(), null);
         ExtendedIterator<Individual> it = userModel.listIndividuals(FOAF.Agent);
         Individual userInd = it.next();
         if (userInd != null && userInd.hasProperty(FOAF.name)) {

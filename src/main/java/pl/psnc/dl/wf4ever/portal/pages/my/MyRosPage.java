@@ -27,19 +27,15 @@ import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
 import org.purl.wf4ever.rosrs.client.ROSRSException;
 import org.purl.wf4ever.rosrs.client.ROSRService;
+import org.purl.wf4ever.rosrs.client.ResearchObject;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
-import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
-import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.pages.MyExpImportPage;
 import pl.psnc.dl.wf4ever.portal.pages.TemplatePage;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
 import pl.psnc.dl.wf4ever.portal.pages.util.ModelIteratorAdapter;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
-import pl.psnc.dl.wf4ever.portal.services.RoFactory;
-
-import com.sun.jersey.api.client.ClientResponse;
 
 /**
  * A page with user's own Research Objects.
@@ -89,8 +85,7 @@ public class MyRosPage extends TemplatePage {
         final List<ResearchObject> researchObjects = new ArrayList<ResearchObject>();
         for (URI uri : uris) {
             try {
-                researchObjects
-                        .add(RoFactory.createResearchObject(rodlURI, uri, false, MySession.get().getUsernames()));
+                researchObjects.add(new ResearchObject(uri, rosrs));
             } catch (Exception e) {
                 error("Could not get manifest for: " + uri + " (" + e.getMessage() + ")");
             }
@@ -155,12 +150,12 @@ public class MyRosPage extends TemplatePage {
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 super.onSubmit(target, form);
-                for (AggregatedResource ro : selectedResearchObjects) {
+                for (ResearchObject ro : selectedResearchObjects) {
                     try {
-                        rosrs.deleteResearchObject(ro.getURI());
+                        rosrs.deleteResearchObject(ro.getUri());
                         researchObjects.remove(ro);
                     } catch (Exception e) {
-                        error("Could not delete Research Object: " + ro.getURI() + " (" + e.getMessage() + ")");
+                        error("Could not delete Research Object: " + ro.getUri() + " (" + e.getMessage() + ")");
                     }
                 }
                 target.add(form);
@@ -193,17 +188,14 @@ public class MyRosPage extends TemplatePage {
             protected void onSubmit(AjaxRequestTarget target, Form<?> addForm) {
                 super.onSubmit(target, addForm);
                 try {
-                    ClientResponse response = rosrs.createResearchObject(roId);
-                    if (response.getStatus() == HttpStatus.SC_CREATED) {
-                        URI researchObjectURI = response.getLocation();
-                        researchObjects.add(RoFactory.createResearchObject(rodlURI, researchObjectURI, false, MySession
-                                .get().getUsernames()));
-                        target.appendJavaScript("$('#confirm-add-modal').modal('hide')");
-                    } else if (response.getStatus() == HttpStatus.SC_CONFLICT) {
-                        error("This ID is already used.");
-                    }
+                    researchObjects.add(ResearchObject.create(rosrs, roId));
+                    target.appendJavaScript("$('#confirm-add-modal').modal('hide')");
                 } catch (ROSRSException e) {
-                    error("Could not add Research Object: " + roId + " (" + e.getMessage() + ")");
+                    if (e.getStatus() == HttpStatus.SC_CONFLICT) {
+                        error("This ID is already used.");
+                    } else {
+                        error("Could not add Research Object: " + roId + " (" + e.getMessage() + ")");
+                    }
                 }
                 target.add(form);
                 target.add(addFeedbackPanel);
@@ -283,10 +275,10 @@ public class MyRosPage extends TemplatePage {
 
         @Override
         protected void populateItem(Item<ResearchObject> item) {
-            AggregatedResource researchObject = (AggregatedResource) item.getDefaultModelObject();
+            ResearchObject researchObject = (ResearchObject) item.getDefaultModelObject();
             item.add(new Check<ResearchObject>("checkbox", item.getModel()));
             BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);
-            link.getPageParameters().add("ro", researchObject.getURI().toString());
+            link.getPageParameters().add("ro", researchObject.getUri().toString());
             link.add(new Label("URI"));
             item.add(link);
             item.add(new Label("createdFormatted"));

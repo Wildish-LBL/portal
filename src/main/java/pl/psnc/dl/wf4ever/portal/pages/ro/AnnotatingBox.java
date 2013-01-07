@@ -19,16 +19,13 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
-import org.purl.wf4ever.rosrs.client.ROSRService;
+import org.purl.wf4ever.rosrs.client.Annotation;
+import org.purl.wf4ever.rosrs.client.Creator;
+import org.purl.wf4ever.rosrs.client.Statement;
+import org.purl.wf4ever.rosrs.client.Thing;
 
-import pl.psnc.dl.wf4ever.portal.MySession;
-import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
-import pl.psnc.dl.wf4ever.portal.model.Annotation;
-import pl.psnc.dl.wf4ever.portal.model.Creator;
-import pl.psnc.dl.wf4ever.portal.model.Statement;
 import pl.psnc.dl.wf4ever.portal.pages.util.CreatorsPanel;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
-import pl.psnc.dl.wf4ever.portal.services.RoFactory;
 
 /**
  * A list of annotations of a resource.
@@ -61,8 +58,8 @@ class AnnotatingBox extends Panel {
     private AjaxButton importAnnotation;
 
 
-    public AggregatedResource getModelObject() {
-        return (AggregatedResource) getDefaultModelObject();
+    public Thing getModelObject() {
+        return (Thing) getDefaultModelObject();
     }
 
 
@@ -74,7 +71,7 @@ class AnnotatingBox extends Panel {
      * @param itemModel
      *            {@link AggregatedResource} model
      */
-    public AnnotatingBox(final RoPage roPage, final CompoundPropertyModel<AggregatedResource> itemModel) {
+    public AnnotatingBox(final RoPage roPage, final CompoundPropertyModel<Thing> itemModel) {
         super("annotatingBox", itemModel);
         this.roPage = roPage;
         setOutputMarkupId(true);
@@ -106,7 +103,7 @@ class AnnotatingBox extends Panel {
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 super.onSubmit(target, form);
                 try {
-                    AnnotatingBox.this.roPage.stmtEditForm.setModelObject(new Statement(itemModel.getObject().getURI(),
+                    AnnotatingBox.this.roPage.stmtEditForm.setModelObject(new Statement(itemModel.getObject().getUri(),
                             null));
                     AnnotatingBox.this.roPage.stmtEditForm.setAddMode();
                     target.add(AnnotatingBox.this.roPage.stmtEditForm);
@@ -124,36 +121,29 @@ class AnnotatingBox extends Panel {
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 super.onSubmit(target, form);
-                ROSRService rosrs = MySession.get().getRosrs();
                 List<Annotation> annotations = new ArrayList<Annotation>();
                 for (Statement statement : selectedStatements) {
-                    statement.getAnnotation().getBody().remove(statement);
+                    statement.getAnnotation().getStatements().remove(statement);
                     annotations.add(statement.getAnnotation());
-                    AggregatedResource subjectAR = AnnotatingBox.this.roPage.resources.get(statement.getSubjectURI());
-                    AggregatedResource objectAR = AnnotatingBox.this.roPage.resources.get(statement.getObjectURI());
-                    if (subjectAR != null && objectAR != null) {
-                        subjectAR.getRelations().remove(statement.getPropertyLocalNameNice(), objectAR);
-                    }
                 }
                 for (Annotation annotation : annotations) {
                     try {
-                        if (annotation.getBody().isEmpty()) {
-                            rosrs.deleteAnnotationAndBody(annotation.getURI());
+                        if (annotation.getStatements().isEmpty()) {
+                            annotation.delete();
                         } else {
-                            rosrs.updateResource(annotation.getBodyURI(),
-                                RoFactory.wrapAnnotationBody(annotation.getBody()), "application/rdf+xml");
+                            annotation.update();
                         }
                     } catch (Exception e) {
                         error(e);
                     }
                 }
-                AnnotatingBox.this.getModelObject().setAnnotations(
-                    RoFactory.createAnnotations(roPage.getRodlURI(), AnnotatingBox.this.roPage.roURI,
-                        AnnotatingBox.this.getModelObject().getURI(), MySession.get().getUsernames()));
+                //                AnnotatingBox.this.getModelObject().setAnnotations(
+                //                    RoFactory.createAnnotations(roPage.getRodlURI(), AnnotatingBox.this.roPage.roURI,
+                //                        AnnotatingBox.this.getModelObject().getUri(), MySession.get().getUsernames()));
                 selectedStatements.clear();
                 target.add(roPage.getFeedbackPanel());
                 target.add(AnnotatingBox.this);
-                target.add(AnnotatingBox.this.roPage.roViewerBox.infoPanel);
+                //                target.add(AnnotatingBox.this.roPage.roViewerBox.infoPanel);
             }
         };
         annForm.add(deleteStatement);
@@ -164,7 +154,7 @@ class AnnotatingBox extends Panel {
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 super.onSubmit(target, form);
                 try {
-                    AnnotatingBox.this.roPage.relEditForm.setModelObject(new Statement(itemModel.getObject().getURI(),
+                    AnnotatingBox.this.roPage.relEditForm.setModelObject(new Statement(itemModel.getObject().getUri(),
                             null));
                     AnnotatingBox.this.roPage.relEditForm.setAddMode();
                     target.add(AnnotatingBox.this.roPage.relEditForm);
@@ -212,7 +202,7 @@ class AnnotatingBox extends Panel {
     private final class AnnotationsListView extends PropertyListView<Statement> {
 
         /** Selected resource model. */
-        private CompoundPropertyModel<AggregatedResource> itemModel;
+        private CompoundPropertyModel<Thing> itemModel;
 
 
         /**
@@ -226,7 +216,7 @@ class AnnotatingBox extends Panel {
          *            selected resource model
          */
         private AnnotationsListView(String id, IModel<? extends List<? extends Statement>> model,
-                CompoundPropertyModel<AggregatedResource> itemModel) {
+                CompoundPropertyModel<Thing> itemModel) {
             super(id, model);
             this.itemModel = itemModel;
         }
@@ -237,8 +227,8 @@ class AnnotatingBox extends Panel {
             final Statement statement = item.getModelObject();
             item.add(new Check<Statement>("checkbox", item.getModel()));
             if (statement.isSubjectURIResource()) {
-                if (RoFactory.isResourceInternal(AnnotatingBox.this.roPage.roURI, statement.getSubjectURI())) {
-                    if (statement.getSubjectURI().equals(itemModel.getObject().getURI())) {
+                if (roPage.researchObject.getResource(statement.getSubjectURI()).isInternal()) {
+                    if (statement.getSubjectURI().equals(itemModel.getObject().getUri())) {
                         item.add(new Label("subject", "[This item]"));
                     } else {
                         item.add(AnnotatingBox.this.roPage.new InternalLinkFragment("subject", "internalLinkFragment",
