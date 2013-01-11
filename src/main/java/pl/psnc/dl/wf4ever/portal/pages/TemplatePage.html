@@ -43,27 +43,29 @@
 	<div id="mainBaner" class="mainBaner_en">
 		<div id="mainBanerIn">
 			<div id="mainBanerRightContainer">
-				<div id="loginContainer">
-				<span wicket:id="username-text"></span>
-				 <a href="" wicket:id="sign-in-link">
-		        	<span wicket:id="sign-in-text"></span>
-		        </a>
-	        	</div>
+	        
+					<div id="loginContainer">
+					<span wicket:id="username-text"></span>
+					 <a href="" wicket:id="sign-in-link">
+			        	<span wicket:id="sign-in-text"></span>
+			        </a>
+		       		 </div>
+	        	
 	        	<div id ="languagesContainer">
-				<span class="LanguagesComponent"> <a href="#" title="polski">
-						<img src="images/pl.gif" alt="polski" height="9px" />
-				</a>&nbsp; <a href="#" title="English"> <img src="images/en.gif"
-						alt="English" height="9px" /></a>&nbsp;
-				</span>
+					<span class="LanguagesComponent"> <a href="#" title="polski">
+							<img src="images/pl.gif" alt="polski" height="9px" />
+					</a>&nbsp; <a href="#" title="English"> <img src="images/en.gif"
+							alt="English" height="9px" /></a>&nbsp;
+					</span>
 				</div>
 			</div>
-			<a id="mainBanerCoin" wicket:id="baner" title="RO Digital Library">
-				<img src="images/wf4ever_logo.png" alt="" />
-			</a>&nbsp;
-			<h1>
-				<a wicket:id="banerTitle" title="Research Object Digital Library">
-					Research Object Digital Library </a>
-			</h1>
+				<a id="mainBanerCoin" wicket:id="baner" title="RO Digital Library">
+					<img src="images/wf4ever_logo.png" alt="" />
+				</a>&nbsp;
+				<h1>
+					<a wicket:id="banerTitle" title="Research Object Digital Library">
+						Research Object Digital Library </a>
+				</h1>
 		</div>
 	</div>
 	<div id="mainMenu">
@@ -82,8 +84,15 @@
 					class="mainMenuOption mainMenuOptionIn" href="#" accesskey="s"
 					wicket:id="menu-sparql"> SPARQL ENDPOINT </a></li>
 				<li class="mmlEmpty mmlEmptyRight">&nbsp;</li>
-			</ul>
+			</ul>		
 		</div>
+		<form class="form-search" wwicket:id="searchForm">
+			<input class="span5 search-querys" autocomplete="off" wwicket:id="keywords" type="text" value="Look for the keywords in annotations">
+			<button id="search-button" class="btn" wwicket:id="searchButton" type="submit">
+				<i class="icon-search"></i>
+			</button>
+		</form>
+
 	</div>
 	<div class="container">
 		<div class="content">

@@ -60,7 +60,17 @@
 
 
 #loginContainer {
+	height: 45px;
 	font-size: 0.62em;
+	text-align: right;
+	padding-right: 5px;
+}
+
+#languagesContainer {
+	text-align: right;
+}
+#search-button {
+	 margin-left: -40px; 
 }
 
 #mainBanerLeft {
@@ -80,9 +90,6 @@
 	float: right;
 }
 
-#languagesContainer {
-	float: right;
-}
 
 #mainBanerIn {
 	width: 940px;
