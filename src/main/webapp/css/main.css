@@ -92,7 +92,7 @@
 }
 
 a.mainMenuOption:hover {
-	border-top: 2px solid #FF5F3F;
+	/*border-top: 2px solid #FF5F3F;*/
 	text-shadow: 0px 0px 5px #fff;
 }
 
@@ -264,12 +264,11 @@ table.resourceList td.link {
 }
 
 .box .boxDiv {
-	margin: 0 0 10px 0;
+	margin: 0 0 0 0;
+	padding-top: 6px;
 	color: #414141;
 	border: 1px solid #ddd;
 	border-top: none;
-	padding-top: 12px;
-	padding-bottom: 12px;
 	-moz-box-shadow: 1px 1px 15px #ddd;
 	-webkit-box-shadow: 1px 1px 15px #ddd;
 	box-shadow: 1px 1px 15px #ddd;
@@ -278,6 +277,7 @@ table.resourceList td.link {
 .box.small {
 	width: 205px;
 	margin-left: 10px;
+	padding-bottom: 6px;
 }
 
 .box.small .boxDiv {
