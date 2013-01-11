@@ -4,12 +4,11 @@ import java.net.URI;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.RestartResponseException;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -66,7 +65,25 @@ public class TemplatePage extends WebPage {
         add(new BookmarkablePageLink<Void>("menu-myros", MyRosPage.class));
         add(new BookmarkablePageLink<Void>("menu-sparql", SparqlEndpointPage.class));
         add(new BookmarkablePageLink<Void>("menu-profile", ProfilePage.class));
+        Label userNameLabel = new Label("username-text", new PropertyModel<String>(this, "usernameText"));
+        Label signInLabel = new Label("sign-in-text", new PropertyModel<String>(this, "signInButtonText"));
+        Link signInLink = new Link<Void>("sign-in-link") {
 
+            @Override
+            public void onClick() {
+                if (MySession.get().isSignedIn()) {
+                    MySession.get().signOut();
+                    throw new RestartResponseException(getApplication().getHomePage());
+                } else {
+                    throw new RestartResponseException(((PortalApplication) getApplication()).getSignInPageClass());
+                }
+            }
+        };
+        signInLink.add(signInLabel);
+        add(userNameLabel);
+        add(signInLink);
+
+        /*
         WebMarkupContainer signedInAs = new WebMarkupContainer("signedInAs");
         signedInAs.add(new AttributeModifier("data-original-title", new PropertyModel<String>(this, "signInTwipsy")));
         add(signedInAs);
@@ -86,6 +103,21 @@ public class TemplatePage extends WebPage {
             }
 
         }.add(new Label("signInText", new PropertyModel<String>(this, "signInButtonText"))));
+        */
+    }
+
+
+    /**
+     * The content of user bar.
+     * 
+     * @return "" or username
+     */
+    public String getUsernameText() {
+        if (MySession.get().isSignedIn()) {
+            return "Logged as " + MySession.get().getUser().getUsername();
+        } else {
+            return "";
+        }
     }
 
 
@@ -96,7 +128,7 @@ public class TemplatePage extends WebPage {
      */
     public String getSignInButtonText() {
         if (MySession.get().isSignedIn()) {
-            return "Sign out";
+            return "sign out";
         } else {
             return "Sign in";
         }

@@ -5,6 +5,8 @@
 
 /* default styles
    -------------- */
+
+   
 .listLine {
 	height: 1px;
 	border: 0;
@@ -56,6 +58,11 @@
 	margin-bottom: 0px;
 }
 
+
+#loginContainer {
+	font-size: 0.62em;
+}
+
 #mainBanerLeft {
 	background: url('../images/main-menu-back-left.png') no-repeat;
 	float: left;
@@ -69,7 +76,11 @@
 	margin-top: 8px;
 }
 
-#mainBanerLanguages {
+#mainBanerRightContainer {
+	float: right;
+}
+
+#languagesContainer {
 	float: right;
 }
 

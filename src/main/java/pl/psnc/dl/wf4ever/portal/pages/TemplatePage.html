@@ -42,13 +42,20 @@
 <body>
 	<div id="mainBaner" class="mainBaner_en">
 		<div id="mainBanerIn">
-			<div id="mainBanerLanguages">
+			<div id="mainBanerRightContainer">
+				<div id="loginContainer">
+				<span wicket:id="username-text"></span>
+				 <a href="" wicket:id="sign-in-link">
+		        	<span wicket:id="sign-in-text"></span>
+		        </a>
+	        	</div>
+	        	<div id ="languagesContainer">
 				<span class="LanguagesComponent"> <a href="#" title="polski">
 						<img src="images/pl.gif" alt="polski" height="9px" />
 				</a>&nbsp; <a href="#" title="English"> <img src="images/en.gif"
 						alt="English" height="9px" /></a>&nbsp;
 				</span>
-
+				</div>
 			</div>
 			<a id="mainBanerCoin" wicket:id="baner" title="RO Digital Library">
 				<img src="images/wf4ever_logo.png" alt="" />
@@ -76,14 +83,6 @@
 					wicket:id="menu-sparql"> SPARQL ENDPOINT </a></li>
 				<li class="mmlEmpty mmlEmptyRight">&nbsp;</li>
 			</ul>
-			<a wicket:id="signedInAs" id="signedInAs" rel="twipsy"
-				data-original-title="Signed in as Piotr Hołubowicz"
-				style="float: right">
-				<button class="btn login" wicket:id="signIn">
-					<span wicket:id="signInText">[Sign in]</span>
-				</button>
-			</a>
-
 		</div>
 	</div>
 	<div class="container">
