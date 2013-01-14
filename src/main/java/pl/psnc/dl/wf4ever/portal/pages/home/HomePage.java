@@ -190,6 +190,7 @@ public class HomePage extends TemplatePage {
         searchForm.add(new RequiredTextField<String>("keywords", new PropertyModel<String>(this, "searchKeywords")));
          */
 
+        /*
         final WebMarkupContainer recommendationsDiv = new WebMarkupContainer("recommendationsDiv");
         recommendationsDiv.setOutputMarkupId(true);
         add(recommendationsDiv);
@@ -210,10 +211,10 @@ public class HomePage extends TemplatePage {
         };
         recommendationsList.setReuseItems(true);
         recommendationsDiv.add(recommendationsList);
-
+        */
         final Form<?> recommenderForm = new Form<Void>("recommenderForm");
         recommenderForm.setOutputMarkupId(true);
-        recommendationsDiv.add(recommenderForm);
+        add(recommenderForm);
 
         recommenderForm.add(new RequiredTextField<String>("myExpId", new PropertyModel<String>(this, "myExpId")));
         recommenderForm.add(new MyAjaxButton("confirmMyExpId", recommenderForm) {
@@ -228,8 +229,8 @@ public class HomePage extends TemplatePage {
                         setRecommendations(recs);
                         getSession().cleanupFeedbackMessages();
                         recommenderForm.setVisible(recs == null || recs.isEmpty());
-                        noRecommendations.setVisible(recs == null || recs.isEmpty());
-                        target.add(recommendationsDiv);
+                        //noRecommendations.setVisible(recs == null || recs.isEmpty());
+                        //target.add(recommendationsDiv);
                     } catch (Exception e) {
                         LOG.error(e);
                         error(e.getMessage());

@@ -5,7 +5,6 @@
 
 /* default styles
    -------------- */
-
    
 .listLine {
 	height: 1px;
@@ -133,8 +132,8 @@ a.mainMenuOption:hover {
 body {
 	padding: 0;
 	margin: 0;
-	/*	font: 10pt "trebuchet ms", tahoma, sans-serif;*/
-	line-height: 1.5em;
+	/*	font: 10pt "trebuchet ms", tahoma, sans-serif; */
+	/* line-height: 1.5em; */
 	background: #d2e2ef;
 	color: #414141;
 	word-wrap: break-word;
@@ -231,10 +230,10 @@ table.resourceList td.link {
    ------ */
 .content {
 	margin: 0 auto;
-	margin-bottom: 10px;
+	margin-bottom: 0px;
 	/*	width: 960px;*/
 	padding: 0 0px;
-	padding-top: 8px;
+	padding-top: 0px;
 	background: #fff url('../images/bottomback.gif') bottom repeat-x;
 	-moz-border-radius: 5px;
 	-webkit-border-radius: 5px;
@@ -283,7 +282,6 @@ table.resourceList td.link {
 
 .box .boxDiv {
 	margin: 0 0 0 0;
-	padding-top: 6px;
 	color: #414141;
 	border: 1px solid #ddd;
 	border-top: none;
@@ -459,4 +457,24 @@ hr.separation {
 	background-image: none;
 }
 
+.breadcrumb {
+	margin-top: 10px;	
+}
+
+p {
+	margin-top: 1px;
+	margin-bottom: 0px;
+	padding: 0px;
+}
+
+.span4 {
+	width: 688px;
+}
+input.span1 {
+	width: 155px;
+}
+#myExp-recommendation-serach-button {
+	
+	margin-left: -45px
+}
 /* visualization */
