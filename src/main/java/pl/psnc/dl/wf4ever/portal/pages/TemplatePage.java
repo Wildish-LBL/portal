@@ -4,9 +4,13 @@ import java.net.URI;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.RequiredTextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.Model;
@@ -82,6 +86,28 @@ public class TemplatePage extends WebPage {
         signInLink.add(signInLabel);
         add(userNameLabel);
         add(signInLink);
+
+        Form<?> searchForm = new Form<Void>("searchFormBar");
+        searchForm.add(new AjaxButton("searchButtonBar", searchForm) {
+
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                // TODO Auto-generated method stub
+
+            }
+
+
+            @Override
+            protected void onError(AjaxRequestTarget target, Form<?> form) {
+                // TODO Auto-generated method stub
+
+            }
+        });
+        RequiredTextField<String> searchFieldBar = new RequiredTextField<String>("keywords", new PropertyModel<String>(
+                this, "searchKeywords"));
+
+        searchForm.add(searchFieldBar);
+        add(searchForm);
 
         /*
         WebMarkupContainer signedInAs = new WebMarkupContainer("signedInAs");

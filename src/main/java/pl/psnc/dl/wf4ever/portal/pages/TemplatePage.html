@@ -37,7 +37,14 @@
 <script type="text/javascript" src="js/bootstrap-tab.js"></script>
 <script type="text/javascript" src="js/jquery.jsPlumb-1.3.8-all.js"></script>
 <script type="text/javascript" src="js/TemplatePage.js"></script>
-
+<!-- watermark -->
+<script type="text/javascript" src="js/jquery.watermark.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#main-search-input").watermark("Look for the keywords in annotations");
+});
+</script>
+<!--------------->
 </head>
 <body>
 	<div id="mainBaner" class="mainBaner_en">
@@ -86,9 +93,9 @@
 				<li class="mmlEmpty mmlEmptyRight">&nbsp;</li>
 			</ul>		
 		</div>
-		<form class="form-search" wwicket:id="searchForm">
-			<input class="span5 search-querys" autocomplete="off" wwicket:id="keywords" type="text" value="Look for the keywords in annotations">
-			<button id="search-button" class="btn" wwicket:id="searchButton" type="submit">
+		<form class="form-search" wicket:id="searchFormBar">
+			<input id="main-search-input" class="span5 search-querys" autocomplete="off" wicket:id="keywords" type="text">
+			<button id="search-button" class="btn" wicket:id="searchButtonBar" type="submit">
 				<i class="icon-search"></i>
 			</button>
 		</form>

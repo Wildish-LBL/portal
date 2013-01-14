@@ -39,8 +39,8 @@ function showStmtEdit(content) {
 	$('#objectValue').wysiwyg({
 		css : 'css/bootstrap.min.css'
 	}).wysiwyg('setContent', content);
-	document.getElementById('propertyURI').onchange = checkStmtPropertyType;
-	document.getElementById('objectType').onclick = checkStmtEditType;
+	$('#propertyURI').onchange = checkStmtPropertyType;
+	$('#objectType').onclick = checkStmtEditType;
 	checkStmtPropertyType();
 	checkStmtEditType();
 }
@@ -48,36 +48,36 @@ function showStmtEdit(content) {
 function checkStmtEditType() {
 	var type = document.getElementById('objectType');
 	if (type.checked) {
-		document.getElementById('objectValueDiv').style.display = "none";
-		document.getElementById('objectURIDiv').style.display = "";
+		$('#objectValueDiv').style.display = "none";
+		$('#objectURIDiv').style.display = "";
 	} else {
-		document.getElementById('objectValueDiv').style.display = "";
-		document.getElementById('objectURIDiv').style.display = "none";
+		$('#objectValueDiv').style.display = "";
+		$('#objectURIDiv').style.display = "none";
 	}
 }
 
 function checkStmtPropertyType() {
 	var type = document.getElementById('propertyURI');
 	if (type.value == "") {
-		document.getElementById('customPropertyURIDiv').style.display = "";
+		$('#customPropertyURIDiv').style.display = "";
 	} else {
-		document.getElementById('customPropertyURIDiv').style.display = "none";
-		document.getElementById('customPropertyURI').value = "";
+		$('#customPropertyURIDiv').style.display = "none";
+		$('#customPropertyURI').value = "";
 	}
 }
 
 function showRelEdit() {
 	$('#edit-rel-modal').modal('show');
-	document.getElementById('relationURI').onchange = checkStmtRelationType;
+	$('#relationURI').onchange = checkStmtRelationType;
 	checkStmtRelationType();
 }
 
 function checkStmtRelationType() {
 	var type = document.getElementById('relationURI');
 	if (type.value == "") {
-		document.getElementById('customRelationURIDiv').style.display = "";
+		$('#customRelationURIDiv').style.display = "";
 	} else {
-		document.getElementById('customRelationURIDiv').style.display = "none";
-		document.getElementById('customRelationURI').value = "";
+		$('#customRelationURIDiv').style.display = "none";
+		$('#customRelationURI').value = "";
 	}
 }
