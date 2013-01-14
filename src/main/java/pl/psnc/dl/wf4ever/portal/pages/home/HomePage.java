@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.Application;
@@ -370,7 +371,7 @@ public class HomePage extends TemplatePage {
             item.add(link);
             item.add(new Label("researchObject.title"));
             item.add(new Label("scoreInPercent"));
-            item.add(new CreatorsPanel("researchObject.creator", new PropertyModel<List<Creator>>(result,
+            item.add(new CreatorsPanel("researchObject.creator", new PropertyModel<Set<Creator>>(result,
                     "researchObject.creators")));
             item.add(new Label("researchObject.createdFormatted"));
             Label bar = new Label("percentBar", "");
@@ -426,7 +427,7 @@ public class HomePage extends TemplatePage {
             link.getPageParameters().add("ro", ro.getUri().toString());
             link.add(new Label("name"));
             item.add(link);
-            item.add(new CreatorsPanel("creator", new PropertyModel<List<Creator>>(ro, "creators")));
+            item.add(new CreatorsPanel("creator", new PropertyModel<Set<Creator>>(ro, "creators")));
             item.add(new Label("createdFormatted"));
         }
     }

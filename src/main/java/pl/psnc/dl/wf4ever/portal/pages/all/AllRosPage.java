@@ -120,7 +120,7 @@ public class AllRosPage extends TemplatePage {
                 link.add(new Label("name"));
                 item.add(link);
                 item.add(new Label("resourcesCnt", "" + resCnts.get(ro)));
-                item.add(new CreatorsPanel("creators", new PropertyModel<List<Creator>>(ro, "creators")));
+                item.add(new CreatorsPanel("creators", new PropertyModel<Set<Creator>>(ro, "creators")));
                 item.add(new Label("createdFormatted"));
             }
 

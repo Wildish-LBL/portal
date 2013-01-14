@@ -3,6 +3,7 @@ package pl.psnc.dl.wf4ever.portal.pages.ro;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -89,9 +90,9 @@ class AnnotatingBox extends Panel {
                 final Annotation annotation = item.getModelObject();
                 item.add(new AttributeAppender("title", new PropertyModel<URI>(annotation, "URI")));
                 PropertyListView<Statement> statementsList = new AnnotationsListView("statementsList",
-                        new PropertyModel<List<Statement>>(annotation, "body"), itemModel);
+                        new PropertyModel<List<Statement>>(annotation, "statements"), itemModel);
                 item.add(statementsList);
-                item.add(new CreatorsPanel("creator", new PropertyModel<List<Creator>>(itemModel, "creators")));
+                item.add(new CreatorsPanel("creator", new PropertyModel<Set<Creator>>(itemModel, "creators")));
                 item.add(new Label("createdFormatted"));
             }
         };

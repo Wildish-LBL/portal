@@ -126,7 +126,7 @@ class RelationEditModal extends Panel {
                 "customRelation"));
         relationURIDiv.add(relationURI);
 
-        tree = new RoTree("objectTree", new PropertyModel<TreeModel>(roPage, "conceptualResourcesTree"));
+        tree = new RoTree("objectTree", new PropertyModel<TreeModel>(roPage, "physicalResourcesTree"));
         treeLoading = new Fragment("objectTree", tempRoTreeId, roPage);
         form.add(treeLoading);
 

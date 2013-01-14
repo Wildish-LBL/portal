@@ -1,7 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.pages.ro;
 
 import java.net.URI;
-import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -64,7 +64,7 @@ public class ItemInfoPanel extends Panel {
                 .<URI> bind("uri")));
         creatorSection = new WebMarkupContainer("creatorSection", new Model<>());
         add(creatorSection);
-        creatorSection.add(new CreatorsPanel("creator", new PropertyModel<List<Creator>>(itemModel, "creators")));
+        creatorSection.add(new CreatorsPanel("creator", new PropertyModel<Set<Creator>>(itemModel, "creators")));
         createdSection = new WebMarkupContainer("createdSection", new Model<>());
         add(createdSection);
         createdSection.add(new Label("createdFormatted"));

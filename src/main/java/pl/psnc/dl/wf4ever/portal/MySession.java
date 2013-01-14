@@ -95,6 +95,7 @@ public class MySession extends AbstractAuthenticatedWebSession {
         super(request);
         PortalApplication app = (PortalApplication) getApplication();
         this.ums = new UserManagementService(app.getRodlURI(), app.getAdminToken());
+        this.rosrs = new ROSRService(app.getRodlURI().resolve("ROs/"), null);
         if (new CookieUtils().load(DLIBRA_KEY) != null) {
             signIn(new CookieUtils().load(DLIBRA_KEY));
         }
@@ -215,6 +216,7 @@ public class MySession extends AbstractAuthenticatedWebSession {
         dLibraAccessToken = null;
         myExpAccessToken = null;
         user = null;
+        rosrs = new ROSRService(rosrs.getRosrsURI(), null);
         new CookieUtils().remove(DLIBRA_KEY);
         new CookieUtils().remove(MYEXP_KEY_TOKEN);
         new CookieUtils().remove(MYEXP_KEY_SECRET);
