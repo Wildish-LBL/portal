@@ -1,16 +1,12 @@
-package pl.psnc.dl.wf4ever.portal.pages;
+package pl.psnc.dl.wf4ever.portal.pages.base;
 
 import java.net.URI;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.RestartResponseException;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.RequiredTextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.Model;
@@ -19,6 +15,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
+import pl.psnc.dl.wf4ever.portal.pages.SparqlEndpointPage;
+import pl.psnc.dl.wf4ever.portal.pages.base.component.Search;
 import pl.psnc.dl.wf4ever.portal.pages.home.HomePage;
 import pl.psnc.dl.wf4ever.portal.pages.my.MyRosPage;
 import pl.psnc.dl.wf4ever.portal.pages.users.ProfilePage;
@@ -29,7 +27,7 @@ import pl.psnc.dl.wf4ever.portal.pages.users.ProfilePage;
  * @author piotrekhol
  * 
  */
-public class TemplatePage extends WebPage {
+public class Base extends WebPage {
 
     /** id. */
     private static final long serialVersionUID = 1L;
@@ -46,7 +44,7 @@ public class TemplatePage extends WebPage {
      * @param parameters
      *            may contain redirection params
      */
-    public TemplatePage(final PageParameters parameters) {
+    public Base(final PageParameters parameters) {
         getSession().bind();
         MySession.get().persist();
         final WebMarkupContainer redirect = new WebMarkupContainer("redirect");
@@ -86,28 +84,7 @@ public class TemplatePage extends WebPage {
         signInLink.add(signInLabel);
         add(userNameLabel);
         add(signInLink);
-
-        Form<?> searchForm = new Form<Void>("searchFormBar");
-        searchForm.add(new AjaxButton("searchButtonBar", searchForm) {
-
-            @Override
-            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                // TODO Auto-generated method stub
-
-            }
-
-
-            @Override
-            protected void onError(AjaxRequestTarget target, Form<?> form) {
-                // TODO Auto-generated method stub
-
-            }
-        });
-        RequiredTextField<String> searchFieldBar = new RequiredTextField<String>("keywords", new PropertyModel<String>(
-                this, "searchKeywords"));
-
-        searchForm.add(searchFieldBar);
-        add(searchForm);
+        add(new Search("main-search"));
 
         /*
         WebMarkupContainer signedInAs = new WebMarkupContainer("signedInAs");

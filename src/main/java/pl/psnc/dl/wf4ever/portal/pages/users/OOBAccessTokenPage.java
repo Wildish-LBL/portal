@@ -9,7 +9,7 @@ import org.purl.wf4ever.rosrs.client.common.users.UserManagementService;
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.User;
-import pl.psnc.dl.wf4ever.portal.pages.TemplatePage;
+import pl.psnc.dl.wf4ever.portal.pages.base.Base;
 
 import com.sun.jersey.api.client.UniformInterfaceException;
 
@@ -21,7 +21,7 @@ import com.sun.jersey.api.client.UniformInterfaceException;
  * @author Piotr Hołubowicz
  * 
  */
-public class OOBAccessTokenPage extends TemplatePage {
+public class OOBAccessTokenPage extends Base {
 
     /** id. */
     private static final long serialVersionUID = 1L;

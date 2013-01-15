@@ -34,7 +34,7 @@ import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.AggregatedResource;
 import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.pages.MyExpImportPage;
-import pl.psnc.dl.wf4ever.portal.pages.TemplatePage;
+import pl.psnc.dl.wf4ever.portal.pages.base.Base;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
 import pl.psnc.dl.wf4ever.portal.pages.util.ModelIteratorAdapter;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
@@ -50,7 +50,7 @@ import com.sun.jersey.api.client.ClientResponse;
  * 
  */
 @AuthorizeInstantiation("USER")
-public class MyRosPage extends TemplatePage {
+public class MyRosPage extends Base {
 
     /** id. */
     private static final long serialVersionUID = 1L;

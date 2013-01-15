@@ -7,7 +7,7 @@ import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
-import pl.psnc.dl.wf4ever.portal.pages.TemplatePage;
+import pl.psnc.dl.wf4ever.portal.pages.base.Base;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 
 /**
@@ -16,7 +16,7 @@ import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
  * @author Piotr Hołubowicz
  * 
  */
-public class GoogleMigratePage extends TemplatePage {
+public class GoogleMigratePage extends Base {
 
     /** id. */
     private static final long serialVersionUID = -8975579933617712699L;

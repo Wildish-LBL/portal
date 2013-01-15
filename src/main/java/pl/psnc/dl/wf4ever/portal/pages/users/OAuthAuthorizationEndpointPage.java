@@ -20,7 +20,7 @@ import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.User;
 import pl.psnc.dl.wf4ever.portal.model.users.AuthCodeData;
-import pl.psnc.dl.wf4ever.portal.pages.TemplatePage;
+import pl.psnc.dl.wf4ever.portal.pages.base.Base;
 import pl.psnc.dl.wf4ever.portal.services.HibernateService;
 
 import com.sun.jersey.api.client.UniformInterfaceException;
@@ -30,7 +30,7 @@ import com.sun.jersey.api.client.UniformInterfaceException;
  * 
  * @author Piotr Hołubowicz
  */
-public class OAuthAuthorizationEndpointPage extends TemplatePage {
+public class OAuthAuthorizationEndpointPage extends Base {
 
     /** id. */
     private static final long serialVersionUID = 3793214124123802219L;

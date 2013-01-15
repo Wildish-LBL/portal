@@ -16,7 +16,7 @@ import org.purl.wf4ever.rosrs.client.common.users.OAuthClient;
 import org.purl.wf4ever.rosrs.client.common.users.UserManagementService;
 
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
-import pl.psnc.dl.wf4ever.portal.pages.TemplatePage;
+import pl.psnc.dl.wf4ever.portal.pages.base.Base;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 
 /**
@@ -26,7 +26,7 @@ import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
  * 
  */
 @AuthorizeInstantiation("USER")
-public class GenerateAccessTokenPage extends TemplatePage {
+public class GenerateAccessTokenPage extends Base {
 
     /** id. */
     private static final long serialVersionUID = 1L;

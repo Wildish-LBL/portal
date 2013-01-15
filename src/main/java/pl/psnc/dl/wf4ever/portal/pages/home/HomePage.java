@@ -35,8 +35,8 @@ import pl.psnc.dl.wf4ever.portal.model.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.model.SearchResult;
 import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
 import pl.psnc.dl.wf4ever.portal.pages.HelpPage;
-import pl.psnc.dl.wf4ever.portal.pages.TemplatePage;
 import pl.psnc.dl.wf4ever.portal.pages.all.AllRosPage;
+import pl.psnc.dl.wf4ever.portal.pages.base.Base;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
 import pl.psnc.dl.wf4ever.portal.pages.util.CreatorsPanel;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
@@ -56,7 +56,7 @@ import com.hp.hpl.jena.query.ResultSet;
  * @author piotrekhol
  * 
  */
-public class HomePage extends TemplatePage {
+public class HomePage extends Base {
 
     /** id. */
     private static final long serialVersionUID = 1L;
@@ -303,15 +303,12 @@ public class HomePage extends TemplatePage {
     }
 
 
-    public String getSearchKeywords() {
-        return searchKeywords;
-    }
-
-
-    public void setSearchKeywords(String searchKeywords) {
-        this.searchKeywords = searchKeywords;
-    }
-
+    /**
+     * public String getSearchKeywords() { return searchKeywords; }
+     * 
+     * 
+     * public void setSearchKeywords(String searchKeywords) { this.searchKeywords = searchKeywords; }
+     */
 
     public String getMyExpId() {
         return myExpId;
