@@ -2,6 +2,7 @@ package pl.psnc.dl.wf4ever.portal.pages.ro;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -17,6 +18,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PropertyListView;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
@@ -82,13 +84,14 @@ class AnnotatingBox extends Panel {
         CheckGroup<Statement> group = new CheckGroup<Statement>("group", selectedStatements);
         annForm.add(group);
 
-        annList = new PropertyListView<Annotation>("annotationsList", new PropertyModel<List<Annotation>>(itemModel,
-                "annotations")) {
+        IModel<List<Annotation>> listModel = new ListModel(new PropertyModel<Collection<Annotation>>(itemModel,
+                "annotations"));
+        annList = new PropertyListView<Annotation>("annotationsList", listModel) {
 
             @Override
             protected void populateItem(ListItem<Annotation> item) {
                 final Annotation annotation = item.getModelObject();
-                item.add(new AttributeAppender("title", new PropertyModel<URI>(annotation, "URI")));
+                item.add(new AttributeAppender("title", new PropertyModel<URI>(annotation, "uri")));
                 PropertyListView<Statement> statementsList = new AnnotationsListView("statementsList",
                         new PropertyModel<List<Statement>>(annotation, "statements"), itemModel);
                 item.add(statementsList);
@@ -191,6 +194,25 @@ class AnnotatingBox extends Panel {
         addStatement.setEnabled(roPage.canEdit && getDefaultModelObject() != null);
         deleteStatement.setEnabled(roPage.canEdit && getDefaultModelObject() != null);
         importAnnotation.setEnabled(roPage.canEdit && getDefaultModelObject() != null);
+    }
+
+
+    private final class ListModel extends AbstractReadOnlyModel<List<Annotation>> {
+
+        private final IModel<Collection<Annotation>> itemModel;
+
+
+        private ListModel(IModel<Collection<Annotation>> itemModel) {
+            this.itemModel = itemModel;
+        }
+
+
+        public List<Annotation> getObject() {
+            if (itemModel.getObject() == null) {
+                return null;
+            }
+            return new ArrayList<Annotation>(itemModel.getObject());
+        }
     }
 
 

@@ -1,5 +1,6 @@
 package pl.psnc.dl.wf4ever.portal.pages.util;
 
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 
@@ -7,6 +8,7 @@ import org.apache.wicket.extensions.markup.html.tree.Tree;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
+import org.purl.wf4ever.rosrs.client.Thing;
 
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 
@@ -76,6 +78,13 @@ public class RoTree extends Tree {
             getTreeState().expandNode(getModelObject().getRoot());
             //			getTreeState().selectNode(getModelObject().getRoot(), true);
         }
+    }
+
+
+    @Override
+    protected String renderNode(TreeNode node) {
+        Thing thing = (Thing) ((DefaultMutableTreeNode) node).getUserObject();
+        return thing.getName();
     }
 
 }

@@ -38,6 +38,9 @@ public class CreatorsPanel extends Panel {
         IModel<List<Creator>> listModel = new AbstractReadOnlyModel<List<Creator>>() {
 
             public List<Creator> getObject() {
+                if (model.getObject() == null) {
+                    return null;
+                }
                 return new ArrayList<Creator>(model.getObject());
             }
         };

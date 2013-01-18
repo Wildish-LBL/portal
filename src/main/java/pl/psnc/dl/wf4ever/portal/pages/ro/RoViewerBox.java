@@ -150,8 +150,7 @@ class RoViewerBox extends WebMarkupContainer {
             }
 
         };
-        downloadResource = new ExternalLink("downloadResource", new PropertyModel<String>(this,
-                "selectedItem.downloadURI"));
+        downloadResource = new ExternalLink("downloadResource", new PropertyModel<String>(this, "selectedItem.uri"));
         downloadResource.setBeforeDisabledLink("");
         downloadResource.setAfterDisabledLink("");
 
