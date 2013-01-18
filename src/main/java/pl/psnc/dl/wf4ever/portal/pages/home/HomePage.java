@@ -2,8 +2,6 @@ package pl.psnc.dl.wf4ever.portal.pages.home;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.List;
 import java.util.Set;
 
@@ -38,8 +36,8 @@ import pl.psnc.dl.wf4ever.portal.model.Recommendation;
 import pl.psnc.dl.wf4ever.portal.model.SearchResult;
 import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
 import pl.psnc.dl.wf4ever.portal.pages.HelpPage;
-import pl.psnc.dl.wf4ever.portal.pages.TemplatePage;
 import pl.psnc.dl.wf4ever.portal.pages.all.AllRosPage;
+import pl.psnc.dl.wf4ever.portal.pages.base.Base;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
 import pl.psnc.dl.wf4ever.portal.pages.util.CreatorsPanel;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
@@ -48,12 +46,10 @@ import pl.psnc.dl.wf4ever.portal.services.MyQueryFactory;
 import pl.psnc.dl.wf4ever.portal.services.RODLUtilities;
 import pl.psnc.dl.wf4ever.portal.services.RSSService;
 import pl.psnc.dl.wf4ever.portal.services.RecommenderService;
-import pl.psnc.dl.wf4ever.portal.services.SearchService;
 
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
-import com.sun.syndication.io.FeedException;
 
 /**
  * The home page.
@@ -61,7 +57,7 @@ import com.sun.syndication.io.FeedException;
  * @author piotrekhol
  * 
  */
-public class HomePage extends TemplatePage {
+public class HomePage extends Base {
 
     /** id. */
     private static final long serialVersionUID = 1L;
@@ -165,7 +161,7 @@ public class HomePage extends TemplatePage {
 
         // FIXME does the below really work?
         add(new Label("usersOnlineCnt", "" + (getRequestLogger().getLiveSessions().length + 1)));
-
+        /*
         Form<?> searchForm = new Form<Void>("searchForm");
         add(searchForm);
 
@@ -192,9 +188,10 @@ public class HomePage extends TemplatePage {
                 }
             }
         });
-
         searchForm.add(new RequiredTextField<String>("keywords", new PropertyModel<String>(this, "searchKeywords")));
+         */
 
+        /*
         final WebMarkupContainer recommendationsDiv = new WebMarkupContainer("recommendationsDiv");
         recommendationsDiv.setOutputMarkupId(true);
         add(recommendationsDiv);
@@ -215,10 +212,10 @@ public class HomePage extends TemplatePage {
         };
         recommendationsList.setReuseItems(true);
         recommendationsDiv.add(recommendationsList);
-
+        */
         final Form<?> recommenderForm = new Form<Void>("recommenderForm");
         recommenderForm.setOutputMarkupId(true);
-        recommendationsDiv.add(recommenderForm);
+        add(recommenderForm);
 
         recommenderForm.add(new RequiredTextField<String>("myExpId", new PropertyModel<String>(this, "myExpId")));
         recommenderForm.add(new MyAjaxButton("confirmMyExpId", recommenderForm) {
@@ -233,8 +230,8 @@ public class HomePage extends TemplatePage {
                         setRecommendations(recs);
                         getSession().cleanupFeedbackMessages();
                         recommenderForm.setVisible(recs == null || recs.isEmpty());
-                        noRecommendations.setVisible(recs == null || recs.isEmpty());
-                        target.add(recommendationsDiv);
+                        //noRecommendations.setVisible(recs == null || recs.isEmpty());
+                        //target.add(recommendationsDiv);
                     } catch (Exception e) {
                         LOG.error(e);
                         error(e.getMessage());
@@ -307,15 +304,12 @@ public class HomePage extends TemplatePage {
     }
 
 
-    public String getSearchKeywords() {
-        return searchKeywords;
-    }
-
-
-    public void setSearchKeywords(String searchKeywords) {
-        this.searchKeywords = searchKeywords;
-    }
-
+    /**
+     * public String getSearchKeywords() { return searchKeywords; }
+     * 
+     * 
+     * public void setSearchKeywords(String searchKeywords) { this.searchKeywords = searchKeywords; }
+     */
 
     public String getMyExpId() {
         return myExpId;

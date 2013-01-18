@@ -1,21 +1,19 @@
-package pl.psnc.dl.wf4ever.portal.pages;
+package pl.psnc.dl.wf4ever.portal.pages.base;
 
 import java.net.URI;
 
 import org.apache.wicket.AttributeModifier;
-import org.apache.wicket.RestartResponseException;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
+import pl.psnc.dl.wf4ever.portal.pages.SparqlEndpointPage;
+import pl.psnc.dl.wf4ever.portal.pages.base.components.Login;
+import pl.psnc.dl.wf4ever.portal.pages.base.components.Search;
 import pl.psnc.dl.wf4ever.portal.pages.home.HomePage;
 import pl.psnc.dl.wf4ever.portal.pages.my.MyRosPage;
 import pl.psnc.dl.wf4ever.portal.pages.users.ProfilePage;
@@ -26,7 +24,7 @@ import pl.psnc.dl.wf4ever.portal.pages.users.ProfilePage;
  * @author piotrekhol
  * 
  */
-public class TemplatePage extends WebPage {
+public class Base extends WebPage {
 
     /** id. */
     private static final long serialVersionUID = 1L;
@@ -43,7 +41,7 @@ public class TemplatePage extends WebPage {
      * @param parameters
      *            may contain redirection params
      */
-    public TemplatePage(final PageParameters parameters) {
+    public Base(final PageParameters parameters) {
         getSession().bind();
         MySession.get().persist();
         final WebMarkupContainer redirect = new WebMarkupContainer("redirect");
@@ -66,7 +64,10 @@ public class TemplatePage extends WebPage {
         add(new BookmarkablePageLink<Void>("menu-myros", MyRosPage.class));
         add(new BookmarkablePageLink<Void>("menu-sparql", SparqlEndpointPage.class));
         add(new BookmarkablePageLink<Void>("menu-profile", ProfilePage.class));
+        add(new Login("login"));
+        add(new Search("main-search"));
 
+        /*
         WebMarkupContainer signedInAs = new WebMarkupContainer("signedInAs");
         signedInAs.add(new AttributeModifier("data-original-title", new PropertyModel<String>(this, "signInTwipsy")));
         add(signedInAs);
@@ -86,34 +87,7 @@ public class TemplatePage extends WebPage {
             }
 
         }.add(new Label("signInText", new PropertyModel<String>(this, "signInButtonText"))));
-    }
-
-
-    /**
-     * The content of the sign in button.
-     * 
-     * @return "Sign out" or "Sign in"
-     */
-    public String getSignInButtonText() {
-        if (MySession.get().isSignedIn()) {
-            return "Sign out";
-        } else {
-            return "Sign in";
-        }
-    }
-
-
-    /**
-     * The sign in button tooltip.
-     * 
-     * @return "Signed in as X" or "Click to sign in!"
-     */
-    public String getSignInTwipsy() {
-        if (MySession.get().isSignedIn()) {
-            return "Signed in as " + MySession.get().getUser().getUsername();
-        } else {
-            return "Click to sign in!";
-        }
+        */
     }
 
 

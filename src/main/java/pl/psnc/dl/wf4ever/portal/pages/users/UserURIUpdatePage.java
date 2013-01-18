@@ -15,7 +15,7 @@ import org.purl.wf4ever.rosrs.client.users.MigrateService;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
-import pl.psnc.dl.wf4ever.portal.pages.TemplatePage;
+import pl.psnc.dl.wf4ever.portal.pages.base.Base;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.services.RODLUtilities;
 
@@ -25,7 +25,7 @@ import pl.psnc.dl.wf4ever.portal.services.RODLUtilities;
  * @author Piotr Hołubowicz
  * 
  */
-public class UserURIUpdatePage extends TemplatePage {
+public class UserURIUpdatePage extends Base {
 
     /** id. */
     private static final long serialVersionUID = -8975579933617712699L;

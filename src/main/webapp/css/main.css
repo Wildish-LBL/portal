@@ -5,6 +5,7 @@
 
 /* default styles
    -------------- */
+   
 .listLine {
 	height: 1px;
 	border: 0;
@@ -56,6 +57,21 @@
 	margin-bottom: 0px;
 }
 
+
+#loginContainer {
+	height: 45px;
+	font-size: 0.62em;
+	text-align: right;
+	padding-right: 5px;
+}
+
+#languagesContainer {
+	text-align: right;
+}
+#search-button {
+	 margin-left: -40px; 
+}
+
 #mainBanerLeft {
 	background: url('../images/main-menu-back-left.png') no-repeat;
 	float: left;
@@ -69,9 +85,10 @@
 	margin-top: 8px;
 }
 
-#mainBanerLanguages {
+#mainBanerRightContainer {
 	float: right;
 }
+
 
 #mainBanerIn {
 	width: 940px;
@@ -92,7 +109,7 @@
 }
 
 a.mainMenuOption:hover {
-	border-top: 2px solid #FF5F3F;
+	/*border-top: 2px solid #FF5F3F;*/
 	text-shadow: 0px 0px 5px #fff;
 }
 
@@ -115,8 +132,8 @@ a.mainMenuOption:hover {
 body {
 	padding: 0;
 	margin: 0;
-	/*	font: 10pt "trebuchet ms", tahoma, sans-serif;*/
-	line-height: 1.5em;
+	/*	font: 10pt "trebuchet ms", tahoma, sans-serif; */
+	/* line-height: 1.5em; */
 	background: #d2e2ef;
 	color: #414141;
 	word-wrap: break-word;
@@ -213,10 +230,10 @@ table.resourceList td.link {
    ------ */
 .content {
 	margin: 0 auto;
-	margin-bottom: 10px;
+	margin-bottom: 0px;
 	/*	width: 960px;*/
 	padding: 0 0px;
-	padding-top: 8px;
+	padding-top: 0px;
 	background: #fff url('../images/bottomback.gif') bottom repeat-x;
 	-moz-border-radius: 5px;
 	-webkit-border-radius: 5px;
@@ -264,12 +281,10 @@ table.resourceList td.link {
 }
 
 .box .boxDiv {
-	margin: 0 0 10px 0;
+	margin: 0 0 0 0;
 	color: #414141;
 	border: 1px solid #ddd;
 	border-top: none;
-	padding-top: 12px;
-	padding-bottom: 12px;
 	-moz-box-shadow: 1px 1px 15px #ddd;
 	-webkit-box-shadow: 1px 1px 15px #ddd;
 	box-shadow: 1px 1px 15px #ddd;
@@ -278,6 +293,7 @@ table.resourceList td.link {
 .box.small {
 	width: 205px;
 	margin-left: 10px;
+	padding-bottom: 6px;
 }
 
 .box.small .boxDiv {
@@ -441,4 +457,24 @@ hr.separation {
 	background-image: none;
 }
 
+.breadcrumb {
+	margin-top: 10px;	
+}
+
+p {
+	margin-top: 1px;
+	margin-bottom: 0px;
+	padding: 0px;
+}
+
+.span4 {
+	width: 688px;
+}
+input.span1 {
+	width: 155px;
+}
+#myExp-recommendation-serach-button {
+	
+	margin-left: -45px
+}
 /* visualization */

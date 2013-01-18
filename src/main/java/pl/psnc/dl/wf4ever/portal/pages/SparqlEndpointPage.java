@@ -19,6 +19,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
+import pl.psnc.dl.wf4ever.portal.pages.base.Base;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyComponentFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
@@ -32,7 +33,7 @@ import com.sun.jersey.api.client.WebResource;
  * @author piotrekhol
  * 
  */
-public class SparqlEndpointPage extends TemplatePage {
+public class SparqlEndpointPage extends Base {
 
     /** id. */
     private static final long serialVersionUID = 1L;

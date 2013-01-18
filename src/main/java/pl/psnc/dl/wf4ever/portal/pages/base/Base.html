@@ -21,8 +21,8 @@
 <link rel="stylesheet" href="css/smoothness/jquery-ui-1.8.16.custom.css"
 	type="text/css" />
 <link rel="stylesheet" href="css/jquery.wysiwyg.css" type="text/css" />
-<link rel="stylesheet" href="css/main.css" type="text/css" />
 <link rel="stylesheet" href="css/evolution.css" type="text/css" />
+<link rel="stylesheet" href="css/main.css" type="text/css" />
 
 <link rel="shortcut icon"
 	href="http://dlibra.psnc.pl/demo/style/dlibra/favicon.ico"
@@ -42,21 +42,23 @@
 <body>
 	<div id="mainBaner" class="mainBaner_en">
 		<div id="mainBanerIn">
-			<div id="mainBanerLanguages">
-				<span class="LanguagesComponent"> <a href="#" title="polski">
-						<img src="images/pl.gif" alt="polski" height="9px" />
-				</a>&nbsp; <a href="#" title="English"> <img src="images/en.gif"
-						alt="English" height="9px" /></a>&nbsp;
-				</span>
-
+			<div id="mainBanerRightContainer">
+				<span wicket:id='login'></span>
+	        	<div id ="languagesContainer">
+					<span class="LanguagesComponent"> <a href="#" title="polski">
+							<img src="images/pl.gif" alt="polski" height="9px" />
+					</a>&nbsp; <a href="#" title="English"> <img src="images/en.gif"
+							alt="English" height="9px" /></a>&nbsp;
+					</span>
+				</div>
 			</div>
-			<a id="mainBanerCoin" wicket:id="baner" title="RO Digital Library">
-				<img src="images/wf4ever_logo.png" alt="" />
-			</a>&nbsp;
-			<h1>
-				<a wicket:id="banerTitle" title="Research Object Digital Library">
-					Research Object Digital Library </a>
-			</h1>
+				<a id="mainBanerCoin" wicket:id="baner" title="RO Digital Library">
+					<img src="images/wf4ever_logo.png" alt="" />
+				</a>&nbsp;
+				<h1>
+					<a wicket:id="banerTitle" title="Research Object Digital Library">
+						Research Object Digital Library </a>
+				</h1>
 		</div>
 	</div>
 	<div id="mainMenu">
@@ -75,16 +77,9 @@
 					class="mainMenuOption mainMenuOptionIn" href="#" accesskey="s"
 					wicket:id="menu-sparql"> SPARQL ENDPOINT </a></li>
 				<li class="mmlEmpty mmlEmptyRight">&nbsp;</li>
-			</ul>
-			<a wicket:id="signedInAs" id="signedInAs" rel="twipsy"
-				data-original-title="Signed in as Piotr Hołubowicz"
-				style="float: right">
-				<button class="btn login" wicket:id="signIn">
-					<span wicket:id="signInText">[Sign in]</span>
-				</button>
-			</a>
-
+			</ul>		
 		</div>
+		<span wicket:id='main-search'></span>
 	</div>
 	<div class="container">
 		<div class="content">
@@ -108,6 +103,5 @@
 			<p>Please wait...</p>
 		</div>
 	</div>
-
 </body>
 </html>

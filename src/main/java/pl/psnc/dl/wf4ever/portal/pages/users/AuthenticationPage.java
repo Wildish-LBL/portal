@@ -19,7 +19,7 @@ import org.openid4java.message.AuthRequest;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.model.users.OpenIdUser;
-import pl.psnc.dl.wf4ever.portal.pages.TemplatePage;
+import pl.psnc.dl.wf4ever.portal.pages.base.Base;
 import pl.psnc.dl.wf4ever.portal.services.OpenIdService;
 
 /**
@@ -29,7 +29,7 @@ import pl.psnc.dl.wf4ever.portal.services.OpenIdService;
  * @author Piotr Hołubowicz
  * 
  */
-public class AuthenticationPage extends TemplatePage {
+public class AuthenticationPage extends Base {
 
     /** id. */
     private static final long serialVersionUID = -8975579933617712699L;

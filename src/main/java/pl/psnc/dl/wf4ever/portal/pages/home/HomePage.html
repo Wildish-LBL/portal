@@ -90,12 +90,34 @@
 					</ul>
 				</div>
 			</section>
+			
+			<section class="box small">
+				<h3 class="collapsible">
+					Recommendations <img class="sh_button" src="images/l_open.gif" />
+				</h3>
+				<div class="boxDiv">
+								<form class="form-horizontal" wicket:id="recommenderForm">
+									<label class="control-label" for="myExpId">Your
+										myExperiment ID</label>
+										<input id ="myExperiment-input" type="text" class="span1"
+											wicket:id="myExpId" />
+								<button class = "btn" id="myExp-recommendation-serach-button" wicket:id="confirmMyExpId"
+									type="submit">OK</button>
+						</form>
+						<script type ="text/javascript">
+						$(document).ready(function() {
+							$("#myExperiment-input").watermark("Try out 2");
+						});
+						</script>
+				</div>
+			</section>
 		</div>
-
+		
 		<div class="span9">
 			<div class="row">
 				<div class="span9" wicket:id="feedbackPanel"></div>
 			</div>
+			<!-- 
 			<div class="row">
 				<div class="span7 offset1">
 					<form class="form-search" wicket:id="searchForm">
@@ -111,13 +133,15 @@
 					</form>
 				</div>
 			</div>
-
+			-->
+	<!-- 
 			<ul class="nav nav-tabs">
 				<li class="active"><a data-toggle="tab" id="mainViewLink"
 					href="#mainView">Main view</a></li>
 				<li><a data-toggle="tab" id="searchResultsLink"
 					href="#searchResults">Search results</a></li>
 			</ul>
+	 -->
 			<div class="tab-content">
 				<div class="row tab-pane active" id="mainView">
 					<div class="span4">
@@ -133,25 +157,10 @@
 							<a wicket:id="allRos"> More... </a>
 						</p>
 					</div>
+					<!-- 
 					<div class="span4 offset1" wicket:id="recommendationsDiv">
 						<h3>Recommended workflows</h3>
-						<form class="form-horizontal" wicket:id="recommenderForm">
-							<fieldset>
-								<div class="control-group">
-									<label class="control-label" for="myExpId">Your
-										myExperiment ID</label>
-									<div class="controls">
-										<input type="text" class="span1" id="myExpId"
-											wicket:id="myExpId" />
-										<p class="help-block">Try out: 2</p>
-									</div>
-								</div>
-							</fieldset>
-							<div class="form-actions">
-								<a class="btn btn-primary" wicket:id="confirmMyExpId"
-									type="submit">OK</a>
-							</div>
-						</form>
+			
 						<ol style="margin-right: 10px;">
 							<li wicket:id="recommendationsList"><a wicket:id="link">[uri]</a>
 								<br /> <span style="font-size: x-small">Strength: <span
@@ -164,6 +173,7 @@
 							<a href="#"> More... </a>
 						</p>
 					</div>
+					 -->
 				</div>
 				<div class="row tab-pane" id="searchResults">
 					<div class="span8" wicket:id="searchResultsDiv">

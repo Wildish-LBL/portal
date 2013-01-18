@@ -26,7 +26,7 @@ import org.purl.wf4ever.rosrs.client.users.UserManagementService;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
-import pl.psnc.dl.wf4ever.portal.pages.TemplatePage;
+import pl.psnc.dl.wf4ever.portal.pages.base.Base;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
 import pl.psnc.dl.wf4ever.portal.pages.util.CreatorsPanel;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
@@ -45,7 +45,7 @@ import com.hp.hpl.jena.rdf.model.Literal;
  * @author piotrekhol
  * 
  */
-public class AllRosPage extends TemplatePage {
+public class AllRosPage extends Base {
 
     /** id. */
     private static final long serialVersionUID = 1L;
