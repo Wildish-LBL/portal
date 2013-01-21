@@ -144,8 +144,9 @@ public final class RODLUtilities {
     public static User getUser(String token, URI rodl)
             throws URISyntaxException, ROSRSException {
         OntModel userModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
-        userModel.read(MySession.get().getUms().getWhoAmi(), null);
+        userModel.read(MySession.get().getUms().getWhoAmi(MySession.get().getRosrs().getToken()), null);
         ExtendedIterator<Individual> it = userModel.listIndividuals(FOAF.Agent);
+        userModel.write(System.out);
         Individual userInd = it.next();
         if (userInd != null && userInd.hasProperty(FOAF.name)) {
             URI userURI = new URI(userInd.getURI());
