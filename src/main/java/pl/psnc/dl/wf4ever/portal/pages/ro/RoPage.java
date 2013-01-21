@@ -422,6 +422,7 @@ public class RoPage extends Base {
      * @throws ROSRSException
      *             requests to RODL returned incorrect responses
      * @throws ROException
+     * @throws IOException
      */
     void onStatementAdd(List<Statement> statements)
             throws URISyntaxException, ROSRSException, ROException {

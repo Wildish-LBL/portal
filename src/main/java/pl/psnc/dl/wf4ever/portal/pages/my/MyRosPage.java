@@ -279,7 +279,7 @@ public class MyRosPage extends Base {
             item.add(new Check<ResearchObject>("checkbox", item.getModel()));
             BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);
             link.getPageParameters().add("ro", researchObject.getUri().toString());
-            link.add(new Label("URI"));
+            link.add(new Label("uri"));
             item.add(link);
             item.add(new Label("createdFormatted"));
         }
