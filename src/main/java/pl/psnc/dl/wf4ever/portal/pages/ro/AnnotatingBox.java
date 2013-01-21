@@ -1,5 +1,6 @@
 package pl.psnc.dl.wf4ever.portal.pages.ro;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.log4j.Logger;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -24,6 +26,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Annotation;
 import org.purl.wf4ever.rosrs.client.Creator;
+import org.purl.wf4ever.rosrs.client.ROSRSException;
 import org.purl.wf4ever.rosrs.client.Statement;
 import org.purl.wf4ever.rosrs.client.Thing;
 
@@ -60,6 +63,9 @@ class AnnotatingBox extends Panel {
     /** Import annotation body button. */
     private AjaxButton importAnnotation;
 
+    /** Logger **/
+    private static final Logger LOG = Logger.getLogger(RoPage.class);
+
 
     public Thing getModelObject() {
         return (Thing) getDefaultModelObject();
@@ -92,6 +98,13 @@ class AnnotatingBox extends Panel {
             protected void populateItem(ListItem<Annotation> item) {
                 final Annotation annotation = item.getModelObject();
                 item.add(new AttributeAppender("title", new PropertyModel<URI>(annotation, "uri")));
+                try {
+                    if (!annotation.isLoaded()) {
+                        annotation.load();
+                    }
+                } catch (ROSRSException | IOException e) {
+                    LOG.error(e.getMessage(), e);
+                }
                 PropertyListView<Statement> statementsList = new AnnotationsListView("statementsList",
                         new PropertyModel<List<Statement>>(annotation, "statements"), itemModel);
                 item.add(statementsList);
@@ -132,6 +145,9 @@ class AnnotatingBox extends Panel {
                 }
                 for (Annotation annotation : annotations) {
                     try {
+                        if (!annotation.isLoaded()) {
+                            annotation.load();
+                        }
                         if (annotation.getStatements().isEmpty()) {
                             annotation.delete();
                         } else {
@@ -250,7 +266,8 @@ class AnnotatingBox extends Panel {
             final Statement statement = item.getModelObject();
             item.add(new Check<Statement>("checkbox", item.getModel()));
             if (statement.isSubjectURIResource()) {
-                if (roPage.researchObject.getResource(statement.getSubjectURI()).isInternal()) {
+                if (roPage.researchObject.getResource(statement.getSubjectURI()) != null
+                        && roPage.researchObject.getResource(statement.getSubjectURI()).isInternal()) {
                     if (statement.getSubjectURI().equals(itemModel.getObject().getUri())) {
                         item.add(new Label("subject", "[This item]"));
                     } else {
