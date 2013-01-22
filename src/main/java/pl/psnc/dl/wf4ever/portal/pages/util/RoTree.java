@@ -4,8 +4,15 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.markup.html.tree.Tree;
+import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.IRequestParameters;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 import org.purl.wf4ever.rosrs.client.Thing;
@@ -39,6 +46,33 @@ public class RoTree extends Tree {
      */
     public RoTree(String id, IModel<? extends TreeModel> model) {
         super(id, model);
+        add(new AbstractDefaultAjaxBehavior() {
+
+            /**
+             * wicket id.
+             */
+            private static final long serialVersionUID = 1L;
+
+
+            @Override
+            protected void respond(AjaxRequestTarget target) {
+                IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
+
+                target.getPageParameters();
+                String a = "ad";
+            }
+
+
+            @Override
+            public void renderHead(Component component, IHeaderResponse response) {
+                super.renderHead(component, response);
+                System.out.println(getCallbackUrl().toString());
+                JavaScriptResourceReference treeClassRefernce = new JavaScriptResourceReference(RoTree.class,
+                        "roTree.js");
+                response.renderJavaScriptReference(treeClassRefernce);
+                response.renderOnDomReadyJavaScript("test_tree_reload(\"" + getCallbackUrl().toString() + "\");");
+            }
+        });
     }
 
 
@@ -54,18 +88,16 @@ public class RoTree extends Tree {
     }
 
 
+    /*
+        @Override
+        public void renderHead(IHeaderResponse response) {
+            super.renderHead(response);
+            response.renderOnDomReadyJavaScript("test_tree_reload();");
+        }
+    */
+
     @Override
     protected ResourceReference getNodeIcon(TreeNode node) {
-        //		Object object = ((DefaultMutableTreeNode) node).getUserObject();
-        //		if (object instanceof AggregatedResource) {
-        //			AggregatedResource res = (AggregatedResource) object;
-        //			if (res.getType() == Type.WORKFLOW) {
-        //				return WORKFLOW;
-        //			}
-        //			if (res.getType() == Type.WEB_SERVICE) {
-        //				return EXTERNAL;
-        //			}
-        //		}
         return super.getNodeIcon(node);
     }
 
@@ -76,7 +108,6 @@ public class RoTree extends Tree {
         getTreeState().collapseAll();
         if (getModelObject() != null) {
             getTreeState().expandNode(getModelObject().getRoot());
-            //			getTreeState().selectNode(getModelObject().getRoot(), true);
         }
     }
 

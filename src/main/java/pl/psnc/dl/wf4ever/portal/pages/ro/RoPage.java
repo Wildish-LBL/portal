@@ -184,7 +184,6 @@ public class RoPage extends Base {
                         setPhysicalResourcesTree(treeModel);
 
                         //                        RoFactory.createRelations(model, roURI, resources);
-
                         roViewerBox.onRoTreeLoaded();
                         relEditForm.onRoTreeLoaded();
                         target.add(roViewerBox);
