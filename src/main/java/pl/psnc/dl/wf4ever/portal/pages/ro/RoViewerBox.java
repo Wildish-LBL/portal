@@ -17,8 +17,8 @@ import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.Resource;
 import org.purl.wf4ever.rosrs.client.Thing;
 
+import pl.psnc.dl.wf4ever.portal.pages.ro.components.folderviewer.RoTree;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
-import pl.psnc.dl.wf4ever.portal.pages.util.RoTree;
 
 /**
  * The part of RO page that displays the RO structure.

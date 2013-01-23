@@ -1,4 +1,4 @@
-package pl.psnc.dl.wf4ever.portal.pages.util;
+package pl.psnc.dl.wf4ever.portal.pages.ro.components.folderviewer;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
@@ -33,7 +33,7 @@ public class RoTree extends Tree {
     /**
      * Reference to the css file.
      */
-    private static final ResourceReference CSS = new PackageResourceReference(RoTree.class, "res/tree.css");
+    private static final ResourceReference CSS = new PackageResourceReference(RoTree.class, "tree.css");
 
 
     /**
