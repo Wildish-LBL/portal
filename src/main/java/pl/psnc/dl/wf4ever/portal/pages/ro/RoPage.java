@@ -43,6 +43,7 @@ import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
 import pl.psnc.dl.wf4ever.portal.pages.base.Base;
+import pl.psnc.dl.wf4ever.portal.pages.ro.components.folderviewer.FoldersViewer;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
@@ -104,6 +105,8 @@ public class RoPage extends Base {
     /** Template for HTML Link Headers. */
     private static final String HTML_LINK_TEMPLATE = "<link rel=\"%s\" href=\"%s\"/>";
 
+    private FoldersViewer foldersViewer;
+
 
     /**
      * Constructor.
@@ -143,6 +146,12 @@ public class RoPage extends Base {
         roViewerBox = new RoViewerBox(this, itemModel, new PropertyModel<TreeModel>(this, "physicalResourcesTree"),
                 "loadingROFragment");
         add(roViewerBox);
+
+        /************************** NEW REPLACING CODE *******************************/
+        this.foldersViewer = new FoldersViewer("folders-viewer", new PropertyModel<TreeModel>(this,
+                "physicalResourcesTree"), this);
+        add(foldersViewer);
+        /*****************************************************************************/
         annotatingBox = new AnnotatingBox(this, itemModel);
         add(annotatingBox);
         annotatingBox.selectedStatements.clear();
@@ -185,6 +194,7 @@ public class RoPage extends Base {
 
                         //                        RoFactory.createRelations(model, roURI, resources);
                         roViewerBox.onRoTreeLoaded();
+                        foldersViewer.rrTest();
                         relEditForm.onRoTreeLoaded();
                         target.add(roViewerBox);
                     }

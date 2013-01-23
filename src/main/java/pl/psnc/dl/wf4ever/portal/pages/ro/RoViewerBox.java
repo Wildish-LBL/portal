@@ -193,6 +193,7 @@ class RoViewerBox extends WebMarkupContainer {
      */
     public void onRoTreeLoaded() {
         physicalTreeLoading.replaceWith(physicalTree);
+
     }
 
 
