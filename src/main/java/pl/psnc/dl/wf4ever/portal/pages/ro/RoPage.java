@@ -43,7 +43,7 @@ import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
 import pl.psnc.dl.wf4ever.portal.pages.base.Base;
-import pl.psnc.dl.wf4ever.portal.pages.ro.components.folderviewer.FoldersViewer;
+import pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.components.FoldersViewer;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
@@ -126,6 +126,7 @@ public class RoPage extends Base {
         super(parameters);
         if (!parameters.get("ro").isEmpty()) {
             roURI = new URI(parameters.get("ro").toString());
+            researchObject = new ResearchObject(roURI, MySession.get().getRosrs());
         } else {
             throw new RestartResponseException(ErrorPage.class, new PageParameters().add("message",
                 "The RO URI is missing"));
@@ -148,10 +149,11 @@ public class RoPage extends Base {
         add(roViewerBox);
 
         /************************** NEW REPLACING CODE *******************************/
-        this.foldersViewer = new FoldersViewer("folders-viewer", new PropertyModel<TreeModel>(this,
-                "physicalResourcesTree"), this);
+        this.foldersViewer = new FoldersViewer("folders-viewer", researchObject);
+        foldersViewer.setOutputMarkupId(true);
         add(foldersViewer);
         /*****************************************************************************/
+
         annotatingBox = new AnnotatingBox(this, itemModel);
         add(annotatingBox);
         annotatingBox.selectedStatements.clear();
@@ -175,28 +177,20 @@ public class RoPage extends Base {
             protected void respond(AjaxRequestTarget target) {
                 try {
                     if (getPhysicalResourcesTree() == null) {
-                        //                        PortalApplication app = ((PortalApplication) getApplication());
-                        //                        Map<URI, Creator> usernames = MySession.get().getUsernames();
 
-                        //new
                         researchObject = new ResearchObject(roURI, MySession.get().getRosrs());
                         researchObject.load();
-                        //new end
-
-                        //                        OntModel model = ROSRService.createManifestAndAnnotationsModel(roURI);
-                        //                        resources = RoFactory.getAggregatedResources(model, rodlURI, roURI, usernames);
-                        //                        RoFactory.assignResourceGroupsToResources(model, roURI, app.getResourceGroups(), resources);
                         RoTreeModel treeModel = new RoTreeModel(researchObject);
                         for (Resource resource : researchObject.getResources().values()) {
                             treeModel.addAggregatedResource(resource);
                         }
                         setPhysicalResourcesTree(treeModel);
-
-                        //                        RoFactory.createRelations(model, roURI, resources);
                         roViewerBox.onRoTreeLoaded();
-                        foldersViewer.rrTest();
+
+                        //foldersViewer.onLoaded();
                         relEditForm.onRoTreeLoaded();
                         target.add(roViewerBox);
+                        //target.add(foldersViewer);
                     }
                 } catch (ROSRSException | ROException e) {
                     LOG.error(e);
@@ -213,6 +207,7 @@ public class RoPage extends Base {
             }
 
         });
+
     }
 
 

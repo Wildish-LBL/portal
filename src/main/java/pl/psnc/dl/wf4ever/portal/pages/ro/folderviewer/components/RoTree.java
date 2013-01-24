@@ -1,11 +1,18 @@
-package pl.psnc.dl.wf4ever.portal.pages.ro.components.folderviewer;
+package pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.components;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.markup.html.tree.Tree;
+import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.IRequestParameters;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 import org.purl.wf4ever.rosrs.client.Thing;
@@ -39,10 +46,8 @@ public class RoTree extends Tree {
      */
     public RoTree(String id, IModel<? extends TreeModel> model) {
         super(id, model);
-        /*
         add(new AbstractDefaultAjaxBehavior() {
 
-           
             private static final long serialVersionUID = 1L;
 
 
@@ -62,7 +67,7 @@ public class RoTree extends Tree {
                 response.renderOnDomReadyJavaScript("test_tree_reload(\"" + getCallbackUrl().toString() + "\");");
             }
         });
-        */
+
     }
 
 
@@ -77,14 +82,6 @@ public class RoTree extends Tree {
         return CSS;
     }
 
-
-    /*
-        @Override
-        public void renderHead(IHeaderResponse response) {
-            super.renderHead(response);
-            response.renderOnDomReadyJavaScript("test_tree_reload();");
-        }
-    */
 
     @Override
     protected ResourceReference getNodeIcon(TreeNode node) {
@@ -108,4 +105,16 @@ public class RoTree extends Tree {
         return thing.getName();
     }
 
+
+    @Override
+    protected void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node) {
+        Thing object = (Thing) ((DefaultMutableTreeNode) node).getUserObject();
+
+        /*if (physicalTree.getTreeState().isNodeSelected(node)) {
+            onResourceSelected(itemModel, target, object);
+        } else {
+            onResourceDeselected(itemModel, target);
+        }
+        */
+    }
 }

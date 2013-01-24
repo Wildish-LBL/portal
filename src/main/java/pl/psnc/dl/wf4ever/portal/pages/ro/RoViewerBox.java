@@ -17,7 +17,7 @@ import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.Resource;
 import org.purl.wf4ever.rosrs.client.Thing;
 
-import pl.psnc.dl.wf4ever.portal.pages.ro.components.folderviewer.RoTree;
+import pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.components.RoTree;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 
 /**
@@ -98,7 +98,6 @@ class RoViewerBox extends WebMarkupContainer {
                 Thing object = (Thing) ((DefaultMutableTreeNode) node).getUserObject();
                 if (physicalTree.getTreeState().isNodeSelected(node)) {
                     onResourceSelected(itemModel, target, object);
-                    target.appendJavaScript("test_tree_reload();");
                 } else {
                     onResourceDeselected(itemModel, target);
                 }
