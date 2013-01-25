@@ -10,8 +10,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.markup.html.tree.Tree;
 import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.IRequestParameters;
-import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
@@ -30,10 +28,13 @@ public class RoTree extends Tree {
     /** id. */
     private static final long serialVersionUID = 7615686756338665378L;
 
-    /**
-     * Reference to the css file.
-     */
+    /** Reference to the css file. */
     private static final ResourceReference CSS = new PackageResourceReference(RoTree.class, "tree.css");
+    /** Reference to the image file. */
+    private static final ResourceReference TREE_IMAGE = new PackageResourceReference(RoTree.class, "tree-images.png");
+    /** Reference to the js file. */
+    private static final JavaScriptResourceReference treeClassRefernce = new JavaScriptResourceReference(RoTree.class,
+            "roTree.js");
 
 
     /**
@@ -53,16 +54,13 @@ public class RoTree extends Tree {
 
             @Override
             protected void respond(AjaxRequestTarget target) {
-                IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
             }
 
 
             @Override
             public void renderHead(Component component, IHeaderResponse response) {
                 super.renderHead(component, response);
-                System.out.println(getCallbackUrl().toString());
-                JavaScriptResourceReference treeClassRefernce = new JavaScriptResourceReference(RoTree.class,
-                        "roTree.js");
+
                 response.renderJavaScriptReference(treeClassRefernce);
                 response.renderOnDomReadyJavaScript("test_tree_reload(\"" + getCallbackUrl().toString() + "\");");
             }

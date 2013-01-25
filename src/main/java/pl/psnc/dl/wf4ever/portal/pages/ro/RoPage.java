@@ -43,7 +43,7 @@ import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
 import pl.psnc.dl.wf4ever.portal.pages.base.Base;
-import pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.components.FoldersViewer;
+import pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.FoldersViewer;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;

@@ -1,4 +1,4 @@
-package pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.components;
+package pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer;
 
 import javax.swing.tree.TreeModel;
 
@@ -9,7 +9,9 @@ import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
-import pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.bahaviours.FolderViewerAjaxInitialBahaviour;
+import pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.components.RoTree;
+import pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.components.bahaviours.FolderViewerAjaxInitialBahaviour;
+import pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.components.forms.FilesShiftForm;
 import pl.psnc.dl.wf4ever.portal.ui.bahaviours.Loadable;
 import pl.psnc.dl.wf4ever.portal.ui.components.LoadingCircle;
 
@@ -60,6 +62,7 @@ public class FoldersViewer extends Panel implements Loadable, ITreeStateListener
         roTree.getTreeState().addTreeStateListener(this);
         loadingCircle = new LoadingCircle("ro-tree", LOADING_OBJECT);
         add(loadingCircle);
+        add(new FilesShiftForm("form"));
         //init in the background
         add(new FolderViewerAjaxInitialBahaviour(researchObject, this));
     }

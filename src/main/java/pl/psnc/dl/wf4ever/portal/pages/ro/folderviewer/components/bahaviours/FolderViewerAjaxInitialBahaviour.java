@@ -1,4 +1,4 @@
-package pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.bahaviours;
+package pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.components.bahaviours;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.Component;
@@ -11,7 +11,7 @@ import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.Resource;
 
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
-import pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.components.FoldersViewer;
+import pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.FoldersViewer;
 
 /**
  * Load some content of the RO page in the background.
