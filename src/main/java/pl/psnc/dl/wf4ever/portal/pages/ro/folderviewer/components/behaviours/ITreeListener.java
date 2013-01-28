@@ -1,5 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.components.behaviours;
 
+import javax.swing.tree.TreeNode;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
 /**
@@ -15,6 +17,7 @@ public interface ITreeListener {
      * 
      * @param target
      *            ajax target
+     * @param node
      */
-    void onNodeLinkClicked(AjaxRequestTarget target);
+    void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node);
 }

@@ -139,7 +139,7 @@ public class RoTree extends Tree {
     protected void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node) {
         super.onNodeLinkClicked(target, node);
         for (ITreeListener listener : treeListenersList) {
-            listener.onNodeLinkClicked(target);
+            listener.onNodeLinkClicked(target, node);
         }
         target.appendJavaScript("test_tree_reload_sortable();");
         target.appendJavaScript("test_tree_reload();");

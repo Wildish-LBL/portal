@@ -7,7 +7,7 @@ function test_tree_reload() {
 	 		   drop:function(event, ui_element) {
 	 			  $("#shift-form-file-uri").val($(event.target).attr("uri"));
 	 			  $("#shift-form-folder-uri").val(resourceFolder.parent().parent().attr('uri'));
-	 			  $("#hidden-files-shift-form").submit();
+	 			  $("#hidden-files-shift-form-submit-link").click();
 				}
 			});
 	    });	    

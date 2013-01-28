@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreeNode;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -156,7 +157,7 @@ public class FoldersViewer extends Panel implements Loadable, ITreeStateListener
 
 
     @Override
-    public void onNodeLinkClicked(AjaxRequestTarget target) {
+    public void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node) {
         target.add(filesPanel);
     }
 }
