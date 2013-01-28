@@ -1,5 +1,8 @@
 package pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.components;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
@@ -18,6 +21,7 @@ import org.apache.wicket.request.resource.ResourceReference;
 import org.purl.wf4ever.rosrs.client.Thing;
 
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
+import pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.components.behaviours.ITreeListener;
 
 /**
  * An extended {@link Tree}.
@@ -37,6 +41,8 @@ public class RoTree extends Tree {
     /** Reference to the js file. */
     private static final JavaScriptResourceReference treeClassRefernce = new JavaScriptResourceReference(RoTree.class,
             "roTree.js");
+    /** Tree listeners. */
+    private List<ITreeListener> treeListenersList;
 
 
     /**
@@ -49,6 +55,8 @@ public class RoTree extends Tree {
      */
     public RoTree(String id, IModel<? extends TreeModel> model) {
         super(id, model);
+        treeListenersList = new ArrayList<ITreeListener>();
+
         add(new AbstractDefaultAjaxBehavior() {
 
             private static final long serialVersionUID = 1L;
@@ -63,10 +71,22 @@ public class RoTree extends Tree {
             public void renderHead(Component component, IHeaderResponse response) {
                 super.renderHead(component, response);
                 response.renderJavaScriptReference(treeClassRefernce);
-                response.renderOnDomReadyJavaScript("test_tree_reload(\"" + getCallbackUrl().toString() + "\");");
+                response.renderOnDomReadyJavaScript("test_tree_reload_sortable();");
+                response.renderOnDomReadyJavaScript("test_tree_reload();");
             }
         });
 
+    }
+
+
+    /**
+     * Register a new tree listener.
+     * 
+     * @param listener
+     *            listener
+     */
+    public void addTreeListeners(ITreeListener listener) {
+        treeListenersList.add(listener);
     }
 
 
@@ -111,5 +131,17 @@ public class RoTree extends Tree {
         super.populateTreeItem(item, level);
         item.add(AttributeModifier.replace("uri",
             ((Thing) ((DefaultMutableTreeNode) (item.getDefaultModelObject())).getUserObject()).getUri()));
+        item.add(AttributeModifier.append("class", "wicket-tree-node"));
+    }
+
+
+    @Override
+    protected void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node) {
+        super.onNodeLinkClicked(target, node);
+        for (ITreeListener listener : treeListenersList) {
+            listener.onNodeLinkClicked(target);
+        }
+        target.appendJavaScript("test_tree_reload_sortable();");
+        target.appendJavaScript("test_tree_reload();");
     }
 }

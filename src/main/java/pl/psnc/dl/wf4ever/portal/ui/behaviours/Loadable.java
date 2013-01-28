@@ -1,4 +1,4 @@
-package pl.psnc.dl.wf4ever.portal.ui.bahaviours;
+package pl.psnc.dl.wf4ever.portal.ui.behaviours;
 
 /**
  * The interface for objects that can be loaded in the background.

@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.net.URI;
 
 import org.apache.log4j.Logger;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
@@ -39,18 +41,26 @@ public class FilesShiftForm extends Panel {
         //building UI
         UriTextField folderUriTextField = new UriTextField("folderUri");
         UriTextField fileUriTextField = new UriTextField("fileUri");
-        form = new Form<FilesShiftModel>("form", new CompoundPropertyModel<FilesShiftModel>(filesShiftModel)) {
 
-            /** Serialization */
+        form = new Form<FilesShiftModel>("form", new CompoundPropertyModel<FilesShiftModel>(filesShiftModel));
+        form.add(new AjaxButton("ajax-submit") {
+
+            /** Serialziation */
             private static final long serialVersionUID = 1L;
 
 
             @Override
-            protected void onSubmit() {
-                super.onSubmit();
-                form.clearInput();
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                target.add(this);
             }
-        };
+
+
+            @Override
+            protected void onError(AjaxRequestTarget target, Form<?> form) {
+                // TODO Auto-generated method stub
+
+            }
+        });
         form.add(folderUriTextField);
         form.add(fileUriTextField);
         add(form);

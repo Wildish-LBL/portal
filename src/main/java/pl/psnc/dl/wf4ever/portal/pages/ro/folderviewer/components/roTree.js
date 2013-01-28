@@ -1,8 +1,8 @@
-function test_tree_reload(wicketUrl) {
-		$( "#sortable" ).sortable({ cursor: "move" });
-	    $( "#sortable" ).disableSelection();
-	    $( ".wicket-tree a" ).each(function(){
+function test_tree_reload() {
+	    $( ".wicket-tree  a" ).each(function(){
+		console.log(resourceFolder);
 	 	   var resourceFolder = $(this);
+	 	   resourceFolder.addClass("cosik"); 
 	 	   $(this).droppable({
 	 		   drop:function(event, ui_element) {
 	 			  $("#shift-form-file-uri").val($(event.target).attr("uri"));
@@ -11,4 +11,9 @@ function test_tree_reload(wicketUrl) {
 				}
 			});
 	    });	    
+}
+
+function test_tree_reload_sortable() {
+	$( "#sortable" ).sortable({ cursor: "move" });
+    $( "#sortable" ).disableSelection();
 }

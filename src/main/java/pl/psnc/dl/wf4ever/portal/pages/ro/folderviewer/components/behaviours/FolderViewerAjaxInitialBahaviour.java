@@ -1,14 +1,17 @@
-package pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.components.bahaviours;
+package pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.components.behaviours;
+
+import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.IHeaderResponse;
-import org.purl.wf4ever.rosrs.client.ROException;
-import org.purl.wf4ever.rosrs.client.ROSRSException;
+import org.purl.wf4ever.rosrs.client.Folder;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
-import org.purl.wf4ever.rosrs.client.Resource;
+import org.purl.wf4ever.rosrs.client.Thing;
+import org.purl.wf4ever.rosrs.client.exception.ROException;
+import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 import pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.FoldersViewer;
@@ -58,13 +61,34 @@ public class FolderViewerAjaxInitialBahaviour extends AbstractDefaultAjaxBehavio
         } catch (ROSRSException | ROException e) {
             LOG.error(e.getMessage(), e);
         }
-
-        RoTreeModel treeModel = new RoTreeModel(researchObject);
-        for (Resource resource : researchObject.getResources().values()) {
-            treeModel.addAggregatedResource(resource);
+        //calculate rootFolder
+        Thing rootFolder = null;
+        RoTreeModel treeModel = null;
+        if (!researchObject.getRootFolders().isEmpty()) {
+            rootFolder = researchObject.getRootFolders().iterator().next();
+            treeModel = new RoTreeModel(rootFolder);
+            addNodeFolder((DefaultMutableTreeNode) treeModel.getRoot());
+        } else {
+            rootFolder = researchObject;
+            treeModel = new RoTreeModel(rootFolder);
         }
         loadableComponent.onLoaded(treeModel);
         target.add(loadableComponent);
+    }
+
+
+    private void addNodeFolder(DefaultMutableTreeNode parent) {
+        Folder currentFolder = (Folder) (parent.getUserObject());
+        try {
+            currentFolder.load(false);
+        } catch (ROSRSException e) {
+            LOG.error("Folder " + currentFolder.getUri().toString() + " can not be loaded", e);
+        }
+        for (Folder child : currentFolder.getSubfolders()) {
+            DefaultMutableTreeNode currentNode = new DefaultMutableTreeNode(child);
+            parent.add(currentNode);
+            addNodeFolder(currentNode);
+        }
     }
 
 

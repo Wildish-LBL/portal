@@ -40,12 +40,13 @@ public class RoTreeModel extends DefaultTreeModel {
      * 
      * @param resource
      *            resource to add
-     * @param addToGroups
-     *            should it be added to groups that it belongs to
+     * @return
      */
-    public void addAggregatedResource(Resource resource) {
+    public DefaultMutableTreeNode addAggregatedResource(Resource resource) {
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.getRoot();
-        root.add(new DefaultMutableTreeNode(resource));
+        DefaultMutableTreeNode node = new DefaultMutableTreeNode(resource);
+        root.add(node);
+        return node;
     }
 
 
