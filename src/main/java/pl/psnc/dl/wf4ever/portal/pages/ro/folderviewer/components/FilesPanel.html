@@ -6,15 +6,9 @@
     </head>
     <body>
         <wicket:panel>
-        	
-        	<div style="width: 35%; float: left;">
-        	<span wicket:id="ro-tree" class="tab-pane"></span>
-        	<span wicket:id="form" class="tab-pane"></span>
-        	</div>
-		  	<div style="width: 65%;float: left;">
-			<span wicket:id="files-panel" class="tab-pane"></span>
-			</div>
-			
+        	<ul id="sortable">
+				<li wicket:id="filesListView" class="ui-state-default"><span wicket:id="tailLabel"></span></li>
+			</ul>
     	</wicket:panel>
     </body>
 </html>

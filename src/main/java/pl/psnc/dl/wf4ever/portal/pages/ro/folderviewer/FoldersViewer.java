@@ -1,5 +1,6 @@
 package pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer;
 
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 
 import org.apache.log4j.Logger;
@@ -7,8 +8,10 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.html.tree.ITreeStateListener;
 import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
+import org.purl.wf4ever.rosrs.client.Thing;
 
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
+import pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.components.FilesPanel;
 import pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.components.RoTree;
 import pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.components.bahaviours.FolderViewerAjaxInitialBahaviour;
 import pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.components.forms.FilesShiftForm;
@@ -44,6 +47,9 @@ public class FoldersViewer extends Panel implements Loadable, ITreeStateListener
     /** The model of RO resource. */
     private RoTreeModel roTreeModel;
 
+    /** Failes panel */
+    private FilesPanel filesPanel;
+
 
     /**
      * Constructor.
@@ -61,10 +67,12 @@ public class FoldersViewer extends Panel implements Loadable, ITreeStateListener
         roTree = new RoTree("ro-tree", new PropertyModel<TreeModel>(this, "roTreeModel"));
         roTree.getTreeState().addTreeStateListener(this);
         loadingCircle = new LoadingCircle("ro-tree", LOADING_OBJECT);
+        filesPanel = new FilesPanel("files-panel");
         add(loadingCircle);
         add(new FilesShiftForm("form"));
         //init in the background
         add(new FolderViewerAjaxInitialBahaviour(researchObject, this));
+        add(filesPanel);
     }
 
 
@@ -87,6 +95,9 @@ public class FoldersViewer extends Panel implements Loadable, ITreeStateListener
 
     @Override
     public void nodeSelected(Object node) {
+        //folder
+        Thing object = (Thing) ((DefaultMutableTreeNode) node).getUserObject();
+        //@TODO get all files from 
     }
 
 

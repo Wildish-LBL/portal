@@ -4,11 +4,13 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.markup.html.tree.Tree;
 import org.apache.wicket.markup.html.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.PackageResourceReference;
@@ -60,7 +62,6 @@ public class RoTree extends Tree {
             @Override
             public void renderHead(Component component, IHeaderResponse response) {
                 super.renderHead(component, response);
-
                 response.renderJavaScriptReference(treeClassRefernce);
                 response.renderOnDomReadyJavaScript("test_tree_reload(\"" + getCallbackUrl().toString() + "\");");
             }
@@ -77,6 +78,7 @@ public class RoTree extends Tree {
 
     @Override
     protected ResourceReference getCSS() {
+
         return CSS;
     }
 
@@ -105,14 +107,9 @@ public class RoTree extends Tree {
 
 
     @Override
-    protected void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node) {
-        Thing object = (Thing) ((DefaultMutableTreeNode) node).getUserObject();
-
-        /*if (physicalTree.getTreeState().isNodeSelected(node)) {
-            onResourceSelected(itemModel, target, object);
-        } else {
-            onResourceDeselected(itemModel, target);
-        }
-        */
+    protected void populateTreeItem(WebMarkupContainer item, int level) {
+        super.populateTreeItem(item, level);
+        item.add(AttributeModifier.replace("uri",
+            ((Thing) ((DefaultMutableTreeNode) (item.getDefaultModelObject())).getUserObject()).getUri()));
     }
 }
