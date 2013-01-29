@@ -84,6 +84,7 @@ public class RoTreeModel extends DefaultTreeModel {
             if (resource.equals(node.getUserObject())) {
                 DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
                 if (parent != null && parent.getChildCount() == 1) {
+                    node.removeFromParent();
                     parent.removeFromParent();
                 } else {
                     node.removeFromParent();
