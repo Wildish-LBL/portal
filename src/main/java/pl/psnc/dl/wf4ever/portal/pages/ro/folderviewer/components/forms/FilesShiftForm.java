@@ -2,11 +2,13 @@ package pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.components.forms;
 
 import java.io.Serializable;
 import java.net.URI;
+import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.IFormSubmitListener;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 
@@ -28,6 +30,8 @@ public class FilesShiftForm extends Panel {
     private FilesShiftModel filesShiftModel;
     /** Logger. */
     private static final Logger LOG = Logger.getLogger(FilesShiftForm.class);
+    /** Listeners. */
+    private ArrayList<IFormSubmitListener> formSubmitListeners;
 
 
     /**
@@ -38,6 +42,7 @@ public class FilesShiftForm extends Panel {
     public FilesShiftForm(String id) {
         super(id);
         filesShiftModel = new FilesShiftModel();
+        formSubmitListeners = new ArrayList<IFormSubmitListener>();
         //building UI
         UriTextField folderUriTextField = new UriTextField("folderUri");
         UriTextField fileUriTextField = new UriTextField("fileUri");
@@ -51,7 +56,9 @@ public class FilesShiftForm extends Panel {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                target.add(this);
+                for (IFormSubmitListener listenr : formSubmitListeners) {
+                    listenr.onFormSubmitted();
+                }
             }
 
 
@@ -68,7 +75,18 @@ public class FilesShiftForm extends Panel {
 
 
     /**
-     * Internal model class
+     * Add new submit event listener.
+     * 
+     * @param formSubmitListener
+     *            listener
+     */
+    public void addOnSubmitListener(IFormSubmitListener formSubmitListener) {
+        formSubmitListeners.add(formSubmitListener);
+    }
+
+
+    /**
+     * Internal model class.
      * 
      * @author pejot
      * 
