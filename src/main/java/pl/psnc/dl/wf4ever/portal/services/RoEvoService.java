@@ -94,7 +94,8 @@ public final class RoEvoService {
             RDFNode object = statement.getObject();
             if (property.equals(RDFS.label)) {
                 node.setLabel(object.asLiteral().getString());
-            } else if (property.equals(Vocab.ROEVO_IS_SNAPSHOT_OF) && object.isURIResource()) {
+            } else if ((property.equals(Vocab.ROEVO_IS_SNAPSHOT_OF) || property.equals(Vocab.ROEVO_IS_SNAPSHOT_OF
+                    .getModel().createProperty("http://purl.org/wf4ever/roevo#isArchiveOf")) && object.isURIResource())) {
                 node.getItsLiveROs().add(createNode(nodes, object.asResource().getURI()));
             } else if (property.equals(Vocab.ROEVO_HAS_PREVIOUS_VERSION) && object.isURIResource()) {
                 node.getPreviousSnapshots().add(createNode(nodes, object.asResource().getURI()));
