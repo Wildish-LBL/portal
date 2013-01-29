@@ -43,7 +43,7 @@ import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
 import pl.psnc.dl.wf4ever.portal.pages.base.Base;
-import pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.FoldersViewer;
+import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.ROExplorer;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
@@ -104,7 +104,7 @@ public class RoPage extends Base {
     /** Template for HTML Link Headers. */
     private static final String HTML_LINK_TEMPLATE = "<link rel=\"%s\" href=\"%s\"/>";
 
-    private FoldersViewer foldersViewer;
+    private ROExplorer foldersViewer;
 
 
     /**
@@ -148,7 +148,7 @@ public class RoPage extends Base {
         add(roViewerBox);
 
         /************************** NEW REPLACING CODE *******************************/
-        this.foldersViewer = new FoldersViewer("folders-viewer", researchObject);
+        this.foldersViewer = new ROExplorer("folders-viewer", researchObject);
         foldersViewer.setOutputMarkupId(true);
         add(foldersViewer);
         /*****************************************************************************/

@@ -23,7 +23,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Statement;
 import org.purl.wf4ever.rosrs.client.Thing;
 
-import pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.components.RoTree;
+import pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.roexplorer.RoTree;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.pages.util.RequiredURITextField;
