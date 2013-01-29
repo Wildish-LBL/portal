@@ -6,31 +6,29 @@ CONSTRUCT
 {
 	<%s> rdfs:label ?liveid ;
 		a ?liveclass .
-	?middle roevo:isSnapshotOf ?live ;
-		roevo:isArchivedOf ?live ;
+	?middle roevo:isSnapshotOf <%<s>;
 		roevo:hasPreviousVersion ?father ;
 		rdfs:label ?id ;
 		a ?class .
-	?son roevo:isSnapshotOf ?live ;
-		roevo:isArchivedOf ?live ;
+	?son roevo:isSnapshotOf <%<s>;
+		roevo:isArchiveOf <%<s>;
 		roevo:hasPreviousVersion ?middle ;
 		rdfs:label ?sonid ;
 		a ?sonclass .
-	?grandson roevo:isSnapshotOf ?live ;
-		roevo:isArchivedOf ?live ;
+	?grandson ?grandsonrelation <%<s>;
 		roevo:hasPreviousVersion ?son ;
 		rdfs:label ?grandsonid ;
 		a ?grandsonclass .
-	?father roevo:isSnapshotOf ?live ;
-		roevo:isArchivedOf ?live ;
+	?father roevo:isSnapshotOf <%<s>;
+		roevo:isArchiveOf <%<s>;
 		roevo:hasPreviousVersion ?grandfather ;
 		rdfs:label ?fatherid ;
 		a ?fatherclass .
-	?grandfather roevo:isSnapshotOf ?live ;
-		roevo:isArchivedOf ?live ;
+	?grandfather roevo:isSnapshotOf <%<s>;
+		roevo:isArchiveOf <%<s>;
 		rdfs:label ?grandfatherid ;
 		a ?grandfatherclass .
-	?live roevo:derivedFrom ?source .
+	<%<s>roevo:derivedFrom ?source .
 	?source rdfs:label ?sourceid ;
 		a ?sourceclass .
 }
@@ -43,7 +41,8 @@ WHERE
 	{
 		{ ?grandson roevo:isSnapshotOf <%<s> . }
 		UNION
-		{ ?grandson roevo:isArchivedOf <%<s> . }
+		{ ?grandson roevo:isArchiveOf <%<s> . }
+		?grandson ?grandsonrelation <%<s> .
 		FILTER NOT EXISTS { ?grandgrandson roevo:hasPreviousVersion ?grandson . }
 		OPTIONAL { ?grandson rdfs:label ?grandsonid . }
 		OPTIONAL { ?grandson a ?grandsonclass . }
@@ -52,32 +51,32 @@ WHERE
 		{
 			?grandson roevo:hasPreviousVersion ?son .
 			OPTIONAL { ?son rdfs:label ?sonid . }
-			OPTIONAL { ?son roevo:isSnapshotOf ?live . }
-			OPTIONAL { ?son roevo:isArchivedOf ?live . }
+			OPTIONAL { ?son roevo:isSnapshotOf <%<s>. }
+			OPTIONAL { ?son roevo:isArchiveOf <%<s>. }
 			OPTIONAL { ?son a ?sonclass . }
 
 			OPTIONAL 
 			{ 
 				?son roevo:hasPreviousVersion ?middle .
 				OPTIONAL { ?middle rdfs:label ?id . }
-				OPTIONAL { ?middle roevo:isSnapshotOf ?live . }
-				OPTIONAL { ?middle roevo:isArchivedOf ?live . }
+				OPTIONAL { ?middle roevo:isSnapshotOf <%<s>. }
+				OPTIONAL { ?middle roevo:isArchiveOf <%<s>. }
 				OPTIONAL { ?middle a ?class . }
 
 				OPTIONAL
 				{
 					?middle roevo:hasPreviousVersion ?father .
 					OPTIONAL { ?father rdfs:label ?fatherid . }
-					OPTIONAL { ?father roevo:isSnapshotOf ?live . }
-					OPTIONAL { ?father roevo:isArchivedOf ?live . }
+					OPTIONAL { ?father roevo:isSnapshotOf <%<s>. }
+					OPTIONAL { ?father roevo:isArchiveOf <%<s>. }
 					OPTIONAL { ?father a ?fatherclass . }
 
 					OPTIONAL
 					{
 						?father roevo:hasPreviousVersion ?grandfather .
 						OPTIONAL { ?grandfather rdfs:label ?grandfatherid . }
-						OPTIONAL { ?grandfather roevo:isSnapshotOf ?live . }
-						OPTIONAL { ?grandfather roevo:isArchivedOf ?live . }
+						OPTIONAL { ?grandfather roevo:isSnapshotOf <%<s>. }
+						OPTIONAL { ?grandfather roevo:isArchiveOf <%<s>. }
 						OPTIONAL { ?grandfather a ?grandfatherclass . }
 					}
 				}
@@ -87,7 +86,7 @@ WHERE
 	
 	OPTIONAL
 	{
-		?live roevo:derivedFrom ?source .
+		<%<s>roevo:derivedFrom ?source .
 		OPTIONAL { ?source rdfs:label ?sourceid . }
 		OPTIONAL { ?source a ?sourceclass . }
 	}

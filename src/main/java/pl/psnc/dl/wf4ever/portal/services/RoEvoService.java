@@ -95,7 +95,8 @@ public final class RoEvoService {
             RDFNode object = statement.getObject();
             if (property.equals(RDFS.label)) {
                 node.setLabel(object.asLiteral().getString());
-            } else if (property.equals(ROEVO.isSnapshotOf) && object.isURIResource()) {
+            } else if ((property.equals(ROEVO.isSnapshotOf) || property.equals(ROEVO.isArchiveOf))
+                    && object.isURIResource()) {
                 node.getItsLiveROs().add(createNode(nodes, object.asResource().getURI()));
             } else if (property.equals(PROV.wasRevisionOf) && object.isURIResource()) {
                 node.getPreviousSnapshots().add(createNode(nodes, object.asResource().getURI()));
