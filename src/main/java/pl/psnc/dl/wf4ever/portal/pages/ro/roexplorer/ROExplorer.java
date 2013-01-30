@@ -159,6 +159,7 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
 
     @Override
     public void nodeUnselected(Object node) {
+        currentlySelectedItem = null;
     }
 
 
@@ -214,7 +215,11 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
     @Override
     public void onAjaxLinkClicked(AjaxRequestTarget target) {
         selectedFile = filesPanel.getSelectedItem();
-        currentlySelectedItem = selectedFile;
+        if (selectedFile == null && selectedFolder != null) {
+            currentlySelectedItem = selectedFolder;
+        } else {
+            currentlySelectedItem = selectedFile;
+        }
         target.add(itemInfoPanel);
     }
 

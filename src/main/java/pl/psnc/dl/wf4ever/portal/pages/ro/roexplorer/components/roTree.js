@@ -15,9 +15,11 @@ function test_tree_reload_sortable() {
 	$( "#sortable" ).sortable();
     $( "#sortable" ).disableSelection();
     $( ".tailLabel" ).click(function(){
+    	console.log("1");
     	if($(this).hasClass("tailLabelSelected")){
     		$(this).removeClass("tailLabelSelected");
-    	}
+    		return;
+    	} 
     	$(this).addClass("tailLabelSelected");
     });
 }
