@@ -26,6 +26,7 @@ import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.ITreeListener;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.ROExplorerAjaxInitialBehaviour;
+import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ButtonsBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.FilesPanel;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ItemStatusBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.RoTree;
@@ -57,6 +58,8 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
     private LoadingCircle loadingCircle;
     /** Info panel. */
     private ItemStatusBar itemInfoPanel;
+    /** Buttons panel */
+    private ButtonsBar buttonsBar;
 
     /** Research object. */
     private ResearchObject researchObject;
@@ -102,6 +105,8 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
         itemInfoPanel = new ItemStatusBar("selected-item-info-panel", new CompoundPropertyModel<Thing>(
                 new PropertyModel<Thing>(this, "currentlySelectedItem")));
         add(itemInfoPanel);
+        buttonsBar = new ButtonsBar("buttons-panel");
+        add(buttonsBar);
 
         //background initialziation
         add(new ROExplorerAjaxInitialBehaviour(researchObject, this));
@@ -154,12 +159,14 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
         } else {
             this.selectedFolder = null;
         }
+        switchButtonBar();
     }
 
 
     @Override
     public void nodeUnselected(Object node) {
         currentlySelectedItem = null;
+        switchButtonBar();
     }
 
 
@@ -187,6 +194,7 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
     public void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node) {
         target.add(filesPanel);
         target.add(itemInfoPanel);
+        target.add(buttonsBar);
 
     }
 
@@ -220,11 +228,35 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
         } else {
             currentlySelectedItem = selectedFile;
         }
+        switchButtonBar();
         target.add(itemInfoPanel);
+        target.add(buttonsBar);
     }
 
 
     public Thing getCurrentlySelectedItem() {
         return this.currentlySelectedItem;
+    }
+
+
+    /**
+     * Switch beetwen resource and folders buttons bar.
+     */
+    private void switchButtonBar() {
+        if (currentlySelectedItem == null) {
+            //nothing to show
+            buttonsBar.hideFoldersButtonContainer();
+            buttonsBar.hideResourceButtonsContainer();
+        }
+        if (currentlySelectedItem != null && currentlySelectedItem.equals(selectedFile)) {
+            //files bar
+            buttonsBar.hideFoldersButtonContainer();
+            buttonsBar.showResourceButtonsContainer(selectedFile);
+        }
+        if (currentlySelectedItem != null && currentlySelectedItem.equals(selectedFolder)) {
+            //folders bar
+            buttonsBar.showFoldersButtonsContainer(selectedFolder);
+            buttonsBar.hideResourceButtonsContainer();
+        }
     }
 }
