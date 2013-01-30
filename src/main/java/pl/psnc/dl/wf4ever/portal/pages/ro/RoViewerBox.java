@@ -17,7 +17,7 @@ import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.Resource;
 import org.purl.wf4ever.rosrs.client.Thing;
 
-import pl.psnc.dl.wf4ever.portal.pages.ro.folderviewer.roexplorer.RoTree;
+import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.RoTree;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 
 /**

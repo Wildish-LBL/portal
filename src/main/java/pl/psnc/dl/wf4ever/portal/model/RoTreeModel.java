@@ -40,7 +40,7 @@ public class RoTreeModel extends DefaultTreeModel {
      * 
      * @param resource
      *            resource to add
-     * @return
+     * @return mpde
      */
     public DefaultMutableTreeNode addAggregatedResource(Resource resource) {
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.getRoot();
