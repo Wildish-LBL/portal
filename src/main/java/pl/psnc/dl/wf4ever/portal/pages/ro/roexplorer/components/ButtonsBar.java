@@ -1,6 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components;
 
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.purl.wf4ever.rosrs.client.Thing;
 
@@ -16,6 +17,13 @@ public class ButtonsBar extends Panel {
     WebMarkupContainer folderButtonsContainer;
     /** Resource buttons container. */
     WebMarkupContainer resourceButtonsContainer;
+    Button addResource;
+    Button deleteFolder;
+    Button downloadFolder;
+
+    Button editResource;
+    Button downloadResource;
+    Button deleteResource;
 
 
     /**
@@ -27,12 +35,8 @@ public class ButtonsBar extends Panel {
     public ButtonsBar(String id) {
         super(id);
         setOutputMarkupId(true);
-        folderButtonsContainer = new WebMarkupContainer("folder-buttons-container");
-        resourceButtonsContainer = new WebMarkupContainer("resource-buttons-container");
-        folderButtonsContainer.setVisible(false);
-        resourceButtonsContainer.setVisible(false);
-        add(folderButtonsContainer);
-        add(resourceButtonsContainer);
+        folderButtonsContainerInit();
+        resourceButtonsContainerInit();
     }
 
 
@@ -73,5 +77,39 @@ public class ButtonsBar extends Panel {
      */
     public void hideResourceButtonsContainer() {
         resourceButtonsContainer.setVisible(false);
+    }
+
+
+    /**
+     * Initialize folder buttons container.
+     */
+    private void folderButtonsContainerInit() {
+        folderButtonsContainer = new WebMarkupContainer("folder-buttons-container");
+        folderButtonsContainer.setVisible(false);
+        addResource = new Button("add-resource");
+        downloadFolder = new Button("download-folder");
+        deleteFolder = new Button("delete-folder");
+
+        folderButtonsContainer.add(addResource);
+        folderButtonsContainer.add(downloadFolder);
+        folderButtonsContainer.add(deleteFolder);
+        add(folderButtonsContainer);
+
+    }
+
+
+    /**
+     * Initialize resource buttons container.
+     */
+    private void resourceButtonsContainerInit() {
+        resourceButtonsContainer = new WebMarkupContainer("resource-buttons-container");
+        resourceButtonsContainer.setVisible(false);
+        editResource = new Button("edit-resource");
+        deleteResource = new Button("delete-resource");
+        downloadResource = new Button("download-resource");
+        resourceButtonsContainer.add(editResource);
+        resourceButtonsContainer.add(deleteResource);
+        resourceButtonsContainer.add(downloadResource);
+        add(resourceButtonsContainer);
     }
 }
