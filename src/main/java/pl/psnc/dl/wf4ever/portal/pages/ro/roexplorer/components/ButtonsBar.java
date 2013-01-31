@@ -1,7 +1,9 @@
 package pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.form.Button;
+import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.purl.wf4ever.rosrs.client.Thing;
 
@@ -13,17 +15,26 @@ import org.purl.wf4ever.rosrs.client.Thing;
  */
 public class ButtonsBar extends Panel {
 
+    /** Serialziation. */
+    private static final long serialVersionUID = 1L;
     /** Folder buttons container. */
     WebMarkupContainer folderButtonsContainer;
     /** Resource buttons container. */
     WebMarkupContainer resourceButtonsContainer;
-    Button addResource;
-    Button deleteFolder;
-    Button downloadFolder;
-
-    Button editResource;
-    Button downloadResource;
-    Button deleteResource;
+    /** Add resource button. */
+    AjaxButton addResource;
+    /** Delete folder button. */
+    AjaxButton deleteFolder;
+    /** Download folder button. */
+    AjaxButton downloadFolder;
+    /** Edit resource button. */
+    AjaxButton editResource;
+    /** Download resource button. */
+    AjaxButton downloadResource;
+    /** Delete resource button. */
+    AjaxButton deleteResource;
+    /** Fake form for ajax buttons. */
+    Form<?> roForm;
 
 
     /**
@@ -35,6 +46,8 @@ public class ButtonsBar extends Panel {
     public ButtonsBar(String id) {
         super(id);
         setOutputMarkupId(true);
+        roForm = new Form<Void>("roForm");
+        add(roForm);
         folderButtonsContainerInit();
         resourceButtonsContainerInit();
     }
@@ -86,14 +99,59 @@ public class ButtonsBar extends Panel {
     private void folderButtonsContainerInit() {
         folderButtonsContainer = new WebMarkupContainer("folder-buttons-container");
         folderButtonsContainer.setVisible(false);
-        addResource = new Button("add-resource");
-        downloadFolder = new Button("download-folder");
-        deleteFolder = new Button("delete-folder");
+        addResource = new AjaxButton("add-resource", roForm) {
+
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                // TODO Auto-generated method stub
+
+            }
+
+
+            @Override
+            protected void onError(AjaxRequestTarget target, Form<?> form) {
+                // TODO Auto-generated method stub
+
+            }
+
+        };
+        downloadFolder = new AjaxButton("download-folder", roForm) {
+
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                // TODO Auto-generated method stub
+
+            }
+
+
+            @Override
+            protected void onError(AjaxRequestTarget target, Form<?> form) {
+                // TODO Auto-generated method stub
+
+            }
+
+        };
+        deleteFolder = new AjaxButton("delete-folder", roForm) {
+
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                // TODO Auto-generated method stub
+
+            }
+
+
+            @Override
+            protected void onError(AjaxRequestTarget target, Form<?> form) {
+                // TODO Auto-generated method stub
+
+            }
+
+        };
 
         folderButtonsContainer.add(addResource);
         folderButtonsContainer.add(downloadFolder);
         folderButtonsContainer.add(deleteFolder);
-        add(folderButtonsContainer);
+        roForm.add(folderButtonsContainer);
 
     }
 
@@ -104,12 +162,57 @@ public class ButtonsBar extends Panel {
     private void resourceButtonsContainerInit() {
         resourceButtonsContainer = new WebMarkupContainer("resource-buttons-container");
         resourceButtonsContainer.setVisible(false);
-        editResource = new Button("edit-resource");
-        deleteResource = new Button("delete-resource");
-        downloadResource = new Button("download-resource");
+        editResource = new AjaxButton("edit-resource", roForm) {
+
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                // TODO Auto-generated method stub
+
+            }
+
+
+            @Override
+            protected void onError(AjaxRequestTarget target, Form<?> form) {
+                // TODO Auto-generated method stub
+
+            }
+
+        };
+        deleteResource = new AjaxButton("delete-resource", roForm) {
+
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                // TODO Auto-generated method stub
+
+            }
+
+
+            @Override
+            protected void onError(AjaxRequestTarget target, Form<?> form) {
+                // TODO Auto-generated method stub
+
+            }
+
+        };
+        downloadResource = new AjaxButton("download-resource", roForm) {
+
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                // TODO Auto-generated method stub
+
+            }
+
+
+            @Override
+            protected void onError(AjaxRequestTarget target, Form<?> form) {
+                // TODO Auto-generated method stub
+
+            }
+
+        };
         resourceButtonsContainer.add(editResource);
         resourceButtonsContainer.add(deleteResource);
         resourceButtonsContainer.add(downloadResource);
-        add(resourceButtonsContainer);
+        roForm.add(resourceButtonsContainer);
     }
 }
