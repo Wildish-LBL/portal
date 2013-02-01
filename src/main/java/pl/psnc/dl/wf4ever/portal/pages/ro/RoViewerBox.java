@@ -116,7 +116,7 @@ class RoViewerBox extends WebMarkupContainer {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                super.onSubmit(target, form);
+                target.appendJavaScript("$('#upload-resource-modal').modal('show')");
             }
 
         };

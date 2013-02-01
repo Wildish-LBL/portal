@@ -14,7 +14,7 @@ import pl.psnc.dl.wf4ever.portal.ui.components.UniversalStyledAjaxButton;
  * @author pejot
  * 
  */
-public class ButtonsBar extends Panel {
+public class ResourceButtonsBar extends Panel {
 
     /** Serialziation. */
     private static final long serialVersionUID = 1L;
@@ -44,7 +44,7 @@ public class ButtonsBar extends Panel {
      * @param id
      *            wicket id
      */
-    public ButtonsBar(String id) {
+    public ResourceButtonsBar(String id) {
         super(id);
         setOutputMarkupId(true);
         roForm = new Form<Void>("roForm");

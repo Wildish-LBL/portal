@@ -25,7 +25,7 @@ import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.ITreeListener;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.ROExplorerAjaxInitialBehaviour;
-import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ButtonsBar;
+import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ResourceButtonsBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.FilesPanel;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ROButtonsBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ROStatusBar;
@@ -61,7 +61,7 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
     /** Info panel. */
     private ResourceStatusBar itemInfoPanel;
     /** Buttons panel. */
-    private ButtonsBar buttonsBar;
+    private ResourceButtonsBar buttonsBar;
     /** Status bar of processed research object. */
     private ROStatusBar roStatusBar;
     /** RO buttons bar. */
@@ -116,7 +116,7 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
         itemInfoPanel = new ResourceStatusBar("selected-item-info-panel", new CompoundPropertyModel<Thing>(
                 new PropertyModel<Thing>(this, "currentlySelectedItem")));
         add(itemInfoPanel);
-        buttonsBar = new ButtonsBar("buttons-panel");
+        buttonsBar = new ResourceButtonsBar("buttons-panel");
         add(buttonsBar);
         roStatusBar = new ROStatusBar("research-object-info-panel", new CompoundPropertyModel<Thing>(
                 new PropertyModel<Thing>(this, "researchObject")));
@@ -272,16 +272,16 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
             //nothing to show
             buttonsBar.hideFoldersButtonContainer();
             buttonsBar.hideResourceButtonsContainer();
-        }
-        if (currentlySelectedItem != null && currentlySelectedItem.equals(selectedFile)) {
+        } else if (currentlySelectedItem != null && currentlySelectedItem.equals(selectedFile)) {
             //files bar
             buttonsBar.hideFoldersButtonContainer();
             buttonsBar.showResourceButtonsContainer(selectedFile);
-        }
-        if (currentlySelectedItem != null && currentlySelectedItem.equals(selectedFolder)) {
+        } else if (currentlySelectedItem != null && currentlySelectedItem.equals(selectedFolder)) {
             //folders bar
             buttonsBar.showFoldersButtonsContainer(selectedFolder);
             buttonsBar.hideResourceButtonsContainer();
+        } else if (currentlySelectedItem.equals(researchObject)) {
+            buttonsBar.showFoldersButtonsContainer(researchObject);
         }
     }
 
