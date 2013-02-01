@@ -226,17 +226,24 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
         URI fileUri = filesShiftForm.getFileUri();
         Resource resource = researchObject.getResource(fileUri);
         Folder folder = researchObject.getFolder(folderUri);
-        try {
-            Iterator<URI> iter = researchObject.getFolders().keySet().iterator();
-            while (iter.hasNext()) {
-                Folder tmpFolder = researchObject.getFolder(iter.next());
-                if (tmpFolder.getFolderEntries().get(fileUri) != null) {
-                    tmpFolder.getFolderEntries().get(fileUri).delete();
+        if (folderUri == null || fileUri == null) {
+            return;
+        }
+        if (folder != null) {
+            try {
+                Iterator<URI> iter = researchObject.getFolders().keySet().iterator();
+                while (iter.hasNext()) {
+                    Folder tmpFolder = researchObject.getFolder(iter.next());
+                    if (tmpFolder.getFolderEntries().get(fileUri) != null) {
+                        tmpFolder.getFolderEntries().get(fileUri).delete();
+                    }
                 }
+                folder.addEntry(resource, resource.getName());
+            } catch (ROSRSException | ROException e) {
+                LOG.error("Can not move resource: " + resource.toString() + " to folder: " + folder.toString(), e);
             }
-            folder.addEntry(resource, resource.getName());
-        } catch (ROSRSException | ROException e) {
-            LOG.error("Can not move resource: " + resource.toString() + " to folder: " + folder.toString(), e);
+        } else {
+            //just remove it from folder, it's already in research object 
         }
     }
 
