@@ -17,8 +17,8 @@ import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.Resource;
 import org.purl.wf4ever.rosrs.client.Thing;
 
+import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.RoTree;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
-import pl.psnc.dl.wf4ever.portal.pages.util.RoTree;
 
 /**
  * The part of RO page that displays the RO structure.
@@ -116,7 +116,6 @@ class RoViewerBox extends WebMarkupContainer {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                super.onSubmit(target, form);
                 target.appendJavaScript("$('#upload-resource-modal').modal('show')");
             }
 
@@ -193,6 +192,7 @@ class RoViewerBox extends WebMarkupContainer {
      */
     public void onRoTreeLoaded() {
         physicalTreeLoading.replaceWith(physicalTree);
+
     }
 
 

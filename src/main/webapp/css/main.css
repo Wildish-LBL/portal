@@ -467,12 +467,14 @@ p {
 	padding: 0px;
 }
 
-.span4 {
-	width: 688px;
-}
 input.span1 {
 	width: 155px;
 }
+
+.dupa {
+	display: none;
+}
+
 #myExp-recommendation-serach-button {
 	
 	margin-left: -45px

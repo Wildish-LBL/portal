@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<wicket:panel xmlns:wicket="http://wicket.apache.org">
+	<span wicket:id="main-container" class="span11" style="border: 1px dashed #BBBBBB; margin-bottom: 5px;">
+		<div class="span7">
+			<span wicket:id="resourceURISection">
+				<strong>URI:</strong> 
+				<a wicket:id="resourceURI">[uri]</a>
+			</span>
+			<span wicket:id="creatorSection">
+			<br>
+				<strong>Created by:</strong> 
+				<span wicket:id="creator">[creator]</span>
+			</span>
+		</div>
+		<div class="span3" >
+			<span wicket:id="createdSection">
+				<strong>Created on:</strong> 
+				<span wicket:id="createdFormatted">[created]</span>
+			</span>
+			<span wicket:id="sizeSection">
+				<strong>File size:</strong> 
+				<span wicket:id="sizeFormatted">[filesize]</span>
+			</span>
+			<!-- 
+			<span wicket:id="annotationsCntSection">
+				<br>
+				<strong>Number of annotations:</strong>
+				 <span wicket:id="annotations.size">[annotationsCnt]</span>
+			</span>
+			 -->
+		</div>
+	</span>
+</wicket:panel>

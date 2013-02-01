@@ -40,32 +40,13 @@ public class RoTreeModel extends DefaultTreeModel {
      * 
      * @param resource
      *            resource to add
-     * @param addToGroups
-     *            should it be added to groups that it belongs to
+     * @return mpde
      */
-    public void addAggregatedResource(Resource resource) {
+    public DefaultMutableTreeNode addAggregatedResource(Resource resource) {
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.getRoot();
-        root.add(new DefaultMutableTreeNode(resource));
-
-        //add to groups, for later use with folders
-        //        DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.getRoot();
-        //        Set<ResourceGroup> notFound = new HashSet<>(resource.getMatchingGroups());
-        //        @SuppressWarnings("unchecked")
-        //        Enumeration<DefaultMutableTreeNode> e = root.breadthFirstEnumeration();
-        //        while (e.hasMoreElements()) {
-        //            DefaultMutableTreeNode node = e.nextElement();
-        //            if (node.getUserObject() instanceof ResourceGroup
-        //                    && resource.getMatchingGroups().contains(node.getUserObject())) {
-        //                node.add(new DefaultMutableTreeNode(resource));
-        //                notFound.remove(node.getUserObject());
-        //            }
-        //        }
-        //
-        //        for (ResourceGroup resourceGroup : notFound) {
-        //            DefaultMutableTreeNode node = new DefaultMutableTreeNode(resourceGroup);
-        //            node.add(new DefaultMutableTreeNode(resource));
-        //            root.insert(node, 0);
-        //        }
+        DefaultMutableTreeNode node = new DefaultMutableTreeNode(resource);
+        root.add(node);
+        return node;
     }
 
 
