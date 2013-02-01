@@ -36,6 +36,8 @@ public class ResourceButtonsBar extends Panel {
     UniversalStyledAjaxButton deleteResource;
     /** Fake form for ajax buttons. */
     Form<?> roForm;
+    /** Processed Thing. */
+    private Thing processedThing;
 
 
     /**
@@ -61,6 +63,7 @@ public class ResourceButtonsBar extends Panel {
      *            processed folder
      */
     public void showFoldersButtonsContainer(Thing folder) {
+        processedThing = folder;
         folderButtonsContainer.setVisible(true);
     }
 
@@ -72,6 +75,7 @@ public class ResourceButtonsBar extends Panel {
      *            processed resource
      */
     public void showResourceButtonsContainer(Thing resource) {
+        processedThing = resource;
         resourceButtonsContainer.setVisible(true);
     }
 
@@ -104,8 +108,7 @@ public class ResourceButtonsBar extends Panel {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                // TODO Auto-generated method stub
-
+                target.appendJavaScript("$('#upload-resource-modal').modal('show')");
             }
 
 
@@ -183,8 +186,7 @@ public class ResourceButtonsBar extends Panel {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                // TODO Auto-generated method stub
-
+                super.onSubmit(target, form);
             }
 
 
@@ -206,8 +208,7 @@ public class ResourceButtonsBar extends Panel {
 
             @Override
             protected void onError(AjaxRequestTarget target, Form<?> form) {
-                // TODO Auto-generated method stub
-
+                super.onSubmit(target, form);
             }
 
         };

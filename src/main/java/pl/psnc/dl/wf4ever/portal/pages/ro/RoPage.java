@@ -357,7 +357,6 @@ public class RoPage extends Base {
             throws ROSRSException, IOException, ROException {
         org.purl.wf4ever.rosrs.client.Resource resource = researchObject.aggregate(uploadedFile.getClientFileName(),
             uploadedFile.getInputStream(), uploadedFile.getContentType());
-
         getPhysicalResourcesTree().addAggregatedResource(resource);
         target.add(roViewerBox);
     }
