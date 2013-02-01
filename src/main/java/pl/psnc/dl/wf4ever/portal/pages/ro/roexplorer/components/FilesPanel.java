@@ -13,9 +13,9 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.list.PropertyListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.purl.wf4ever.rosrs.client.Resource;
-import org.purl.wf4ever.rosrs.client.Thing;
 
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
 
@@ -28,16 +28,12 @@ import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListene
 public class FilesPanel extends Panel {
 
     /** List of files. */
-    private ListView<Thing> listView;
+    private ListView<Resource> listView;
     /** Serialization. */
     private static final long serialVersionUID = 1L;
     /** CSS tail resource reference. */
     private CssResourceReference cssResourceReference = new CssResourceReference(FilesPanel.class, "tails.css");
-    /** Selected file. */
-    private Thing selectedItem;
-    /** List model. */
-    private IModel<List<Resource>> model;
-    /** Listeners. */
+    /** Listeners for the selected resource. */
     private List<IAjaxLinkListener> listeners;
 
 
@@ -48,23 +44,20 @@ public class FilesPanel extends Panel {
      *            wicket id
      */
     public FilesPanel(String id, IModel<List<Resource>> foldersModel) {
-        super(id, foldersModel);
+        super(id, new Model<Resource>());
         setOutputMarkupId(true);
-        this.selectedItem = null;
-        this.model = foldersModel;
         listeners = new ArrayList<IAjaxLinkListener>();
-        final FilesPanel pp = this;
-        listView = new PropertyListView<Thing>("filesListView", foldersModel) {
+        listView = new PropertyListView<Resource>("filesListView", foldersModel) {
 
             private static final long serialVersionUID = -6310254217773728128L;
 
 
             @Override
-            protected void populateItem(final ListItem<Thing> item) {
+            protected void populateItem(final ListItem<Resource> item) {
 
-                final Thing thing = item.getModelObject();
-                final Label label = new Label("tailLabel", item.getModelObject().calculateName());
-                final AjaxLink<Object> link = new AjaxLink<Object>("tailLink") {
+                final Resource thing = item.getModelObject();
+                final Label label = new Label("tailLabel", item.getModelObject().getName());
+                final AjaxLink<Object> link = new AjaxLink<Object>("tailLink", new Model()) {
 
                     /** Serialization */
                     private static final long serialVersionUID = 6984606437114241889L;
@@ -72,11 +65,10 @@ public class FilesPanel extends Panel {
 
                     @Override
                     public void onClick(AjaxRequestTarget target) {
-                        if (selectedItem != null && selectedItem.equals(thing)) {
-                            selectedItem = null;
+                        if (thing.equals(getSelectedFile())) {
+                            unselect();
                         } else {
-                            selectedItem = thing;
-
+                            setSelectedFile(thing);
                         }
                         for (IAjaxLinkListener listener : listeners) {
                             listener.onAjaxLinkClicked(target);
@@ -105,16 +97,6 @@ public class FilesPanel extends Panel {
     }
 
 
-    /**
-     * Get selected item.
-     * 
-     * @return the currently selected file
-     */
-    public Thing getSelectedItem() {
-        return selectedItem;
-    }
-
-
     @Override
     public void renderHead(IHeaderResponse response) {
         response.renderCSSReference(cssResourceReference);
@@ -122,10 +104,27 @@ public class FilesPanel extends Panel {
     }
 
 
+    @SuppressWarnings("unchecked")
+    public IModel<Resource> getModel() {
+        return (IModel<Resource>) this.getDefaultModel();
+    }
+
+
+    public void setSelectedFile(Resource resource) {
+        getModel().setObject(resource);
+    }
+
+
+    public Resource getSelectedFile() {
+        return getModel().getObject();
+    }
+
+
     /**
      * Unselect selected file from outside (For example on node click).
      */
     public void unselect() {
-        selectedItem = null;
+        setSelectedFile(null);
     }
+
 }

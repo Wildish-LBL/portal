@@ -30,6 +30,7 @@ import org.purl.wf4ever.rosrs.client.Statement;
 import org.purl.wf4ever.rosrs.client.Thing;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
+import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.util.CreatorsPanel;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 
@@ -40,7 +41,7 @@ import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
  * 
  */
 @SuppressWarnings("serial")
-class AnnotatingBox extends Panel {
+class AnnotatingBox extends Panel implements IAjaxLinkListener {
 
     /** The owning page. */
     private final RoPage roPage;
@@ -307,5 +308,11 @@ class AnnotatingBox extends Panel {
                 item.add(new Label("edit", "Edit"));
             }
         }
+    }
+
+
+    @Override
+    public void onAjaxLinkClicked(AjaxRequestTarget target) {
+        target.add(this);
     }
 }
