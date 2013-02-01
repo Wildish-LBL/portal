@@ -152,8 +152,8 @@ public class ResourceButtonsBar extends Panel {
         };
 
         folderButtonsContainer.add(addResource);
-        folderButtonsContainer.add(downloadFolder);
-        folderButtonsContainer.add(deleteFolder);
+        //folderButtonsContainer.add(downloadFolder);
+        //folderButtonsContainer.add(deleteFolder);
         roForm.add(folderButtonsContainer);
 
     }
@@ -209,7 +209,7 @@ public class ResourceButtonsBar extends Panel {
             }
 
         };
-        resourceButtonsContainer.add(editResource);
+        //resourceButtonsContainer.add(editResource);
         resourceButtonsContainer.add(deleteResource);
         resourceButtonsContainer.add(downloadResource);
         roForm.add(resourceButtonsContainer);
