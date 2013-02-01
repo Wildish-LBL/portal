@@ -22,14 +22,14 @@ import pl.psnc.dl.wf4ever.portal.pages.util.CreatorsPanel;
  * @author Piotr Hołubowicz
  * 
  */
-public class ItemStatusBar extends Panel {
+public class ResourceStatusBar extends Panel {
 
     /** id. */
     private static final long serialVersionUID = -3775797988389365540L;
 
     /** Logger. */
     @SuppressWarnings("unused")
-    private static final Logger LOG = Logger.getLogger(ItemStatusBar.class);
+    private static final Logger LOG = Logger.getLogger(ResourceStatusBar.class);
 
     /** Div about the resource creator. */
     private final WebMarkupContainer creatorSection;
@@ -58,7 +58,7 @@ public class ItemStatusBar extends Panel {
      * @param itemModel
      *            selected resource model
      */
-    public ItemStatusBar(String id, final CompoundPropertyModel<Thing> itemModel) {
+    public ResourceStatusBar(String id, final CompoundPropertyModel<Thing> itemModel) {
         super(id, itemModel);
         setOutputMarkupId(true);
         mainContainer = new WebMarkupContainer("main-container");

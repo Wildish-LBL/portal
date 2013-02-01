@@ -14,6 +14,7 @@ import org.apache.wicket.markup.html.list.PropertyListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.resource.CssResourceReference;
+import org.purl.wf4ever.rosrs.client.Resource;
 import org.purl.wf4ever.rosrs.client.Thing;
 
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
@@ -33,9 +34,9 @@ public class FilesPanel extends Panel {
     /** CSS tail resource reference. */
     private CssResourceReference cssResourceReference = new CssResourceReference(FilesPanel.class, "tails.css");
     /** Selected file. */
-    private ListItem<Thing> selectedItem;
+    private Thing selectedItem;
     /** List model. */
-    private IModel<List<Thing>> model;
+    private IModel<List<Resource>> model;
     /** Listeners. */
     private List<IAjaxLinkListener> listeners;
 
@@ -46,20 +47,22 @@ public class FilesPanel extends Panel {
      * @param id
      *            wicket id
      */
-    public FilesPanel(String id, IModel<List<Thing>> model) {
-        super(id, model);
+    public FilesPanel(String id, IModel<List<Resource>> foldersModel) {
+        super(id, foldersModel);
         setOutputMarkupId(true);
         this.selectedItem = null;
-        this.model = model;
+        this.model = foldersModel;
         listeners = new ArrayList<IAjaxLinkListener>();
         final FilesPanel pp = this;
-        listView = new PropertyListView<Thing>("filesListView", model) {
+        listView = new PropertyListView<Thing>("filesListView", foldersModel) {
 
             private static final long serialVersionUID = -6310254217773728128L;
 
 
             @Override
             protected void populateItem(final ListItem<Thing> item) {
+
+                final Thing thing = item.getModelObject();
                 final Label label = new Label("tailLabel", item.getModelObject().calculateName());
                 final AjaxLink<Object> link = new AjaxLink<Object>("tailLink") {
 
@@ -69,11 +72,11 @@ public class FilesPanel extends Panel {
 
                     @Override
                     public void onClick(AjaxRequestTarget target) {
-                        if (selectedItem != null && selectedItem.equals(item)) {
-                            //unselect
+                        if (selectedItem != null && selectedItem.equals(thing)) {
                             selectedItem = null;
                         } else {
-                            selectedItem = item;
+                            selectedItem = thing;
+
                         }
                         for (IAjaxLinkListener listener : listeners) {
                             listener.onAjaxLinkClicked(target);
@@ -105,14 +108,10 @@ public class FilesPanel extends Panel {
     /**
      * Get selected item.
      * 
-     * @return the currently seleted file
+     * @return the currently selected file
      */
     public Thing getSelectedItem() {
-        if (selectedItem != null) {
-            return selectedItem.getModel().getObject();
-        } else {
-            return null;
-        }
+        return selectedItem;
     }
 
 
@@ -120,5 +119,13 @@ public class FilesPanel extends Panel {
     public void renderHead(IHeaderResponse response) {
         response.renderCSSReference(cssResourceReference);
         super.renderHead(response);
+    }
+
+
+    /**
+     * Unselect selected file from outside (For example on node click).
+     */
+    public void unselect() {
+        selectedItem = null;
     }
 }

@@ -49,6 +49,7 @@ import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
 import com.sun.jersey.api.client.ClientResponse;
+
 /**
  * The Research Object page.
  * 
@@ -145,7 +146,7 @@ public class RoPage extends Base {
         final CompoundPropertyModel<Thing> itemModel = new CompoundPropertyModel<Thing>((Thing) null);
         roViewerBox = new RoViewerBox(this, itemModel, new PropertyModel<TreeModel>(this, "physicalResourcesTree"),
                 "loadingROFragment");
-        add(roViewerBox);
+        //add(roViewerBox);
 
         /************************** NEW REPLACING CODE *******************************/
         this.foldersViewer = new ROExplorer("folders-viewer", researchObject);

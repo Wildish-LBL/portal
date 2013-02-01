@@ -1,11 +1,12 @@
 package pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.purl.wf4ever.rosrs.client.Thing;
+
+import pl.psnc.dl.wf4ever.portal.ui.components.UniversalStyledAjaxButton;
 
 /**
  * Buttons bar for selected folder or resource.
@@ -22,17 +23,17 @@ public class ButtonsBar extends Panel {
     /** Resource buttons container. */
     WebMarkupContainer resourceButtonsContainer;
     /** Add resource button. */
-    AjaxButton addResource;
+    UniversalStyledAjaxButton addResource;
     /** Delete folder button. */
-    AjaxButton deleteFolder;
+    UniversalStyledAjaxButton deleteFolder;
     /** Download folder button. */
-    AjaxButton downloadFolder;
+    UniversalStyledAjaxButton downloadFolder;
     /** Edit resource button. */
-    AjaxButton editResource;
+    UniversalStyledAjaxButton editResource;
     /** Download resource button. */
-    AjaxButton downloadResource;
+    UniversalStyledAjaxButton downloadResource;
     /** Delete resource button. */
-    AjaxButton deleteResource;
+    UniversalStyledAjaxButton deleteResource;
     /** Fake form for ajax buttons. */
     Form<?> roForm;
 
@@ -99,7 +100,7 @@ public class ButtonsBar extends Panel {
     private void folderButtonsContainerInit() {
         folderButtonsContainer = new WebMarkupContainer("folder-buttons-container");
         folderButtonsContainer.setVisible(false);
-        addResource = new AjaxButton("add-resource", roForm) {
+        addResource = new UniversalStyledAjaxButton("add-resource", roForm) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -115,7 +116,7 @@ public class ButtonsBar extends Panel {
             }
 
         };
-        downloadFolder = new AjaxButton("download-folder", roForm) {
+        downloadFolder = new UniversalStyledAjaxButton("download-folder", roForm) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -131,7 +132,7 @@ public class ButtonsBar extends Panel {
             }
 
         };
-        deleteFolder = new AjaxButton("delete-folder", roForm) {
+        deleteFolder = new UniversalStyledAjaxButton("delete-folder", roForm) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -162,7 +163,7 @@ public class ButtonsBar extends Panel {
     private void resourceButtonsContainerInit() {
         resourceButtonsContainer = new WebMarkupContainer("resource-buttons-container");
         resourceButtonsContainer.setVisible(false);
-        editResource = new AjaxButton("edit-resource", roForm) {
+        editResource = new UniversalStyledAjaxButton("edit-resource", roForm) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -178,7 +179,7 @@ public class ButtonsBar extends Panel {
             }
 
         };
-        deleteResource = new AjaxButton("delete-resource", roForm) {
+        deleteResource = new UniversalStyledAjaxButton("delete-resource", roForm) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -194,7 +195,7 @@ public class ButtonsBar extends Panel {
             }
 
         };
-        downloadResource = new AjaxButton("download-resource", roForm) {
+        downloadResource = new UniversalStyledAjaxButton("download-resource", roForm) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

@@ -2,7 +2,6 @@ package pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer;
 
 import java.net.URI;
 import java.util.Iterator;
-import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
@@ -28,9 +27,11 @@ import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.ITreeListener;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.ROExplorerAjaxInitialBehaviour;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ButtonsBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.FilesPanel;
-import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ItemStatusBar;
+import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ROStatusBar;
+import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ResourceStatusBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.RoTree;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.forms.FilesShiftForm;
+import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.models.TreeNodeContentModel;
 import pl.psnc.dl.wf4ever.portal.ui.behaviours.Loadable;
 import pl.psnc.dl.wf4ever.portal.ui.components.LoadingCircle;
 
@@ -57,10 +58,11 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
     /** Loading image. */
     private LoadingCircle loadingCircle;
     /** Info panel. */
-    private ItemStatusBar itemInfoPanel;
-    /** Buttons panel */
+    private ResourceStatusBar itemInfoPanel;
+    /** Buttons panel. */
     private ButtonsBar buttonsBar;
-
+    /** Status bar of processed research object. */
+    private ROStatusBar roStatusBar;
     /** Research object. */
     private ResearchObject researchObject;
     /** The model of RO resource. */
@@ -72,7 +74,7 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
     /** Last clicked item (file or Folder). */
     private Thing currentlySelectedItem;
     /** Folders model. */
-    private PropertyModel<List<Thing>> foldersModel;
+    private TreeNodeContentModel foldersModel;
 
     /** Loading information. */
     private static final String LOADING_OBJECT = "Loading Research Object metadata.<br />Please wait...";
@@ -93,7 +95,8 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
         this.selectedFolder = null;
         this.selectedFile = null;
         this.currentlySelectedItem = null;
-        this.foldersModel = new PropertyModel<List<Thing>>(this, "selectedFolder.resources");
+        this.foldersModel = new TreeNodeContentModel(new PropertyModel<Thing>(this, "selectedNodeObject"),
+                researchObject);
 
         //building UI
         roTree = new RoTree("ro-tree", new PropertyModel<TreeModel>(this, "roTreeModel"));
@@ -102,12 +105,14 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
         filesPanel = new FilesPanel("files-panel", foldersModel);
         add(loadingCircle);
         filesShiftForm = new FilesShiftForm("form", this);
-        itemInfoPanel = new ItemStatusBar("selected-item-info-panel", new CompoundPropertyModel<Thing>(
+        itemInfoPanel = new ResourceStatusBar("selected-item-info-panel", new CompoundPropertyModel<Thing>(
                 new PropertyModel<Thing>(this, "currentlySelectedItem")));
         add(itemInfoPanel);
         buttonsBar = new ButtonsBar("buttons-panel");
         add(buttonsBar);
-
+        roStatusBar = new ROStatusBar("research-object-info-panel", new CompoundPropertyModel<Thing>(
+                new PropertyModel<Thing>(this, "researchObject")));
+        add(roStatusBar);
         //background initialziation
         add(new ROExplorerAjaxInitialBehaviour(researchObject, this));
         add(filesPanel);
@@ -119,8 +124,13 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
     }
 
 
-    public Folder getSelctedFolder() {
-        return selectedFolder;
+    public Thing getResearchObject() {
+        return researchObject;
+    }
+
+
+    public Thing getSelectedNodeObject() {
+        return currentlySelectedItem;
     }
 
 
@@ -192,6 +202,11 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
 
     @Override
     public void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node) {
+        filesPanel.unselect();
+        if (currentlySelectedItem != null && currentlySelectedItem.equals(selectedFile)) {
+            currentlySelectedItem = filesPanel.getSelectedItem();
+        }
+        selectedFile = filesPanel.getSelectedItem();
         target.add(filesPanel);
         target.add(itemInfoPanel);
         target.add(buttonsBar);
@@ -259,4 +274,5 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
             buttonsBar.hideResourceButtonsContainer();
         }
     }
+
 }

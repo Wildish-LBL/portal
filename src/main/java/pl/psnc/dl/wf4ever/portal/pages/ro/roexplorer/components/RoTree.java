@@ -37,8 +37,8 @@ public class RoTree extends Tree {
     /** Reference to the css file. */
     private static final ResourceReference CSS = new PackageResourceReference(RoTree.class, "tree.css");
     /** Reference to the js file. */
-    private static final JavaScriptResourceReference TREE_CLASS_REFRENCE = new JavaScriptResourceReference(RoTree.class,
-            "roTree.js");
+    private static final JavaScriptResourceReference TREE_CLASS_REFRENCE = new JavaScriptResourceReference(
+            RoTree.class, "roTree.js");
     /** Tree listeners. */
     private List<ITreeListener> treeListenersList;
 
