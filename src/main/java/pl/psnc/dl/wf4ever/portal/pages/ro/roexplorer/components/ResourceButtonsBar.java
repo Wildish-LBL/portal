@@ -115,8 +115,7 @@ public class ResourceButtonsBar extends Panel {
 
             @Override
             protected void onError(AjaxRequestTarget target, Form<?> form) {
-                // TODO Auto-generated method stub
-
+                super.onSubmit(target, form);
             }
 
         };
@@ -130,8 +129,7 @@ public class ResourceButtonsBar extends Panel {
 
             @Override
             protected void onError(AjaxRequestTarget target, Form<?> form) {
-                // TODO Auto-generated method stub
-
+                super.onSubmit(target, form);
             }
 
         };
@@ -145,8 +143,7 @@ public class ResourceButtonsBar extends Panel {
 
             @Override
             protected void onError(AjaxRequestTarget target, Form<?> form) {
-                // TODO Auto-generated method stub
-
+                super.onSubmit(target, form);
             }
 
         };
@@ -175,8 +172,7 @@ public class ResourceButtonsBar extends Panel {
 
             @Override
             protected void onError(AjaxRequestTarget target, Form<?> form) {
-                // TODO Auto-generated method stub
-
+                super.onSubmit(target, form);
             }
 
         };
@@ -190,8 +186,7 @@ public class ResourceButtonsBar extends Panel {
 
             @Override
             protected void onError(AjaxRequestTarget target, Form<?> form) {
-                // TODO Auto-generated method stub
-
+                super.onSubmit(target, form);
             }
 
         };

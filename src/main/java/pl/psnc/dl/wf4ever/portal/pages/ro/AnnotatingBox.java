@@ -32,6 +32,7 @@ import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
 import pl.psnc.dl.wf4ever.portal.pages.util.CreatorsPanel;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
+
 /**
  * A list of annotations of a resource.
  * 

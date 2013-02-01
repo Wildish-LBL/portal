@@ -4,9 +4,9 @@ import org.apache.log4j.Logger;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.purl.wf4ever.rosrs.client.users.User;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
-import pl.psnc.dl.wf4ever.portal.model.User;
 import pl.psnc.dl.wf4ever.portal.pages.base.Base;
 
 import com.sun.jersey.api.client.UniformInterfaceException;

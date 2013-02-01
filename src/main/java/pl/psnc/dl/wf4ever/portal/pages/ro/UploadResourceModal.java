@@ -47,14 +47,8 @@ class UploadResourceModal extends Panel {
     /** Resource URI. */
     private URI resourceURI;
 
-    /** Download URI, currently not used. */
-    private URI downloadURI;
-
     /** Div with remote resource URI. */
     private final WebMarkupContainer resourceDiv;
-
-    /** Div with remote resource download URI. */
-    private final WebMarkupContainer downloadDiv;
 
     /** Div for uploading files. */
     private final WebMarkupContainer fileDiv;
@@ -89,10 +83,6 @@ class UploadResourceModal extends Panel {
         resourceDiv.setOutputMarkupId(true);
         resourceDiv.setOutputMarkupPlaceholderTag(true);
         form.add(resourceDiv);
-        downloadDiv = new WebMarkupContainer("downloadURIDiv");
-        downloadDiv.setOutputMarkupId(true);
-        downloadDiv.setOutputMarkupPlaceholderTag(true);
-        form.add(downloadDiv);
         fileDiv = new WebMarkupContainer("fileUploadDiv");
         fileDiv.setOutputMarkupId(true);
         fileDiv.setOutputMarkupPlaceholderTag(true);
@@ -107,10 +97,8 @@ class UploadResourceModal extends Panel {
             @Override
             protected void onEvent(AjaxRequestTarget target) {
                 resourceDiv.setVisible(false);
-                downloadDiv.setVisible(false);
                 fileDiv.setVisible(true);
                 target.add(resourceDiv);
-                target.add(downloadDiv);
                 target.add(fileDiv);
             }
 
@@ -122,10 +110,8 @@ class UploadResourceModal extends Panel {
             @Override
             protected void onEvent(AjaxRequestTarget target) {
                 resourceDiv.setVisible(true);
-                downloadDiv.setVisible(true);
                 fileDiv.setVisible(false);
                 target.add(resourceDiv);
-                target.add(downloadDiv);
                 target.add(fileDiv);
             }
 
@@ -140,10 +126,6 @@ class UploadResourceModal extends Panel {
         TextField<URI> resourceURIField = new RequiredURITextField("resourceURI", new PropertyModel<URI>(this,
                 "resourceURI"));
         resourceDiv.add(resourceURIField);
-
-        TextField<URI> downloadURIField = new RequiredURITextField("downloadURI", new PropertyModel<URI>(this,
-                "downloadURI"));
-        downloadDiv.add(downloadURIField);
 
         form.add(new MyAjaxButton("confirmUploadResource", form) {
 
@@ -199,12 +181,10 @@ class UploadResourceModal extends Panel {
         switch (resourceType) {
             case LOCAL:
                 resourceDiv.setVisible(false);
-                downloadDiv.setVisible(false);
                 fileDiv.setVisible(true);
                 break;
             case REMOTE:
                 resourceDiv.setVisible(true);
-                downloadDiv.setVisible(true);
                 fileDiv.setVisible(false);
                 break;
             default:
@@ -220,16 +200,6 @@ class UploadResourceModal extends Panel {
 
     public void setResourceURI(URI resourceURI) {
         this.resourceURI = resourceURI;
-    }
-
-
-    public URI getDownloadURI() {
-        return downloadURI;
-    }
-
-
-    public void setDownloadURI(URI downloadURI) {
-        this.downloadURI = downloadURI;
     }
 
 

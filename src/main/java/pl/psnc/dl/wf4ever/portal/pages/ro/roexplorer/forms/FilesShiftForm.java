@@ -88,7 +88,7 @@ public class FilesShiftForm extends Panel {
     }
 
 
-    public URI getFIleUri() {
+    public URI getFileUri() {
         return filesShiftModel.getFileUri();
     }
 

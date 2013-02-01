@@ -48,9 +48,7 @@ public class OpenIDEndpoint extends WebPage {
             if (openIdUser == null) {
                 session.error("Open ID Confirmation Failed. No information was retrieved from the OpenID Provider.");
             } else {
-                if (register(openIdUser) && openIdUser.getOpenId().startsWith("https://www.google.com/")) {
-                    throw new RestartResponseException(GoogleMigratePage.class);
-                }
+                register(openIdUser);
                 if (!continueToOriginalDestination()) {
                     LOG.warn("Could not find the original destination");
                     throw new RestartResponseException(getApplication().getHomePage());
