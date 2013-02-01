@@ -12,6 +12,7 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Creator;
+import org.purl.wf4ever.rosrs.client.Resource;
 import org.purl.wf4ever.rosrs.client.Thing;
 
 import pl.psnc.dl.wf4ever.portal.pages.util.CreatorsPanel;
@@ -69,6 +70,7 @@ public class ResourceStatusBar extends Panel {
         creatorSection = new WebMarkupContainer("creatorSection", new Model<>());
         mainContainer.add(creatorSection);
         creatorSection.add(new CreatorsPanel("creator", new PropertyModel<Set<Creator>>(itemModel, "creators")));
+
         createdSection = new WebMarkupContainer("createdSection", new Model<>());
         mainContainer.add(createdSection);
         createdSection.add(new Label("createdFormatted"));
@@ -88,15 +90,16 @@ public class ResourceStatusBar extends Panel {
         if (resource != null) {
             mainContainer.setVisible(true);
             resourceURISection.setVisible(true);
-            //            creatorSection.setVisible(!resource.getCreators().isEmpty());
-            creatorSection.setVisible(false);
+            creatorSection.setVisible(resource.getCreators() != null);
             createdSection.setVisible(resource.getCreated() != null);
-            //            sizeSection.setVisible(resource.getSizeFormatted() != null);
-            sizeSection.setVisible(false);
+            if (resource instanceof Resource) {
+                sizeSection.setVisible(((Resource) resource).getSizeFormatted() != null);
+            } else {
+                sizeSection.setVisible(false);
+            }
             annotationsCntSection.setVisible(true);
         } else {
             mainContainer.setVisible(false);
         }
     }
-
 }
