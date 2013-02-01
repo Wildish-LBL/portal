@@ -27,6 +27,7 @@ import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.ITreeListener;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.ROExplorerAjaxInitialBehaviour;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ButtonsBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.FilesPanel;
+import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ROButtonsBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ROStatusBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ResourceStatusBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.RoTree;
@@ -63,6 +64,8 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
     private ButtonsBar buttonsBar;
     /** Status bar of processed research object. */
     private ROStatusBar roStatusBar;
+    /** RO buttons bar. */
+    private ROButtonsBar roButtonsBar;
     /** Research object. */
     private ResearchObject researchObject;
     /** The model of RO resource. */
@@ -75,6 +78,8 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
     private Thing currentlySelectedItem;
     /** Folders model. */
     private TreeNodeContentModel foldersModel;
+    /** RO URI. */
+    private URI roURI;
 
     /** Loading information. */
     private static final String LOADING_OBJECT = "Loading Research Object metadata.<br />Please wait...";
@@ -85,12 +90,15 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
      * 
      * @param id
      *            wicket id
+     * @param roUri
+     *            roUri
      * @param researchObject
      *            Research Object
      */
-    public ROExplorer(String id, ResearchObject researchObject) {
+    public ROExplorer(String id, ResearchObject researchObject, URI roUri) {
         super(id);
         //setting variables
+        this.roURI = roUri;
         this.researchObject = researchObject;
         this.selectedFolder = null;
         this.selectedFile = null;
@@ -113,6 +121,8 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
         roStatusBar = new ROStatusBar("research-object-info-panel", new CompoundPropertyModel<Thing>(
                 new PropertyModel<Thing>(this, "researchObject")));
         add(roStatusBar);
+        roButtonsBar = new ROButtonsBar("ro-button-bar", roUri);
+        add(roButtonsBar);
         //background initialziation
         add(new ROExplorerAjaxInitialBehaviour(researchObject, this));
         add(filesPanel);

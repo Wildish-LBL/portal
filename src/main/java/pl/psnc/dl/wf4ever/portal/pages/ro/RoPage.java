@@ -149,7 +149,7 @@ public class RoPage extends Base {
         //add(roViewerBox);
 
         /************************** NEW REPLACING CODE *******************************/
-        this.foldersViewer = new ROExplorer("folders-viewer", researchObject);
+        this.foldersViewer = new ROExplorer("folders-viewer", researchObject, roURI);
         foldersViewer.setOutputMarkupId(true);
         add(foldersViewer);
         /*****************************************************************************/

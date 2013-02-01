@@ -1,30 +1,18 @@
 <?xml version="1.0"?>
 <wicket:panel xmlns:wicket="http://wicket.apache.org">
-	<form class="" wicket:id="roForm" style="margin: 0px">
-	
-	<div wicket:id="folder-buttons-container" class="btn-group span11" style="border: 1px dashed #BBBBBB; margin-bottom: 5px;">
-		<button class="btn" type="submit" wicket:id="add-resource">
-			<i class="icon-file"></i>
-		</button>
-		<button class="btn" type="submit" wicket:id="download-folder">
-			<i class="icon-download"></i>
-		</button>
-		<button class="btn" type="submit" wicket:id="delete-folder">
-			<i class="icon-trash"></i>
-		</button>
-	</div>						
-		
-	<div wicket:id="resource-buttons-container" class="btn-group span11" style="border: 1px dashed #BBBBBB; margin-bottom: 5px;">
-		<button class="btn" type="submit" wicket:id="edit-resource">
-			<i class="icon-pencil"></i>
-		</button>
-		<button class="btn" type="submit" wicket:id="delete-resource">
-			<i class="icon-trash"></i>
-		</button>
-		<button class="btn" type="submit" wicket:id="download-resource">
-			<i class="icon-download"></i>
-		</button>
+	<div class="span11" style="border: 1px dashed #BBBBBB; margin-bottom: 5px;">
+		<form class="" wicket:id="roForm" style="margin: 0px">
+			
+				<div class="btn-group">
+					<button class="btn" type="submit" wicket:id="downloadROZipped">
+						<i class="icon-download-alt"></i> ZIP
+					</button>
+					<button class="btn" type="submit" wicket:id="downloadMetadata">
+						<i class="icon-download-alt"></i> Metadata
+					</button>
+				</div>
+			
+		</form>
 	</div>
-	
-	</form>
+	<span wicket:id="downloadMetadataModal"></span>
 </wicket:panel>
