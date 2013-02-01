@@ -78,8 +78,6 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
     private Thing currentlySelectedItem;
     /** Folders model. */
     private TreeNodeContentModel foldersModel;
-    /** RO URI. */
-    private URI roURI;
 
     /** Loading information. */
     private static final String LOADING_OBJECT = "Loading Research Object metadata.<br />Please wait...";
@@ -90,15 +88,12 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
      * 
      * @param id
      *            wicket id
-     * @param roUri
-     *            roUri
      * @param researchObject
      *            Research Object
      */
-    public ROExplorer(String id, ResearchObject researchObject, URI roUri) {
+    public ROExplorer(String id, ResearchObject researchObject) {
         super(id);
         //setting variables
-        this.roURI = roUri;
         this.researchObject = researchObject;
         this.selectedFolder = null;
         this.selectedFile = null;
@@ -121,7 +116,7 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
         roStatusBar = new ROStatusBar("research-object-info-panel", new CompoundPropertyModel<Thing>(
                 new PropertyModel<Thing>(this, "researchObject")));
         add(roStatusBar);
-        roButtonsBar = new ROButtonsBar("ro-button-bar", roUri);
+        roButtonsBar = new ROButtonsBar("ro-button-bar", researchObject.getUri());
         add(roButtonsBar);
         //background initialziation
         add(new ROExplorerAjaxInitialBehaviour(researchObject, this));

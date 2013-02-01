@@ -108,14 +108,14 @@ public class ResourceButtonsBar extends Panel {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                super.onSubmit(target, form);
                 target.appendJavaScript("$('#upload-resource-modal').modal('show')");
             }
 
 
             @Override
             protected void onError(AjaxRequestTarget target, Form<?> form) {
-                // TODO Auto-generated method stub
-
+                super.onSubmit(target, form);
             }
 
         };
@@ -123,15 +123,13 @@ public class ResourceButtonsBar extends Panel {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                // TODO Auto-generated method stub
-
+                super.onSubmit(target, form);
             }
 
 
             @Override
             protected void onError(AjaxRequestTarget target, Form<?> form) {
-                // TODO Auto-generated method stub
-
+                super.onSubmit(target, form);
             }
 
         };
@@ -139,15 +137,13 @@ public class ResourceButtonsBar extends Panel {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                // TODO Auto-generated method stub
-
+                super.onSubmit(target, form);
             }
 
 
             @Override
             protected void onError(AjaxRequestTarget target, Form<?> form) {
-                // TODO Auto-generated method stub
-
+                super.onSubmit(target, form);
             }
 
         };
@@ -170,15 +166,13 @@ public class ResourceButtonsBar extends Panel {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                // TODO Auto-generated method stub
-
+                super.onSubmit(target, form);
             }
 
 
             @Override
             protected void onError(AjaxRequestTarget target, Form<?> form) {
-                // TODO Auto-generated method stub
-
+                super.onSubmit(target, form);
             }
 
         };
@@ -192,8 +186,7 @@ public class ResourceButtonsBar extends Panel {
 
             @Override
             protected void onError(AjaxRequestTarget target, Form<?> form) {
-                // TODO Auto-generated method stub
-
+                super.onSubmit(target, form);
             }
 
         };
@@ -201,8 +194,7 @@ public class ResourceButtonsBar extends Panel {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                // TODO Auto-generated method stub
-
+                super.onSubmit(target, form);
             }
 
 

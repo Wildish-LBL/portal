@@ -20,7 +20,6 @@ import org.scribe.oauth.OAuthService;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
-import pl.psnc.dl.wf4ever.portal.pages.users.UserURIUpdatePage;
 import pl.psnc.dl.wf4ever.portal.services.DlibraApi;
 import pl.psnc.dl.wf4ever.portal.services.MyExpApi;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
@@ -57,17 +56,7 @@ public class OAuthPage extends WebPage {
         MySession session = MySession.get();
         PortalApplication app = (PortalApplication) getApplication();
 
-        if (session.isUpdateURI()) {
-            session.setUpdateURI(false);
-            OAuthService service = DlibraApi.getOAuthService(app.getDLibraClientId(), app.getCallbackURL());
-            Token token = retrieveDlibraAccessToken(pageParameters, service);
-            if (token != null) {
-                LOG.info("Successfully received dLibra access token");
-            }
-            PageParameters params = new PageParameters();
-            params.add("token", token.getToken());
-            throw new RestartResponseException(UserURIUpdatePage.class, params);
-        } else if (session.getMyExpAccessToken() == null) {
+        if (session.getMyExpAccessToken() == null) {
             OAuthService service = MyExpApi.getOAuthService(app.getMyExpConsumerKey(), app.getMyExpConsumerSecret(),
                 app.getCallbackURL());
             Token token = retrieveMyExpAccessToken(pageParameters, service);
@@ -116,6 +105,7 @@ public class OAuthPage extends WebPage {
      * @throws URISyntaxException
      *             the response details contain invalid URIs
      */
+    @SuppressWarnings("unused")
     private Token retrieveDlibraAccessToken(PageParameters pageParameters, OAuthService service)
             throws URISyntaxException {
         Token accessToken = null;

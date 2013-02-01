@@ -28,7 +28,6 @@ import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.purl.wf4ever.rosrs.client.Annotation;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
@@ -64,23 +63,11 @@ public class RoPage extends Base {
     /** Logger. */
     private static final Logger LOG = Logger.getLogger(RoPage.class);
 
-    /** RO URI. */
-    URI roURI;
-
-    /** Resources aggregated by the RO. */
-    //    Map<URI, AggregatedResource> resources;
-
     /** Can the user edit the RO. */
     boolean canEdit = false;
 
-    /** The part showing the RO structure. */
-    final RoViewerBox roViewerBox;
-
     /** The part showing the RO annotations. */
     final AnnotatingBox annotatingBox;
-
-    /** The physical model of RO resource. */
-    private RoTreeModel physicalResourcesTree;
 
     /** The modal window for editing annotations. */
     final StatementEditModal stmtEditForm;
@@ -125,7 +112,7 @@ public class RoPage extends Base {
             throws URISyntaxException, OAuthException, IOException {
         super(parameters);
         if (!parameters.get("ro").isEmpty()) {
-            roURI = new URI(parameters.get("ro").toString());
+            URI roURI = new URI(parameters.get("ro").toString());
             researchObject = new ResearchObject(roURI, MySession.get().getRosrs());
         } else {
             throw new RestartResponseException(ErrorPage.class, new PageParameters().add("message",
@@ -141,15 +128,13 @@ public class RoPage extends Base {
             //            canEdit = uris.contains(roURI);
             canEdit = true;
         }
-        add(new Label("title", roURI.toString()));
+        add(new Label("title", researchObject.getUri().toString()));
 
         final CompoundPropertyModel<Thing> itemModel = new CompoundPropertyModel<Thing>((Thing) null);
-        roViewerBox = new RoViewerBox(this, itemModel, new PropertyModel<TreeModel>(this, "physicalResourcesTree"),
-                "loadingROFragment");
         //add(roViewerBox);
 
         /************************** NEW REPLACING CODE *******************************/
-        this.foldersViewer = new ROExplorer("folders-viewer", researchObject, roURI);
+        this.foldersViewer = new ROExplorer("folders-viewer", researchObject);
         foldersViewer.setOutputMarkupId(true);
         add(foldersViewer);
         /*****************************************************************************/
@@ -169,28 +154,24 @@ public class RoPage extends Base {
         importAnnotationModal = new ImportAnnotationModal("importAnnotationModal", this, itemModel);
         add(importAnnotationModal);
 
-        add(new RoEvoBox("roEvoBox", ((PortalApplication) getApplication()).getSparqlEndpointURI(), roURI));
+        add(new RoEvoBox("roEvoBox", ((PortalApplication) getApplication()).getSparqlEndpointURI(),
+                researchObject.getUri()));
 
         add(new AbstractDefaultAjaxBehavior() {
 
             @Override
             protected void respond(AjaxRequestTarget target) {
                 try {
-                    if (getPhysicalResourcesTree() == null) {
-
-                        researchObject = new ResearchObject(roURI, MySession.get().getRosrs());
+                    if (!researchObject.isLoaded()) {
                         researchObject.load();
                         RoTreeModel treeModel = new RoTreeModel(researchObject);
                         for (Resource resource : researchObject.getResources().values()) {
                             treeModel.addAggregatedResource(resource);
                         }
-                        setPhysicalResourcesTree(treeModel);
-                        roViewerBox.onRoTreeLoaded();
 
                         //foldersViewer.onLoaded();
                         relEditForm.onRoTreeLoaded();
-                        target.add(roViewerBox);
-                        //target.add(foldersViewer);
+                        target.add(foldersViewer);
                     }
                 } catch (ROSRSException | ROException e) {
                     LOG.error(e);
@@ -215,7 +196,8 @@ public class RoPage extends Base {
     public void renderHead(IHeaderResponse response) {
         super.renderHead(response);
         try {
-            ClientResponse head = MySession.get().getRosrs().getResourceHead(roURI.resolve(".ro/manifest.rdf"));
+            ClientResponse head = MySession.get().getRosrs()
+                    .getResourceHead(researchObject.getUri().resolve(".ro/manifest.rdf"));
             List<String> links = head.getHeaders().get("Link");
             if (links != null) {
                 for (String link : links) {
@@ -232,13 +214,8 @@ public class RoPage extends Base {
     }
 
 
-    public RoTreeModel getPhysicalResourcesTree() {
-        return physicalResourcesTree;
-    }
-
-
-    public void setPhysicalResourcesTree(RoTreeModel physicalResourcesTree) {
-        this.physicalResourcesTree = physicalResourcesTree;
+    public TreeModel getPhysicalResourcesTree() {
+        return null;
     }
 
 
@@ -296,7 +273,7 @@ public class RoPage extends Base {
          */
         public InternalLinkFragment(String id, String markupId, MarkupContainer markupProvider, Statement statement) {
             super(id, markupId, markupProvider);
-            String internalName = "./" + roURI.relativize(statement.getSubjectURI()).toString();
+            String internalName = "./" + researchObject.getUri().relativize(statement.getSubjectURI()).toString();
             add(new AjaxLink<String>("link", new Model<String>(internalName)) {
 
                 @Override
@@ -355,10 +332,9 @@ public class RoPage extends Base {
      */
     void onResourceAdd(AjaxRequestTarget target, final FileUpload uploadedFile)
             throws ROSRSException, IOException, ROException {
-        org.purl.wf4ever.rosrs.client.Resource resource = researchObject.aggregate(uploadedFile.getClientFileName(),
-            uploadedFile.getInputStream(), uploadedFile.getContentType());
-        getPhysicalResourcesTree().addAggregatedResource(resource);
-        target.add(roViewerBox);
+        researchObject.aggregate(uploadedFile.getClientFileName(), uploadedFile.getInputStream(),
+            uploadedFile.getContentType());
+        target.add(foldersViewer);
     }
 
 
@@ -377,8 +353,7 @@ public class RoPage extends Base {
     public void onResourceDelete(org.purl.wf4ever.rosrs.client.Resource resource, AjaxRequestTarget target)
             throws IOException, ROSRSException {
         resource.delete();
-        getPhysicalResourcesTree().removeAggregatedResource(resource);
-        target.add(roViewerBox);
+        target.add(foldersViewer);
     }
 
 
@@ -407,10 +382,9 @@ public class RoPage extends Base {
      */
     public void onRemoteResourceAdded(AjaxRequestTarget target, URI resourceURI)
             throws ROSRSException, ROException {
-        URI absoluteResourceURI = roURI.resolve(resourceURI);
-        Resource resource = researchObject.aggregate(absoluteResourceURI);
-        getPhysicalResourcesTree().addAggregatedResource(resource);
-        target.add(roViewerBox);
+        URI absoluteResourceURI = researchObject.getUri().resolve(resourceURI);
+        researchObject.aggregate(absoluteResourceURI);
+        target.add(foldersViewer);
 
     }
 
@@ -502,7 +476,7 @@ public class RoPage extends Base {
         MySession
                 .get()
                 .getRosrs()
-                .addAnnotation(roURI, new HashSet<>(Arrays.asList(aggregatedResource.getUri())),
+                .addAnnotation(researchObject.getUri(), new HashSet<>(Arrays.asList(aggregatedResource.getUri())),
                     uploadedFile.getClientFileName(), uploadedFile.getInputStream(), contentType);
         setResponsePage(RoPage.class, getPageParameters());
     }
@@ -514,7 +488,7 @@ public class RoPage extends Base {
 
 
     public String getROZipLink() {
-        return roURI.toString().replaceFirst("/ROs/", "/zippedROs/");
+        return researchObject.getUri().toString().replaceFirst("/ROs/", "/zippedROs/");
     }
 
 
@@ -526,6 +500,7 @@ public class RoPage extends Base {
      * @return a URI as string of the resource
      */
     public String getROMetadataLink(RDFFormat format) {
-        return roURI.resolve(".ro/manifest." + format.getDefaultFileExtension() + "?original=manifest.rdf").toString();
+        return researchObject.getUri()
+                .resolve(".ro/manifest." + format.getDefaultFileExtension() + "?original=manifest.rdf").toString();
     }
 }

@@ -327,7 +327,7 @@ class RelationEditModal extends Panel {
         if (getModelObject() == null) {
             return null;
         }
-        return "./" + roPage.roURI.relativize(getModelObject().getSubjectURI()).toString();
+        return "./" + roPage.researchObject.getUri().relativize(getModelObject().getSubjectURI()).toString();
     }
 
 

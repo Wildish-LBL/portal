@@ -16,11 +16,9 @@ import org.apache.wicket.util.cookies.CookieUtils;
 import org.openid4java.discovery.DiscoveryInformation;
 import org.purl.wf4ever.rosrs.client.Creator;
 import org.purl.wf4ever.rosrs.client.ROSRService;
+import org.purl.wf4ever.rosrs.client.users.User;
 import org.purl.wf4ever.rosrs.client.users.UserManagementService;
 import org.scribe.model.Token;
-
-import pl.psnc.dl.wf4ever.portal.model.User;
-import pl.psnc.dl.wf4ever.portal.services.RODLUtilities;
 
 /**
  * Custom app session.
@@ -75,9 +73,6 @@ public class MySession extends AbstractAuthenticatedWebSession {
     /** RODL user. */
     private User user;
 
-    /** Is user updating his user URI. */
-    private boolean updateURI;
-
     /** ROSRS client. */
     private ROSRService rosrs;
 
@@ -94,7 +89,6 @@ public class MySession extends AbstractAuthenticatedWebSession {
     public MySession(Request request) {
         super(request);
         PortalApplication app = (PortalApplication) getApplication();
-        this.ums = new UserManagementService(app.getRodlURI(), app.getAdminToken());
         this.rosrs = new ROSRService(app.getRodlURI().resolve("ROs/"), null);
         if (new CookieUtils().load(DLIBRA_KEY) != null) {
             signIn(new CookieUtils().load(DLIBRA_KEY));
@@ -116,37 +110,12 @@ public class MySession extends AbstractAuthenticatedWebSession {
     }
 
 
-    //    /**
-    //     * RODL access token.
-    //     * 
-    //     * @return the dLibraAccessToken
-    //     */
-    //    public Token getdLibraAccessToken() {
-    //        return dLibraAccessToken;
-    //    }
-
-    /**
-     * RODL access token.
-     * 
-     * @param dLibraAccessToken
-     *            the dLibraAccessToken to set
-     */
-    //    public void setdLibraAccessToken(Token dLibraAccessToken) {
-    //        this.dLibraAccessToken = dLibraAccessToken;
-    //        try {
-    //            this.user = RODLUtilities.getUser(getdLibraAccessToken());
-    //        } catch (Exception e) {
-    //            LOG.error("Error when retrieving user data: " + e.getMessage());
-    //        }
-    //        dirtydLibra = true;
-    //    }
-
-    public void signIn(String dLibraAccessToken) {
-        //HACK
-        this.rosrs = new ROSRService(((PortalApplication) getApplication()).getRodlURI().resolve("ROs/"),
-                dLibraAccessToken);
+    public void signIn(String userToken) {
         try {
-            this.user = RODLUtilities.getUser(dLibraAccessToken);
+            PortalApplication app = (PortalApplication) getApplication();
+            this.rosrs = new ROSRService(app.getRodlURI().resolve("ROs/"), userToken);
+            this.ums = new UserManagementService(app.getRodlURI(), app.getAdminToken());
+            this.user = getUms().getWhoAmi(userToken);
         } catch (Exception e) {
             LOG.error("Error when retrieving user data: " + e.getMessage());
         }
@@ -205,7 +174,7 @@ public class MySession extends AbstractAuthenticatedWebSession {
 
     @Override
     public boolean isSignedIn() {
-        return getRosrs() != null && user != null;
+        return user != null;
     }
 
 
@@ -285,16 +254,6 @@ public class MySession extends AbstractAuthenticatedWebSession {
 
     public void setOpenIDCallbackURI(URI openIDCallbackURI) {
         this.openIDCallbackURI = openIDCallbackURI;
-    }
-
-
-    public boolean isUpdateURI() {
-        return updateURI;
-    }
-
-
-    public void setUpdateURI(boolean updateURI) {
-        this.updateURI = updateURI;
     }
 
 
