@@ -170,6 +170,7 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
         //folder or RO
         Thing object = (Thing) ((DefaultMutableTreeNode) node).getUserObject();
         setCurrentlySelectedItem(object);
+        filesPanel.unselect();
         if (object instanceof Folder) {
             Folder folder = (Folder) object;
             if (!folder.isLoaded()) {
