@@ -470,13 +470,12 @@ p {
 input.span1 {
 	width: 155px;
 }
-
-.dupa {
-	display: none;
-}
-
 #myExp-recommendation-serach-button {
 	
 	margin-left: -45px
+}
+
+.spaceDiv {
+	margin-bottom: 2px;
 }
 /* visualization */
