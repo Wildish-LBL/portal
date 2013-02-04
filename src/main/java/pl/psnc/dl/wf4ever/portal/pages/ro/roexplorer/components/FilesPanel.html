@@ -6,13 +6,20 @@
     </head>
     <body>
         <wicket:panel>
-        <div style="overflow: auto; height: 400px;">
-        	<ul id="sortable">
-				<li wicket:id="filesListView" class="ui-state-default">
-					<span wicket:id="tailLink"><span wicket:id="tailLabel" class="tailLabel"></span></span>
-				</li>
-			</ul>
+        <div wicket:id="scrol-div" style="overflow: auto; height: 200px;">
+			<div wicket:id="scrol-content-div" style="overflow: auto; height: 200px;">
+			</div>
         </div>
+        <div wicket:id="normal-div" style="overflow: auto; height: 200px;">
+	        <div wicket:id="normal-content-div" style="overflow: auto; height: 200px;">
+	        
+	        	<ul id="sortable">
+					<li wicket:id="filesListView" class="ui-state-default">
+						<span wicket:id="tailLink"><span wicket:id="tailLabel" class="tailLabel"></span></span>
+					</li>
+				</ul>
+			</div>
+		</div>
     	</wicket:panel>
     </body>
 </html>

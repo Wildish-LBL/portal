@@ -7,6 +7,7 @@ import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -35,6 +36,12 @@ public class FilesPanel extends Panel {
     private CssResourceReference cssResourceReference = new CssResourceReference(FilesPanel.class, "tails.css");
     /** Listeners for the selected resource. */
     private List<IAjaxLinkListener> listeners;
+    IModel<List<Resource>> foldersModel;
+    WebMarkupContainer scrolDiv;
+    WebMarkupContainer scrolContentDiv;
+
+    WebMarkupContainer normalDiv;
+    WebMarkupContainer normalContentDiv;
 
 
     /**
@@ -46,6 +53,13 @@ public class FilesPanel extends Panel {
     public FilesPanel(String id, IModel<List<Resource>> foldersModel) {
         super(id, new Model<Resource>());
         setOutputMarkupId(true);
+        scrolDiv = new WebMarkupContainer("scrol-div");
+        scrolDiv = new WebMarkupContainer("normal-div");
+        scrolContentDiv = new WebMarkupContainer("scrol-content-div");
+        normalContentDiv = new WebMarkupContainer("normal-content-div");
+        scrolDiv.setVisible(false);
+
+        this.foldersModel = foldersModel;
         listeners = new ArrayList<IAjaxLinkListener>();
         listView = new PropertyListView<Resource>("filesListView", foldersModel) {
 
@@ -82,7 +96,13 @@ public class FilesPanel extends Panel {
             }
 
         };
-        add(listView);
+
+        scrolDiv.add(scrolContentDiv);
+        normalDiv.add(normalContentDiv);
+        normalContentDiv.add(listView);
+        add(normalDiv);
+        add(scrolDiv);
+
     }
 
 
@@ -129,6 +149,11 @@ public class FilesPanel extends Panel {
     @Override
     protected void onConfigure() {
         super.onConfigure();
+        if (foldersModel.getObject() != null && foldersModel.getObject().size() > 20) {
+            scrolDiv.setVisible(true);
+        } else {
+            scrolDiv.setVisible(false);
+        }
     }
 
 
