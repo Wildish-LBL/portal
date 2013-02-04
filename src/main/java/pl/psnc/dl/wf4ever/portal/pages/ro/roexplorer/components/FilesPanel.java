@@ -110,6 +110,11 @@ public class FilesPanel extends Panel {
     }
 
 
+    /**
+     * set selected file.
+     * 
+     * @param resource
+     */
     public void setSelectedFile(Resource resource) {
         getModel().setObject(resource);
     }

@@ -96,9 +96,9 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
         super(id, itemModel);
         //setting variables
         this.researchObject = researchObject;
+
         this.foldersModel = new TreeNodeContentModel(new PropertyModel<Thing>(this, "currentlySelectedItem"),
                 researchObject);
-
         //building UI
         roTree = new RoTree("ro-tree", new PropertyModel<TreeModel>(this, "roTreeModel"));
         roTree.getTreeState().addTreeStateListener(this);
@@ -124,6 +124,7 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
         roTree.addTreeListeners(this);
         filesShiftForm.addOnSubmitListener(this);
         filesPanel.addLinkListeners(this);
+        buttonsBar.appendTarget(this);
     }
 
 
@@ -137,6 +138,12 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
     }
 
 
+    /**
+     * Set currently selected item.
+     * 
+     * @param item
+     *            currently selcted item.
+     */
     public void setCurrentlySelectedItem(Thing item) {
         this.getModel().setObject(item);
     }
@@ -164,6 +171,7 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
         //folder or RO
         Thing object = (Thing) ((DefaultMutableTreeNode) node).getUserObject();
         setCurrentlySelectedItem(object);
+        filesPanel.unselect();
         if (object instanceof Folder) {
             Folder folder = (Folder) object;
             if (!folder.isLoaded()) {
@@ -208,41 +216,54 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
 
     @Override
     public void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node) {
-        filesPanel.unselect();
-        setCurrentlySelectedItem((Thing) ((DefaultMutableTreeNode) node).getUserObject());
         target.add(filesPanel);
         target.add(itemInfoPanel);
         target.add(buttonsBar);
-        for (IAjaxLinkListener listener : listeners) {
-            listener.onAjaxLinkClicked(target);
-        }
     }
 
 
     @Override
     public void onFormSubmitted() {
         URI folderUri = filesShiftForm.getFolderUri();
-        URI fileUri = filesShiftForm.getFIleUri();
+        URI fileUri = filesShiftForm.getFileUri();
         Resource resource = researchObject.getResource(fileUri);
         Folder folder = researchObject.getFolder(folderUri);
-        try {
-            Iterator<URI> iter = researchObject.getFolders().keySet().iterator();
-            while (iter.hasNext()) {
-                Folder tmpFolder = researchObject.getFolder(iter.next());
-                if (tmpFolder.getFolderEntries().get(fileUri) != null) {
-                    tmpFolder.getFolderEntries().get(fileUri).delete();
+        if (folderUri == null || fileUri == null) {
+            return;
+        }
+        if (folder != null) {
+            try {
+                Iterator<URI> iter = researchObject.getFolders().keySet().iterator();
+                while (iter.hasNext()) {
+                    Folder tmpFolder = researchObject.getFolder(iter.next());
+                    if (tmpFolder.getFolderEntries().get(fileUri) != null) {
+                        tmpFolder.getFolderEntries().get(fileUri).delete();
+                    }
                 }
+                folder.addEntry(resource, resource.getName());
+            } catch (ROSRSException | ROException e) {
+                LOG.error("Can not move resource: " + resource.toString() + " to folder: " + folder.toString(), e);
             }
-            folder.addEntry(resource, resource.getName());
-        } catch (ROSRSException | ROException e) {
-            LOG.error("Can not move resource: " + resource.toString() + " to folder: " + folder.toString(), e);
+        } else {
+            //just remove it from folder, it's already in research object 
         }
     }
 
 
     @Override
     public void onAjaxLinkClicked(AjaxRequestTarget target) {
-        setCurrentlySelectedItem(getSelectedFile());
+        if (getSelectedFile() != null) {
+            setCurrentlySelectedItem(getSelectedFile());
+        } else {
+            if (roTree.getTreeState().getSelectedNodes().isEmpty()) {
+                setCurrentlySelectedItem(null);
+            } else {
+                setCurrentlySelectedItem((Thing) ((DefaultMutableTreeNode) roTree.getTreeState().getSelectedNodes()
+                        .iterator().next()).getUserObject());
+
+            }
+
+        }
         switchButtonBar();
         target.add(itemInfoPanel);
         target.add(buttonsBar);

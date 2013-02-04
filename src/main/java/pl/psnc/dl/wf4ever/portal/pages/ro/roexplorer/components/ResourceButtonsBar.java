@@ -1,11 +1,19 @@
 package pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.log4j.Logger;
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.purl.wf4ever.rosrs.client.Resource;
 import org.purl.wf4ever.rosrs.client.Thing;
+import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
+import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.ui.components.UniversalStyledAjaxButton;
 
 /**
@@ -16,6 +24,9 @@ import pl.psnc.dl.wf4ever.portal.ui.components.UniversalStyledAjaxButton;
  */
 public class ResourceButtonsBar extends Panel {
 
+    /** Logger. */
+    @SuppressWarnings("unused")
+    private static final Logger LOG = Logger.getLogger(ResourceStatusBar.class);
     /** Serialziation. */
     private static final long serialVersionUID = 1L;
     /** Folder buttons container. */
@@ -38,6 +49,8 @@ public class ResourceButtonsBar extends Panel {
     Form<?> roForm;
     /** Processed Thing. */
     private Thing processedThing;
+    /** list of components to refresh. */
+    private List<Component> targets;
 
 
     /**
@@ -149,8 +162,8 @@ public class ResourceButtonsBar extends Panel {
         };
 
         folderButtonsContainer.add(addResource);
-        folderButtonsContainer.add(downloadFolder);
-        folderButtonsContainer.add(deleteFolder);
+        //folderButtonsContainer.add(downloadFolder);
+        //folderButtonsContainer.add(deleteFolder);
         roForm.add(folderButtonsContainer);
 
     }
@@ -181,6 +194,17 @@ public class ResourceButtonsBar extends Panel {
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 super.onSubmit(target, form);
+                if (processedThing instanceof Resource) {
+                    try {
+                        ((Resource) processedThing).delete();
+                    } catch (ROSRSException e) {
+                        LOG.error("Can not remove resource: " + processedThing.getUri(), e);
+                        return;
+                    }
+                    for (Component c : targets) {
+                        target.add(c);
+                    }
+                }
             }
 
 
@@ -190,6 +214,7 @@ public class ResourceButtonsBar extends Panel {
             }
 
         };
+
         downloadResource = new UniversalStyledAjaxButton("download-resource", roForm) {
 
             @Override
@@ -204,9 +229,29 @@ public class ResourceButtonsBar extends Panel {
             }
 
         };
-        resourceButtonsContainer.add(editResource);
+        //resourceButtonsContainer.add(editResource);
         resourceButtonsContainer.add(deleteResource);
         resourceButtonsContainer.add(downloadResource);
         roForm.add(resourceButtonsContainer);
+        //check permissions (easy way)
+        if (!MySession.get().isSignedIn()) {
+            deleteResource.setVisible(false);
+            addResource.setVisible(false);
+        }
+
+    }
+
+
+    /**
+     * set the list of component to refresh once the button is clicked.
+     * 
+     * @param component
+     *            refreshable component.
+     */
+    public void appendTarget(Component component) {
+        if (targets == null) {
+            targets = new ArrayList<Component>();
+        }
+        targets.add(component);
     }
 }
