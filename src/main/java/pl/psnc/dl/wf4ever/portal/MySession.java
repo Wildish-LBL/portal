@@ -90,6 +90,7 @@ public class MySession extends AbstractAuthenticatedWebSession {
         super(request);
         PortalApplication app = (PortalApplication) getApplication();
         this.rosrs = new ROSRService(app.getRodlURI().resolve("ROs/"), null);
+        this.ums = new UserManagementService(app.getRodlURI(), app.getAdminToken());
         if (new CookieUtils().load(DLIBRA_KEY) != null) {
             signIn(new CookieUtils().load(DLIBRA_KEY));
         }
@@ -114,7 +115,6 @@ public class MySession extends AbstractAuthenticatedWebSession {
         try {
             PortalApplication app = (PortalApplication) getApplication();
             this.rosrs = new ROSRService(app.getRodlURI().resolve("ROs/"), userToken);
-            this.ums = new UserManagementService(app.getRodlURI(), app.getAdminToken());
             this.user = getUms().getWhoAmi(userToken);
         } catch (Exception e) {
             LOG.error("Error when retrieving user data: " + e.getMessage());
