@@ -114,6 +114,7 @@ public class FilesPanel extends Panel {
      * set selected file.
      * 
      * @param resource
+     *            resource
      */
     public void setSelectedFile(Resource resource) {
         getModel().setObject(resource);
@@ -122,6 +123,12 @@ public class FilesPanel extends Panel {
 
     public Resource getSelectedFile() {
         return getModel().getObject();
+    }
+
+
+    @Override
+    protected void onConfigure() {
+        super.onConfigure();
     }
 
 
