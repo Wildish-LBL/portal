@@ -29,6 +29,12 @@ public class ROButtonsBar extends Panel {
     /** Download RO metadata button. */
     private UniversalStyledAjaxButton downloadROMetadata;
 
+    /** Snapshot RO button. */
+    private UniversalStyledAjaxButton snapshotButton;
+
+    /** Release RO button. */
+    private UniversalStyledAjaxButton releaseButton;
+
     /** Download RO ZIP button. */
     private ExternalLink downloadROZipped;
 
@@ -62,8 +68,35 @@ public class ROButtonsBar extends Panel {
             }
 
         };
+        snapshotButton = new UniversalStyledAjaxButton("snapshot-ro-button", roForm) {
+
+            /** Serialization. */
+            private static final long serialVersionUID = 1L;
+
+
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                super.onSubmit(target, form);
+            }
+
+        };
+        releaseButton = new UniversalStyledAjaxButton("release-ro-button", roForm) {
+
+            /** Serialization. */
+            private static final long serialVersionUID = 1L;
+
+
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                super.onSubmit(target, form);
+            }
+
+        };
+
         roForm.add(downloadROZipped);
         roForm.add(downloadROMetadata);
+        roForm.add(snapshotButton);
+        roForm.add(releaseButton);
         add(roForm);
     }
 
