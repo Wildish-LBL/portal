@@ -1,7 +1,9 @@
 package pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
@@ -13,6 +15,7 @@ import org.apache.wicket.markup.html.form.IFormSubmitListener;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.html.tree.ITreeStateListener;
 import org.apache.wicket.model.CompoundPropertyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Folder;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
@@ -70,14 +73,10 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
     private ResearchObject researchObject;
     /** The model of RO resource. */
     private RoTreeModel roTreeModel;
-    /** The folder currently selected. */
-    private Folder selectedFolder;
-    /** The file currently selected. */
-    private Thing selectedFile;
-    /** Last clicked item (file or Folder). */
-    private Thing currentlySelectedItem;
     /** Folders model. */
     private TreeNodeContentModel foldersModel;
+    /** Listeners for the selected resource. */
+    private List<IAjaxLinkListener> listeners = new ArrayList<>();
 
     /** Loading information. */
     private static final String LOADING_OBJECT = "Loading Research Object metadata.<br />Please wait...";
@@ -90,18 +89,16 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
      *            wicket id
      * @param researchObject
      *            Research Object
+     * @param itemModel
      */
-    public ROExplorer(String id, ResearchObject researchObject) {
-        super(id);
+    public ROExplorer(String id, ResearchObject researchObject, IModel<Thing> itemModel) {
+        // Last clicked item (file or Folder). 
+        super(id, itemModel);
         //setting variables
         this.researchObject = researchObject;
-        this.selectedFolder = null;
-        this.selectedFile = null;
-        this.currentlySelectedItem = null;
 
-        this.foldersModel = new TreeNodeContentModel(new PropertyModel<Thing>(this, "selectedNodeObject"),
+        this.foldersModel = new TreeNodeContentModel(new PropertyModel<Thing>(this, "currentlySelectedItem"),
                 researchObject);
-
         //building UI
         roTree = new RoTree("ro-tree", new PropertyModel<TreeModel>(this, "roTreeModel"));
         roTree.getTreeState().addTreeStateListener(this);
@@ -135,8 +132,19 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
     }
 
 
-    public Thing getSelectedNodeObject() {
-        return currentlySelectedItem;
+    public Thing getCurrentlySelectedItem() {
+        return this.getModel().getObject();
+    }
+
+
+    /**
+     * Set currently selected item.
+     * 
+     * @param item
+     *            currently selcted item.
+     */
+    public void setCurrentlySelectedItem(Thing item) {
+        this.getModel().setObject(item);
     }
 
 
@@ -159,21 +167,19 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
 
     @Override
     public void nodeSelected(Object node) {
-        //folder
+        //folder or RO
         Thing object = (Thing) ((DefaultMutableTreeNode) node).getUserObject();
-        currentlySelectedItem = object;
+        setCurrentlySelectedItem(object);
         if (object instanceof Folder) {
-            this.selectedFolder = (Folder) object;
-            if (!this.selectedFolder.isLoaded()) {
+            Folder folder = (Folder) object;
+            if (!folder.isLoaded()) {
                 try {
-                    this.selectedFolder.load(false);
+                    folder.load(false);
                 } catch (ROSRSException e) {
                     LOG.error("Folfer " + object.getUri().toString() + " can not be loaded", e);
-                    this.selectedFolder = null;
+                    folder = null;
                 }
             }
-        } else {
-            this.selectedFolder = null;
         }
         switchButtonBar();
     }
@@ -181,7 +187,7 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
 
     @Override
     public void nodeUnselected(Object node) {
-        currentlySelectedItem = null;
+        setCurrentlySelectedItem(null);
         switchButtonBar();
     }
 
@@ -208,15 +214,9 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
 
     @Override
     public void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node) {
-        filesPanel.unselect();
-        if (currentlySelectedItem != null && currentlySelectedItem.equals(selectedFile)) {
-            currentlySelectedItem = filesPanel.getSelectedItem();
-        }
-        selectedFile = filesPanel.getSelectedItem();
         target.add(filesPanel);
         target.add(itemInfoPanel);
         target.add(buttonsBar);
-
     }
 
 
@@ -250,42 +250,68 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
 
     @Override
     public void onAjaxLinkClicked(AjaxRequestTarget target) {
-        selectedFile = filesPanel.getSelectedItem();
-        if (selectedFile == null && selectedFolder != null) {
-            currentlySelectedItem = selectedFolder;
+        if (getSelectedFile() != null) {
+            setCurrentlySelectedItem(getSelectedFile());
         } else {
-            currentlySelectedItem = selectedFile;
+            if (roTree.getTreeState().getSelectedNodes().isEmpty()) {
+                setCurrentlySelectedItem(null);
+            } else {
+                setCurrentlySelectedItem((Thing) ((DefaultMutableTreeNode) roTree.getTreeState().getSelectedNodes()
+                        .iterator().next()).getUserObject());
+
+            }
+
         }
         switchButtonBar();
         target.add(itemInfoPanel);
         target.add(buttonsBar);
-    }
-
-
-    public Thing getCurrentlySelectedItem() {
-        return this.currentlySelectedItem;
+        for (IAjaxLinkListener listener : listeners) {
+            listener.onAjaxLinkClicked(target);
+        }
     }
 
 
     /**
-     * Switch beetwen resource and folders buttons bar.
+     * Switch between resource and folders buttons bar.
      */
     private void switchButtonBar() {
-        if (currentlySelectedItem == null) {
+        if (getCurrentlySelectedItem() == null) {
             //nothing to show
             buttonsBar.hideFoldersButtonContainer();
             buttonsBar.hideResourceButtonsContainer();
-        } else if (currentlySelectedItem != null && currentlySelectedItem.equals(selectedFile)) {
+        } else if (getCurrentlySelectedItem() instanceof Folder) {
+            //folders bar
+            buttonsBar.showFoldersButtonsContainer(getCurrentlySelectedItem());
+            buttonsBar.hideResourceButtonsContainer();
+        } else if (getCurrentlySelectedItem() instanceof Resource) {
             //files bar
             buttonsBar.hideFoldersButtonContainer();
-            buttonsBar.showResourceButtonsContainer(selectedFile);
-        } else if (currentlySelectedItem != null && currentlySelectedItem.equals(selectedFolder)) {
-            //folders bar
-            buttonsBar.showFoldersButtonsContainer(selectedFolder);
-            buttonsBar.hideResourceButtonsContainer();
-        } else if (currentlySelectedItem.equals(researchObject)) {
+            buttonsBar.showResourceButtonsContainer(getSelectedFile());
+        } else if (getCurrentlySelectedItem() instanceof ResearchObject) {
             buttonsBar.showFoldersButtonsContainer(researchObject);
         }
+    }
+
+
+    @SuppressWarnings("unchecked")
+    public IModel<Thing> getModel() {
+        return (IModel<Thing>) getDefaultModel();
+    }
+
+
+    public Resource getSelectedFile() {
+        return filesPanel.getSelectedFile();
+    }
+
+
+    /**
+     * Add new link listener.
+     * 
+     * @param listener
+     *            link listener
+     */
+    public void addLinkListener(IAjaxLinkListener listener) {
+        listeners.add(listener);
     }
 
 }

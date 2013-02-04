@@ -134,7 +134,7 @@ public class RoPage extends Base {
         //add(roViewerBox);
 
         /************************** NEW REPLACING CODE *******************************/
-        this.foldersViewer = new ROExplorer("folders-viewer", researchObject);
+        this.foldersViewer = new ROExplorer("folders-viewer", researchObject, itemModel);
         foldersViewer.setOutputMarkupId(true);
         add(foldersViewer);
         /*****************************************************************************/
@@ -142,6 +142,7 @@ public class RoPage extends Base {
         annotatingBox = new AnnotatingBox(this, itemModel);
         add(annotatingBox);
         annotatingBox.selectedStatements.clear();
+        foldersViewer.addLinkListener(annotatingBox);
         add(new DownloadMetadataModal("downloadMetadataModal", this));
         uploadResourceModal = new UploadResourceModal("uploadResourceModal", this);
         add(uploadResourceModal);
