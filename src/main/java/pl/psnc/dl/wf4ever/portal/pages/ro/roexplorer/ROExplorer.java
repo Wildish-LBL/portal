@@ -124,6 +124,7 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
         roTree.addTreeListeners(this);
         filesShiftForm.addOnSubmitListener(this);
         filesPanel.addLinkListeners(this);
+        buttonsBar.appendTarget(this);
     }
 
 

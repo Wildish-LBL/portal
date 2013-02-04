@@ -47,6 +47,9 @@ public class ROButtonsBar extends Panel {
      * 
      * @param id
      *            wicket id
+     * @param roURI
+     *            research object URI
+     * 
      */
     public ROButtonsBar(String id, URI roURI) {
         super(id);
