@@ -38,6 +38,7 @@ import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.forms.FilesShiftForm;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.models.TreeNodeContentModel;
 import pl.psnc.dl.wf4ever.portal.ui.behaviours.Loadable;
 import pl.psnc.dl.wf4ever.portal.ui.components.LoadingCircle;
+import pl.psnc.dl.wf4ever.portal.ui.components.UniversalStyledAjaxButton;
 
 /**
  * Basic RO files and folders viewer.
@@ -314,6 +315,16 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
      */
     public void addLinkListener(IAjaxLinkListener listener) {
         listeners.add(listener);
+    }
+
+
+    public UniversalStyledAjaxButton getSnapshotButton() {
+        return roButtonsBar.getSnapshotButton();
+    }
+
+
+    public UniversalStyledAjaxButton getReleaseButton() {
+        return roButtonsBar.getReleaseButton();
     }
 
 }

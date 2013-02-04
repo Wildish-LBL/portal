@@ -124,4 +124,14 @@ public class ROButtonsBar extends Panel {
     public String getROMetadataLink(RDFFormat format) {
         return roURI.resolve(".ro/manifest." + format.getDefaultFileExtension() + "?original=manifest.rdf").toString();
     }
+
+
+    public UniversalStyledAjaxButton getSnapshotButton() {
+        return snapshotButton;
+    }
+
+
+    public UniversalStyledAjaxButton getReleaseButton() {
+        return releaseButton;
+    }
 }
