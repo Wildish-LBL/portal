@@ -13,7 +13,6 @@ import org.purl.wf4ever.rosrs.client.Resource;
 import org.purl.wf4ever.rosrs.client.Thing;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
-import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.ui.components.UniversalStyledAjaxButton;
 
 /**
@@ -233,13 +232,6 @@ public class ResourceButtonsBar extends Panel {
         resourceButtonsContainer.add(deleteResource);
         //resourceButtonsContainer.add(downloadResource);
         roForm.add(resourceButtonsContainer);
-        //check permissions (easy way)
-        if (!MySession.get().isSignedIn()) {
-            deleteResource.setVisible(false);
-            addResource.setVisible(false);
-            this.folderButtonsContainer.setVisible(false);
-            this.resourceButtonsContainer.setVisible(false);
-        }
 
     }
 

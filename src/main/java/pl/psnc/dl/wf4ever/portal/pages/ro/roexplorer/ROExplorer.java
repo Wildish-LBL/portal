@@ -25,6 +25,7 @@ import org.purl.wf4ever.rosrs.client.Thing;
 import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
+import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.ITreeListener;
@@ -283,7 +284,7 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
      * Switch between resource and folders buttons bar.
      */
     private void switchButtonBar() {
-        if (getCurrentlySelectedItem() == null) {
+        if (getCurrentlySelectedItem() == null || !MySession.get().isSignedIn()) {
             //nothing to show
             buttonsBar.hideFoldersButtonContainer();
             buttonsBar.hideResourceButtonsContainer();
@@ -297,6 +298,7 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
             buttonsBar.showResourceButtonsContainer(getSelectedFile());
         } else if (getCurrentlySelectedItem() instanceof ResearchObject) {
             buttonsBar.showFoldersButtonsContainer(researchObject);
+            buttonsBar.hideResourceButtonsContainer();
         }
     }
 

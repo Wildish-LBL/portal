@@ -2,6 +2,12 @@
 <wicket:panel xmlns:wicket="http://wicket.apache.org">
 	<span wicket:id="main-container" class="span11" style="border: 1px dashed #BBBBBB; margin-bottom: 5px;">
 		<div class="span7">
+			<span wicket:id="titleSection">
+				<strong>Title:</strong> 
+				<a wicket:id="title">[uri]</a>
+				<br>
+			</span>
+			
 			<span wicket:id="resourceURISection">
 				<strong>URI:</strong> 
 				<a wicket:id="resourceURI">[uri]</a>
@@ -12,6 +18,7 @@
 				<span wicket:id="creator">[creator]</span>
 			</span>
 		</div>
+		
 		<div class="span3" >
 			<span wicket:id="createdSection">
 				<strong>Created on:</strong> 
@@ -21,13 +28,22 @@
 				<strong>File size:</strong> 
 				<span wicket:id="sizeFormatted">[filesize]</span>
 			</span>
-			<!-- 
+			<span wicket:id="evoClassSection">
+				<strong>Status:</strong> 
+				<span wicket:id="evoType.toString">[evoType]</span>
+			</span>
 			<span wicket:id="annotationsCntSection">
 				<br>
 				<strong>Number of annotations:</strong>
 				 <span wicket:id="annotations.size">[annotationsCnt]</span>
 			</span>
-			 -->
+		</div>
+		
+		<div class="span10" >
+			<span wicket:id="descSection">
+				<strong>Description:</strong> 
+				<span wicket:id="description">[created]</span>
+			</span>
 		</div>
 	</span>
 </wicket:panel>

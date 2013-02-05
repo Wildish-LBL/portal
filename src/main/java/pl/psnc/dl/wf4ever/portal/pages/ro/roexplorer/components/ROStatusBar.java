@@ -42,10 +42,19 @@ public class ROStatusBar extends Panel {
 
     /** Div about the resource URI. */
     private final WebMarkupContainer resourceURISection;
+
     /** Div about the resource annotations. */
-    /*
     private final WebMarkupContainer annotationsCntSection;
-     */
+
+    /** Div about the resource title. */
+    private final WebMarkupContainer titleSection;
+
+    /** Div about the resource description. */
+    private final WebMarkupContainer descSection;
+
+    /** Div about the RO evolution Class. */
+    private final WebMarkupContainer evoClassSection;
+
     /** Main container for all labels. **/
     WebMarkupContainer mainContainer;
 
@@ -75,9 +84,20 @@ public class ROStatusBar extends Panel {
         sizeSection = new WebMarkupContainer("sizeSection", new Model<>());
         mainContainer.add(sizeSection);
         sizeSection.add(new Label("sizeFormatted"));
-        /*annotationsCntSection = new WebMarkupContainer("annotationsCntSection", new Model<>());*/
-        /*annotationsCntSection.add(new Label("annotations.size"));*/
-        /*mainContainer.add(annotationsCntSection);*/
+        annotationsCntSection = new WebMarkupContainer("annotationsCntSection", new Model<>());
+        annotationsCntSection.add(new Label("annotations.size"));
+        mainContainer.add(annotationsCntSection);
+
+        titleSection = new WebMarkupContainer("titleSection", new Model<>());
+        titleSection.add(new Label("title"));
+        descSection = new WebMarkupContainer("descSection", new Model<>());
+        descSection.add(new Label("description"));
+        evoClassSection = new WebMarkupContainer("evoClassSection", new Model<>());
+        evoClassSection.add(new Label("evoType.toString"));
+        mainContainer.add(titleSection);
+        mainContainer.add(descSection);
+        mainContainer.add(evoClassSection);
+
         add(mainContainer);
     }
 
@@ -93,7 +113,7 @@ public class ROStatusBar extends Panel {
             createdSection.setVisible(resource.getCreated() != null);
             //            sizeSection.setVisible(resource.getSizeFormatted() != null);
             sizeSection.setVisible(false);
-            //annotationsCntSection.setVisible(true);
+            annotationsCntSection.setVisible(true);
         } else {
             mainContainer.setVisible(false);
         }
