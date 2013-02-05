@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import pl.psnc.dl.wf4ever.portal.model.SearchResult;
@@ -35,6 +36,7 @@ public class TestSearch {
      *             any error
      */
     @Test
+    @Ignore
     public final void testFindByKeywords()
             throws IllegalArgumentException, MalformedURLException, FeedException, IOException {
         List<SearchResult> ros = SearchService.findByKeywords(URI.create("http://sandbox.wf4ever-project.org/rodl"),
