@@ -231,12 +231,14 @@ public class ResourceButtonsBar extends Panel {
         };
         //resourceButtonsContainer.add(editResource);
         resourceButtonsContainer.add(deleteResource);
-        resourceButtonsContainer.add(downloadResource);
+        //resourceButtonsContainer.add(downloadResource);
         roForm.add(resourceButtonsContainer);
         //check permissions (easy way)
         if (!MySession.get().isSignedIn()) {
             deleteResource.setVisible(false);
             addResource.setVisible(false);
+            this.folderButtonsContainer.setVisible(false);
+            this.resourceButtonsContainer.setVisible(false);
         }
 
     }

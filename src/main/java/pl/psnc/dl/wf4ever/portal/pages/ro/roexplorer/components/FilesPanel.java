@@ -167,7 +167,7 @@ public class FilesPanel extends Panel {
     private void assignIcon(ListItem<Resource> item) {
         Resource resource = (Resource) item.getDefaultModelObject();
         String name = resource.getName();
-        if (name.endsWith(".txt")) {
+        if (name.endsWith(".txt") || name.endsWith(".text")) {
             item.add(new ContextImage("image", "images/mimetypes/txt.png"));
         } else if (name.endsWith(".doc") || name.endsWith(".odt") || name.endsWith(".rtf") || name.endsWith(".doc")) {
             item.add(new ContextImage("image", "images/mimetypes/doc.png"));

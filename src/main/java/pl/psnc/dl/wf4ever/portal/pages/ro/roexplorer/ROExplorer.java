@@ -10,6 +10,7 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 
 import org.apache.log4j.Logger;
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.IFormSubmitListener;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -77,6 +78,7 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
     private TreeNodeContentModel foldersModel;
     /** Listeners for the selected resource. */
     private List<IAjaxLinkListener> listeners = new ArrayList<>();
+    private List<Component> onNodeListTargets = new ArrayList<>();
 
     /** Loading information. */
     private static final String LOADING_OBJECT = "Loading Research Object metadata.<br />Please wait...";
@@ -189,6 +191,7 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
 
     @Override
     public void nodeUnselected(Object node) {
+        filesPanel.unselect();
         setCurrentlySelectedItem(null);
         switchButtonBar();
     }
@@ -219,6 +222,9 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
         target.add(filesPanel);
         target.add(itemInfoPanel);
         target.add(buttonsBar);
+        for (Component c : onNodeListTargets) {
+            target.add(c);
+        }
     }
 
 
@@ -316,4 +322,11 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
         listeners.add(listener);
     }
 
+
+    /**
+     * Add a new taget for node click event.
+     */
+    public void appendOnNodeClickTarget(Component target) {
+        onNodeListTargets.add(target);
+    }
 }

@@ -138,8 +138,9 @@ public class RoPage extends Base {
         foldersViewer.setOutputMarkupId(true);
         add(foldersViewer);
         /*****************************************************************************/
-
         annotatingBox = new AnnotatingBox(this, itemModel);
+        foldersViewer.appendOnNodeClickTarget(annotatingBox);
+        /*****************************************************************************/
         add(annotatingBox);
         annotatingBox.selectedStatements.clear();
         foldersViewer.addLinkListener(annotatingBox);
