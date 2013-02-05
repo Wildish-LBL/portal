@@ -1,5 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours;
 
+import java.io.Serializable;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
 /**
@@ -8,7 +10,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
  * @author pejot
  * 
  */
-public interface IAjaxLinkListener {
+public interface IAjaxLinkListener extends Serializable {
 
     /**
      * On click event.

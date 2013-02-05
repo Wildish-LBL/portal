@@ -2,7 +2,6 @@ package pl.psnc.dl.wf4ever.portal.services;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,11 +53,9 @@ public final class RoEvoService {
      * @return a collection of {@link RoEvoNode}
      * @throws IOException
      *             can't connect to RODL
-     * @throws URISyntaxException
-     *             the URIs in the SPARQL response are incorrect
      */
     public static Collection<RoEvoNode> describeRO(URI sparqlEndpointURI, URI researchObjectURI)
-            throws IOException, URISyntaxException {
+            throws IOException {
         OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM);
         QueryExecution x = QueryExecutionFactory.sparqlService(sparqlEndpointURI.toString(),
             MyQueryFactory.getResourceClass(researchObjectURI.toString()));
@@ -86,7 +83,7 @@ public final class RoEvoService {
         StmtIterator it = model.listStatements();
         while (it.hasNext()) {
             Statement statement = it.next();
-            URI subjectURI = new URI(statement.getSubject().getURI());
+            URI subjectURI = URI.create(statement.getSubject().getURI());
             if (!nodes.containsKey(subjectURI)) {
                 nodes.put(subjectURI, new RoEvoNode(subjectURI));
             }
@@ -133,12 +130,9 @@ public final class RoEvoService {
      * @param objectURIString
      *            URI
      * @return a node
-     * @throws URISyntaxException
-     *             the URI is incorrect
      */
-    private static RoEvoNode createNode(Map<URI, RoEvoNode> nodes, String objectURIString)
-            throws URISyntaxException {
-        URI objectURI = new URI(objectURIString);
+    private static RoEvoNode createNode(Map<URI, RoEvoNode> nodes, String objectURIString) {
+        URI objectURI = URI.create(objectURIString);
         if (!nodes.containsKey(objectURI)) {
             nodes.put(objectURI, new RoEvoNode(objectURI));
         }

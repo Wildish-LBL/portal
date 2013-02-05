@@ -99,6 +99,8 @@ public class RoPage extends Base {
 
     private ROExplorer foldersViewer;
 
+    private RoEvoBox roevoBox;
+
 
     /**
      * Constructor.
@@ -136,7 +138,6 @@ public class RoPage extends Base {
         add(new Label("title", researchObject.getUri().toString()));
 
         final CompoundPropertyModel<Thing> itemModel = new CompoundPropertyModel<Thing>((Thing) null);
-        //add(roViewerBox);
 
         this.foldersViewer = new ROExplorer("folders-viewer", researchObject, itemModel);
         foldersViewer.setOutputMarkupId(true);
@@ -146,6 +147,13 @@ public class RoPage extends Base {
             @Override
             public void onAjaxLinkClicked(AjaxRequestTarget target) {
                 createSnapshot(target);
+            }
+        });
+        foldersViewer.getReleaseButton().addLinkListener(new IAjaxLinkListener() {
+
+            @Override
+            public void onAjaxLinkClicked(AjaxRequestTarget target) {
+                createArchive(target);
             }
         });
 
@@ -165,8 +173,9 @@ public class RoPage extends Base {
         importAnnotationModal = new ImportAnnotationModal("importAnnotationModal", this, itemModel);
         add(importAnnotationModal);
 
-        add(new RoEvoBox("roEvoBox", ((PortalApplication) getApplication()).getSparqlEndpointURI(),
-                researchObject.getUri()));
+        roevoBox = new RoEvoBox("roEvoBox", ((PortalApplication) getApplication()).getSparqlEndpointURI(),
+                researchObject);
+        add(roevoBox);
 
         add(new AbstractDefaultAjaxBehavior() {
 
@@ -220,23 +229,84 @@ public class RoPage extends Base {
                 status.refresh();
                 if (status.getState() != State.RUNNING) {
                     stop();
-                    RoPage.this.remove(this);
+                    feedbackPanel.remove(this);
                 }
                 switch (status.getState()) {
                     case RUNNING:
-                        info(String.format("A snapshot %s is being created...", status.getTarget()));
+                        RoPage.this.info(String.format("A snapshot %s is being created...", status.getTarget()));
                         break;
                     case DONE:
-                        success(String.format("Snapshot %s has been created!", status.getTarget()));
+                        RoPage.this.success(String.format("Snapshot %s has been created!", status.getTarget()));
+                        try {
+                            RoEvoBox newRoevoBox = new RoEvoBox("roEvoBox",
+                                    ((PortalApplication) getApplication()).getSparqlEndpointURI(), researchObject);
+                            roevoBox.replaceWith(newRoevoBox);
+                            roevoBox = newRoevoBox;
+                            target.add(roevoBox);
+                            //                            target.appendJavaScript(roevoBox.getDrawJavaScript());
+                        } catch (IOException e) {
+                            LOG.error("Can't refresh roevoBox", e);
+                            RoPage.this.error(e.getMessage());
+                        }
                         break;
                     default:
-                        error(String.format("%s: %s", status.getState(), status.getReason()));
+                        RoPage.this.error(String.format("%s: %s", status.getState(), status.getReason()));
                 }
-                target.add(RoPage.this.feedbackPanel);
-                getRequestCycle().setResponsePage(getPage());
+                target.add(feedbackPanel);
             }
         };
 
+        info(String.format("A snapshot %s is being created...", status.getTarget()));
+        feedbackPanel.add(updater);
+        target.add(feedbackPanel);
+    }
+
+
+    protected void createArchive(AjaxRequestTarget target) {
+        final JobStatus status = researchObject.archive(researchObject.getName().substring(0,
+            researchObject.getName().length() - 1)
+                + "-snapshot");
+
+        final AjaxSelfUpdatingTimerBehavior updater = new AjaxSelfUpdatingTimerBehavior(Duration.milliseconds(1000)) {
+
+            /** id. */
+            private static final long serialVersionUID = 6060461146505243329L;
+
+
+            @Override
+            protected void onPostProcessTarget(AjaxRequestTarget target) {
+                super.onPostProcessTarget(target);
+                status.refresh();
+                if (status.getState() != State.RUNNING) {
+                    stop();
+                    feedbackPanel.remove(this);
+                }
+                switch (status.getState()) {
+                    case RUNNING:
+                        RoPage.this.info(String.format("A release %s is being created...", status.getTarget()));
+                        break;
+                    case DONE:
+                        RoPage.this.success(String.format("Release %s has been created!", status.getTarget()));
+                        try {
+                            RoEvoBox newRoevoBox = new RoEvoBox("roEvoBox",
+                                    ((PortalApplication) getApplication()).getSparqlEndpointURI(), researchObject);
+                            roevoBox.replaceWith(newRoevoBox);
+                            roevoBox = newRoevoBox;
+                            target.add(roevoBox);
+                            //                            target.appendJavaScript(roevoBox.getDrawJavaScript());
+                        } catch (IOException e) {
+                            LOG.error("Can't refresh roevoBox", e);
+                            RoPage.this.error(e.getMessage());
+                        }
+                        break;
+                    default:
+                        RoPage.this.error(String.format("%s: %s", status.getState(), status.getReason()));
+                }
+                target.add(feedbackPanel);
+            }
+        };
+
+        info(String.format("A release %s is being created...", status.getTarget()));
         feedbackPanel.add(updater);
         target.add(feedbackPanel);
     }
