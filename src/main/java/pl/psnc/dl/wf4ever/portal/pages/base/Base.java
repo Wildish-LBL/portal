@@ -5,6 +5,7 @@ import java.net.URI;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -66,28 +67,8 @@ public class Base extends WebPage {
         add(new BookmarkablePageLink<Void>("menu-profile", ProfilePage.class));
         add(new Login("login"));
         add(new Search("main-search"));
-
-        /*
-        WebMarkupContainer signedInAs = new WebMarkupContainer("signedInAs");
-        signedInAs.add(new AttributeModifier("data-original-title", new PropertyModel<String>(this, "signInTwipsy")));
-        add(signedInAs);
-        signedInAs.add(new AjaxFallbackLink<String>("signIn") {
-
-            private static final long serialVersionUID = -4458301162412620530L;
-
-
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                if (MySession.get().isSignedIn()) {
-                    MySession.get().signOut();
-                    throw new RestartResponseException(getApplication().getHomePage());
-                } else {
-                    throw new RestartResponseException(((PortalApplication) getApplication()).getSignInPageClass());
-                }
-            }
-
-        }.add(new Label("signInText", new PropertyModel<String>(this, "signInButtonText"))));
-        */
+        add(new Label("application.appName", ((PortalApplication) getApplication()).getAppName()));
+        add(new Label("application.version", ((PortalApplication) getApplication()).getVersion()));
     }
 
 
