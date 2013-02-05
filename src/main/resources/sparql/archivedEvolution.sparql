@@ -1,32 +1,33 @@
 PREFIX roevo: <http://purl.org/wf4ever/roevo#>
 PREFIX ro: <http://purl.org/wf4ever/ro#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
 
 CONSTRUCT
 {
-	<%s> roevo:isArchivedOf ?live ;
-		roevo:hasPreviousVersion ?son ;
+	<%s> roevo:isArchiveOf ?live ;
+		prov:wasRevisionOf ?son ;
 		rdfs:label ?grandsonid ;
 		a ?grandsonclass .
 	?live rdfs:label ?liveid ;
 		a ?liveclass .
 	?middle roevo:isSnapshotOf ?live ;
-		roevo:isArchivedOf ?live ;
-		roevo:hasPreviousVersion ?father ;
+		roevo:isArchiveOf ?live ;
+		prov:wasRevisionOf ?father ;
 		rdfs:label ?id ;
 		a ?class .
 	?son roevo:isSnapshotOf ?live ;
-		roevo:isArchivedOf ?live ;
-		roevo:hasPreviousVersion ?middle ;
+		roevo:isArchiveOf ?live ;
+		prov:wasRevisionOf ?middle ;
 		rdfs:label ?sonid ;
 		a ?sonclass .
 	?father roevo:isSnapshotOf ?live ;
-		roevo:isArchivedOf ?live ;
-		roevo:hasPreviousVersion ?grandfather ;
+		roevo:isArchiveOf ?live ;
+		prov:wasRevisionOf ?grandfather ;
 		rdfs:label ?fatherid ;
 		a ?fatherclass .
 	?grandfather roevo:isSnapshotOf ?live ;
-		roevo:isArchivedOf ?live ;
+		roevo:isArchiveOf ?live ;
 		rdfs:label ?grandfatherid ;
 		a ?grandfatherclass .
 }
@@ -37,39 +38,39 @@ WHERE
 	
 	OPTIONAL
 	{
-		<%<s> roevo:isArchivedOf ?live . 
+		<%<s> roevo:isArchiveOf ?live . 
 		OPTIONAL { ?live rdfs:label ?liveid . }
 		OPTIONAL { ?live a ?liveclass . }
 
 		OPTIONAL
 		{
-			<%<s> roevo:hasPreviousVersion ?son .
+			<%<s> prov:wasRevisionOf ?son .
 			OPTIONAL { ?son rdfs:label ?sonid . }
 			OPTIONAL { ?son roevo:isSnapshotOf ?live . }
-			OPTIONAL { ?son roevo:isArchivedOf ?live . }
+			OPTIONAL { ?son roevo:isArchiveOf ?live . }
 			OPTIONAL { ?son a ?sonclass . }
 
 			OPTIONAL 
 			{ 
-				?son roevo:hasPreviousVersion ?middle .
+				?son prov:wasRevisionOf ?middle .
 				OPTIONAL { ?middle rdfs:label ?id . }
 				OPTIONAL { ?middle roevo:isSnapshotOf ?live . }
-				OPTIONAL { ?middle roevo:isArchivedOf ?live . }
+				OPTIONAL { ?middle roevo:isArchiveOf ?live . }
 				OPTIONAL { ?middle a ?class . }
 
 				OPTIONAL
 				{
-					?middle roevo:hasPreviousVersion ?father .
+					?middle prov:wasRevisionOf ?father .
 					OPTIONAL { ?father rdfs:label ?fatherid . }
 					OPTIONAL { ?father roevo:isSnapshotOf ?live . }
-					OPTIONAL { ?father roevo:isArchivedOf ?live . }
+					OPTIONAL { ?father roevo:isArchiveOf ?live . }
 					OPTIONAL { ?father a ?fatherclass . }
 
 					OPTIONAL{
-						?father roevo:hasPreviousVersion ?grandfather .
+						?father prov:wasRevisionOf ?grandfather .
 						OPTIONAL { ?grandfather rdfs:label ?grandfatherid . }
 						OPTIONAL { ?grandfather roevo:isSnapshotOf ?live . }
-						OPTIONAL { ?grandfather roevo:isArchivedOf ?live . }
+						OPTIONAL { ?grandfather roevo:isArchiveOf ?live . }
 						OPTIONAL { ?grandfather a ?grandfatherclass . }
 					}
 				}

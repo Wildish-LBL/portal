@@ -21,6 +21,7 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
+import org.purl.wf4ever.rosrs.client.ResearchObject;
 
 import pl.psnc.dl.wf4ever.portal.model.RoEvoNode;
 import pl.psnc.dl.wf4ever.portal.model.RoEvoNode.EvoClassModifier;
@@ -36,6 +37,8 @@ public class RoEvoBox extends Panel {
 
     /** id. */
     private static final long serialVersionUID = -3775797988389365540L;
+
+    private final List<RoEvoNode> postorder;
 
 
     /**
@@ -53,8 +56,8 @@ public class RoEvoBox extends Panel {
      *             when data from the SPARQL endpoint contain invalid URIs
      */
     @SuppressWarnings("serial")
-    public RoEvoBox(String id, URI sparqlEndpointURI, final URI researchObjectURI)
-            throws IOException, URISyntaxException {
+    public RoEvoBox(String id, URI sparqlEndpointURI, final ResearchObject researchObject)
+            throws IOException {
         super(id);
 
         setOutputMarkupId(true);
@@ -71,9 +74,9 @@ public class RoEvoBox extends Panel {
         WebMarkupContainer forks = new WebMarkupContainer("forks");
         add(forks);
 
-        Collection<RoEvoNode> nodes = RoEvoService.describeRO(sparqlEndpointURI, researchObjectURI);
+        Collection<RoEvoNode> nodes = RoEvoService.describeRO(sparqlEndpointURI, researchObject.getUri());
         List<RoEvoNode> preorder = new ArrayList<>();
-        final List<RoEvoNode> postorder = new ArrayList<>();
+        postorder = new ArrayList<>();
         for (RoEvoNode node : nodes) {
             if (!preorder.contains(node)) {
                 visit(node, preorder, postorder);
@@ -90,7 +93,7 @@ public class RoEvoBox extends Panel {
                 sourceNodes.add(node);
                 continue;
             }
-            if (node.getEvoClassModifier() == EvoClassModifier.FORK && !node.getUri().equals(researchObjectURI)) {
+            if (node.getEvoClassModifier() == EvoClassModifier.FORK && !node.getUri().equals(researchObject.getUri())) {
                 forkNodes.add(node);
                 continue;
             }
@@ -114,7 +117,7 @@ public class RoEvoBox extends Panel {
 
                 @Override
                 protected void populateItem(ListItem<RoEvoNode> item) {
-                    populateRoEvoNode(item, researchObjectURI, ox + dx * postorder.indexOf(item.getModelObject()));
+                    populateRoEvoNode(item, researchObject.getUri(), ox + dx * postorder.indexOf(item.getModelObject()));
                 }
 
             });
@@ -126,7 +129,7 @@ public class RoEvoBox extends Panel {
 
                 @Override
                 protected void populateItem(ListItem<RoEvoNode> item) {
-                    populateRoEvoNode(item, researchObjectURI, ox + dx * postorder.indexOf(item.getModelObject()));
+                    populateRoEvoNode(item, researchObject.getUri(), ox + dx * postorder.indexOf(item.getModelObject()));
                 }
 
             });
@@ -138,7 +141,7 @@ public class RoEvoBox extends Panel {
 
                 @Override
                 protected void populateItem(ListItem<RoEvoNode> item) {
-                    populateRoEvoNode(item, researchObjectURI, ox + dx * postorder.indexOf(item.getModelObject()));
+                    populateRoEvoNode(item, researchObject.getUri(), ox + dx * postorder.indexOf(item.getModelObject()));
                 }
 
             });
@@ -150,7 +153,7 @@ public class RoEvoBox extends Panel {
 
                 @Override
                 protected void populateItem(ListItem<RoEvoNode> item) {
-                    populateRoEvoNode(item, researchObjectURI, ox + dx * postorder.indexOf(item.getModelObject()));
+                    populateRoEvoNode(item, researchObject.getUri(), ox + dx * postorder.indexOf(item.getModelObject()));
                 }
 
             });
@@ -162,7 +165,7 @@ public class RoEvoBox extends Panel {
 
                 @Override
                 protected void populateItem(ListItem<RoEvoNode> item) {
-                    populateRoEvoNode(item, researchObjectURI, ox + dx * postorder.indexOf(item.getModelObject()));
+                    populateRoEvoNode(item, researchObject.getUri(), ox + dx * postorder.indexOf(item.getModelObject()));
                 }
 
             });
@@ -175,25 +178,7 @@ public class RoEvoBox extends Panel {
             @Override
             public void renderHead(Component component, IHeaderResponse response) {
                 super.renderHead(component, response);
-                final StringBuilder sb = new StringBuilder();
-                sb.append("$('#evoroot').on('firstShow', function() {");
-
-                for (RoEvoNode source : postorder) {
-                    for (RoEvoNode node : source.getItsLiveROs()) {
-                        sb.append(createConnection(source, node, "Has live RO"));
-                    }
-                    for (RoEvoNode node : source.getPreviousSnapshots()) {
-                        sb.append(createConnection(source, node, "Previous snapshot"));
-                    }
-                    for (RoEvoNode node : source.getDerivedResources()) {
-                        sb.append(createConnection(source, node, "Derived from"));
-                    }
-
-                }
-
-                sb.append("});");
-
-                response.renderOnLoadJavaScript(sb.toString());
+                response.renderOnLoadJavaScript(getDrawJavaScript());
             }
         });
     }
@@ -286,6 +271,28 @@ public class RoEvoBox extends Panel {
         sb.append(connId + ".bind('mouseenter', function (c) { c.showOverlay('label'); });");
         sb.append(connId + ".bind('mouseexit', function (c) { c.hideOverlay('label'); });");
         sb.append(connId + ".hideOverlay('label');");
+        return sb.toString();
+    }
+
+
+    public String getDrawJavaScript() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("$('#evoroot').on('firstShow', function() {");
+
+        for (RoEvoNode source : postorder) {
+            for (RoEvoNode node : source.getItsLiveROs()) {
+                sb.append(createConnection(source, node, "Has live RO"));
+            }
+            for (RoEvoNode node : source.getPreviousSnapshots()) {
+                sb.append(createConnection(source, node, "Previous snapshot"));
+            }
+            for (RoEvoNode node : source.getDerivedResources()) {
+                sb.append(createConnection(source, node, "Derived from"));
+            }
+
+        }
+
+        sb.append("});");
         return sb.toString();
     }
 

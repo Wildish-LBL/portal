@@ -1,25 +1,26 @@
 PREFIX roevo: <http://purl.org/wf4ever/roevo#>
 PREFIX ro: <http://purl.org/wf4ever/ro#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
 
 CONSTRUCT
 {
 	<%s> roevo:isSnapshotOf ?live ;
-		roevo:hasPreviousVersion ?father ;
+		prov:wasRevisionOf ?father ;
 		rdfs:label ?id ;
 		a ?class .
 	?live rdfs:label ?liveid ;
 		a ?liveclass .
 	?son roevo:isSnapshotOf ?live ;
-		roevo:hasPreviousVersion <%<s> ;
+		prov:wasRevisionOf <%<s> ;
 		rdfs:label ?sonid ;
 		a ?sonclass .
 	?grandson roevo:isSnapshotOf ?live ;
-		roevo:hasPreviousVersion ?son ;
+		prov:wasRevisionOf ?son ;
 		rdfs:label ?grandsonid ;
 		a ?grandsonclass .
 	?father roevo:isSnapshotOf ?live ;
-		roevo:hasPreviousVersion ?grandfather ;
+		prov:wasRevisionOf ?grandfather ;
 		rdfs:label ?fatherid ;
 		a ?fatherclass .
 	?grandfather roevo:isSnapshotOf ?live ;
@@ -43,12 +44,12 @@ WHERE
 
 	OPTIONAL
 	{
-		<%<s> roevo:hasPreviousVersion ?father .
+		<%<s> prov:wasRevisionOf ?father .
 		OPTIONAL { ?father rdfs:label ?fatherid . }
 		OPTIONAL { ?father roevo:isSnapshotOf ?live . }
 		OPTIONAL { ?father a ?fatherclass . }
 		OPTIONAL{
-			?father roevo:hasPreviousVersion ?grandfather .
+			?father prov:wasRevisionOf ?grandfather .
 			OPTIONAL { ?grandfather rdfs:label ?grandfatherid . }
 			OPTIONAL { ?grandfather roevo:isSnapshotOf ?live . }
 			OPTIONAL { ?grandfather a ?grandfatherclass . }
@@ -57,13 +58,13 @@ WHERE
 
 	OPTIONAL
 	{
-		?son roevo:hasPreviousVersion <%<s> .
+		?son prov:wasRevisionOf <%<s> .
 		OPTIONAL { ?son rdfs:label ?sonid . }
 		OPTIONAL { ?son roevo:isSnapshotOf ?live . }
 		OPTIONAL { ?son a ?sonclass . }
 		OPTIONAL
 		{
-			?grandson roevo:hasPreviousVersion ?son ;
+			?grandson prov:wasRevisionOf ?son ;
 			OPTIONAL { ?grandson rdfs:label ?grandsonid . }
 			OPTIONAL { ?grandson roevo:isSnapshotOf ?live . }
 			OPTIONAL { ?grandson a ?grandsonclass . }

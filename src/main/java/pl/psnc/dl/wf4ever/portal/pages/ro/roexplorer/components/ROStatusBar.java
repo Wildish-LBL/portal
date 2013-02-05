@@ -12,6 +12,7 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Creator;
+import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.Thing;
 
 import pl.psnc.dl.wf4ever.portal.pages.util.CreatorsPanel;
@@ -114,9 +115,25 @@ public class ROStatusBar extends Panel {
             //            sizeSection.setVisible(resource.getSizeFormatted() != null);
             sizeSection.setVisible(false);
             annotationsCntSection.setVisible(true);
+
+            titleSection.setVisible(false);
+            descSection.setVisible(false);
+            evoClassSection.setVisible(false);
+
+            if (resource instanceof ResearchObject) {
+                ResearchObject ro = (ResearchObject) resource;
+                if (ro.getTitle() != null && !ro.getTitle().equals("")) {
+                    titleSection.setVisible(true);
+                }
+                if (ro.getDescription() != null && !ro.getDescription().equals("")) {
+                    descSection.setVisible(true);
+                }
+                if (ro.getEvoType() != null) {
+                    evoClassSection.setVisible(true);
+                }
+            }
         } else {
             mainContainer.setVisible(false);
         }
     }
-
 }

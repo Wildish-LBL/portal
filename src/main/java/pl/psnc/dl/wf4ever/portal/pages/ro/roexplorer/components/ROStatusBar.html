@@ -4,25 +4,32 @@
 		<div class="span7">
 			<span wicket:id="titleSection">
 				<strong>Title:</strong> 
-				<a wicket:id="title">[uri]</a>
+				<span wicket:id="title">[title]</span>
 				<br>
 			</span>
-			
 			<span wicket:id="resourceURISection">
 				<strong>URI:</strong> 
 				<a wicket:id="resourceURI">[uri]</a>
+				<br>
 			</span>
 			<span wicket:id="creatorSection">
-			<br>
 				<strong>Created by:</strong> 
 				<span wicket:id="creator">[creator]</span>
+				<br>
 			</span>
+			<span wicket:id="descSection">
+				<strong>Description:</strong> 
+				<span wicket:id="description">[created]</span>
+			</span>
+		
 		</div>
+		
 		
 		<div class="span3" >
 			<span wicket:id="createdSection">
 				<strong>Created on:</strong> 
 				<span wicket:id="createdFormatted">[created]</span>
+				<br>
 			</span>
 			<span wicket:id="sizeSection">
 				<strong>File size:</strong> 
@@ -36,13 +43,6 @@
 				<br>
 				<strong>Number of annotations:</strong>
 				 <span wicket:id="annotations.size">[annotationsCnt]</span>
-			</span>
-		</div>
-		
-		<div class="span10" >
-			<span wicket:id="descSection">
-				<strong>Description:</strong> 
-				<span wicket:id="description">[created]</span>
 			</span>
 		</div>
 	</span>

@@ -81,6 +81,12 @@ public class PortalApplication extends AuthenticatedWebApplication {
     /** RODL admin token. */
     private String adminToken;
 
+    /** Application name, from pom.xml. */
+    private String name;
+
+    /** Application version, from pom.xml. */
+    private String version;
+
 
     @Override
     public Class<? extends WebPage> getHomePage() {
@@ -144,6 +150,8 @@ public class PortalApplication extends AuthenticatedWebApplication {
             userAccessTokenEndpointURL = new URL(props.getProperty("userAccessTokenEndpointURL"));
             userAuthorizationEndpointURL = new URL(props.getProperty("userAuthorizationEndpointURL"));
             wf2ROService = new URI(props.getProperty("wf2ROService"));
+            name = props.getProperty("application.name");
+            version = props.getProperty("application.version");
         } catch (Exception e) {
             LOG.error("Failed to load properties: " + e.getMessage());
         }
@@ -271,6 +279,16 @@ public class PortalApplication extends AuthenticatedWebApplication {
     @Override
     protected Class<? extends AbstractAuthenticatedWebSession> getWebSessionClass() {
         return MySession.class;
+    }
+
+
+    public String getAppName() {
+        return name;
+    }
+
+
+    public String getVersion() {
+        return version;
     }
 
 }
