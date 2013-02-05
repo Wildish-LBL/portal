@@ -176,7 +176,7 @@ public class RoPage extends Base {
         add(importAnnotationModal);
 
         roevoBox = new RoEvoBox("roEvoBox", ((PortalApplication) getApplication()).getSparqlEndpointURI(),
-                researchObject);
+                researchObject, false);
         add(roevoBox);
 
         add(new AbstractDefaultAjaxBehavior() {
@@ -241,11 +241,10 @@ public class RoPage extends Base {
                         RoPage.this.success(String.format("Snapshot %s has been created!", status.getTarget()));
                         try {
                             RoEvoBox newRoevoBox = new RoEvoBox("roEvoBox",
-                                    ((PortalApplication) getApplication()).getSparqlEndpointURI(), researchObject);
+                                    ((PortalApplication) getApplication()).getSparqlEndpointURI(), researchObject, true);
                             roevoBox.replaceWith(newRoevoBox);
                             roevoBox = newRoevoBox;
                             target.add(roevoBox);
-                            //                            target.appendJavaScript(roevoBox.getDrawJavaScript());
                         } catch (IOException e) {
                             LOG.error("Can't refresh roevoBox", e);
                             RoPage.this.error(e.getMessage());
@@ -291,7 +290,7 @@ public class RoPage extends Base {
                         RoPage.this.success(String.format("Release %s has been created!", status.getTarget()));
                         try {
                             RoEvoBox newRoevoBox = new RoEvoBox("roEvoBox",
-                                    ((PortalApplication) getApplication()).getSparqlEndpointURI(), researchObject);
+                                    ((PortalApplication) getApplication()).getSparqlEndpointURI(), researchObject, true);
                             roevoBox.replaceWith(newRoevoBox);
                             roevoBox = newRoevoBox;
                             target.add(roevoBox);
