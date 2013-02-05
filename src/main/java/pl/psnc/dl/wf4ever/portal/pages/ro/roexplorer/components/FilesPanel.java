@@ -36,7 +36,8 @@ public class FilesPanel extends Panel {
     private CssResourceReference cssResourceReference = new CssResourceReference(FilesPanel.class, "tails.css");
     /** Listeners for the selected resource. */
     private List<IAjaxLinkListener> listeners;
-    IModel<List<Resource>> foldersModel;
+    /** Folders model. */
+    private IModel<List<Resource>> foldersModel;
 
 
     /**
@@ -44,6 +45,8 @@ public class FilesPanel extends Panel {
      * 
      * @param id
      *            wicket id
+     * @param foldersModel
+     *            folders model
      */
     public FilesPanel(String id, IModel<List<Resource>> foldersModel) {
         super(id, new Model<Resource>());
@@ -56,11 +59,14 @@ public class FilesPanel extends Panel {
             private static final long serialVersionUID = -6310254217773728128L;
 
 
+            @SuppressWarnings("rawtypes")
             @Override
             protected void populateItem(final ListItem<Resource> item) {
 
                 final Resource thing = item.getModelObject();
                 final Label label = new Label("tailLabel", item.getModelObject().getName());
+
+                @SuppressWarnings("unchecked")
                 final AjaxLink<Object> link = new AjaxLink<Object>("tailLink", new Model()) {
 
                     /** Serialization */
@@ -82,8 +88,8 @@ public class FilesPanel extends Panel {
 
                 link.add(AttributeModifier.replace("uri", item.getModelObject().getUri()));
                 item.add(link);
+                assignIcon(item);
                 link.add(label);
-                item.add(new ContextImage("image", "images/mimetypes/pdf.png"));
             }
 
         };
@@ -137,9 +143,9 @@ public class FilesPanel extends Panel {
     protected void onConfigure() {
         super.onConfigure();
         if (foldersModel.getObject() != null && foldersModel.getObject().size() > 1) {
-
+            //show with scroll
         } else {
-
+            //show without scroll
         }
     }
 
@@ -151,4 +157,40 @@ public class FilesPanel extends Panel {
         setSelectedFile(null);
     }
 
+
+    /**
+     * Assign icon with respect to the mimetype.
+     * 
+     * @param item
+     *            resource from the file list.
+     */
+    private void assignIcon(ListItem<Resource> item) {
+        Resource resource = (Resource) item.getDefaultModelObject();
+        String name = resource.getName();
+        if (name.endsWith(".txt")) {
+            item.add(new ContextImage("image", "images/mimetypes/txt.png"));
+        } else if (name.endsWith(".doc") || name.endsWith(".odt") || name.endsWith(".rtf") || name.endsWith(".doc")) {
+            item.add(new ContextImage("image", "images/mimetypes/doc.png"));
+        } else if (name.endsWith(".pdf")) {
+            item.add(new ContextImage("image", "images/mimetypes/pdf.png"));
+        } else if (name.endsWith(".xls") || name.endsWith(".xlsx") || name.endsWith(".ods")) {
+            item.add(new ContextImage("image", "images/mimetypes/xls.png"));
+        } else if (name.endsWith(".rdf") || name.endsWith(".ttl") || name.endsWith(".owl")) {
+            item.add(new ContextImage("image", "images/mimetypes/rdf.png"));
+        } else if (name.endsWith(".zip") || name.endsWith(".tar") || name.endsWith(".tar.gz") || name.endsWith(".rar")) {
+            item.add(new ContextImage("image", "images/mimetypes/zip.png"));
+        } else if (name.endsWith(".jpeg") || name.endsWith(".png") || name.endsWith(".bmp") || name.endsWith(".gif")
+                || name.endsWith(".jpg")) {
+            item.add(new ContextImage("image", "images/mimetypes/jpeg.png"));
+        } else if (name.endsWith(".avi") || name.endsWith(".wmv") || name.endsWith(".3gp")) {
+            item.add(new ContextImage("image", "images/mimetypes/avi.png"));
+        } else if (name.endsWith(".mp3") || name.endsWith(".wav") || name.endsWith(".midi")) {
+            item.add(new ContextImage("image", "images/mimetypes/mp3.png"));
+        } else if (name.endsWith(".wfbundle")) {
+            item.add(new ContextImage("image", "images/mimetypes/wfbundle.png"));
+        } else {
+            item.add(new ContextImage("image", "images/mimetypes/blank.png"));
+        }
+
+    }
 }
