@@ -478,4 +478,12 @@ input.span1 {
 .spaceDiv {
 	margin-bottom: 2px;
 }
+
+.tmpDashedContainer {
+	border: 1px dashed #BBBBBB; 
+	margin-bottom: 5px;
+	padding-bottom: 3px;
+	padding-top: 3px;
+}
+
 /* visualization */

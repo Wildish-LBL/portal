@@ -33,7 +33,7 @@ public class FilesPanel extends Panel {
     /** Serialization. */
     private static final long serialVersionUID = 1L;
     /** CSS tail resource reference. */
-    private CssResourceReference cssResourceReference = new CssResourceReference(FilesPanel.class, "tails.css");
+    private CssResourceReference cssResourceReference = new CssResourceReference(FilesPanel.class, "teils.css");
     /** Listeners for the selected resource. */
     private List<IAjaxLinkListener> listeners;
     /** Folders model. */

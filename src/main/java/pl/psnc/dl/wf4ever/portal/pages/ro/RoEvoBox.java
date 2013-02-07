@@ -289,7 +289,7 @@ public class RoEvoBox extends Panel {
             }
 
         }
-        return sb.toString() + "window.alert('redraw');";
+        return sb.toString();
     }
 
 }
