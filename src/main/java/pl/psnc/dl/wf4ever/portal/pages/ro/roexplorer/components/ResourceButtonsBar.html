@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <wicket:panel xmlns:wicket="http://wicket.apache.org">
-	<form class="" wicket:id="roForm" style="margin: 0px">
-	
+	<form class="form-stacked" wicket:id="roForm" style="margin: 0px">
 	<div wicket:id="folder-buttons-container" class="btn-group span11 tmpDashedContainer">
-		<button class="btn" type="submit" wicket:id="add-resource">
+		<div class="btn-toolbar">
+		<button class="btn" type="submit" wicket:id="add-resource" style="margin-left: 5px;">
 			<i class="icon-file"></i>
 		</button>
 		<!--
@@ -14,9 +14,11 @@
 			<i class="icon-trash"></i>
 		</button>
 		-->
+		</div>					
 	</div>						
 		
 	<div wicket:id="resource-buttons-container" class="btn-group span11 tmpDashedContainer">
+		<div class="btn-toolbar">
 		<!-- 
 		<button class="btn" type="submit" wicket:id="download-resource">
 			<i class="icon-download"></i>
@@ -25,10 +27,10 @@
 			<i class="icon-pencil"></i>
 		</button>
 		 -->
-		<button class="btn" type="submit" wicket:id="delete-resource">
+		<button class="btn" type="submit" wicket:id="delete-resource" style="margin-left: 5px;">
 			<i class="icon-trash"></i>
 		</button>
 	</div>
-	
+	</div>
 	</form>
 </wicket:panel>
