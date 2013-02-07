@@ -56,7 +56,7 @@ public class RoEvoBox extends Panel {
      *             when data from the SPARQL endpoint contain invalid URIs
      */
     @SuppressWarnings("serial")
-    public RoEvoBox(String id, URI sparqlEndpointURI, final ResearchObject researchObject, final boolean redraw)
+    public RoEvoBox(String id, URI sparqlEndpointURI, final ResearchObject researchObject)
             throws IOException {
         super(id);
 
@@ -178,7 +178,7 @@ public class RoEvoBox extends Panel {
             @Override
             public void renderHead(Component component, IHeaderResponse response) {
                 super.renderHead(component, response);
-                response.renderOnLoadJavaScript(getDrawJavaScript(redraw));
+                response.renderOnLoadJavaScript(getDrawJavaScript());
             }
         });
     }
@@ -274,7 +274,7 @@ public class RoEvoBox extends Panel {
     }
 
 
-    public String getDrawJavaScript(boolean redraw) {
+    private String getDrawJavaScript() {
         final StringBuilder sb = new StringBuilder();
         sb.append("jsPlumb.ready(function() {");
         sb.append("initRoEvo(jsPlumb);");

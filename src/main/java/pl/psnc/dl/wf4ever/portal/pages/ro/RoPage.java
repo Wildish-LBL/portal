@@ -186,7 +186,7 @@ public class RoPage extends Base implements Loadable {
         importAnnotationModal = new ImportAnnotationModal("importAnnotationModal", this, itemModel);
         add(importAnnotationModal);
         roevoBox = new RoEvoBox("roEvoBox", ((PortalApplication) getApplication()).getSparqlEndpointURI(),
-                researchObject, false);
+                researchObject);
         add(roevoBox);
         add(new AbstractDefaultAjaxBehavior() {
 
@@ -250,7 +250,7 @@ public class RoPage extends Base implements Loadable {
                         RoPage.this.success(String.format("Snapshot %s has been created!", status.getTarget()));
                         try {
                             RoEvoBox newRoevoBox = new RoEvoBox("roEvoBox",
-                                    ((PortalApplication) getApplication()).getSparqlEndpointURI(), researchObject, true);
+                                    ((PortalApplication) getApplication()).getSparqlEndpointURI(), researchObject);
                             roevoBox.replaceWith(newRoevoBox);
                             roevoBox = newRoevoBox;
                             target.add(roevoBox);
@@ -299,7 +299,7 @@ public class RoPage extends Base implements Loadable {
                         RoPage.this.success(String.format("Release %s has been created!", status.getTarget()));
                         try {
                             RoEvoBox newRoevoBox = new RoEvoBox("roEvoBox",
-                                    ((PortalApplication) getApplication()).getSparqlEndpointURI(), researchObject, true);
+                                    ((PortalApplication) getApplication()).getSparqlEndpointURI(), researchObject);
                             roevoBox.replaceWith(newRoevoBox);
                             roevoBox = newRoevoBox;
                             target.add(roevoBox);
