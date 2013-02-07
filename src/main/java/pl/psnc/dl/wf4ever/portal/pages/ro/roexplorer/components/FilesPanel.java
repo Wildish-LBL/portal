@@ -64,7 +64,8 @@ public class FilesPanel extends Panel {
             protected void populateItem(final ListItem<Resource> item) {
 
                 final Resource thing = item.getModelObject();
-                final Label label = new Label("tailLabel", item.getModelObject().getName());
+
+                final Label label = new Label("tailLabel", calculateLabel(item.getModelObject().getName()));
 
                 @SuppressWarnings("unchecked")
                 final AjaxLink<Object> link = new AjaxLink<Object>("tailLink", new Model()) {
@@ -96,6 +97,22 @@ public class FilesPanel extends Panel {
 
         add(listView);
 
+    }
+
+
+    /**
+     * Calculate tile label basing on resource name.
+     * 
+     * @param name
+     *            object name
+     * @return label
+     */
+    private String calculateLabel(String name) {
+        if (name.length() <= 35) {
+            return name;
+        } else {
+            return name.substring(0, 31) + "...";
+        }
     }
 
 
