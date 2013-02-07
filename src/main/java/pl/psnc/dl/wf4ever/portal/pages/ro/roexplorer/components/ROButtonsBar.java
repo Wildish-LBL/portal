@@ -1,12 +1,12 @@
 package pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components;
 
-import java.net.URI;
-
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
+import org.purl.wf4ever.rosrs.client.ResearchObject;
+import org.purl.wf4ever.rosrs.client.evo.EvoType;
 
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.modals.DownloadMetadataModal;
 import pl.psnc.dl.wf4ever.portal.ui.components.UniversalStyledAjaxButton;
@@ -21,7 +21,7 @@ import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 public class ROButtonsBar extends Panel {
 
     /** RO URI. */
-    URI roURI;
+    private ResearchObject ro;
 
     /** Serialziation. */
     private static final long serialVersionUID = 1L;
@@ -51,9 +51,9 @@ public class ROButtonsBar extends Panel {
      *            research object URI
      * 
      */
-    public ROButtonsBar(String id, URI roURI) {
+    public ROButtonsBar(String id, final ResearchObject ro) {
         super(id);
-        this.roURI = roURI;
+        this.ro = ro;
         setOutputMarkupId(true);
         roForm = new Form<Void>("roForm");
         add(new DownloadMetadataModal("downloadMetadataModal", this));
@@ -82,6 +82,13 @@ public class ROButtonsBar extends Panel {
                 super.onSubmit(target, form);
             }
 
+
+            @Override
+            protected void onConfigure() {
+                super.onConfigure();
+                setEnabled(ro.getEvoType() == EvoType.LIVE);
+            }
+
         };
         releaseButton = new UniversalStyledAjaxButton("release-ro-button", roForm) {
 
@@ -92,6 +99,13 @@ public class ROButtonsBar extends Panel {
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 super.onSubmit(target, form);
+            }
+
+
+            @Override
+            protected void onConfigure() {
+                super.onConfigure();
+                setEnabled(ro.getEvoType() == EvoType.LIVE || ro.getEvoType() == EvoType.SNAPSHOT);
             }
 
         };
@@ -110,7 +124,7 @@ public class ROButtonsBar extends Panel {
      * @return a link to Zipped RO
      */
     public String getROZipLink() {
-        return roURI.toString().replaceFirst("/ROs/", "/zippedROs/");
+        return ro.getUri().toString().replaceFirst("/ROs/", "/zippedROs/");
     }
 
 
@@ -122,7 +136,8 @@ public class ROButtonsBar extends Panel {
      * @return a URI as string of the resource
      */
     public String getROMetadataLink(RDFFormat format) {
-        return roURI.resolve(".ro/manifest." + format.getDefaultFileExtension() + "?original=manifest.rdf").toString();
+        return ro.getUri().resolve(".ro/manifest." + format.getDefaultFileExtension() + "?original=manifest.rdf")
+                .toString();
     }
 
 

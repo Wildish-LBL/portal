@@ -114,7 +114,7 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
         roStatusBar = new ROStatusBar("research-object-info-panel", new CompoundPropertyModel<Thing>(
                 new PropertyModel<Thing>(this, "researchObject")));
         add(roStatusBar);
-        roButtonsBar = new ROButtonsBar("ro-button-bar", researchObject.getUri());
+        roButtonsBar = new ROButtonsBar("ro-button-bar", researchObject);
         add(roButtonsBar);
         //background initialziation
         add(roTree);
