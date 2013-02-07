@@ -44,6 +44,8 @@ public class RoEvoBox extends Panel {
     @SuppressWarnings("unused")
     private static final Logger LOG = Logger.getLogger(RoEvoBox.class);
 
+    private final ResearchObject researchObject;
+
     private final Map<ResearchObject, RoEvoNode> allNodes;
 
     /** next unassigned index. */
@@ -68,6 +70,7 @@ public class RoEvoBox extends Panel {
     public RoEvoBox(String id, URI sparqlEndpointURI, final ResearchObject researchObject)
             throws IOException {
         super(id);
+        this.researchObject = researchObject;
 
         setOutputMarkupId(true);
         setOutputMarkupPlaceholderTag(true);
@@ -90,7 +93,7 @@ public class RoEvoBox extends Panel {
         researchObject.loadEvolutionInformation();
         nextIndex = 0;
         switch (researchObject.getEvoType()) {
-            case LIVE:
+            case LIVE: {
                 Set<ResearchObject> snapshotsAndArchives = new HashSet<>();
                 snapshotsAndArchives.addAll(researchObject.getSnapshots());
                 snapshotsAndArchives.addAll(researchObject.getArchives());
@@ -110,48 +113,32 @@ public class RoEvoBox extends Panel {
                         default:
                     }
                 }
+            }
+                break;
+            case SNAPSHOT:
+            case ARCHIVE: {
+                addNode(liveNodes, researchObject.getLiveRO());
+                visit(researchObject, preorder, postorder);
+                for (ResearchObject ro : postorder) {
+                    switch (ro.getEvoType()) {
+                        case SNAPSHOT:
+                            addNode(snapshotNodes, ro);
+                            break;
+                        case ARCHIVE:
+                            addNode(archivedNodes, ro);
+                        default:
+                    }
+                }
+            }
                 break;
             default:
                 break;
         }
 
         final int dx = 120, ox = 20;
-        if (!liveNodes.isEmpty()) {
-            live.add(new ListView<RoEvoNode>("liveNodes", liveNodes) {
-
-                @Override
-                protected void populateItem(ListItem<RoEvoNode> item) {
-                    populateRoEvoNode(item, researchObject, ox + dx * item.getModelObject().getIndex());
-                }
-
-            });
-        } else {
-            live.setVisible(false);
-        }
-        if (!snapshotNodes.isEmpty()) {
-            snapshots.add(new ListView<RoEvoNode>("snapshotNodes", snapshotNodes) {
-
-                @Override
-                protected void populateItem(ListItem<RoEvoNode> item) {
-                    populateRoEvoNode(item, researchObject, ox + dx * item.getModelObject().getIndex());
-                }
-
-            });
-        } else {
-            snapshots.setVisible(false);
-        }
-        if (!archivedNodes.isEmpty()) {
-            archived.add(new ListView<RoEvoNode>("archivedNodes", archivedNodes) {
-
-                @Override
-                protected void populateItem(ListItem<RoEvoNode> item) {
-                    populateRoEvoNode(item, researchObject, ox + dx * item.getModelObject().getIndex());
-                }
-
-            });
-        } else {
-            archived.setVisible(false);
-        }
+        fillLayer(live, "liveNodes", liveNodes, dx, ox);
+        fillLayer(snapshots, "snapshotNodes", snapshotNodes, dx, ox);
+        fillLayer(archived, "archivedNodes", archivedNodes, dx, ox);
 
         add(new Behavior() {
 
@@ -161,6 +148,23 @@ public class RoEvoBox extends Panel {
                 response.renderOnLoadJavaScript(getDrawJavaScript());
             }
         });
+    }
+
+
+    @SuppressWarnings("serial")
+    private void fillLayer(WebMarkupContainer layer, String id, List<RoEvoNode> nodes, final int dx, final int ox) {
+        if (!nodes.isEmpty()) {
+            layer.add(new ListView<RoEvoNode>(id, nodes) {
+
+                @Override
+                protected void populateItem(ListItem<RoEvoNode> item) {
+                    populateRoEvoNode(item, ox + dx * item.getModelObject().getIndex());
+                }
+
+            });
+        } else {
+            layer.setVisible(false);
+        }
     }
 
 
@@ -174,7 +178,9 @@ public class RoEvoBox extends Panel {
 
     private void visit(ResearchObject ro, List<ResearchObject> preorder, List<ResearchObject> postorder) {
         preorder.add(ro);
-        ro.loadEvolutionInformation();
+        if (!ro.isEvolutionInformationLoaded()) {
+            ro.loadEvolutionInformation();
+        }
         if (ro.getPreviousSnapshot() != null && !preorder.contains(ro.getPreviousSnapshot())) {
             visit(ro.getPreviousSnapshot(), preorder, postorder);
         }
@@ -192,7 +198,7 @@ public class RoEvoBox extends Panel {
      * @param x
      *            the horizontal position of the node, in px
      */
-    private void populateRoEvoNode(ListItem<RoEvoNode> item, final ResearchObject researchObject, int x) {
+    private void populateRoEvoNode(ListItem<RoEvoNode> item, int x) {
         RoEvoNode node = item.getModelObject();
         item.add(new ExternalLink("labelOrIdentifier", new PropertyModel<String>(node, "researchObject.uri.toString"),
                 new PropertyModel<>(node, "labelOrIdentifier")));
