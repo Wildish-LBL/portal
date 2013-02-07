@@ -274,7 +274,7 @@ public class RoPage extends Base implements Loadable {
     protected void createArchive(AjaxRequestTarget target) {
         final JobStatus status = researchObject.archive(researchObject.getName().substring(0,
             researchObject.getName().length() - 1)
-                + "-snapshot");
+                + "-release");
 
         final AjaxSelfUpdatingTimerBehavior updater = new AjaxSelfUpdatingTimerBehavior(Duration.milliseconds(1000)) {
 

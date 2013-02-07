@@ -1,14 +1,10 @@
 package pl.psnc.dl.wf4ever.portal;
 
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.tester.WicketTester;
 import org.junit.Before;
 import org.junit.Test;
-import org.purl.wf4ever.rosrs.client.ROSRService;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
 import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
@@ -17,7 +13,6 @@ import pl.psnc.dl.wf4ever.portal.pages.HelpPage;
 import pl.psnc.dl.wf4ever.portal.pages.SparqlEndpointPage;
 import pl.psnc.dl.wf4ever.portal.pages.all.AllRosPage;
 import pl.psnc.dl.wf4ever.portal.pages.home.HomePage;
-import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
 import pl.psnc.dl.wf4ever.portal.pages.users.AuthenticationPage;
 
 /**
@@ -71,15 +66,15 @@ public class TestPages {
 
         tester.startPage(HelpPage.class);
         tester.assertRenderedPage(HelpPage.class);
-
-        ROSRService rosrs = new ROSRService(((PortalApplication) tester.getApplication()).getRodlURI(), null);
-        List<URI> ros = rosrs.getROList(true);
-        if (!ros.isEmpty()) {
-            URI ro = ros.get(0);
-            PageParameters parameters = new PageParameters();
-            parameters.add("ro", ro);
-            tester.startPage(RoPage.class, parameters);
-            tester.assertRenderedPage(RoPage.class);
-        }
+        //
+        //        ROSRService rosrs = new ROSRService(((PortalApplication) tester.getApplication()).getRodlURI(), null);
+        //        List<URI> ros = rosrs.getROList(true);
+        //        if (!ros.isEmpty()) {
+        //            URI ro = ros.get(0);
+        //            PageParameters parameters = new PageParameters();
+        //            parameters.add("ro", ro);
+        //            tester.startPage(RoPage.class, parameters);
+        //            tester.assertRenderedPage(RoPage.class);
+        //        }
     }
 }
