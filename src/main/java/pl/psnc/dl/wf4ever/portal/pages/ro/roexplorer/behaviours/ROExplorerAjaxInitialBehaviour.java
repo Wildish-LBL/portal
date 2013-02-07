@@ -70,6 +70,7 @@ public class ROExplorerAjaxInitialBehaviour extends AbstractDefaultAjaxBehavior 
         }
         loadableComponent.onLoaded(treeModel);
         target.add(loadableComponent.getRoExplorerParent());
+        target.add(loadableComponent.getROEvoBox());
     }
 
 

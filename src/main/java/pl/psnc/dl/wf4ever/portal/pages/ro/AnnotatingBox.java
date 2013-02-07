@@ -34,6 +34,7 @@ import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.util.CreatorsPanel;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
+import pl.psnc.dl.wf4ever.portal.ui.components.LoadingCircle;
 
 /**
  * A list of annotations of a resource.
@@ -71,6 +72,9 @@ class AnnotatingBox extends Panel implements IAjaxLinkListener {
 
     /** Logger. **/
     private static final Logger LOG = Logger.getLogger(RoPage.class);
+
+    private LoadingCircle loadingAnnotationCircle;
+    private static final String LOADING_ANNOTATIONS_OBJECT = "Loading annotations.<br />Please wait...";
 
 
     public Thing getModelObject() {
