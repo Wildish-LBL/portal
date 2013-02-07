@@ -85,6 +85,7 @@ class AnnotatingBox extends Panel implements IAjaxLinkListener {
         super("annotatingBox", itemModel);
         this.roPage = roPage;
         setOutputMarkupId(true);
+        setOutputMarkupPlaceholderTag(true);
 
         Form<?> annForm = new Form<Void>("annotationsForm");
         add(annForm);
@@ -211,6 +212,7 @@ class AnnotatingBox extends Panel implements IAjaxLinkListener {
         addStatement.setEnabled(roPage.canEdit && getDefaultModelObject() != null);
         deleteStatement.setEnabled(roPage.canEdit && getDefaultModelObject() != null);
         importAnnotation.setEnabled(roPage.canEdit && getDefaultModelObject() != null);
+        this.setVisible(getDefaultModelObject() != null);
     }
 
 
