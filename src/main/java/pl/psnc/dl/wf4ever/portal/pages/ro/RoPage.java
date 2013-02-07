@@ -185,11 +185,9 @@ public class RoPage extends Base implements Loadable {
         add(relEditForm);
         importAnnotationModal = new ImportAnnotationModal("importAnnotationModal", this, itemModel);
         add(importAnnotationModal);
-        /*
         roevoBox = new RoEvoBox("roEvoBox", ((PortalApplication) getApplication()).getSparqlEndpointURI(),
                 researchObject, false);
         add(roevoBox);
-         */
         add(new AbstractDefaultAjaxBehavior() {
 
             @Override

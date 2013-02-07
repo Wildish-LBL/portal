@@ -277,7 +277,6 @@ public class RoEvoBox extends Panel {
 
     public String getDrawJavaScript(boolean redraw) {
         final StringBuilder sb = new StringBuilder();
-        sb.append("$('#evoroot').on('firstShow', function() {");
         for (RoEvoNode source : postorder) {
             for (RoEvoNode node : source.getItsLiveROs()) {
                 sb.append(createConnection(source, node, "Has live RO"));
@@ -290,12 +289,7 @@ public class RoEvoBox extends Panel {
             }
 
         }
-        sb.append("});");
-        if (redraw) {
-            sb.append("$('#evoroot').trigger('firstShow');");
-            sb.append("$('#evoroot').off('firstShow');");
-        }
-        return sb.toString();
+        return sb.toString() + "window.alert('redraw');";
     }
 
 }

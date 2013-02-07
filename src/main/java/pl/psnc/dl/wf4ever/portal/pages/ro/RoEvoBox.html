@@ -1,12 +1,8 @@
 <?xml version="1.0"?>
 <wicket:panel xmlns:wicket="http://wicket.apache.org">
 	<!-- RO evo box -->
-	<section class="box inspan12">
-		<h3 class="collapsible hidden">
-			RO evolution <img class="sh_button" src="images/l_open.gif">
-		</h3>
-		<div class="row boxDiv evoroot" id="evoroot">
-			<div class="span11 evo sources separated_bottom" wicket:id="sources">
+		<div class="boxDiv evoroot" id="evoroot">
+			<div class="span11 evo sources" wicket:id="sources">
 				<div>Sources</div>
 				<div wicket:id="sourceNodes" class="node">
 					<a wicket:id="labelOrIdentifier" class="nodeInside">[RO]</a>
@@ -15,7 +11,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="span11 evo live separated_bottom" wicket:id="live">
+			<div class="span11 evo live" wicket:id="live">
 				<div>Live</div>
 				<div wicket:id="liveNodes" class="node">
 					<a wicket:id="labelOrIdentifier" class="nodeInside">[RO]</a>
@@ -24,7 +20,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="span11 evo snapshot separated_bottom"
+			<div class="span11 evo snapshot"
 				wicket:id="snapshots">
 				<div>Snapshots</div>
 				<div wicket:id="snapshotNodes" class="node">
@@ -34,7 +30,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="span11 evo archived separated_bottom"
+			<div class="span11 evo archived"
 				wicket:id="archived">
 				<div>Archived</div>
 				<div wicket:id="archivedNodes" class="node">
@@ -44,7 +40,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="span11 evo forks separated_bottom" wicket:id="forks">
+			<div class="span11 evo forks " wicket:id="forks">
 				<div>Forks</div>
 				<div wicket:id="forkNodes" class="node">
 					<a wicket:id="labelOrIdentifier" class="nodeInside">[RO]</a>
@@ -54,5 +50,5 @@
 				</div>
 			</div>
 		</div>
-	</section>
+	
 </wicket:panel>
