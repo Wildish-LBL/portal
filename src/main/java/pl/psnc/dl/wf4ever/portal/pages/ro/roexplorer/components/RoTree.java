@@ -39,6 +39,8 @@ public class RoTree extends Tree {
     /** Reference to the js file. */
     private static final JavaScriptResourceReference TREE_CLASS_REFRENCE = new JavaScriptResourceReference(
             RoTree.class, "roTree.js");
+    /** Reference to the icon of tree item (not a folder) */
+    private static final ResourceReference ROOT = new PackageResourceReference(RoTree.class, "ro.png");
     /** Tree listeners. */
     private List<ITreeListener> treeListenersList;
 
@@ -102,6 +104,9 @@ public class RoTree extends Tree {
 
     @Override
     protected ResourceReference getNodeIcon(TreeNode node) {
+        if (this.getModelObject().getRoot().equals(node)) {
+            return ROOT;
+        }
         if (node.isLeaf()) {
             if (getTreeState().getSelectedNodes().contains(node)) {
                 return getFolderOpen();
