@@ -69,7 +69,7 @@ public class ROExplorerAjaxInitialBehaviour extends AbstractDefaultAjaxBehavior 
             addNodeFolder(currentNode);
         }
         loadableComponent.onLoaded(treeModel);
-        target.add(loadableComponent);
+        target.add(loadableComponent.getRoExplorerParent());
     }
 
 

@@ -331,5 +331,4 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
     public UniversalStyledAjaxButton getReleaseButton() {
         return roButtonsBar.getReleaseButton();
     }
-
 }

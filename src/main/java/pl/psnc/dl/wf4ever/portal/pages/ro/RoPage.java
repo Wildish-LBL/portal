@@ -23,6 +23,7 @@ import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.link.ExternalLink;
@@ -101,7 +102,7 @@ public class RoPage extends Base implements Loadable {
     private static final String HTML_LINK_TEMPLATE = "<link rel=\"%s\" href=\"%s\"/>";
 
     private ROExplorer foldersViewer;
-
+    private WebMarkupContainer roExplorerParent;
     private RoEvoBox roevoBox;
     /** Loading image. */
     private LoadingCircle loadingCircle;
@@ -146,7 +147,10 @@ public class RoPage extends Base implements Loadable {
         final CompoundPropertyModel<Thing> itemModel = new CompoundPropertyModel<Thing>((Thing) null);
 
         loadingCircle = new LoadingCircle("folders-viewer", LOADING_OBJECT);
-        add(loadingCircle);
+        roExplorerParent = new WebMarkupContainer("ro-explorer-parent");
+        add(roExplorerParent);
+        roExplorerParent.setOutputMarkupId(true);
+        roExplorerParent.add(loadingCircle);
         this.foldersViewer = new ROExplorer("folders-viewer", researchObject, itemModel, loadingCircle);
         add(new ROExplorerAjaxInitialBehaviour(researchObject, this));
         foldersViewer.setOutputMarkupId(true);
@@ -164,7 +168,6 @@ public class RoPage extends Base implements Loadable {
                 createArchive(target);
             }
         });
-
         annotatingBox = new AnnotatingBox(this, itemModel);
         foldersViewer.appendOnNodeClickTarget(annotatingBox);
         /*****************************************************************************/
@@ -643,5 +646,10 @@ public class RoPage extends Base implements Loadable {
 
     public Object getRoTreeModel() {
         return foldersViewer.getRoTreeModel();
+    }
+
+
+    public Component getRoExplorerParent() {
+        return roExplorerParent;
     }
 }

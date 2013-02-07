@@ -2,7 +2,7 @@
 <wicket:panel xmlns:wicket="http://wicket.apache.org">
 	<div class="span11" style="border: 1px dashed #BBBBBB; margin-bottom: 5px;">
 		<form class="" wicket:id="roForm" style="margin: 0px">
-				<div class="btn-group" style="float: left;">
+				<div class="btn-group" style="float: left;">			<div class="btn-group">
 					<button class="btn" type="submit" wicket:id="downloadROZipped">
 						<i class="icon-download"></i> zip
 					</button>
@@ -12,14 +12,13 @@
 				</div>
 				<div class="btn-group" style="float: left;">
 					<button class="btn" type="submit" wicket:id="snapshot-ro-button">
-							<i class="icon-camera"></i> 
-						 snapshot
+						<i class="icon-camera"></i> snapshot
 					</button>
 					<button class="btn" type="submit" wicket:id="release-ro-button">
-							<i class="icon-share"></i>
-						release
+						<i class="icon-share"></i> release
 					</button>
 				</div>
+			</div>
 		</form>
 	</div>
 	<span wicket:id="downloadMetadataModal"></span>
