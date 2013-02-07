@@ -1,4 +1,0 @@
-CONSTRUCT WHERE
-{
-	<%s> a ?class .
-}

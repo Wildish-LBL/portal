@@ -4,11 +4,9 @@
 package pl.psnc.dl.wf4ever.portal.model;
 
 import java.io.Serializable;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.wicket.Component;
+import org.purl.wf4ever.rosrs.client.ResearchObject;
 
 /**
  * A node in visualization of RO evolution. Represents an RO or any other resource.
@@ -21,70 +19,20 @@ public class RoEvoNode implements Serializable {
     /** id. */
     private static final long serialVersionUID = 3083098588758012143L;
 
-
-    /**
-     * roevo RDF class.
-     * 
-     * @author piotrekhol
-     * 
-     */
-    public enum EvoClass {
-        /** roevo:LiveRO. */
-        LIVE,
-        /** roevo:SnapshotRO. */
-        SNAPSHOT,
-        /** roevo:ArchivedRO. */
-        ARCHIVED,
-        /** Default value. */
-        UNKNOWN
-    }
-
-
-    /**
-     * Modifiers suggesting that the node may need to be placed not according to its EvoClass.
-     * 
-     * @author piotrekhol
-     * 
-     */
-    public enum EvoClassModifier {
-        /** Some other node is roevo:derivedFrom this one. */
-        SOURCE,
-        /** This node is roevo:derivedFrom some other node. */
-        FORK,
-        /** Default value. */
-        NONE
-    }
-
-
     /** Resource URI. */
-    private URI uri;
+    private ResearchObject researchObject;
 
     /** rdfs:label. */
     private String label;
 
     /** Does it have ro:ResearchObject RDF class. */
-    private boolean isResearchObject = false;
-
-    /** Any of roevo RDF classes. */
-    private EvoClass evoClass = EvoClass.UNKNOWN;
-
-    /** Position modifiers. */
-    private EvoClassModifier evoLayer = EvoClassModifier.NONE;
-
-    /** For snapshots: roevo:previousSnapshot. */
-    private final List<RoEvoNode> previousSnapshots = new ArrayList<>();
-
-    /** For snapshots: roevo:hasSnapshot. */
-    private final List<RoEvoNode> itsLiveROs = new ArrayList<>();
-
-    /** For snapshots: roevo:derivedFrom. */
-    private final List<RoEvoNode> derivedResources = new ArrayList<>();
-
-    /** For live ROs: roevo:derivedFrom. */
-    private final List<RoEvoNode> sourceResources = new ArrayList<>();
+    private boolean isResearchObject = true;
 
     /** Its representation on the page. */
     private Component component;
+
+    /** position from the left of the panel, starting with 0. */
+    private int index;
 
 
     /**
@@ -101,18 +49,18 @@ public class RoEvoNode implements Serializable {
      * @param uri
      *            resource URI
      */
-    public RoEvoNode(URI uri) {
-        setUri(uri);
+    public RoEvoNode(ResearchObject researchObject) {
+        setResearchObject(researchObject);
     }
 
 
-    public URI getUri() {
-        return uri;
+    public ResearchObject getResearchObject() {
+        return researchObject;
     }
 
 
-    public void setUri(URI uri) {
-        this.uri = uri;
+    public void setResearchObject(ResearchObject researchObject) {
+        this.researchObject = researchObject;
     }
 
 
@@ -134,31 +82,10 @@ public class RoEvoNode implements Serializable {
     public String getLabelOrIdentifier() {
         if (getLabel() != null) {
             return getLabel();
-        } else if (getUri() != null) {
-            String[] segments = getUri().getPath().split("/");
-            return segments[segments.length - 1];
+        } else if (getResearchObject() != null) {
+            return getResearchObject().getName();
         }
         return null;
-    }
-
-
-    public EvoClass getEvoClass() {
-        return evoClass;
-    }
-
-
-    public void setEvoClass(EvoClass evoClass) {
-        this.evoClass = evoClass;
-    }
-
-
-    public EvoClassModifier getEvoClassModifier() {
-        return evoLayer;
-    }
-
-
-    public void setEvoClassModifier(EvoClassModifier evoLayer) {
-        this.evoLayer = evoLayer;
     }
 
 
@@ -172,26 +99,6 @@ public class RoEvoNode implements Serializable {
     }
 
 
-    public List<RoEvoNode> getPreviousSnapshots() {
-        return previousSnapshots;
-    }
-
-
-    public List<RoEvoNode> getItsLiveROs() {
-        return itsLiveROs;
-    }
-
-
-    public List<RoEvoNode> getDerivedResources() {
-        return derivedResources;
-    }
-
-
-    public List<RoEvoNode> getSourceResources() {
-        return sourceResources;
-    }
-
-
     public Component getComponent() {
         return component;
     }
@@ -199,6 +106,16 @@ public class RoEvoNode implements Serializable {
 
     public void setComponent(Component component) {
         this.component = component;
+    }
+
+
+    public int getIndex() {
+        return index;
+    }
+
+
+    public void setIndex(int index) {
+        this.index = index;
     }
 
 }

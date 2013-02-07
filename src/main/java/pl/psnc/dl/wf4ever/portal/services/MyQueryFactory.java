@@ -23,23 +23,8 @@ public final class MyQueryFactory {
     /** resources count. */
     private static String resourcesCount = null;
 
-    /** get provenance traces. */
-    private static String provenanceTraces;
-
     /** get all ROs. */
     private static String allROs;
-
-    /** describe snapshot evolution. */
-    private static String snapshotEvolution;
-
-    /** describe live RO evolution. */
-    private static String liveEvolution;
-
-    /** describe archived RO evolution. */
-    private static String archivedEvolution;
-
-    /** check resource class. */
-    private static String resourceClass;
 
 
     /**
@@ -99,96 +84,6 @@ public final class MyQueryFactory {
             resourcesCount = loadQuery("resourcesCount.sparql");
         }
         return QueryFactory.create(String.format(resourcesCount, resourceClass), Syntax.syntaxARQ);
-    }
-
-
-    /**
-     * Get provenance traces.
-     * 
-     * @param researchObject
-     *            the RO URI
-     * @return SPARQL query
-     * @throws IOException
-     *             can't load the query file
-     */
-    public static Query getProvenanceTraces(String researchObject)
-            throws IOException {
-        if (provenanceTraces == null) {
-            provenanceTraces = loadQuery("provenanceTraces.sparql");
-        }
-        return QueryFactory.create(String.format(provenanceTraces, researchObject), Syntax.syntaxARQ);
-    }
-
-
-    /**
-     * Get the snapshot evolution.
-     * 
-     * @param researchObject
-     *            the RO URI
-     * @return SPARQL query
-     * @throws IOException
-     *             can't load the query file
-     */
-    public static Query getSnapshotEvolution(String researchObject)
-            throws IOException {
-        if (snapshotEvolution == null) {
-            snapshotEvolution = loadQuery("snapshotEvolution.sparql");
-        }
-        return QueryFactory.create(String.format(snapshotEvolution, researchObject), Syntax.syntaxARQ);
-    }
-
-
-    /**
-     * Get the live RO evolution.
-     * 
-     * @param researchObject
-     *            the RO URI
-     * @return SPARQL query
-     * @throws IOException
-     *             can't load the query file
-     */
-    public static Query getLiveEvolution(String researchObject)
-            throws IOException {
-        if (liveEvolution == null) {
-            liveEvolution = loadQuery("liveEvolution.sparql");
-        }
-        return QueryFactory.create(String.format(liveEvolution, researchObject), Syntax.syntaxARQ);
-    }
-
-
-    /**
-     * Get the archived RO evolution.
-     * 
-     * @param researchObject
-     *            the RO URI
-     * @return SPARQL query
-     * @throws IOException
-     *             can't load the query file
-     */
-    public static Query getArchivedEvolution(String researchObject)
-            throws IOException {
-        if (archivedEvolution == null) {
-            archivedEvolution = loadQuery("archivedEvolution.sparql");
-        }
-        return QueryFactory.create(String.format(archivedEvolution, researchObject), Syntax.syntaxARQ);
-    }
-
-
-    /**
-     * Get the resource class.
-     * 
-     * @param researchObject
-     *            the RO URI
-     * @return SPARQL query
-     * @throws IOException
-     *             can't load the query file
-     */
-    public static Query getResourceClass(String researchObject)
-            throws IOException {
-        if (resourceClass == null) {
-            resourceClass = loadQuery("resourceClass.sparql");
-        }
-        return QueryFactory.create(String.format(resourceClass, researchObject), Syntax.syntaxARQ);
     }
 
 
