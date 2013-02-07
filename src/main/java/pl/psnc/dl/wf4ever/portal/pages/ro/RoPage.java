@@ -48,8 +48,11 @@ import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
 import pl.psnc.dl.wf4ever.portal.pages.base.Base;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.ROExplorer;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
+import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.ROExplorerAjaxInitialBehaviour;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
+import pl.psnc.dl.wf4ever.portal.ui.behaviours.Loadable;
+import pl.psnc.dl.wf4ever.portal.ui.components.LoadingCircle;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
 import com.sun.jersey.api.client.ClientResponse;
@@ -60,7 +63,7 @@ import com.sun.jersey.api.client.ClientResponse;
  * @author piotrekhol
  * 
  */
-public class RoPage extends Base {
+public class RoPage extends Base implements Loadable {
 
     /** id. */
     private static final long serialVersionUID = 1L;
@@ -100,6 +103,10 @@ public class RoPage extends Base {
     private ROExplorer foldersViewer;
 
     private RoEvoBox roevoBox;
+    /** Loading image. */
+    private LoadingCircle loadingCircle;
+    /** Loading information. */
+    private static final String LOADING_OBJECT = "Loading Research Object metadata.<br />Please wait...";
 
 
     /**
@@ -129,7 +136,6 @@ public class RoPage extends Base {
         feedbackPanel = new MyFeedbackPanel("feedbackPanel");
         feedbackPanel.setOutputMarkupId(true);
         add(feedbackPanel);
-
         if (MySession.get().isSignedIn()) {
             //            List<URI> uris = ROSRService.getROList(rodlURI, MySession.get().getdLibraAccessToken());
             //            canEdit = uris.contains(roURI);
@@ -139,9 +145,11 @@ public class RoPage extends Base {
 
         final CompoundPropertyModel<Thing> itemModel = new CompoundPropertyModel<Thing>((Thing) null);
 
-        this.foldersViewer = new ROExplorer("folders-viewer", researchObject, itemModel);
+        loadingCircle = new LoadingCircle("folders-viewer", LOADING_OBJECT);
+        add(loadingCircle);
+        this.foldersViewer = new ROExplorer("folders-viewer", researchObject, itemModel, loadingCircle);
+        add(new ROExplorerAjaxInitialBehaviour(researchObject, this));
         foldersViewer.setOutputMarkupId(true);
-        add(foldersViewer);
         foldersViewer.getSnapshotButton().addLinkListener(new IAjaxLinkListener() {
 
             @Override
@@ -623,5 +631,17 @@ public class RoPage extends Base {
     public String getROMetadataLink(RDFFormat format) {
         return researchObject.getUri()
                 .resolve(".ro/manifest." + format.getDefaultFileExtension() + "?original=manifest.rdf").toString();
+    }
+
+
+    @Override
+    public void onLoaded(Object data) {
+        foldersViewer.setRoTreeModel((RoTreeModel) data);
+        loadingCircle.replaceWith(foldersViewer);
+    }
+
+
+    public Object getRoTreeModel() {
+        return foldersViewer.getRoTreeModel();
     }
 }

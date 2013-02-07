@@ -13,7 +13,7 @@ import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
-import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.ROExplorer;
+import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
 
 /**
  * Load some content of the RO page in the background.
@@ -31,7 +31,7 @@ public class ROExplorerAjaxInitialBehaviour extends AbstractDefaultAjaxBehavior 
     /** Research object. */
     private ResearchObject researchObject;
     /** Loadable Component. */
-    private ROExplorer loadableComponent;
+    private RoPage loadableComponent;
 
 
     /**
@@ -42,10 +42,10 @@ public class ROExplorerAjaxInitialBehaviour extends AbstractDefaultAjaxBehavior 
      * @param foldersViewer
      *            Component that will relad the data and will be refreshed.
      */
-    public ROExplorerAjaxInitialBehaviour(ResearchObject researchObject, ROExplorer foldersViewer) {
+    public ROExplorerAjaxInitialBehaviour(ResearchObject researchObject, RoPage roPage) {
         super();
         this.researchObject = researchObject;
-        this.loadableComponent = foldersViewer;
+        this.loadableComponent = roPage;
     }
 
 

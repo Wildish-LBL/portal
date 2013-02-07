@@ -29,7 +29,6 @@ import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.ITreeListener;
-import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.ROExplorerAjaxInitialBehaviour;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.FilesPanel;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ROButtonsBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ROStatusBar;
@@ -38,7 +37,6 @@ import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ResourceStatusBa
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.RoTree;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.forms.FilesShiftForm;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.models.TreeNodeContentModel;
-import pl.psnc.dl.wf4ever.portal.ui.behaviours.Loadable;
 import pl.psnc.dl.wf4ever.portal.ui.components.LoadingCircle;
 import pl.psnc.dl.wf4ever.portal.ui.components.UniversalStyledAjaxButton;
 
@@ -48,7 +46,7 @@ import pl.psnc.dl.wf4ever.portal.ui.components.UniversalStyledAjaxButton;
  * @author pejot
  * 
  */
-public class ROExplorer extends Panel implements Loadable, ITreeStateListener, ITreeListener, IFormSubmitListener,
+public class ROExplorer extends Panel implements ITreeStateListener, ITreeListener, IFormSubmitListener,
         IAjaxLinkListener {
 
     /** Logger. */
@@ -80,10 +78,8 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
     private TreeNodeContentModel foldersModel;
     /** Listeners for the selected resource. */
     private List<IAjaxLinkListener> listeners = new ArrayList<>();
+    /** List of targets refreshed on node clicked event. */
     private List<Component> onNodeListTargets = new ArrayList<>();
-
-    /** Loading information. */
-    private static final String LOADING_OBJECT = "Loading Research Object metadata.<br />Please wait...";
 
 
     /**
@@ -94,21 +90,21 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
      * @param researchObject
      *            Research Object
      * @param itemModel
+     *            model?
      */
-    public ROExplorer(String id, ResearchObject researchObject, IModel<Thing> itemModel) {
+    public ROExplorer(String id, ResearchObject researchObject, IModel<Thing> itemModel, LoadingCircle loadingCircle) {
         // Last clicked item (file or Folder). 
         super(id, itemModel);
         //setting variables
         this.researchObject = researchObject;
-
+        this.loadingCircle = loadingCircle;
         this.foldersModel = new TreeNodeContentModel(new PropertyModel<Thing>(this, "currentlySelectedItem"),
                 researchObject);
         //building UI
         roTree = new RoTree("ro-tree", new PropertyModel<TreeModel>(this, "roTreeModel"));
         roTree.getTreeState().addTreeStateListener(this);
-        loadingCircle = new LoadingCircle("ro-tree", LOADING_OBJECT);
+        this.loadingCircle = loadingCircle;
         filesPanel = new FilesPanel("files-panel", foldersModel);
-        add(loadingCircle);
         filesShiftForm = new FilesShiftForm("form", this);
         itemInfoPanel = new ResourceStatusBar("selected-item-info-panel", new CompoundPropertyModel<Thing>(
                 new PropertyModel<Thing>(this, "currentlySelectedItem")));
@@ -121,7 +117,7 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
         roButtonsBar = new ROButtonsBar("ro-button-bar", researchObject.getUri());
         add(roButtonsBar);
         //background initialziation
-        add(new ROExplorerAjaxInitialBehaviour(researchObject, this));
+        add(roTree);
         add(filesPanel);
         add(filesShiftForm);
         //registry listeners
@@ -150,13 +146,6 @@ public class ROExplorer extends Panel implements Loadable, ITreeStateListener, I
      */
     public void setCurrentlySelectedItem(Thing item) {
         this.getModel().setObject(item);
-    }
-
-
-    @Override
-    public void onLoaded(Object data) {
-        setRoTreeModel((RoTreeModel) data);
-        loadingCircle.replaceWith(roTree);
     }
 
 
