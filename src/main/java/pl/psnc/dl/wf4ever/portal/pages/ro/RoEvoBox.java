@@ -260,10 +260,9 @@ public class RoEvoBox extends Panel {
      * @return JavaScript code
      */
     protected String createConnection(RoEvoNode source, RoEvoNode target, String label) {
-
         StringBuilder sb = new StringBuilder();
         String connId = "conn" + Math.abs(new Random().nextInt());
-        sb.append("var " + connId + " = jsPlumb.connect({");
+        sb.append("var " + connId + " = instance.connect({");
         sb.append("source: '" + source.getComponent().getMarkupId() + "',");
         sb.append("target: '" + target.getComponent().getMarkupId() + "',");
         sb.append("overlays:[ [ 'Label', { label:'" + label + "', id: 'label', cssClass : 'evolabel' } ] ]");
@@ -277,6 +276,10 @@ public class RoEvoBox extends Panel {
 
     public String getDrawJavaScript(boolean redraw) {
         final StringBuilder sb = new StringBuilder();
+        sb.append("jsPlumb.ready(function() {");
+        sb.append("initRoEvo(jsPlumb);");
+        sb.append("var instance = jsPlumb.getInstance();");
+        sb.append("initRoEvo(instance);");
         for (RoEvoNode source : postorder) {
             for (RoEvoNode node : source.getItsLiveROs()) {
                 sb.append(createConnection(source, node, "Has live RO"));
@@ -289,7 +292,8 @@ public class RoEvoBox extends Panel {
             }
 
         }
-        return sb.toString() + "window.alert('redraw');";
+        sb.append("});");
+        return sb.toString();
     }
 
 }
