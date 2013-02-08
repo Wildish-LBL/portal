@@ -14,45 +14,31 @@ import java.util.regex.Pattern;
 import javax.swing.tree.TreeModel;
 
 import org.apache.log4j.Logger;
-import org.apache.wicket.Component;
-import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.RestartResponseException;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
-import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
-import org.apache.wicket.markup.html.link.ExternalLink;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.CompoundPropertyModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.util.time.Duration;
 import org.purl.wf4ever.rosrs.client.Annotation;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
-import org.purl.wf4ever.rosrs.client.Resource;
 import org.purl.wf4ever.rosrs.client.Statement;
 import org.purl.wf4ever.rosrs.client.Thing;
 import org.purl.wf4ever.rosrs.client.evo.JobStatus;
-import org.purl.wf4ever.rosrs.client.evo.JobStatus.State;
 import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
-import pl.psnc.dl.wf4ever.portal.PortalApplication;
-import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
 import pl.psnc.dl.wf4ever.portal.pages.base.Base;
+import pl.psnc.dl.wf4ever.portal.pages.ro.behaviours.JobStatusUpdatingBehaviour;
+import pl.psnc.dl.wf4ever.portal.pages.ro.behaviours.OnDomReadyAjaxBehaviour;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.ROExplorer;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
-import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.ROExplorerAjaxInitialBehaviour;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
-import pl.psnc.dl.wf4ever.portal.ui.behaviours.Loadable;
 import pl.psnc.dl.wf4ever.portal.ui.components.LoadingCircle;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
@@ -64,7 +50,7 @@ import com.sun.jersey.api.client.ClientResponse;
  * @author piotrekhol
  * 
  */
-public class RoPage extends Base implements Loadable {
+public class RoPage extends Base {
 
     /** id. */
     private static final long serialVersionUID = 1L;
@@ -91,7 +77,7 @@ public class RoPage extends Base implements Loadable {
     private UploadResourceModal uploadResourceModal;
 
     /** The feedback panel. */
-    private MyFeedbackPanel feedbackPanel;
+    MyFeedbackPanel feedbackPanel;
 
     protected ResearchObject researchObject;
 
@@ -103,11 +89,15 @@ public class RoPage extends Base implements Loadable {
 
     private ROExplorer foldersViewer;
     private WebMarkupContainer roExplorerParent;
-    private RoEvoBox roevoBox;
+    RoEvoBox roevoBox;
     private LoadingCircle loadingEvoCircle;
 
     /** Loading image. */
     private LoadingCircle loadingCircle;
+
+    /** Selected resource model. */
+    private CompoundPropertyModel<Thing> itemModel;
+
     /** Loading information. */
     private static final String LOADING_OBJECT = "Loading Research Object metadata.<br />Please wait...";
     private static final String LOADING_EVO_OBJECT = "Loading ROEVO history.<br />Please wait...";
@@ -147,7 +137,7 @@ public class RoPage extends Base implements Loadable {
         }
         add(new Label("title", researchObject.getUri().toString()));
 
-        final CompoundPropertyModel<Thing> itemModel = new CompoundPropertyModel<Thing>((Thing) null);
+        itemModel = new CompoundPropertyModel<Thing>((Thing) null);
 
         loadingCircle = new LoadingCircle("folders-viewer", LOADING_OBJECT);
         loadingEvoCircle = new LoadingCircle("ro-evo-box", LOADING_EVO_OBJECT);
@@ -156,9 +146,31 @@ public class RoPage extends Base implements Loadable {
         add(roExplorerParent);
         roExplorerParent.setOutputMarkupId(true);
         roExplorerParent.add(loadingCircle);
-        this.foldersViewer = new ROExplorer("folders-viewer", researchObject, itemModel, loadingCircle);
-        add(new ROExplorerAjaxInitialBehaviour(researchObject, this));
+        add(new OnDomReadyAjaxBehaviour(feedbackPanel) {
 
+            @Override
+            protected void respond(AjaxRequestTarget target) {
+                try {
+                    researchObject.load();
+                    onRoLoaded(target);
+                } catch (ROSRSException | ROException e) {
+                    error("Research object cannot be loaded: " + e.getMessage());
+                    LOG.error("Research object cannot be loaded", e);
+                }
+                super.respond(target);
+            }
+        });
+        add(new OnDomReadyAjaxBehaviour(feedbackPanel) {
+
+            @Override
+            protected void respond(AjaxRequestTarget target) {
+                researchObject.loadEvolutionInformation();
+                onRoEvoLoaded(target);
+                super.respond(target);
+            }
+        });
+
+        foldersViewer = new ROExplorer("folders-viewer", researchObject, itemModel);
         foldersViewer.setOutputMarkupId(true);
         foldersViewer.getSnapshotButton().addLinkListener(new IAjaxLinkListener() {
 
@@ -192,135 +204,47 @@ public class RoPage extends Base implements Loadable {
         importAnnotationModal = new ImportAnnotationModal("importAnnotationModal", this, itemModel);
         add(importAnnotationModal);
         add(loadingEvoCircle);
-        add(new AbstractDefaultAjaxBehavior() {
-
-            @Override
-            protected void respond(AjaxRequestTarget target) {
-                try {
-                    if (!researchObject.isLoaded()) {
-                        researchObject.load();
-                        RoTreeModel treeModel = new RoTreeModel(researchObject);
-                        for (Resource resource : researchObject.getResources().values()) {
-                            treeModel.addAggregatedResource(resource);
-                        }
-
-                        //foldersViewer.onLoaded();
-                        relEditForm.onRoTreeLoaded();
-                        target.add(foldersViewer);
-                    }
-                } catch (ROSRSException | ROException e) {
-                    LOG.error(e);
-                    error(e);
-                }
-                target.add(feedbackPanel);
-            }
-
-
-            @Override
-            public void renderHead(final Component component, final IHeaderResponse response) {
-                super.renderHead(component, response);
-                response.renderOnDomReadyJavaScript(getCallbackScript().toString());
-            }
-
-        });
     }
 
 
+    @SuppressWarnings("serial")
     protected void createSnapshot(AjaxRequestTarget target) {
         final JobStatus status = researchObject.snapshot(researchObject.getName().substring(0,
             researchObject.getName().length() - 1)
                 + "-snapshot");
-
-        final AjaxSelfUpdatingTimerBehavior updater = new AjaxSelfUpdatingTimerBehavior(Duration.milliseconds(1000)) {
-
-            /** id. */
-            private static final long serialVersionUID = 6060461146505243329L;
-
+        feedbackPanel.add(new JobStatusUpdatingBehaviour(feedbackPanel, status, "snapshot") {
 
             @Override
-            protected void onPostProcessTarget(AjaxRequestTarget target) {
-                super.onPostProcessTarget(target);
-                status.refresh();
-                if (status.getState() != State.RUNNING) {
-                    stop();
-                    feedbackPanel.remove(this);
-                }
-                switch (status.getState()) {
-                    case RUNNING:
-                        RoPage.this.info(String.format("A snapshot %s is being created...", status.getTarget()));
-                        break;
-                    case DONE:
-                        RoPage.this.success(String.format("Snapshot %s has been created!", status.getTarget()));
-                        try {
-                            RoEvoBox newRoevoBox = new RoEvoBox("roEvoBox",
-                                    ((PortalApplication) getApplication()).getSparqlEndpointURI(), researchObject);
-                            roevoBox.replaceWith(newRoevoBox);
-                            roevoBox = newRoevoBox;
-                            target.add(roevoBox);
-                        } catch (IOException e) {
-                            LOG.error("Can't refresh roevoBox", e);
-                            RoPage.this.error(e.getMessage());
-                        }
-                        break;
-                    default:
-                        RoPage.this.error(String.format("%s: %s", status.getState(), status.getReason()));
-                }
-                target.add(feedbackPanel);
+            public void onSuccess(AjaxRequestTarget target) {
+                researchObject.loadEvolutionInformation();
+                RoEvoBox newRoevoBox = new RoEvoBox("ro-evo-box", researchObject);
+                roevoBox.replaceWith(newRoevoBox);
+                roevoBox = newRoevoBox;
+                target.add(roevoBox);
             }
-        };
+        });
 
-        info(String.format("A snapshot %s is being created...", status.getTarget()));
-        feedbackPanel.add(updater);
         target.add(feedbackPanel);
     }
 
 
+    @SuppressWarnings("serial")
     protected void createArchive(AjaxRequestTarget target) {
         final JobStatus status = researchObject.archive(researchObject.getName().substring(0,
             researchObject.getName().length() - 1)
                 + "-release");
-
-        final AjaxSelfUpdatingTimerBehavior updater = new AjaxSelfUpdatingTimerBehavior(Duration.milliseconds(1000)) {
-
-            /** id. */
-            private static final long serialVersionUID = 6060461146505243329L;
-
+        feedbackPanel.add(new JobStatusUpdatingBehaviour(feedbackPanel, status, "release") {
 
             @Override
-            protected void onPostProcessTarget(AjaxRequestTarget target) {
-                super.onPostProcessTarget(target);
-                status.refresh();
-                if (status.getState() != State.RUNNING) {
-                    stop();
-                    feedbackPanel.remove(this);
-                }
-                switch (status.getState()) {
-                    case RUNNING:
-                        RoPage.this.info(String.format("A release %s is being created...", status.getTarget()));
-                        break;
-                    case DONE:
-                        RoPage.this.success(String.format("Release %s has been created!", status.getTarget()));
-                        try {
-                            RoEvoBox newRoevoBox = new RoEvoBox("roEvoBox",
-                                    ((PortalApplication) getApplication()).getSparqlEndpointURI(), researchObject);
-                            roevoBox.replaceWith(newRoevoBox);
-                            roevoBox = newRoevoBox;
-                            target.add(roevoBox);
-                            //                            target.appendJavaScript(roevoBox.getDrawJavaScript());
-                        } catch (IOException e) {
-                            LOG.error("Can't refresh roevoBox", e);
-                            RoPage.this.error(e.getMessage());
-                        }
-                        break;
-                    default:
-                        RoPage.this.error(String.format("%s: %s", status.getState(), status.getReason()));
-                }
-                target.add(feedbackPanel);
+            public void onSuccess(AjaxRequestTarget target) {
+                researchObject.loadEvolutionInformation();
+                RoEvoBox newRoevoBox = new RoEvoBox("ro-evo-box", researchObject);
+                roevoBox.replaceWith(newRoevoBox);
+                roevoBox = newRoevoBox;
+                target.add(roevoBox);
             }
-        };
+        });
 
-        info(String.format("A release %s is being created...", status.getTarget()));
-        feedbackPanel.add(updater);
         target.add(feedbackPanel);
     }
 
@@ -349,102 +273,6 @@ public class RoPage extends Base implements Loadable {
 
     public TreeModel getPhysicalResourcesTree() {
         return null;
-    }
-
-
-    /**
-     * A utility class for creating an external link to a property of a statement.
-     * 
-     * @author piotrekhol
-     * 
-     */
-    @SuppressWarnings("serial")
-    class ExternalLinkFragment extends Fragment {
-
-        /**
-         * Constructor.
-         * 
-         * @param id
-         *            wicket id
-         * @param markupId
-         *            fragment wicket id
-         * @param markupProvider
-         *            which component defines the fragment
-         * @param model
-         *            statement model
-         * @param property
-         *            property of a statement
-         */
-        public ExternalLinkFragment(String id, String markupId, MarkupContainer markupProvider,
-                CompoundPropertyModel<Statement> model, String property) {
-            super(id, markupId, markupProvider, model);
-            add(new ExternalLink("link", model.<String> bind(property), model.<String> bind(property)));
-        }
-    }
-
-
-    /**
-     * A utility class for creating links to resources inside the RO.
-     * 
-     * @author piotrekhol
-     * 
-     */
-    @SuppressWarnings("serial")
-    class InternalLinkFragment extends Fragment {
-
-        /**
-         * Constructor.
-         * 
-         * @param id
-         *            wicket id
-         * @param markupId
-         *            fragment wicket id
-         * @param markupProvider
-         *            which component defines the fragment
-         * @param statement
-         *            the statement for which the link is created
-         */
-        public InternalLinkFragment(String id, String markupId, MarkupContainer markupProvider, Statement statement) {
-            super(id, markupId, markupProvider);
-            String internalName = "./" + researchObject.getUri().relativize(statement.getSubjectURI()).toString();
-            add(new AjaxLink<String>("link", new Model<String>(internalName)) {
-
-                @Override
-                public void onClick(AjaxRequestTarget target) {
-                    // TODO Auto-generated method stub
-
-                }
-            }.add(new Label("name", internalName.toString())));
-        }
-    }
-
-
-    /**
-     * A utility class for creating a link for editing a statement.
-     * 
-     * @author piotrekhol
-     * 
-     */
-    @SuppressWarnings("serial")
-    class EditLinkFragment extends Fragment {
-
-        /**
-         * Constructor.
-         * 
-         * @param id
-         *            wicket id
-         * @param markupId
-         *            fragment wicket id
-         * @param markupProvider
-         *            which component defines the fragment
-         * @param link
-         *            link defining the action upon click
-         */
-        public EditLinkFragment(String id, String markupId, MarkupContainer markupProvider,
-                AjaxFallbackLink<String> link) {
-            super(id, markupId, markupProvider);
-            add(link);
-        }
     }
 
 
@@ -563,9 +391,6 @@ public class RoPage extends Base implements Loadable {
      */
     void onStatementAddedEdited(AjaxRequestTarget target) {
         //FIXME isn't it the same as the next one?
-        //        this.annotatingBox.getModelObject().setAnnotations(
-        //            RoFactory.createAnnotations(rodlURI, roURI, this.annotatingBox.getModelObject().getUri(), MySession.get()
-        //                    .getUsernames()));
         target.add(annotatingBox);
     }
 
@@ -638,32 +463,17 @@ public class RoPage extends Base implements Loadable {
     }
 
 
-    @Override
-    public void onLoaded(Object data) {
-        foldersViewer.setRoTreeModel((RoTreeModel) data);
+    public void onRoLoaded(AjaxRequestTarget target) {
+        foldersViewer.onRoLoaded();
         loadingCircle.replaceWith(foldersViewer);
-        try {
-            roevoBox = new RoEvoBox("ro-evo-box", ((PortalApplication) getApplication()).getSparqlEndpointURI(),
-                    researchObject);
-            loadingEvoCircle.replaceWith(roevoBox);
-        } catch (IOException e) {
-            LOG.error("Can't load RoEvoBox", e);
-        }
+        target.add(roExplorerParent);
     }
 
 
-    public Object getRoTreeModel() {
-        return foldersViewer.getRoTreeModel();
-    }
-
-
-    public Component getRoExplorerParent() {
-        return roExplorerParent;
-    }
-
-
-    public RoEvoBox getROEvoBox() {
-        return roevoBox;
+    public void onRoEvoLoaded(AjaxRequestTarget target) {
+        roevoBox = new RoEvoBox("ro-evo-box", researchObject);
+        loadingEvoCircle.replaceWith(roevoBox);
+        target.add(roevoBox);
     }
 
 }

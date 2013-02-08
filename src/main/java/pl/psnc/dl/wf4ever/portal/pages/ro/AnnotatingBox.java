@@ -31,6 +31,9 @@ import org.purl.wf4ever.rosrs.client.Statement;
 import org.purl.wf4ever.rosrs.client.Thing;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
+import pl.psnc.dl.wf4ever.portal.pages.ro.components.EditLinkFragment;
+import pl.psnc.dl.wf4ever.portal.pages.ro.components.ExternalLinkFragment;
+import pl.psnc.dl.wf4ever.portal.pages.ro.components.InternalLinkFragment;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.util.CreatorsPanel;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
@@ -292,12 +295,12 @@ class AnnotatingBox extends Panel implements IAjaxLinkListener {
                     if (statement.getSubjectURI().equals(itemModel.getObject().getUri())) {
                         item.add(new Label("subject", "[This item]"));
                     } else {
-                        item.add(AnnotatingBox.this.roPage.new InternalLinkFragment("subject", "internalLinkFragment",
-                                AnnotatingBox.this.roPage, statement));
+                        item.add(new InternalLinkFragment("subject", "internalLinkFragment", AnnotatingBox.this.roPage,
+                                statement, roPage.researchObject));
                     }
                 } else {
-                    item.add(AnnotatingBox.this.roPage.new ExternalLinkFragment("subject", "externalLinkFragment",
-                            AnnotatingBox.this.roPage, (CompoundPropertyModel<Statement>) item.getModel(), "subjectURI"));
+                    item.add(new ExternalLinkFragment("subject", "externalLinkFragment", AnnotatingBox.this.roPage,
+                            (CompoundPropertyModel<Statement>) item.getModel(), "subjectURI"));
                 }
             } else {
                 item.add(new Label("subject", ((CompoundPropertyModel<Statement>) item.getModel())
@@ -305,14 +308,14 @@ class AnnotatingBox extends Panel implements IAjaxLinkListener {
             }
             item.add(new Label("propertyLocalNameNice"));
             if (statement.isObjectURIResource()) {
-                item.add(AnnotatingBox.this.roPage.new ExternalLinkFragment("object", "externalLinkFragment",
-                        AnnotatingBox.this.roPage, (CompoundPropertyModel<Statement>) item.getModel(), "objectURI"));
+                item.add(new ExternalLinkFragment("object", "externalLinkFragment", AnnotatingBox.this.roPage,
+                        (CompoundPropertyModel<Statement>) item.getModel(), "objectURI"));
             } else {
                 item.add(new Label("object", ((CompoundPropertyModel<Statement>) item.getModel())
                         .<String> bind("objectValue")).setEscapeModelStrings(false));
             }
             if (AnnotatingBox.this.roPage.canEdit) {
-                item.add(AnnotatingBox.this.roPage.new EditLinkFragment("edit", "editLinkFragment",
+                item.add(new EditLinkFragment("edit", "editLinkFragment",
                         AnnotatingBox.this.roPage, new AjaxFallbackLink<String>("link") {
 
                             @Override

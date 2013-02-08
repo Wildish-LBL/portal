@@ -37,7 +37,6 @@ import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ResourceStatusBa
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.RoTree;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.forms.FilesShiftForm;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.models.TreeNodeContentModel;
-import pl.psnc.dl.wf4ever.portal.ui.components.LoadingCircle;
 import pl.psnc.dl.wf4ever.portal.ui.components.UniversalStyledAjaxButton;
 
 /**
@@ -60,8 +59,6 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
     private RoTree roTree;
     /** Hidden form. */
     private FilesShiftForm filesShiftForm;
-    /** Loading image. */
-    private LoadingCircle loadingCircle;
     /** Info panel. */
     private ResourceStatusBar itemInfoPanel;
     /** Buttons panel. */
@@ -92,18 +89,23 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
      * @param itemModel
      *            model?
      */
-    public ROExplorer(String id, ResearchObject researchObject, IModel<Thing> itemModel, LoadingCircle loadingCircle) {
+    public ROExplorer(String id, ResearchObject researchObject, IModel<Thing> itemModel) {
         // Last clicked item (file or Folder). 
         super(id, itemModel);
         //setting variables
         this.researchObject = researchObject;
-        this.loadingCircle = loadingCircle;
         this.foldersModel = new TreeNodeContentModel(new PropertyModel<Thing>(this, "currentlySelectedItem"),
                 researchObject);
         //building UI
+        if (!researchObject.isLoaded()) {
+            try {
+                researchObject.load();
+            } catch (ROSRSException | ROException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
         roTree = new RoTree("ro-tree", new PropertyModel<TreeModel>(this, "roTreeModel"));
         roTree.getTreeState().addTreeStateListener(this);
-        this.loadingCircle = loadingCircle;
         filesPanel = new FilesPanel("files-panel", foldersModel);
         filesShiftForm = new FilesShiftForm("form", this);
         itemInfoPanel = new ResourceStatusBar("selected-item-info-panel", new CompoundPropertyModel<Thing>(
@@ -125,6 +127,11 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
         filesShiftForm.addOnSubmitListener(this);
         filesPanel.addLinkListeners(this);
         buttonsBar.appendTarget(this);
+    }
+
+
+    public void onRoLoaded() {
+        roTreeModel = RoTreeModel.create(researchObject);
     }
 
 
@@ -316,7 +323,7 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
 
 
     /**
-     * Add a new taget for node click event.
+     * Add a new target for node click event.
      */
     public void appendOnNodeClickTarget(Component target) {
         onNodeListTargets.add(target);
