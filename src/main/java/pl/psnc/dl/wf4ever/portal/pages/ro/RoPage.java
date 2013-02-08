@@ -14,10 +14,8 @@ import java.util.regex.Pattern;
 import javax.swing.tree.TreeModel;
 
 import org.apache.log4j.Logger;
-import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.RestartResponseException;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
@@ -42,16 +40,13 @@ import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
-import pl.psnc.dl.wf4ever.portal.PortalApplication;
-import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
 import pl.psnc.dl.wf4ever.portal.pages.base.Base;
+import pl.psnc.dl.wf4ever.portal.pages.ro.behaviours.OnDomReadyAjaxBehaviour;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.ROExplorer;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
-import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.ROExplorerAjaxInitialBehaviour;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.services.OAuthException;
-import pl.psnc.dl.wf4ever.portal.ui.behaviours.Loadable;
 import pl.psnc.dl.wf4ever.portal.ui.components.LoadingCircle;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
@@ -63,7 +58,7 @@ import com.sun.jersey.api.client.ClientResponse;
  * @author piotrekhol
  * 
  */
-public class RoPage extends Base implements Loadable {
+public class RoPage extends Base {
 
     /** id. */
     private static final long serialVersionUID = 1L;
@@ -107,6 +102,10 @@ public class RoPage extends Base implements Loadable {
 
     /** Loading image. */
     private LoadingCircle loadingCircle;
+
+    /** Selected resource model. */
+    private CompoundPropertyModel<Thing> itemModel;
+
     /** Loading information. */
     private static final String LOADING_OBJECT = "Loading Research Object metadata.<br />Please wait...";
     private static final String LOADING_EVO_OBJECT = "Loading ROEVO history.<br />Please wait...";
@@ -146,7 +145,7 @@ public class RoPage extends Base implements Loadable {
         }
         add(new Label("title", researchObject.getUri().toString()));
 
-        final CompoundPropertyModel<Thing> itemModel = new CompoundPropertyModel<Thing>((Thing) null);
+        itemModel = new CompoundPropertyModel<Thing>((Thing) null);
 
         loadingCircle = new LoadingCircle("folders-viewer", LOADING_OBJECT);
         loadingEvoCircle = new LoadingCircle("ro-evo-box", LOADING_EVO_OBJECT);
@@ -155,9 +154,31 @@ public class RoPage extends Base implements Loadable {
         add(roExplorerParent);
         roExplorerParent.setOutputMarkupId(true);
         roExplorerParent.add(loadingCircle);
-        this.foldersViewer = new ROExplorer("folders-viewer", researchObject, itemModel, loadingCircle);
-        add(new ROExplorerAjaxInitialBehaviour(researchObject, this));
+        add(new OnDomReadyAjaxBehaviour(feedbackPanel) {
 
+            @Override
+            protected void respond(AjaxRequestTarget target) {
+                try {
+                    researchObject.load();
+                    onRoLoaded(target);
+                } catch (ROSRSException | ROException e) {
+                    error("Research object cannot be loaded: " + e.getMessage());
+                    LOG.error("Research object cannot be loaded", e);
+                }
+                super.respond(target);
+            }
+        });
+        add(new OnDomReadyAjaxBehaviour(feedbackPanel) {
+
+            @Override
+            protected void respond(AjaxRequestTarget target) {
+                researchObject.loadEvolutionInformation();
+                onRoEvoLoaded(target);
+                super.respond(target);
+            }
+        });
+
+        foldersViewer = new ROExplorer("folders-viewer", researchObject, itemModel);
         foldersViewer.setOutputMarkupId(true);
         foldersViewer.getSnapshotButton().addLinkListener(new IAjaxLinkListener() {
 
@@ -191,35 +212,6 @@ public class RoPage extends Base implements Loadable {
         importAnnotationModal = new ImportAnnotationModal("importAnnotationModal", this, itemModel);
         add(importAnnotationModal);
         add(loadingEvoCircle);
-        add(new AbstractDefaultAjaxBehavior() {
-
-            @Override
-            protected void respond(AjaxRequestTarget target) {
-                try {
-                    if (!researchObject.isLoaded()) {
-                        researchObject.load();
-                        //                        RoTreeModel treeModel = new RoTreeModel(researchObject);
-                        //                        for (Resource resource : researchObject.getResources().values()) {
-                        //                            treeModel.addAggregatedResource(resource);
-                        //                        }
-                        relEditForm.onRoTreeLoaded();
-                        target.add(foldersViewer);
-                    }
-                } catch (ROSRSException | ROException e) {
-                    LOG.error(e);
-                    error(e);
-                }
-                target.add(feedbackPanel);
-            }
-
-
-            @Override
-            public void renderHead(final Component component, final IHeaderResponse response) {
-                super.renderHead(component, response);
-                response.renderOnDomReadyJavaScript(getCallbackScript().toString());
-            }
-
-        });
     }
 
 
@@ -248,16 +240,10 @@ public class RoPage extends Base implements Loadable {
                         break;
                     case DONE:
                         RoPage.this.success(String.format("Snapshot %s has been created!", status.getTarget()));
-                        try {
-                            RoEvoBox newRoevoBox = new RoEvoBox("roEvoBox",
-                                    ((PortalApplication) getApplication()).getSparqlEndpointURI(), researchObject);
-                            roevoBox.replaceWith(newRoevoBox);
-                            roevoBox = newRoevoBox;
-                            target.add(roevoBox);
-                        } catch (IOException e) {
-                            LOG.error("Can't refresh roevoBox", e);
-                            RoPage.this.error(e.getMessage());
-                        }
+                        RoEvoBox newRoevoBox = new RoEvoBox("roEvoBox", researchObject);
+                        roevoBox.replaceWith(newRoevoBox);
+                        roevoBox = newRoevoBox;
+                        target.add(roevoBox);
                         break;
                     default:
                         RoPage.this.error(String.format("%s: %s", status.getState(), status.getReason()));
@@ -297,17 +283,10 @@ public class RoPage extends Base implements Loadable {
                         break;
                     case DONE:
                         RoPage.this.success(String.format("Release %s has been created!", status.getTarget()));
-                        try {
-                            RoEvoBox newRoevoBox = new RoEvoBox("roEvoBox",
-                                    ((PortalApplication) getApplication()).getSparqlEndpointURI(), researchObject);
-                            roevoBox.replaceWith(newRoevoBox);
-                            roevoBox = newRoevoBox;
-                            target.add(roevoBox);
-                            //                            target.appendJavaScript(roevoBox.getDrawJavaScript());
-                        } catch (IOException e) {
-                            LOG.error("Can't refresh roevoBox", e);
-                            RoPage.this.error(e.getMessage());
-                        }
+                        RoEvoBox newRoevoBox = new RoEvoBox("roEvoBox", researchObject);
+                        roevoBox.replaceWith(newRoevoBox);
+                        roevoBox = newRoevoBox;
+                        target.add(roevoBox);
                         break;
                     default:
                         RoPage.this.error(String.format("%s: %s", status.getState(), status.getReason()));
@@ -560,9 +539,6 @@ public class RoPage extends Base implements Loadable {
      */
     void onStatementAddedEdited(AjaxRequestTarget target) {
         //FIXME isn't it the same as the next one?
-        //        this.annotatingBox.getModelObject().setAnnotations(
-        //            RoFactory.createAnnotations(rodlURI, roURI, this.annotatingBox.getModelObject().getUri(), MySession.get()
-        //                    .getUsernames()));
         target.add(annotatingBox);
     }
 
@@ -635,36 +611,17 @@ public class RoPage extends Base implements Loadable {
     }
 
 
-    @Override
-    public void onLoaded(Object data, AjaxRequestTarget target) {
-        foldersViewer.setRoTreeModel((RoTreeModel) data);
+    public void onRoLoaded(AjaxRequestTarget target) {
+        foldersViewer.onRoLoaded();
         loadingCircle.replaceWith(foldersViewer);
-        try {
-            target.add(getRoExplorerParent());
-
-            //TODO do przeniesienia
-            roevoBox = new RoEvoBox("ro-evo-box", ((PortalApplication) getApplication()).getSparqlEndpointURI(),
-                    researchObject);
-            loadingEvoCircle.replaceWith(roevoBox);
-            target.add(getROEvoBox());
-        } catch (IOException e) {
-            LOG.error("Can't load RoEvoBox", e);
-        }
+        target.add(roExplorerParent);
     }
 
 
-    public Object getRoTreeModel() {
-        return foldersViewer.getRoTreeModel();
-    }
-
-
-    public Component getRoExplorerParent() {
-        return roExplorerParent;
-    }
-
-
-    public RoEvoBox getROEvoBox() {
-        return roevoBox;
+    public void onRoEvoLoaded(AjaxRequestTarget target) {
+        roevoBox = new RoEvoBox("ro-evo-box", researchObject);
+        loadingEvoCircle.replaceWith(roevoBox);
+        target.add(roevoBox);
     }
 
 }

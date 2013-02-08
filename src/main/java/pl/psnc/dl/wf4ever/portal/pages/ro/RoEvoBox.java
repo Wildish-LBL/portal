@@ -3,9 +3,6 @@
  */
 package pl.psnc.dl.wf4ever.portal.pages.ro;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -61,14 +58,9 @@ public class RoEvoBox extends Panel {
      *            RODL SPARQL endpoint URI
      * @param researchObjectURI
      *            RO URI
-     * @throws IOException
-     *             when there are problems with connecting to the SPARQL endpoint
-     * @throws URISyntaxException
-     *             when data from the SPARQL endpoint contain invalid URIs
      */
     @SuppressWarnings("serial")
-    public RoEvoBox(String id, URI sparqlEndpointURI, final ResearchObject researchObject)
-            throws IOException {
+    public RoEvoBox(String id, final ResearchObject researchObject) {
         super(id);
         this.researchObject = researchObject;
 
@@ -90,7 +82,9 @@ public class RoEvoBox extends Panel {
         List<ResearchObject> preorder = new ArrayList<>();
         List<ResearchObject> postorder = new ArrayList<>();
 
-        researchObject.loadEvolutionInformation();
+        if (!researchObject.isEvolutionInformationLoaded()) {
+            researchObject.loadEvolutionInformation();
+        }
         nextIndex = 0;
         switch (researchObject.getEvoType()) {
             case LIVE: {
