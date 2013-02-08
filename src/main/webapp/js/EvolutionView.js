@@ -1,7 +1,7 @@
 function initRoEvo(instance) {
 	instance.Defaults.Container = $("#evoroot");
 	instance.Defaults.PaintStyle = {
-		lineWidth : 2,
+		lineWidth : 1.5,
 		strokeStyle : '#23A4FF'
 	}
 
@@ -10,7 +10,7 @@ function initRoEvo(instance) {
 	instance.Defaults.Connector = 'Flowchart';
 	instance.Defaults.Overlays = [ [ 'PlainArrow', {
 		location : 1,
-		width : 20,
+		width : 8,
 		length : 12
 	} ] ];
 

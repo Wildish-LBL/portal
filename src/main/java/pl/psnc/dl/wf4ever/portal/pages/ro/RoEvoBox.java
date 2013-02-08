@@ -135,7 +135,7 @@ public class RoEvoBox extends Panel {
                 break;
         }
 
-        final int dx = 120, ox = 20;
+        final int dx = 80, ox = 20;
         fillLayer(live, "liveNodes", liveNodes, dx, ox);
         fillLayer(snapshots, "snapshotNodes", snapshotNodes, dx, ox);
         fillLayer(archived, "archivedNodes", archivedNodes, dx, ox);

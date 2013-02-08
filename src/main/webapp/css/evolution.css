@@ -4,16 +4,16 @@
 
 .evo {
 	position: relative;
-	height: 120px;
+	height: 90px;
 }
 
 .evo .node {
 	border-width: 2px;
 	border-style: solid;
-	font-size: 0.8em;
-	height: 70px;
-	width: 80px;
-	border-radius: 40px/35px;
+	font-size: 0.75em;
+	height: 35px;
+	width: 35px;
+	border-radius: 20px/20px;
 	top: 20px;
 	z-index: 20;
 	opacity: 0.8;
@@ -22,6 +22,7 @@
 
 .evo div {
 	position: absolute;
+	left: 10px;
 }
 
 .evo.sources .node {
@@ -50,19 +51,20 @@
 }
 
 .evo .nodeInside {
-	height: 54px;
-	width: 60px;
+	height: 62px;
+	width: 68px;
 	display: block;
 	color: inherit;
 	position: absolute;
-	top: 7px;
-	left: 10px;
+	text-align: center;
+	top: 36px;
+	left: -16px;
 	word-wrap: break-word;
 }
 
 .evo .roMark {
 	position: absolute;
-	top: 50px;
+	top: 48px;
 	left: 55px;
 }
 
@@ -71,7 +73,7 @@
 }
 
 .evo .node.active {
-	box-shadow: 0 0 12px 6px rgba(82, 168, 236, 0.8);
+	box-shadow: 0 0 0px 0px rgba(82, 168, 236, 0.7);
 }
 
 .evolabel {
