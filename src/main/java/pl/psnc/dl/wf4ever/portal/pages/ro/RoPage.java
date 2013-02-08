@@ -17,7 +17,6 @@ import org.apache.log4j.Logger;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.IHeaderResponse;
@@ -29,19 +28,18 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.util.time.Duration;
 import org.purl.wf4ever.rosrs.client.Annotation;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.Statement;
 import org.purl.wf4ever.rosrs.client.Thing;
 import org.purl.wf4ever.rosrs.client.evo.JobStatus;
-import org.purl.wf4ever.rosrs.client.evo.JobStatus.State;
 import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
 import pl.psnc.dl.wf4ever.portal.pages.base.Base;
+import pl.psnc.dl.wf4ever.portal.pages.ro.behaviours.JobStatusUpdatingBehaviour;
 import pl.psnc.dl.wf4ever.portal.pages.ro.behaviours.OnDomReadyAjaxBehaviour;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.ROExplorer;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
@@ -85,7 +83,7 @@ public class RoPage extends Base {
     private UploadResourceModal uploadResourceModal;
 
     /** The feedback panel. */
-    private MyFeedbackPanel feedbackPanel;
+    MyFeedbackPanel feedbackPanel;
 
     protected ResearchObject researchObject;
 
@@ -97,7 +95,7 @@ public class RoPage extends Base {
 
     private ROExplorer foldersViewer;
     private WebMarkupContainer roExplorerParent;
-    private RoEvoBox roevoBox;
+    RoEvoBox roevoBox;
     private LoadingCircle loadingEvoCircle;
 
     /** Loading image. */
@@ -215,88 +213,44 @@ public class RoPage extends Base {
     }
 
 
+    @SuppressWarnings("serial")
     protected void createSnapshot(AjaxRequestTarget target) {
         final JobStatus status = researchObject.snapshot(researchObject.getName().substring(0,
             researchObject.getName().length() - 1)
                 + "-snapshot");
-
-        final AjaxSelfUpdatingTimerBehavior updater = new AjaxSelfUpdatingTimerBehavior(Duration.milliseconds(1000)) {
-
-            /** id. */
-            private static final long serialVersionUID = 6060461146505243329L;
-
+        feedbackPanel.add(new JobStatusUpdatingBehaviour(feedbackPanel, status, "snapshot") {
 
             @Override
-            protected void onPostProcessTarget(AjaxRequestTarget target) {
-                super.onPostProcessTarget(target);
-                status.refresh();
-                if (status.getState() != State.RUNNING) {
-                    stop();
-                    feedbackPanel.remove(this);
-                }
-                switch (status.getState()) {
-                    case RUNNING:
-                        RoPage.this.info(String.format("A snapshot %s is being created...", status.getTarget()));
-                        break;
-                    case DONE:
-                        RoPage.this.success(String.format("Snapshot %s has been created!", status.getTarget()));
-                        RoEvoBox newRoevoBox = new RoEvoBox("roEvoBox", researchObject);
-                        roevoBox.replaceWith(newRoevoBox);
-                        roevoBox = newRoevoBox;
-                        target.add(roevoBox);
-                        break;
-                    default:
-                        RoPage.this.error(String.format("%s: %s", status.getState(), status.getReason()));
-                }
-                target.add(feedbackPanel);
+            public void onSuccess(AjaxRequestTarget target) {
+                researchObject.loadEvolutionInformation();
+                RoEvoBox newRoevoBox = new RoEvoBox("ro-evo-box", researchObject);
+                roevoBox.replaceWith(newRoevoBox);
+                roevoBox = newRoevoBox;
+                target.add(roevoBox);
             }
-        };
+        });
 
-        info(String.format("A snapshot %s is being created...", status.getTarget()));
-        feedbackPanel.add(updater);
         target.add(feedbackPanel);
     }
 
 
+    @SuppressWarnings("serial")
     protected void createArchive(AjaxRequestTarget target) {
         final JobStatus status = researchObject.archive(researchObject.getName().substring(0,
             researchObject.getName().length() - 1)
                 + "-release");
-
-        final AjaxSelfUpdatingTimerBehavior updater = new AjaxSelfUpdatingTimerBehavior(Duration.milliseconds(1000)) {
-
-            /** id. */
-            private static final long serialVersionUID = 6060461146505243329L;
-
+        feedbackPanel.add(new JobStatusUpdatingBehaviour(feedbackPanel, status, "release") {
 
             @Override
-            protected void onPostProcessTarget(AjaxRequestTarget target) {
-                super.onPostProcessTarget(target);
-                status.refresh();
-                if (status.getState() != State.RUNNING) {
-                    stop();
-                    feedbackPanel.remove(this);
-                }
-                switch (status.getState()) {
-                    case RUNNING:
-                        RoPage.this.info(String.format("A release %s is being created...", status.getTarget()));
-                        break;
-                    case DONE:
-                        RoPage.this.success(String.format("Release %s has been created!", status.getTarget()));
-                        RoEvoBox newRoevoBox = new RoEvoBox("roEvoBox", researchObject);
-                        roevoBox.replaceWith(newRoevoBox);
-                        roevoBox = newRoevoBox;
-                        target.add(roevoBox);
-                        break;
-                    default:
-                        RoPage.this.error(String.format("%s: %s", status.getState(), status.getReason()));
-                }
-                target.add(feedbackPanel);
+            public void onSuccess(AjaxRequestTarget target) {
+                researchObject.loadEvolutionInformation();
+                RoEvoBox newRoevoBox = new RoEvoBox("ro-evo-box", researchObject);
+                roevoBox.replaceWith(newRoevoBox);
+                roevoBox = newRoevoBox;
+                target.add(roevoBox);
             }
-        };
+        });
 
-        info(String.format("A release %s is being created...", status.getTarget()));
-        feedbackPanel.add(updater);
         target.add(feedbackPanel);
     }
 
