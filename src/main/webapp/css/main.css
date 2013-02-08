@@ -317,6 +317,10 @@ div.separated_bottom {
 	border-bottom: 1px dashed #BBBBBB;
 }
 
+div.separated_top{
+	border-top: 1px dashed #BBBBBB;
+}
+
 hr.separation {
 	border-top: 1px dashed #BBBBBB;
 	border-bottom: none;
@@ -478,4 +482,12 @@ input.span1 {
 .spaceDiv {
 	margin-bottom: 2px;
 }
+
+.tmpDashedContainer {
+	border: 1px dashed #BBBBBB; 
+	margin-bottom: 5px;
+	padding-bottom: 3px;
+	padding-top: 3px;
+}
+
 /* visualization */

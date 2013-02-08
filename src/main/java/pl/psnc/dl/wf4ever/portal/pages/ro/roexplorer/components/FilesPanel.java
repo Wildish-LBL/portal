@@ -32,8 +32,8 @@ public class FilesPanel extends Panel {
     private ListView<Resource> listView;
     /** Serialization. */
     private static final long serialVersionUID = 1L;
-    /** CSS tile resource reference. */
-    private CssResourceReference cssResourceReference = new CssResourceReference(FilesPanel.class, "tails.css");
+    /** CSS tail resource reference. */
+    private CssResourceReference cssResourceReference = new CssResourceReference(FilesPanel.class, "tiles.css");
     /** Listeners for the selected resource. */
     private List<IAjaxLinkListener> listeners;
     /** Folders model. */

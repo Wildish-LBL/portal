@@ -104,10 +104,13 @@ public class RoPage extends Base implements Loadable {
     private ROExplorer foldersViewer;
     private WebMarkupContainer roExplorerParent;
     private RoEvoBox roevoBox;
+    private LoadingCircle loadingEvoCircle;
+
     /** Loading image. */
     private LoadingCircle loadingCircle;
     /** Loading information. */
     private static final String LOADING_OBJECT = "Loading Research Object metadata.<br />Please wait...";
+    private static final String LOADING_EVO_OBJECT = "Loading ROEVO history.<br />Please wait...";
 
 
     /**
@@ -147,12 +150,17 @@ public class RoPage extends Base implements Loadable {
         final CompoundPropertyModel<Thing> itemModel = new CompoundPropertyModel<Thing>((Thing) null);
 
         loadingCircle = new LoadingCircle("folders-viewer", LOADING_OBJECT);
+        loadingEvoCircle = new LoadingCircle("ro-evo-box", LOADING_EVO_OBJECT);
+        loadingEvoCircle.setOutputMarkupId(true);
         roExplorerParent = new WebMarkupContainer("ro-explorer-parent");
         add(roExplorerParent);
         roExplorerParent.setOutputMarkupId(true);
         roExplorerParent.add(loadingCircle);
         this.foldersViewer = new ROExplorer("folders-viewer", researchObject, itemModel, loadingCircle);
+        roevoBox = new RoEvoBox("ro-evo-box", ((PortalApplication) getApplication()).getSparqlEndpointURI(),
+                researchObject);
         add(new ROExplorerAjaxInitialBehaviour(researchObject, this));
+
         foldersViewer.setOutputMarkupId(true);
         foldersViewer.getSnapshotButton().addLinkListener(new IAjaxLinkListener() {
 
@@ -185,9 +193,7 @@ public class RoPage extends Base implements Loadable {
         add(relEditForm);
         importAnnotationModal = new ImportAnnotationModal("importAnnotationModal", this, itemModel);
         add(importAnnotationModal);
-        roevoBox = new RoEvoBox("roEvoBox", ((PortalApplication) getApplication()).getSparqlEndpointURI(),
-                researchObject);
-        add(roevoBox);
+        add(loadingEvoCircle);
         add(new AbstractDefaultAjaxBehavior() {
 
             @Override
@@ -219,7 +225,6 @@ public class RoPage extends Base implements Loadable {
             }
 
         });
-
     }
 
 
@@ -639,6 +644,7 @@ public class RoPage extends Base implements Loadable {
     public void onLoaded(Object data) {
         foldersViewer.setRoTreeModel((RoTreeModel) data);
         loadingCircle.replaceWith(foldersViewer);
+        loadingEvoCircle.replaceWith(roevoBox);
     }
 
 
@@ -650,4 +656,10 @@ public class RoPage extends Base implements Loadable {
     public Component getRoExplorerParent() {
         return roExplorerParent;
     }
+
+
+    public RoEvoBox getROEvoBox() {
+        return roevoBox;
+    }
+
 }

@@ -13,6 +13,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Check;
 import org.apache.wicket.markup.html.form.CheckGroup;
@@ -33,6 +34,7 @@ import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.util.CreatorsPanel;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
+import pl.psnc.dl.wf4ever.portal.ui.components.LoadingCircle;
 
 /**
  * A list of annotations of a resource.
@@ -63,9 +65,16 @@ class AnnotatingBox extends Panel implements IAjaxLinkListener {
 
     /** Import annotation body button. */
     private AjaxButton importAnnotation;
+    /** Buttons Container. */
+    private WebMarkupContainer buttonsContainer;
+    /** Table container. */
+    private WebMarkupContainer tableContainer;
 
-    /** Logger **/
+    /** Logger. **/
     private static final Logger LOG = Logger.getLogger(RoPage.class);
+
+    private LoadingCircle loadingAnnotationCircle;
+    private static final String LOADING_ANNOTATIONS_OBJECT = "Loading annotations.<br />Please wait...";
 
 
     public Thing getModelObject() {
@@ -87,10 +96,12 @@ class AnnotatingBox extends Panel implements IAjaxLinkListener {
         setOutputMarkupId(true);
         setOutputMarkupPlaceholderTag(true);
 
+        buttonsContainer = new WebMarkupContainer("buttons-container");
+        tableContainer = new WebMarkupContainer("table-container");
         Form<?> annForm = new Form<Void>("annotationsForm");
         add(annForm);
         CheckGroup<Statement> group = new CheckGroup<Statement>("group", selectedStatements);
-        annForm.add(group);
+        tableContainer.add(group);
 
         IModel<List<Annotation>> listModel = new ListModel(new PropertyModel<Collection<Annotation>>(itemModel,
                 "annotations"));
@@ -133,7 +144,6 @@ class AnnotatingBox extends Panel implements IAjaxLinkListener {
                 target.add(roPage.getFeedbackPanel());
             }
         };
-        annForm.add(addStatement);
 
         deleteStatement = new MyAjaxButton("deleteAnnotation", annForm) {
 
@@ -168,7 +178,6 @@ class AnnotatingBox extends Panel implements IAjaxLinkListener {
                 //                target.add(AnnotatingBox.this.roPage.roViewerBox.infoPanel);
             }
         };
-        annForm.add(deleteStatement);
 
         addRelation = new MyAjaxButton("addRelation", annForm) {
 
@@ -187,7 +196,6 @@ class AnnotatingBox extends Panel implements IAjaxLinkListener {
                 target.add(roPage.getFeedbackPanel());
             }
         };
-        annForm.add(addRelation);
 
         importAnnotation = new MyAjaxButton("importAnnotation", annForm) {
 
@@ -202,7 +210,15 @@ class AnnotatingBox extends Panel implements IAjaxLinkListener {
                 target.add(roPage.getFeedbackPanel());
             }
         };
-        annForm.add(importAnnotation);
+
+        buttonsContainer.add(addStatement);
+        buttonsContainer.add(deleteStatement);
+        buttonsContainer.add(addRelation);
+        buttonsContainer.add(importAnnotation);
+
+        annForm.add(buttonsContainer);
+        annForm.add(tableContainer);
+
     }
 
 
@@ -212,7 +228,9 @@ class AnnotatingBox extends Panel implements IAjaxLinkListener {
         addStatement.setEnabled(roPage.canEdit && getDefaultModelObject() != null);
         deleteStatement.setEnabled(roPage.canEdit && getDefaultModelObject() != null);
         importAnnotation.setEnabled(roPage.canEdit && getDefaultModelObject() != null);
-        this.setVisible(getDefaultModelObject() != null);
+        buttonsContainer.setVisible(getDefaultModelObject() != null);
+        tableContainer.setVisible(getDefaultModelObject() != null
+                && !((List<?>) (annList.getDefaultModelObject())).isEmpty());
     }
 
 
