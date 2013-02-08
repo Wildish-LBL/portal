@@ -16,5 +16,5 @@ function initRoEvo(instance) {
 
 };
 $(document).ready(function() {
-	$('div[rel="popover"]').popover();
+//	$('div[rel="popover"]').popover();
 });

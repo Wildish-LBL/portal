@@ -30,6 +30,7 @@ import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.ITreeListener;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.FilesPanel;
+import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ProgressBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ROButtonsBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ROStatusBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ResourceButtonsBar;
@@ -97,13 +98,6 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
         this.foldersModel = new TreeNodeContentModel(new PropertyModel<Thing>(this, "currentlySelectedItem"),
                 researchObject);
         //building UI
-        if (!researchObject.isLoaded()) {
-            try {
-                researchObject.load();
-            } catch (ROSRSException | ROException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
         roTree = new RoTree("ro-tree", new PropertyModel<TreeModel>(this, "roTreeModel"));
         roTree.getTreeState().addTreeStateListener(this);
         filesPanel = new FilesPanel("files-panel", foldersModel);
@@ -122,6 +116,7 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
         add(roTree);
         add(filesPanel);
         add(filesShiftForm);
+        add(new ProgressBar("health-progress-bar", 32));
         //registry listeners
         roTree.addTreeListeners(this);
         filesShiftForm.addOnSubmitListener(this);

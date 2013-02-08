@@ -150,12 +150,14 @@ public class RoPage extends Base {
 
             @Override
             protected void respond(AjaxRequestTarget target) {
-                try {
-                    researchObject.load();
-                    onRoLoaded(target);
-                } catch (ROSRSException | ROException e) {
-                    error("Research object cannot be loaded: " + e.getMessage());
-                    LOG.error("Research object cannot be loaded", e);
+                if (!researchObject.isLoaded()) {
+                    try {
+                        researchObject.load();
+                        onRoLoaded(target);
+                    } catch (ROSRSException | ROException e) {
+                        error("Research object cannot be loaded: " + e.getMessage());
+                        LOG.error("Research object cannot be loaded", e);
+                    }
                 }
                 super.respond(target);
             }
@@ -164,8 +166,10 @@ public class RoPage extends Base {
 
             @Override
             protected void respond(AjaxRequestTarget target) {
-                researchObject.loadEvolutionInformation();
-                onRoEvoLoaded(target);
+                if (!researchObject.isEvolutionInformationLoaded()) {
+                    researchObject.loadEvolutionInformation();
+                    onRoEvoLoaded(target);
+                }
                 super.respond(target);
             }
         });
