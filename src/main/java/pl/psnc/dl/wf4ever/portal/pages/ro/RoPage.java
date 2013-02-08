@@ -14,19 +14,13 @@ import java.util.regex.Pattern;
 import javax.swing.tree.TreeModel;
 
 import org.apache.log4j.Logger;
-import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
-import org.apache.wicket.markup.html.link.ExternalLink;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.CompoundPropertyModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.purl.wf4ever.rosrs.client.Annotation;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
@@ -279,102 +273,6 @@ public class RoPage extends Base {
 
     public TreeModel getPhysicalResourcesTree() {
         return null;
-    }
-
-
-    /**
-     * A utility class for creating an external link to a property of a statement.
-     * 
-     * @author piotrekhol
-     * 
-     */
-    @SuppressWarnings("serial")
-    class ExternalLinkFragment extends Fragment {
-
-        /**
-         * Constructor.
-         * 
-         * @param id
-         *            wicket id
-         * @param markupId
-         *            fragment wicket id
-         * @param markupProvider
-         *            which component defines the fragment
-         * @param model
-         *            statement model
-         * @param property
-         *            property of a statement
-         */
-        public ExternalLinkFragment(String id, String markupId, MarkupContainer markupProvider,
-                CompoundPropertyModel<Statement> model, String property) {
-            super(id, markupId, markupProvider, model);
-            add(new ExternalLink("link", model.<String> bind(property), model.<String> bind(property)));
-        }
-    }
-
-
-    /**
-     * A utility class for creating links to resources inside the RO.
-     * 
-     * @author piotrekhol
-     * 
-     */
-    @SuppressWarnings("serial")
-    class InternalLinkFragment extends Fragment {
-
-        /**
-         * Constructor.
-         * 
-         * @param id
-         *            wicket id
-         * @param markupId
-         *            fragment wicket id
-         * @param markupProvider
-         *            which component defines the fragment
-         * @param statement
-         *            the statement for which the link is created
-         */
-        public InternalLinkFragment(String id, String markupId, MarkupContainer markupProvider, Statement statement) {
-            super(id, markupId, markupProvider);
-            String internalName = "./" + researchObject.getUri().relativize(statement.getSubjectURI()).toString();
-            add(new AjaxLink<String>("link", new Model<String>(internalName)) {
-
-                @Override
-                public void onClick(AjaxRequestTarget target) {
-                    // TODO Auto-generated method stub
-
-                }
-            }.add(new Label("name", internalName.toString())));
-        }
-    }
-
-
-    /**
-     * A utility class for creating a link for editing a statement.
-     * 
-     * @author piotrekhol
-     * 
-     */
-    @SuppressWarnings("serial")
-    class EditLinkFragment extends Fragment {
-
-        /**
-         * Constructor.
-         * 
-         * @param id
-         *            wicket id
-         * @param markupId
-         *            fragment wicket id
-         * @param markupProvider
-         *            which component defines the fragment
-         * @param link
-         *            link defining the action upon click
-         */
-        public EditLinkFragment(String id, String markupId, MarkupContainer markupProvider,
-                AjaxFallbackLink<String> link) {
-            super(id, markupId, markupProvider);
-            add(link);
-        }
     }
 
 
