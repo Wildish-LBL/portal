@@ -1,13 +1,10 @@
 package pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import org.apache.log4j.Logger;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.IHeaderResponse;
-import org.purl.wf4ever.rosrs.client.Folder;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
@@ -60,39 +57,9 @@ public class ROExplorerAjaxInitialBehaviour extends AbstractDefaultAjaxBehavior 
         } catch (ROSRSException | ROException e) {
             LOG.error(e.getMessage(), e);
         }
-        RoTreeModel treeModel = null;
-        treeModel = new RoTreeModel(researchObject);
-        DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode) treeModel.getRoot();
-        for (Folder folder : researchObject.getRootFolders()) {
-            DefaultMutableTreeNode currentNode = new DefaultMutableTreeNode(folder);
-            rootNode.add(currentNode);
-            addNodeFolder(currentNode);
-        }
-        loadableComponent.onLoaded(treeModel);
-        target.add(loadableComponent.getRoExplorerParent());
-        target.add(loadableComponent.getROEvoBox());
-    }
+        RoTreeModel treeModel = RoTreeModel.create(researchObject);
+        loadableComponent.onLoaded(treeModel, target);
 
-
-    /**
-     * Recursive method for filling up the tree.
-     * 
-     * @param parent
-     *            parent tree node
-     * 
-     */
-    private void addNodeFolder(DefaultMutableTreeNode parent) {
-        Folder currentFolder = (Folder) (parent.getUserObject());
-        try {
-            currentFolder.load(false);
-        } catch (ROSRSException e) {
-            LOG.error("Folder " + currentFolder.getUri().toString() + " can not be loaded", e);
-        }
-        for (Folder child : currentFolder.getSubfolders()) {
-            DefaultMutableTreeNode currentNode = new DefaultMutableTreeNode(child);
-            parent.add(currentNode);
-            addNodeFolder(currentNode);
-        }
     }
 
 

@@ -316,7 +316,7 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
 
 
     /**
-     * Add a new taget for node click event.
+     * Add a new target for node click event.
      */
     public void appendOnNodeClickTarget(Component target) {
         onNodeListTargets.add(target);

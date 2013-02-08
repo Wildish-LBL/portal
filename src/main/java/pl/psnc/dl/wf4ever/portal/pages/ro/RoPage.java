@@ -34,7 +34,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.time.Duration;
 import org.purl.wf4ever.rosrs.client.Annotation;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
-import org.purl.wf4ever.rosrs.client.Resource;
 import org.purl.wf4ever.rosrs.client.Statement;
 import org.purl.wf4ever.rosrs.client.Thing;
 import org.purl.wf4ever.rosrs.client.evo.JobStatus;
@@ -199,12 +198,10 @@ public class RoPage extends Base implements Loadable {
                 try {
                     if (!researchObject.isLoaded()) {
                         researchObject.load();
-                        RoTreeModel treeModel = new RoTreeModel(researchObject);
-                        for (Resource resource : researchObject.getResources().values()) {
-                            treeModel.addAggregatedResource(resource);
-                        }
-
-                        //foldersViewer.onLoaded();
+                        //                        RoTreeModel treeModel = new RoTreeModel(researchObject);
+                        //                        for (Resource resource : researchObject.getResources().values()) {
+                        //                            treeModel.addAggregatedResource(resource);
+                        //                        }
                         relEditForm.onRoTreeLoaded();
                         target.add(foldersViewer);
                     }
@@ -639,13 +636,17 @@ public class RoPage extends Base implements Loadable {
 
 
     @Override
-    public void onLoaded(Object data) {
+    public void onLoaded(Object data, AjaxRequestTarget target) {
         foldersViewer.setRoTreeModel((RoTreeModel) data);
         loadingCircle.replaceWith(foldersViewer);
         try {
+            target.add(getRoExplorerParent());
+
+            //TODO do przeniesienia
             roevoBox = new RoEvoBox("ro-evo-box", ((PortalApplication) getApplication()).getSparqlEndpointURI(),
                     researchObject);
             loadingEvoCircle.replaceWith(roevoBox);
+            target.add(getROEvoBox());
         } catch (IOException e) {
             LOG.error("Can't load RoEvoBox", e);
         }
