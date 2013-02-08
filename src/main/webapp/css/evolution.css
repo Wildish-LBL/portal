@@ -4,17 +4,17 @@
 
 .evo {
 	position: relative;
-	height: 90px;
+	height: 60px;
 }
 
 .evo .node {
 	border-width: 2px;
 	border-style: solid;
 	font-size: 0.75em;
-	height: 35px;
-	width: 35px;
+	height:20px;
+	width: 20px;
 	border-radius: 20px/20px;
-	top: 20px;
+	top: 5px;
 	z-index: 20;
 	opacity: 0.8;
 	color: black;
@@ -51,14 +51,14 @@
 }
 
 .evo .nodeInside {
-	height: 62px;
-	width: 68px;
+	height: 40px;
+	width: 74px;
 	display: block;
 	color: inherit;
 	position: absolute;
 	text-align: center;
-	top: 36px;
-	left: -16px;
+	top: 19px;
+	left: -25px;
 	word-wrap: break-word;
 }
 
