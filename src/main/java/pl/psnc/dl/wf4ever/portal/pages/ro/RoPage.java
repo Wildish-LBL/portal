@@ -157,8 +157,6 @@ public class RoPage extends Base implements Loadable {
         roExplorerParent.setOutputMarkupId(true);
         roExplorerParent.add(loadingCircle);
         this.foldersViewer = new ROExplorer("folders-viewer", researchObject, itemModel, loadingCircle);
-        roevoBox = new RoEvoBox("ro-evo-box", ((PortalApplication) getApplication()).getSparqlEndpointURI(),
-                researchObject);
         add(new ROExplorerAjaxInitialBehaviour(researchObject, this));
 
         foldersViewer.setOutputMarkupId(true);
@@ -644,7 +642,13 @@ public class RoPage extends Base implements Loadable {
     public void onLoaded(Object data) {
         foldersViewer.setRoTreeModel((RoTreeModel) data);
         loadingCircle.replaceWith(foldersViewer);
-        loadingEvoCircle.replaceWith(roevoBox);
+        try {
+            roevoBox = new RoEvoBox("ro-evo-box", ((PortalApplication) getApplication()).getSparqlEndpointURI(),
+                    researchObject);
+            loadingEvoCircle.replaceWith(roevoBox);
+        } catch (IOException e) {
+            LOG.error("Can't load RoEvoBox", e);
+        }
     }
 
 
