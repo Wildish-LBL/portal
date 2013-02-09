@@ -1,9 +1,10 @@
 <?xml version="1.0"?>
 <wicket:panel xmlns:wicket="http://wicket.apache.org">
 	<!-- RO evo box -->
-		<div class="row boxDiv evoroot" id="evoroot">
+	<div class="evoroot" id="evoroot">
+		<div class="row">
 			<div class="span11 evo live" wicket:id="live">
-				<div style="left: 832px">Live</div> 
+				<div style="left: 832px">Live</div>
 				<div wicket:id="liveNodes" class="node">
 					<a wicket:id="labelOrIdentifier" class="nodeInside">[RO]</a>
 					<div class="roMark" wicket:id="roMark">
@@ -11,29 +12,31 @@
 					</div>
 				</div>
 			</div>
-			<div class="span11 evo snapshot separated_top"
-				wicket:id="snapshots">
-				<div style="left: 795px">Snapshots</div> 
+		</div>
+		<div class="row">
+			<div class="span11 evo snapshot separated_top" wicket:id="snapshots">
+				<div style="left: 795px">Snapshots</div>
 				<div wicket:id="snapshotNodes" class="node">
 					<a wicket:id="labelOrIdentifier" class="nodeInside">[RO]</a>
-					
+
 					<div class="roMark" wicket:id="roMark">
 						<!-- <span class="badge">RO</span>  -->
 					</div>
 				</div>
 			</div>
-			<div class="span11 evo archived separated_top"
-				wicket:id="archived">
-				<div style="left: 806px">Archives</div> 
+		</div>
+		<div class="row">
+			<div class="span11 evo archived separated_top" wicket:id="archived">
+				<div style="left: 806px">Archives</div>
 				<div wicket:id="archivedNodes" class="node">
-					  
+
 					<a wicket:id="labelOrIdentifier" class="nodeInside">[RO]</a>
 					<div class="roMark" wicket:id="roMark">
 						<!--<span class="badge">RO</span>-->
 					</div>
-					
 				</div>
 			</div>
 		</div>
-	
+	</div>
+
 </wicket:panel>

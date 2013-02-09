@@ -56,9 +56,6 @@ public class ROStatusBar extends Panel {
     /** Div about the RO evolution Class. */
     private final WebMarkupContainer evoClassSection;
 
-    /** Main container for all labels. **/
-    WebMarkupContainer mainContainer;
-
 
     /**
      * Constructor.
@@ -71,23 +68,23 @@ public class ROStatusBar extends Panel {
     public ROStatusBar(String id, final CompoundPropertyModel<Thing> itemModel) {
         super(id, itemModel);
         setOutputMarkupId(true);
-        mainContainer = new WebMarkupContainer("main-container");
+        setOutputMarkupPlaceholderTag(true);
         resourceURISection = new WebMarkupContainer("resourceURISection", new Model<>());
-        mainContainer.add(resourceURISection);
+        add(resourceURISection);
         resourceURISection.add(new ExternalLink("resourceURI", itemModel.<String> bind("uri.toString"), itemModel
                 .<URI> bind("uri")));
         creatorSection = new WebMarkupContainer("creatorSection", new Model<>());
-        mainContainer.add(creatorSection);
+        add(creatorSection);
         creatorSection.add(new CreatorsPanel("creator", new PropertyModel<Set<Creator>>(itemModel, "creators")));
         createdSection = new WebMarkupContainer("createdSection", new Model<>());
-        mainContainer.add(createdSection);
+        add(createdSection);
         createdSection.add(new Label("createdFormatted"));
         sizeSection = new WebMarkupContainer("sizeSection", new Model<>());
-        mainContainer.add(sizeSection);
+        add(sizeSection);
         sizeSection.add(new Label("sizeFormatted"));
         annotationsCntSection = new WebMarkupContainer("annotationsCntSection", new Model<>());
         annotationsCntSection.add(new Label("annotations.size"));
-        mainContainer.add(annotationsCntSection);
+        add(annotationsCntSection);
 
         titleSection = new WebMarkupContainer("titleSection", new Model<>());
         titleSection.add(new Label("title"));
@@ -95,11 +92,9 @@ public class ROStatusBar extends Panel {
         descSection.add(new Label("description"));
         evoClassSection = new WebMarkupContainer("evoClassSection", new Model<>());
         evoClassSection.add(new Label("evoType.toString"));
-        mainContainer.add(titleSection);
-        mainContainer.add(descSection);
-        mainContainer.add(evoClassSection);
-
-        add(mainContainer);
+        add(titleSection);
+        add(descSection);
+        add(evoClassSection);
     }
 
 
@@ -107,7 +102,7 @@ public class ROStatusBar extends Panel {
     protected void onConfigure() {
         Thing resource = (Thing) getDefaultModelObject();
         if (resource != null) {
-            mainContainer.setVisible(true);
+            setVisible(true);
             resourceURISection.setVisible(true);
             //            creatorSection.setVisible(!resource.getCreators().isEmpty());
             creatorSection.setVisible(false);
@@ -133,7 +128,7 @@ public class ROStatusBar extends Panel {
                 }
             }
         } else {
-            mainContainer.setVisible(false);
+            setVisible(false);
         }
     }
 }

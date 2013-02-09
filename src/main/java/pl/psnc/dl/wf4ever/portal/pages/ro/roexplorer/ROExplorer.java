@@ -18,6 +18,7 @@ import org.apache.wicket.markup.html.tree.ITreeStateListener;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
+import org.purl.wf4ever.checklist.client.EvaluationResult;
 import org.purl.wf4ever.rosrs.client.Folder;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.Resource;
@@ -30,6 +31,7 @@ import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.ITreeListener;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.FilesPanel;
+import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ProgressBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ROButtonsBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ROStatusBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ResourceButtonsBar;
@@ -78,6 +80,8 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
     /** List of targets refreshed on node clicked event. */
     private List<Component> onNodeListTargets = new ArrayList<>();
 
+    private EvaluationResult qualityEvaluationResult;
+
 
     /**
      * Constructor.
@@ -115,7 +119,7 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
         add(roTree);
         add(filesPanel);
         add(filesShiftForm);
-        //add(new ProgressBar("health-progress-bar", 32));
+        add(new ProgressBar("health-progress-bar", 32));
         //registry listeners
         roTree.addTreeListeners(this);
         filesShiftForm.addOnSubmitListener(this);
@@ -331,5 +335,15 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
 
     public UniversalStyledAjaxButton getReleaseButton() {
         return roButtonsBar.getReleaseButton();
+    }
+
+
+    public EvaluationResult getQualityEvaluationResult() {
+        return qualityEvaluationResult;
+    }
+
+
+    public void setQualityEvaluationResult(EvaluationResult qualityEvaluationResult) {
+        this.qualityEvaluationResult = qualityEvaluationResult;
     }
 }

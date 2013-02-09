@@ -13,6 +13,7 @@ import org.apache.wicket.authroles.authorization.strategies.role.annotations.Ann
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
+import org.purl.wf4ever.checklist.client.ChecklistEvaluationService;
 
 import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
@@ -77,6 +78,9 @@ public class PortalApplication extends AuthenticatedWebApplication {
 
     /** Wf-RO transformation service URI. */
     private URI wf2ROService;
+
+    /** checklist service client. */
+    private ChecklistEvaluationService checklistService;
 
     /** RODL admin token. */
     private String adminToken;
@@ -152,6 +156,9 @@ public class PortalApplication extends AuthenticatedWebApplication {
             wf2ROService = new URI(props.getProperty("wf2ROService"));
             name = props.getProperty("application.name");
             version = props.getProperty("application.version");
+            URI checklistUri = new URI(props.getProperty("checklist.uri"));
+            URI minimUri = new URI(props.getProperty("checklist.minim.uri"));
+            checklistService = new ChecklistEvaluationService(checklistUri, minimUri);
         } catch (Exception e) {
             LOG.error("Failed to load properties: " + e.getMessage());
         }
@@ -289,6 +296,11 @@ public class PortalApplication extends AuthenticatedWebApplication {
 
     public String getVersion() {
         return version;
+    }
+
+
+    public ChecklistEvaluationService getChecklistService() {
+        return checklistService;
     }
 
 }
