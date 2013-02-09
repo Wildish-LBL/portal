@@ -23,6 +23,7 @@ import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.purl.wf4ever.checklist.client.ChecklistEvaluationService;
 import org.purl.wf4ever.checklist.client.EvaluationResult;
 import org.purl.wf4ever.rosrs.client.Annotation;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
@@ -33,6 +34,7 @@ import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
+import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
 import pl.psnc.dl.wf4ever.portal.pages.base.Base;
 import pl.psnc.dl.wf4ever.portal.pages.ro.behaviours.JobStatusUpdatingBehaviour;
@@ -174,6 +176,16 @@ public class RoPage extends Base {
                     researchObject.loadEvolutionInformation();
                     onRoEvoLoaded(target);
                 }
+                super.respond(target);
+            }
+        });
+        add(new OnDomReadyAjaxBehaviour(feedbackPanel) {
+
+            @Override
+            protected void respond(AjaxRequestTarget target) {
+                ChecklistEvaluationService service = ((PortalApplication) getApplication()).getChecklistService();
+                qualityEvaluation = service.evaluate(researchObject.getUri(), "ready-to-release");
+                foldersViewer.onQualityEvaluated(target);
                 super.respond(target);
             }
         });

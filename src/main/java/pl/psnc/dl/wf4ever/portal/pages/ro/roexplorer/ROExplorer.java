@@ -135,6 +135,10 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
 
     public void onRoLoaded(AjaxRequestTarget target) {
         roTreeModel = RoTreeModel.create(researchObject);
+    }
+
+
+    public void onQualityEvaluated(AjaxRequestTarget target) {
         qualityPanel.onQualityEvaluated(target);
     }
 

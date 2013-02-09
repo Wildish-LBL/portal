@@ -9,11 +9,12 @@
 		<div class="padded">
 			<p>Research object quality:</p>
 		</div>
-		<div id="health-progress-bar-main-container"
+		<div wicket:id="initialLabel" class="padded">
+			<p>Calculating...</p>
+		</div>
+		<div wicket:id="progressBar" id="health-progress-bar-main-container"
 			class="btn-toolbar padded" style="padding-right: 20px;">
-			<div id="health-progress-bar" style="height: 10px;">
-				<span wicket:id="label">Calculating...</span>
-			</div>
+			<div id="health-progress-bar" style="height: 10px;"></div>
 		</div>
 	</wicket:panel>
 </body>
