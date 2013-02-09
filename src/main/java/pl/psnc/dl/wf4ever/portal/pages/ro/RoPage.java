@@ -21,7 +21,9 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.model.CompoundPropertyModel;
+import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.purl.wf4ever.checklist.client.EvaluationResult;
 import org.purl.wf4ever.rosrs.client.Annotation;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.Statement;
@@ -80,6 +82,8 @@ public class RoPage extends Base {
     MyFeedbackPanel feedbackPanel;
 
     protected ResearchObject researchObject;
+
+    protected EvaluationResult qualityEvaluation;
 
     /** Regex pattern for parsing Link HTTP headers. */
     private static final Pattern LINK_HEADER = Pattern.compile("<(.+)>; rel=(.+)");
@@ -174,7 +178,8 @@ public class RoPage extends Base {
             }
         });
 
-        foldersViewer = new ROExplorer("folders-viewer", researchObject, itemModel);
+        foldersViewer = new ROExplorer("folders-viewer", researchObject, itemModel,
+                new PropertyModel<EvaluationResult>(this, "qualityEvaluation"));
         foldersViewer.setOutputMarkupId(true);
         foldersViewer.getSnapshotButton().addLinkListener(new IAjaxLinkListener() {
 
@@ -277,6 +282,16 @@ public class RoPage extends Base {
 
     public TreeModel getPhysicalResourcesTree() {
         return null;
+    }
+
+
+    public EvaluationResult getQualityEvaluation() {
+        return qualityEvaluation;
+    }
+
+
+    public void setQualityEvaluation(EvaluationResult qualityEvaluation) {
+        this.qualityEvaluation = qualityEvaluation;
     }
 
 
@@ -468,7 +483,7 @@ public class RoPage extends Base {
 
 
     public void onRoLoaded(AjaxRequestTarget target) {
-        foldersViewer.onRoLoaded();
+        foldersViewer.onRoLoaded(target);
         loadingCircle.replaceWith(foldersViewer);
         target.add(roExplorerParent);
     }

@@ -24,7 +24,6 @@ import pl.psnc.dl.wf4ever.portal.ui.components.UniversalStyledAjaxButton;
 public class ResourceButtonsBar extends Panel {
 
     /** Logger. */
-    @SuppressWarnings("unused")
     private static final Logger LOG = Logger.getLogger(ResourceStatusBar.class);
     /** Serialziation. */
     private static final long serialVersionUID = 1L;
@@ -61,6 +60,7 @@ public class ResourceButtonsBar extends Panel {
     public ResourceButtonsBar(String id) {
         super(id);
         setOutputMarkupId(true);
+        setOutputMarkupPlaceholderTag(true);
         roForm = new Form<Void>("roForm");
         add(roForm);
         folderButtonsContainerInit();

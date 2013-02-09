@@ -81,6 +81,7 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
     private List<Component> onNodeListTargets = new ArrayList<>();
 
     private EvaluationResult qualityEvaluationResult;
+    private ProgressBar qualityPanel;
 
 
     /**
@@ -92,8 +93,10 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
      *            Research Object
      * @param itemModel
      *            model?
+     * @param qualityModel
      */
-    public ROExplorer(String id, ResearchObject researchObject, IModel<Thing> itemModel) {
+    public ROExplorer(String id, ResearchObject researchObject, IModel<Thing> itemModel,
+            IModel<EvaluationResult> qualityModel) {
         // Last clicked item (file or Folder). 
         super(id, itemModel);
         //setting variables
@@ -109,6 +112,7 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
                 new PropertyModel<Thing>(this, "currentlySelectedItem")));
         add(itemInfoPanel);
         buttonsBar = new ResourceButtonsBar("buttons-panel");
+        buttonsBar.setVisible(false);
         add(buttonsBar);
         roStatusBar = new ROStatusBar("research-object-info-panel", new CompoundPropertyModel<Thing>(
                 new PropertyModel<Thing>(this, "researchObject")));
@@ -119,7 +123,8 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
         add(roTree);
         add(filesPanel);
         add(filesShiftForm);
-        add(new ProgressBar("health-progress-bar", 32));
+        qualityPanel = new ProgressBar("health-progress-bar", qualityModel);
+        add(qualityPanel);
         //registry listeners
         roTree.addTreeListeners(this);
         filesShiftForm.addOnSubmitListener(this);
@@ -128,8 +133,9 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
     }
 
 
-    public void onRoLoaded() {
+    public void onRoLoaded(AjaxRequestTarget target) {
         roTreeModel = RoTreeModel.create(researchObject);
+        qualityPanel.onQualityEvaluated(target);
     }
 
 
@@ -281,17 +287,21 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
     private void switchButtonBar() {
         if (getCurrentlySelectedItem() == null || !MySession.get().isSignedIn()) {
             //nothing to show
+            buttonsBar.setVisible(false);
             buttonsBar.hideFoldersButtonContainer();
             buttonsBar.hideResourceButtonsContainer();
         } else if (getCurrentlySelectedItem() instanceof Folder) {
             //folders bar
+            buttonsBar.setVisible(true);
             buttonsBar.showFoldersButtonsContainer(getCurrentlySelectedItem());
             buttonsBar.hideResourceButtonsContainer();
         } else if (getCurrentlySelectedItem() instanceof Resource) {
             //files bar
+            buttonsBar.setVisible(true);
             buttonsBar.hideFoldersButtonContainer();
             buttonsBar.showResourceButtonsContainer(getSelectedFile());
         } else if (getCurrentlySelectedItem() instanceof ResearchObject) {
+            buttonsBar.setVisible(true);
             buttonsBar.showFoldersButtonsContainer(researchObject);
             buttonsBar.hideResourceButtonsContainer();
         }
