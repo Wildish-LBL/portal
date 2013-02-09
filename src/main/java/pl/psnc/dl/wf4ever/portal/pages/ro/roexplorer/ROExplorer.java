@@ -31,7 +31,7 @@ import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.ITreeListener;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.FilesPanel;
-import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ProgressBar;
+import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.QualityBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ROButtonsBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ROStatusBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ResourceButtonsBar;
@@ -81,7 +81,7 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
     private List<Component> onNodeListTargets = new ArrayList<>();
 
     private EvaluationResult qualityEvaluationResult;
-    private ProgressBar qualityPanel;
+    private QualityBar qualityPanel;
 
 
     /**
@@ -123,7 +123,7 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
         add(roTree);
         add(filesPanel);
         add(filesShiftForm);
-        qualityPanel = new ProgressBar("health-progress-bar", qualityModel);
+        qualityPanel = new QualityBar("health-progress-bar", qualityModel);
         add(qualityPanel);
         //registry listeners
         roTree.addTreeListeners(this);
