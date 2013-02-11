@@ -160,7 +160,7 @@ public class RoPage extends Base {
                     try {
                         researchObject.load();
                         onRoLoaded(target);
-                    } catch (ROSRSException | ROException e) {
+                    } catch (Exception e) {
                         error("Research object cannot be loaded: " + e.getMessage());
                         LOG.error("Research object cannot be loaded", e);
                     }
@@ -172,9 +172,13 @@ public class RoPage extends Base {
 
             @Override
             protected void respond(AjaxRequestTarget target) {
-                if (!researchObject.isEvolutionInformationLoaded()) {
-                    researchObject.loadEvolutionInformation();
-                    onRoEvoLoaded(target);
+                try {
+                    if (!researchObject.isEvolutionInformationLoaded()) {
+                        researchObject.loadEvolutionInformation();
+                        onRoEvoLoaded(target);
+                    }
+                } catch (Exception e) {
+                    feedbackPanel.error("Could not load the evolution information: " + e.getLocalizedMessage());
                 }
                 super.respond(target);
             }
@@ -183,9 +187,13 @@ public class RoPage extends Base {
 
             @Override
             protected void respond(AjaxRequestTarget target) {
-                ChecklistEvaluationService service = ((PortalApplication) getApplication()).getChecklistService();
-                qualityEvaluation = service.evaluate(researchObject.getUri(), "ready-to-release");
-                foldersViewer.onQualityEvaluated(target);
+                try {
+                    ChecklistEvaluationService service = ((PortalApplication) getApplication()).getChecklistService();
+                    qualityEvaluation = service.evaluate(researchObject.getUri(), "ready-to-release");
+                    foldersViewer.onQualityEvaluated(target);
+                } catch (Exception e) {
+                    feedbackPanel.error("Could not calculate the quality: " + e.getLocalizedMessage());
+                }
                 super.respond(target);
             }
         });
