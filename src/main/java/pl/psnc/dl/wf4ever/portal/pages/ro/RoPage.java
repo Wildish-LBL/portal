@@ -42,7 +42,6 @@ import pl.psnc.dl.wf4ever.portal.pages.ro.behaviours.OnDomReadyAjaxBehaviour;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.ROExplorer;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
-import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.ui.components.LoadingCircle;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
@@ -116,14 +115,10 @@ public class RoPage extends Base {
      *            page parameters
      * @throws URISyntaxException
      *             if URIs returned by the RODL are incorrect
-     * @throws OAuthException
-     *             if it cannot connect to RODL
-     * @throws IOException
-     *             if it cannot connect to RODL
      */
     @SuppressWarnings("serial")
     public RoPage(final PageParameters parameters)
-            throws URISyntaxException, OAuthException, IOException {
+            throws URISyntaxException {
         super(parameters);
         if (!parameters.get("ro").isEmpty()) {
             URI roURI = new URI(parameters.get("ro").toString());
