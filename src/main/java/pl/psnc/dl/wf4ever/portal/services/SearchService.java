@@ -14,9 +14,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jdom.Element;
 import org.joda.time.DateTime;
+import org.joda.time.format.ISODateTimeFormat;
 import org.purl.wf4ever.rosrs.client.Creator;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.users.UserManagementService;
@@ -24,6 +26,10 @@ import org.purl.wf4ever.rosrs.client.users.UserManagementService;
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.model.SearchResult;
 
+import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.ResultSet;
 import com.sun.jersey.api.uri.UriBuilderImpl;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
@@ -47,6 +53,21 @@ public final class SearchService {
 
     /** date format for parsing the dates in search results. */
     public static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z");
+
+    private static final String SPARQL_REGEX = "REGEX(%s, \"%s\",\"i\") ";
+
+    private static final String SPARQL_FILTER = "FILTER (%s).";
+
+    private static final String SPARQL = "PREFIX ro: <http://purl.org/wf4ever/ro#>\n"
+            + "PREFIX dcterms: <http://purl.org/dc/terms/>\n"
+            + "PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n"
+            + "PREFIX ore: <http://www.openarchives.org/ore/terms/>\n"
+            + "\n"
+            + "SELECT ?ro (sample(?creator) as ?thecreator) (min(?created) as ?mincreated) (count(distinct ?resource) as ?resCnt)\n"
+            + "WHERE {\n" + "    ?ro a ro:ResearchObject ;\n" + "          dcterms:creator ?creator;\n"
+            + "        dcterms:created ?created ;\n" + "        ore:aggregates ?resource ;\n"
+            + "    OPTIONAL {?ro dcterms:title  ?title ;\n" + "                dcterms:description ?desc }\n"
+            + "  %s \n" + "}\n" + "GROUP BY ?ro \n" + "ORDER BY DESC(?mincreated)\n" + "LIMIT 25";
 
 
     /**
@@ -142,5 +163,43 @@ public final class SearchService {
         }
 
         return ros;
+    }
+
+
+    public static List<SearchResult> findUsingSparql(URI sparqlEndpointUri, String[] keywords) {
+        List<SearchResult> searchResults = new ArrayList<>();
+        StringBuilder filter = new StringBuilder();
+        for (String keyword : keywords) {
+            String[] regex = { String.format(SPARQL_REGEX, "?title", keyword),
+                    String.format(SPARQL_REGEX, "?desc", keyword), String.format(SPARQL_REGEX, "str(?ro)", keyword) };
+            filter.append(String.format(SPARQL_FILTER, StringUtils.join(regex, "||")));
+        }
+        String queryS = String.format(SPARQL, filter.toString());
+        ResultSet results = QueryExecutionFactory.sparqlService(sparqlEndpointUri.toString(), queryS).execSelect();
+        while (results.hasNext()) {
+            QuerySolution solution = results.next();
+            URI uri = URI.create(solution.get("ro").asResource().getURI());
+            URI creator = URI.create(solution.get("thecreator").asResource().getURI());
+            DateTime created = null;
+            Object date = solution.getLiteral("created").getValue();
+            if (date instanceof XSDDateTime) {
+                created = new DateTime(((XSDDateTime) date).asCalendar().getTimeInMillis());
+            } else {
+                try {
+                    created = new DateTime(ISODateTimeFormat.dateTime().parseDateTime(date.toString())
+                            .toGregorianCalendar().getTimeInMillis());
+                } catch (IllegalArgumentException e) {
+                    LOG.warn("Don't know how to parse date: " + date);
+                }
+            }
+            int resCnt = solution.getLiteral("resCnt").getInt();
+            ResearchObject ro = new ResearchObject(uri, null);
+            ro.setCreator(creator);
+            ro.setCreated(created);
+            SearchResult result = new SearchResult(ro, 1);
+            result.setResourceCount(resCnt);
+            searchResults.add(result);
+        }
+        return searchResults;
     }
 }

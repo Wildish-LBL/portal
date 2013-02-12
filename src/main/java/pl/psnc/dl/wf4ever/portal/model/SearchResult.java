@@ -21,6 +21,9 @@ public class SearchResult implements Serializable {
     /** RO found. */
     private final ResearchObject researchObject;
 
+    /** Number of resources in the RO. */
+    private int resourceCount;
+
     /** Search score. The higher the better, from 0 to infinity. */
     private final double score;
 
@@ -51,5 +54,15 @@ public class SearchResult implements Serializable {
 
     public int getScoreInPercent() {
         return (int) Math.round(score * 100);
+    }
+
+
+    public int getResourceCount() {
+        return resourceCount;
+    }
+
+
+    public void setResourceCount(int resourceCount) {
+        this.resourceCount = resourceCount;
     }
 }
