@@ -5,7 +5,8 @@
 		<div class="span12">
 			<div class="inspan12">
 				<ul class="breadcrumb">
-					<li><a href="home">Home</a></li>
+					<li><a href="home">Home</a> <span class="divider">/</span></li>
+					<li><a href="#">Search results</a></li>
 				</ul>
 			</div>
 		</div>
@@ -20,11 +21,11 @@
 				<li wicket:id="searchResultsListView"><a wicket:id="link"><span
 						wicket:id="researchObject.name">[uri]</span></a>&nbsp;<span
 					wicket:id="researchObject.title">[title]</span> <br /> <span
-					style="font-size: x-small">by <span
-						wicket:id="researchObject.creator"></span>, <span
+					style="font-size: x-small"><!-- by <span
+						wicket:id="researchObject.creator"></span>,  --><span
 						wicket:id="researchObject.createdFormatted"></span></span>
 
-					<div class="searchScore">
+					<div class="searchScore" wicket:id="searchScore">
 						<div>
 							Score: <span wicket:id="scoreInPercent">[score]</span>%
 						</div>

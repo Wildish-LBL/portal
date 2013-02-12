@@ -54,20 +54,17 @@ public final class SearchService {
     /** date format for parsing the dates in search results. */
     public static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z");
 
-    private static final String SPARQL_REGEX = "REGEX(%s, \"%s\",\"i\") ";
+    private static final String SPARQL_REGEX = " REGEX(%s, \"%s\",\"i\") ";
 
     private static final String SPARQL_FILTER = "FILTER (%s).";
 
     private static final String SPARQL = "PREFIX ro: <http://purl.org/wf4ever/ro#>\n"
-            + "PREFIX dcterms: <http://purl.org/dc/terms/>\n"
-            + "PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n"
-            + "PREFIX ore: <http://www.openarchives.org/ore/terms/>\n"
-            + "\n"
-            + "SELECT ?ro (sample(?creator) as ?thecreator) (min(?created) as ?mincreated) (count(distinct ?resource) as ?resCnt)\n"
-            + "WHERE {\n" + "    ?ro a ro:ResearchObject ;\n" + "          dcterms:creator ?creator;\n"
-            + "        dcterms:created ?created ;\n" + "        ore:aggregates ?resource ;\n"
-            + "    OPTIONAL {?ro dcterms:title  ?title ;\n" + "                dcterms:description ?desc }\n"
-            + "  %s \n" + "}\n" + "GROUP BY ?ro \n" + "ORDER BY DESC(?mincreated)\n" + "LIMIT 25";
+            + "PREFIX dcterms: <http://purl.org/dc/terms/>\n" + "PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n"
+            + "PREFIX ore: <http://www.openarchives.org/ore/terms/>\n" + "\n"
+            + "SELECT ?ro (sample(?creator) as ?thecreator) (min(?created) as ?mincreated)\n" + "WHERE {\n"
+            + "    ?ro a ro:ResearchObject ;\n" + "        dcterms:creator ?creator;\n"
+            + "        dcterms:created ?created .\n" + "  OPTIONAL {?ro dcterms:title  ?title . }\n" + "  %s \n"
+            + "}\n" + "GROUP BY ?ro \n" + "ORDER BY DESC(?mincreated)\n" + "LIMIT 10";
 
 
     /**
@@ -178,10 +175,13 @@ public final class SearchService {
         ResultSet results = QueryExecutionFactory.sparqlService(sparqlEndpointUri.toString(), queryS).execSelect();
         while (results.hasNext()) {
             QuerySolution solution = results.next();
+            if (solution.get("ro") == null) {
+                continue;
+            }
             URI uri = URI.create(solution.get("ro").asResource().getURI());
             URI creator = URI.create(solution.get("thecreator").asResource().getURI());
             DateTime created = null;
-            Object date = solution.getLiteral("created").getValue();
+            Object date = solution.getLiteral("mincreated").getValue();
             if (date instanceof XSDDateTime) {
                 created = new DateTime(((XSDDateTime) date).asCalendar().getTimeInMillis());
             } else {
@@ -192,12 +192,12 @@ public final class SearchService {
                     LOG.warn("Don't know how to parse date: " + date);
                 }
             }
-            int resCnt = solution.getLiteral("resCnt").getInt();
+            String title = solution.getLiteral("title") != null ? solution.getLiteral("title").getString() : null;
             ResearchObject ro = new ResearchObject(uri, null);
             ro.setCreator(creator);
             ro.setCreated(created);
-            SearchResult result = new SearchResult(ro, 1);
-            result.setResourceCount(resCnt);
+            ro.setTitle(title);
+            SearchResult result = new SearchResult(ro, -1);
             searchResults.add(result);
         }
         return searchResults;

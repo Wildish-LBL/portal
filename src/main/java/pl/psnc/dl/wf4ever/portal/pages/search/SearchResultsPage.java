@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.CompoundPropertyModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import pl.psnc.dl.wf4ever.portal.model.SearchResult;
 import pl.psnc.dl.wf4ever.portal.pages.base.Base;
@@ -37,7 +38,7 @@ public class SearchResultsPage extends Base {
      *             can't connect to RODL
      */
     public SearchResultsPage(final List<SearchResult> searchResults) {
-        super(null);
+        super(new PageParameters());
         setDefaultModel(new CompoundPropertyModel<SearchResultsPage>(this));
 
         final MyFeedbackPanel feedbackPanel = new MyFeedbackPanel("feedbackPanel");

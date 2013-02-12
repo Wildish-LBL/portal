@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -46,10 +47,13 @@ final class SearchResultsListView extends PropertyListView<SearchResult> {
         link.add(new Label("researchObject.name"));
         item.add(link);
         item.add(new Label("researchObject.title"));
-        item.add(new Label("scoreInPercent"));
         //            item.add(new CreatorsPanel("researchObject.creator", new PropertyModel<List<Creator>>(result,
         //                    "researchObject.creators")));
         item.add(new Label("researchObject.createdFormatted"));
+        WebMarkupContainer score = new WebMarkupContainer("searchScore");
+        item.add(score);
+        score.setVisible(result.getScore() >= 0);
+        score.add(new Label("scoreInPercent"));
         Label bar = new Label("percentBar", "");
         bar.add(new Behavior() {
 
@@ -65,6 +69,6 @@ final class SearchResultsListView extends PropertyListView<SearchResult> {
                 tag.put("style", "width: " + Math.min(100, result.getScoreInPercent()) + "%");
             }
         });
-        item.add(bar);
+        score.add(bar);
     }
 }
