@@ -64,7 +64,7 @@ public final class SearchService {
             + "SELECT ?ro (sample(?creator) as ?thecreator) (min(?created) as ?mincreated)\n" + "WHERE {\n"
             + "    ?ro a ro:ResearchObject ;\n" + "        dcterms:creator ?creator;\n"
             + "        dcterms:created ?created .\n" + "  OPTIONAL {?ro dcterms:title  ?title . }\n" + "  %s \n"
-            + "}\n" + "GROUP BY ?ro \n" + "ORDER BY DESC(?mincreated)\n" + "LIMIT 10";
+            + "}\n" + "GROUP BY ?ro \n" + "ORDER BY DESC(?mincreated)\n" + "LIMIT 20";
 
 
     /**
@@ -192,11 +192,11 @@ public final class SearchService {
                     LOG.warn("Don't know how to parse date: " + date);
                 }
             }
-            String title = solution.getLiteral("title") != null ? solution.getLiteral("title").getString() : null;
+            //            String title = solution.getLiteral("title") != null ? solution.getLiteral("title").getString() : null;
             ResearchObject ro = new ResearchObject(uri, null);
             ro.setCreator(creator);
             ro.setCreated(created);
-            ro.setTitle(title);
+            //            ro.setTitle(title);
             SearchResult result = new SearchResult(ro, -1);
             searchResults.add(result);
         }
