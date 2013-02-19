@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.log4j.Logger;
+import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -315,8 +316,8 @@ class AnnotatingBox extends Panel implements IAjaxLinkListener {
                         .<String> bind("objectValue")).setEscapeModelStrings(false));
             }
             if (AnnotatingBox.this.roPage.canEdit) {
-                item.add(new EditLinkFragment("edit", "editLinkFragment",
-                        AnnotatingBox.this.roPage, new AjaxFallbackLink<String>("link") {
+                item.add(new EditLinkFragment("edit", "editLinkFragment", AnnotatingBox.this.roPage,
+                        new AjaxFallbackLink<String>("link") {
 
                             @Override
                             public void onClick(AjaxRequestTarget target) {
@@ -336,6 +337,15 @@ class AnnotatingBox extends Panel implements IAjaxLinkListener {
 
     @Override
     public void onAjaxLinkClicked(AjaxRequestTarget target) {
-        target.add(this);
+        AbstractDefaultAjaxBehavior x = new AbstractDefaultAjaxBehavior() {
+
+            @Override
+            protected void respond(AjaxRequestTarget target) {
+                target.add(AnnotatingBox.this);
+            }
+
+        };
+        add(x);
+        target.appendJavaScript(x.getCallbackUrl());
     }
 }

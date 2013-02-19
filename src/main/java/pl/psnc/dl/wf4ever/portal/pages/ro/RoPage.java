@@ -91,7 +91,8 @@ public class RoPage extends Base {
     private WebMarkupContainer roExplorerParent;
     RoEvoBox roevoBox;
     private LoadingCircle loadingEvoCircle;
-
+    private LoadingCircle loadingAnnotationCircle;
+    private static final String LOADING_ANNOTATIONS_OBJECT = "Loading annotations.<br />Please wait...";
     /** Loading image. */
     private LoadingCircle loadingCircle;
 
@@ -141,7 +142,9 @@ public class RoPage extends Base {
 
         loadingCircle = new LoadingCircle("folders-viewer", LOADING_OBJECT);
         loadingEvoCircle = new LoadingCircle("ro-evo-box", LOADING_EVO_OBJECT);
+        loadingAnnotationCircle = new LoadingCircle("ro-evo-box", LOADING_ANNOTATIONS_OBJECT);
         loadingEvoCircle.setOutputMarkupId(true);
+        loadingAnnotationCircle.setOutputMarkupId(true);
         roExplorerParent = new WebMarkupContainer("ro-explorer-parent");
         add(roExplorerParent);
         roExplorerParent.setOutputMarkupId(true);
@@ -194,6 +197,7 @@ public class RoPage extends Base {
         foldersViewer.appendOnNodeClickTarget(annotatingBox);
         /*****************************************************************************/
         add(annotatingBox);
+        //add(load)
         annotatingBox.selectedStatements.clear();
         foldersViewer.addLinkListener(annotatingBox);
         add(new DownloadMetadataModal("downloadMetadataModal", this));
