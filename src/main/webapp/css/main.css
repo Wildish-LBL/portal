@@ -261,6 +261,14 @@ table.resourceList td.link {
 	margin-left: 10px;
 }
 
+.row.centered {
+	margin-left: 20px;
+}
+
+.padded {
+	padding-left: 20px;
+}
+
 .box h3 {
 	clear: both;
 	color: #fff;
@@ -486,6 +494,7 @@ input.span1 {
 .tmpDashedContainer {
 	border: 1px dashed #BBBBBB; 
 	margin-bottom: 5px;
+	margin-left: -1px;
 	padding-bottom: 3px;
 	padding-top: 3px;
 }

@@ -47,9 +47,6 @@ public class ResourceStatusBar extends Panel {
     /** Div about the resource annotations. */
     private final WebMarkupContainer annotationsCntSection;
 
-    /** Main container for all labels. **/
-    WebMarkupContainer mainContainer;
-
 
     /**
      * Constructor.
@@ -62,25 +59,24 @@ public class ResourceStatusBar extends Panel {
     public ResourceStatusBar(String id, final CompoundPropertyModel<Thing> itemModel) {
         super(id, itemModel);
         setOutputMarkupId(true);
-        mainContainer = new WebMarkupContainer("main-container");
+        setOutputMarkupPlaceholderTag(true);
         resourceURISection = new WebMarkupContainer("resourceURISection", new Model<>());
-        mainContainer.add(resourceURISection);
+        add(resourceURISection);
         resourceURISection.add(new ExternalLink("resourceURI", itemModel.<String> bind("uri.toString"), itemModel
                 .<URI> bind("uri")));
         creatorSection = new WebMarkupContainer("creatorSection", new Model<>());
-        mainContainer.add(creatorSection);
+        add(creatorSection);
         creatorSection.add(new CreatorsPanel("creator", new PropertyModel<Set<Creator>>(itemModel, "creators")));
 
         createdSection = new WebMarkupContainer("createdSection", new Model<>());
-        mainContainer.add(createdSection);
+        add(createdSection);
         createdSection.add(new Label("createdFormatted"));
         sizeSection = new WebMarkupContainer("sizeSection", new Model<>());
-        mainContainer.add(sizeSection);
+        add(sizeSection);
         sizeSection.add(new Label("sizeFormatted"));
         annotationsCntSection = new WebMarkupContainer("annotationsCntSection", new Model<>());
-        mainContainer.add(annotationsCntSection);
+        add(annotationsCntSection);
         annotationsCntSection.add(new Label("annotations.size"));
-        add(mainContainer);
     }
 
 
@@ -88,7 +84,7 @@ public class ResourceStatusBar extends Panel {
     protected void onConfigure() {
         Thing resource = (Thing) getDefaultModelObject();
         if (resource != null) {
-            mainContainer.setVisible(true);
+            setVisible(true);
             resourceURISection.setVisible(true);
             creatorSection.setVisible(resource.getCreators() != null);
             createdSection.setVisible(resource.getCreated() != null);
@@ -99,7 +95,7 @@ public class ResourceStatusBar extends Panel {
             }
             annotationsCntSection.setVisible(true);
         } else {
-            mainContainer.setVisible(false);
+            setVisible(false);
         }
     }
 }

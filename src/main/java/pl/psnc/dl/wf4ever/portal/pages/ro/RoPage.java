@@ -21,7 +21,10 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.model.CompoundPropertyModel;
+import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.purl.wf4ever.checklist.client.ChecklistEvaluationService;
+import org.purl.wf4ever.checklist.client.EvaluationResult;
 import org.purl.wf4ever.rosrs.client.Annotation;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.Statement;
@@ -31,6 +34,7 @@ import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
+import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
 import pl.psnc.dl.wf4ever.portal.pages.base.Base;
 import pl.psnc.dl.wf4ever.portal.pages.ro.behaviours.JobStatusUpdatingBehaviour;
@@ -38,7 +42,6 @@ import pl.psnc.dl.wf4ever.portal.pages.ro.behaviours.OnDomReadyAjaxBehaviour;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.ROExplorer;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
-import pl.psnc.dl.wf4ever.portal.services.OAuthException;
 import pl.psnc.dl.wf4ever.portal.ui.components.LoadingCircle;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
@@ -81,6 +84,8 @@ public class RoPage extends Base {
 
     protected ResearchObject researchObject;
 
+    protected EvaluationResult qualityEvaluation;
+
     /** Regex pattern for parsing Link HTTP headers. */
     private static final Pattern LINK_HEADER = Pattern.compile("<(.+)>; rel=(.+)");
 
@@ -111,14 +116,10 @@ public class RoPage extends Base {
      *            page parameters
      * @throws URISyntaxException
      *             if URIs returned by the RODL are incorrect
-     * @throws OAuthException
-     *             if it cannot connect to RODL
-     * @throws IOException
-     *             if it cannot connect to RODL
      */
     @SuppressWarnings("serial")
     public RoPage(final PageParameters parameters)
-            throws URISyntaxException, OAuthException, IOException {
+            throws URISyntaxException {
         super(parameters);
         if (!parameters.get("ro").isEmpty()) {
             URI roURI = new URI(parameters.get("ro").toString());
@@ -158,7 +159,7 @@ public class RoPage extends Base {
                     try {
                         researchObject.load();
                         onRoLoaded(target);
-                    } catch (ROSRSException | ROException e) {
+                    } catch (Exception e) {
                         error("Research object cannot be loaded: " + e.getMessage());
                         LOG.error("Research object cannot be loaded", e);
                     }
@@ -170,15 +171,34 @@ public class RoPage extends Base {
 
             @Override
             protected void respond(AjaxRequestTarget target) {
-                if (!researchObject.isEvolutionInformationLoaded()) {
-                    researchObject.loadEvolutionInformation();
-                    onRoEvoLoaded(target);
+                try {
+                    if (!researchObject.isEvolutionInformationLoaded()) {
+                        researchObject.loadEvolutionInformation();
+                        onRoEvoLoaded(target);
+                    }
+                } catch (Exception e) {
+                    feedbackPanel.error("Could not load the evolution information: " + e.getLocalizedMessage());
+                }
+                super.respond(target);
+            }
+        });
+        add(new OnDomReadyAjaxBehaviour(feedbackPanel) {
+
+            @Override
+            protected void respond(AjaxRequestTarget target) {
+                try {
+                    ChecklistEvaluationService service = ((PortalApplication) getApplication()).getChecklistService();
+                    qualityEvaluation = service.evaluate(researchObject.getUri(), "ready-to-release");
+                    foldersViewer.onQualityEvaluated(target);
+                } catch (Exception e) {
+                    feedbackPanel.error("Could not calculate the quality: " + e.getLocalizedMessage());
                 }
                 super.respond(target);
             }
         });
 
-        foldersViewer = new ROExplorer("folders-viewer", researchObject, itemModel);
+        foldersViewer = new ROExplorer("folders-viewer", researchObject, itemModel,
+                new PropertyModel<EvaluationResult>(this, "qualityEvaluation"));
         foldersViewer.setOutputMarkupId(true);
         foldersViewer.getSnapshotButton().addLinkListener(new IAjaxLinkListener() {
 
@@ -283,6 +303,16 @@ public class RoPage extends Base {
 
     public TreeModel getPhysicalResourcesTree() {
         return null;
+    }
+
+
+    public EvaluationResult getQualityEvaluation() {
+        return qualityEvaluation;
+    }
+
+
+    public void setQualityEvaluation(EvaluationResult qualityEvaluation) {
+        this.qualityEvaluation = qualityEvaluation;
     }
 
 
@@ -474,7 +504,7 @@ public class RoPage extends Base {
 
 
     public void onRoLoaded(AjaxRequestTarget target) {
-        foldersViewer.onRoLoaded();
+        foldersViewer.onRoLoaded(target);
         loadingCircle.replaceWith(foldersViewer);
         target.add(roExplorerParent);
     }

@@ -18,6 +18,7 @@ import org.apache.wicket.markup.html.tree.ITreeStateListener;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
+import org.purl.wf4ever.checklist.client.EvaluationResult;
 import org.purl.wf4ever.rosrs.client.Folder;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.Resource;
@@ -30,6 +31,7 @@ import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.ITreeListener;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.FilesPanel;
+import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.QualityBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ROButtonsBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ROStatusBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ResourceButtonsBar;
@@ -80,6 +82,9 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
     /** List of targets refreshed on link clicked event. */
     private List<Component> onLinkClickTarget = new ArrayList<>();
 
+    private EvaluationResult qualityEvaluationResult;
+    private QualityBar qualityPanel;
+
 
     /**
      * Constructor.
@@ -90,8 +95,10 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
      *            Research Object
      * @param itemModel
      *            model?
+     * @param qualityModel
      */
-    public ROExplorer(String id, ResearchObject researchObject, IModel<Thing> itemModel) {
+    public ROExplorer(String id, ResearchObject researchObject, IModel<Thing> itemModel,
+            IModel<EvaluationResult> qualityModel) {
         // Last clicked item (file or Folder). 
         super(id, itemModel);
         //setting variables
@@ -107,6 +114,7 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
                 new PropertyModel<Thing>(this, "currentlySelectedItem")));
         add(itemInfoPanel);
         buttonsBar = new ResourceButtonsBar("buttons-panel");
+        buttonsBar.setVisible(false);
         add(buttonsBar);
         roStatusBar = new ROStatusBar("research-object-info-panel", new CompoundPropertyModel<Thing>(
                 new PropertyModel<Thing>(this, "researchObject")));
@@ -117,7 +125,8 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
         add(roTree);
         add(filesPanel);
         add(filesShiftForm);
-        //add(new ProgressBar("health-progress-bar", 32));
+        qualityPanel = new QualityBar("health-progress-bar", qualityModel);
+        add(qualityPanel);
         //registry listeners
         roTree.addTreeListeners(this);
         filesShiftForm.addOnSubmitListener(this);
@@ -126,8 +135,13 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
     }
 
 
-    public void onRoLoaded() {
+    public void onRoLoaded(AjaxRequestTarget target) {
         roTreeModel = RoTreeModel.create(researchObject);
+    }
+
+
+    public void onQualityEvaluated(AjaxRequestTarget target) {
+        qualityPanel.onQualityEvaluated(target);
     }
 
 
@@ -282,17 +296,21 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
     private void switchButtonBar() {
         if (getCurrentlySelectedItem() == null || !MySession.get().isSignedIn()) {
             //nothing to show
+            buttonsBar.setVisible(false);
             buttonsBar.hideFoldersButtonContainer();
             buttonsBar.hideResourceButtonsContainer();
         } else if (getCurrentlySelectedItem() instanceof Folder) {
             //folders bar
+            buttonsBar.setVisible(true);
             buttonsBar.showFoldersButtonsContainer(getCurrentlySelectedItem());
             buttonsBar.hideResourceButtonsContainer();
         } else if (getCurrentlySelectedItem() instanceof Resource) {
             //files bar
+            buttonsBar.setVisible(true);
             buttonsBar.hideFoldersButtonContainer();
             buttonsBar.showResourceButtonsContainer(getSelectedFile());
         } else if (getCurrentlySelectedItem() instanceof ResearchObject) {
+            buttonsBar.setVisible(true);
             buttonsBar.showFoldersButtonsContainer(researchObject);
             buttonsBar.hideResourceButtonsContainer();
         }
@@ -344,5 +362,15 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
 
     public UniversalStyledAjaxButton getReleaseButton() {
         return roButtonsBar.getReleaseButton();
+    }
+
+
+    public EvaluationResult getQualityEvaluationResult() {
+        return qualityEvaluationResult;
+    }
+
+
+    public void setQualityEvaluationResult(EvaluationResult qualityEvaluationResult) {
+        this.qualityEvaluationResult = qualityEvaluationResult;
     }
 }
