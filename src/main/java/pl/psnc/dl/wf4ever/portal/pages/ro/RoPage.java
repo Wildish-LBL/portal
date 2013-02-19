@@ -149,6 +149,7 @@ public class RoPage extends Base {
         add(roExplorerParent);
         roExplorerParent.setOutputMarkupId(true);
         roExplorerParent.add(loadingCircle);
+
         add(new OnDomReadyAjaxBehaviour(feedbackPanel) {
 
             @Override
@@ -200,6 +201,7 @@ public class RoPage extends Base {
         //add(load)
         annotatingBox.selectedStatements.clear();
         foldersViewer.addLinkListener(annotatingBox);
+        foldersViewer.appendOnLinkClickTarget(annotatingBox);
         add(new DownloadMetadataModal("downloadMetadataModal", this));
         uploadResourceModal = new UploadResourceModal("uploadResourceModal", this);
         add(uploadResourceModal);

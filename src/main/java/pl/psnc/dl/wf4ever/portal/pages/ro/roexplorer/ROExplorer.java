@@ -77,6 +77,8 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
     private List<IAjaxLinkListener> listeners = new ArrayList<>();
     /** List of targets refreshed on node clicked event. */
     private List<Component> onNodeListTargets = new ArrayList<>();
+    /** List of targets refreshed on link clicked event. */
+    private List<Component> onLinkClickTarget = new ArrayList<>();
 
 
     /**
@@ -268,6 +270,9 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
         for (IAjaxLinkListener listener : listeners) {
             listener.onAjaxLinkClicked(target);
         }
+        for (Component c : onLinkClickTarget) {
+            target.add(c);
+        }
     }
 
 
@@ -321,6 +326,14 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
      */
     public void appendOnNodeClickTarget(Component target) {
         onNodeListTargets.add(target);
+    }
+
+
+    /**
+     * Add a new target for link click event.
+     */
+    public void appendOnLinkClickTarget(Component target) {
+        onLinkClickTarget.add(target);
     }
 
 
