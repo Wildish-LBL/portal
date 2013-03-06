@@ -90,58 +90,32 @@
 					</ul>
 				</div>
 			</section>
-			
+
 			<section class="box small">
 				<h3 class="collapsible">
 					Recommendations <img class="sh_button" src="images/l_open.gif" />
 				</h3>
 				<div class="boxDiv">
-								<form class="form-horizontal" wicket:id="recommenderForm">
-									<label class="control-label" for="myExpId">Your
-										myExperiment ID</label>
-										<input id ="myExperiment-input" type="text" class="span1"
-											wicket:id="myExpId" />
-								<button class = "btn" id="myExp-recommendation-serach-button" wicket:id="confirmMyExpId"
-									type="submit">OK</button>
-						</form>
-						<script type ="text/javascript">
+					<form class="form-horizontal" wicket:id="recommenderForm">
+						<label class="control-label" for="myExpId">Your
+							myExperiment ID</label> <input id="myExperiment-input" type="text"
+							class="span1" wicket:id="myExpId" />
+						<button class="btn" id="myExp-recommendation-serach-button"
+							wicket:id="confirmMyExpId" type="submit">OK</button>
+					</form>
+					<script type="text/javascript">
 						$(document).ready(function() {
 							$("#myExperiment-input").watermark("Try out 2");
 						});
-						</script>
+					</script>
 				</div>
 			</section>
 		</div>
-		
+
 		<div class="span9">
 			<div class="row">
 				<div class="span9" wicket:id="feedbackPanel"></div>
 			</div>
-			<!-- 
-			<div class="row">
-				<div class="span7 offset1">
-					<form class="form-search" wicket:id="searchForm">
-						<p>
-							<input class="span5 search-query" autocomplete="off"
-								wicket:id="keywords" type="text" />
-							<button class="btn" wicket:id="searchButton" type="submit">
-								<i class="icon-search"></i> Search
-							</button>
-							<span class="help-inline">Keywords are looked for in
-								annotations describing the RO (not its resources).</span>
-						</p>
-					</form>
-				</div>
-			</div>
-			-->
-	<!-- 
-			<ul class="nav nav-tabs">
-				<li class="active"><a data-toggle="tab" id="mainViewLink"
-					href="#mainView">Main view</a></li>
-				<li><a data-toggle="tab" id="searchResultsLink"
-					href="#searchResults">Search results</a></li>
-			</ul>
-	 -->
 			<div class="tab-content">
 				<div class="row tab-pane active" id="mainView">
 					<div class="span8">
@@ -156,47 +130,6 @@
 						<p class="more2" style="margin-top: 1em;">
 							<a wicket:id="allRos"> More... </a>
 						</p>
-					</div>
-					<!-- 
-					<div class="span4 offset1" wicket:id="recommendationsDiv">
-						<h3>Recommended workflows</h3>
-			
-						<ol style="margin-right: 10px;">
-							<li wicket:id="recommendationsList"><a wicket:id="link">[uri]</a>
-								<br /> <span style="font-size: x-small">Strength: <span
-									wicket:id="strength">[strength]</span></span>
-								<hr class="listLine" /></li>
-						</ol>
-						<p wicket:id="noRecommendations">There are no recommendations
-							for you.</p>
-						<p class="more2">
-							<a href="#"> More... </a>
-						</p>
-					</div>
-					 -->
-				</div>
-				<div class="row tab-pane" id="searchResults">
-					<div class="span8" wicket:id="searchResultsDiv">
-						<h3>Search results</h3>
-						<ol style="margin-right: 40px;">
-							<li wicket:id="searchResultsListView"><a wicket:id="link"><span
-									wicket:id="researchObject.name">[uri]</span></a>&nbsp;<span
-								wicket:id="researchObject.title">[title]</span> <br /> <span
-								style="font-size: x-small">by <span
-									wicket:id="researchObject.creator"></span>, <span
-									wicket:id="researchObject.createdFormatted"></span></span>
-
-								<div class="searchScore">
-									<div>
-										Score: <span wicket:id="scoreInPercent">[score]</span>%
-									</div>
-									<div class="meter">
-										<span wicket:id="percentBar" style="width: 25%"></span>
-									</div>
-								</div> <br />
-								<hr class="listLine" /></li>
-						</ol>
-						<p wicket:id="noResults">No results have been found.</p>
 					</div>
 				</div>
 			</div>
