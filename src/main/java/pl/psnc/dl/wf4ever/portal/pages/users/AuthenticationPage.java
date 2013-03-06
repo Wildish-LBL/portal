@@ -71,7 +71,7 @@ public class AuthenticationPage extends Base {
                 super.onSubmit();
                 try {
                     applyForAuthentication(tempUser.getOpenId(), callbackUrl);
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     LOGGER.error("Failed to authenticate: " + e.getMessage());
                     error("Incorrect OpenID (" + e.getMessage() + ")");
                 }
