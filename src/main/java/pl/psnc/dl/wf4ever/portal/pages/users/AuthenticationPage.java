@@ -2,6 +2,7 @@ package pl.psnc.dl.wf4ever.portal.pages.users;
 
 import java.net.URI;
 
+import org.apache.log4j.Logger;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.RequiredTextField;
@@ -20,6 +21,7 @@ import org.openid4java.message.AuthRequest;
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.model.users.OpenIdUser;
 import pl.psnc.dl.wf4ever.portal.pages.base.Base;
+import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.services.OpenIdService;
 
 /**
@@ -34,8 +36,14 @@ public class AuthenticationPage extends Base {
     /** id. */
     private static final long serialVersionUID = -8975579933617712699L;
 
+    /** Logger. */
+    private static final Logger LOGGER = Logger.getLogger(AuthenticationPage.class);
+
     /** Google OP. */
     private static final String GOOGLE_URL = "https://www.google.com/accounts/o8/id";
+
+    /** The feedback panel. */
+    private MyFeedbackPanel feedbackPanel;
 
 
     /**
@@ -47,6 +55,9 @@ public class AuthenticationPage extends Base {
     @SuppressWarnings("serial")
     public AuthenticationPage(PageParameters pageParameters) {
         super(pageParameters);
+        feedbackPanel = new MyFeedbackPanel("feedbackPanel");
+        feedbackPanel.setOutputMarkupId(true);
+        add(feedbackPanel);
 
         final URI callbackUrl = createCallbackUrl();
         ((MySession) getSession()).setOpenIDCallbackURI(callbackUrl);
@@ -58,7 +69,12 @@ public class AuthenticationPage extends Base {
             @Override
             protected void onSubmit() {
                 super.onSubmit();
-                applyForAuthentication(tempUser.getOpenId(), callbackUrl);
+                try {
+                    applyForAuthentication(tempUser.getOpenId(), callbackUrl);
+                } catch (Exception e) {
+                    LOGGER.error("Failed to authenticate: " + e.getMessage());
+                    error("Incorrect OpenID (" + e.getMessage() + ")");
+                }
             }
         };
         add(form);
