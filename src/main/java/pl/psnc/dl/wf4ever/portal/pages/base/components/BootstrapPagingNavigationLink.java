@@ -16,13 +16,10 @@ public class BootstrapPagingNavigationLink extends PagingNavigationLink<Void> {
 
 
     @Override
-    protected void disableLink(final ComponentTag tag) {
-        // Remove any href from the old link
+    protected void disableLink(ComponentTag tag) {
         tag.remove("href");
-
         tag.remove("onclick");
-
-        //        tag.put("disabled", "disabled");
+        tag.put("class", "active");
     }
 
 }
