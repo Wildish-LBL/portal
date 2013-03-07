@@ -14,6 +14,10 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
 import org.purl.wf4ever.checklist.client.ChecklistEvaluationService;
+import org.purl.wf4ever.rosrs.client.search.OpenSearchSearchServer;
+import org.purl.wf4ever.rosrs.client.search.SearchServer;
+import org.purl.wf4ever.rosrs.client.search.SolrSearchServer;
+import org.purl.wf4ever.rosrs.client.search.SparqlSearchServer;
 
 import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
@@ -41,6 +45,13 @@ import pl.psnc.dl.wf4ever.portal.services.RSSService;
  */
 public class PortalApplication extends AuthenticatedWebApplication {
 
+    public enum SearchType {
+        OPENSEARCH,
+        SPARQL,
+        SOLR
+    }
+
+
     /** Logger. */
     private static final Logger LOG = Logger.getLogger(PortalApplication.class);
 
@@ -63,7 +74,7 @@ public class PortalApplication extends AuthenticatedWebApplication {
     private URI sparqlEndpoint;
 
     /** RODL search service URI. */
-    private URL searchEndpointURL;
+    private URI searchEndpointURI;
 
     /** Recommender service URI. */
     private URL recommenderEndpointURL;
@@ -91,6 +102,12 @@ public class PortalApplication extends AuthenticatedWebApplication {
 
     /** Application version, from pom.xml. */
     private String version;
+
+    /** Type of search server: opensearch / sparql / solr. */
+    private SearchType searchType;
+
+    /** Service for performing searches in RODL. */
+    private SearchServer searchServer;
 
 
     @Override
@@ -126,9 +143,24 @@ public class PortalApplication extends AuthenticatedWebApplication {
         loadTokens("tokens.properties");
         loadAdminTokens("admintoken.properties");
 
+        searchServer = createSearchServer();
+
         RSSService.start(null, sparqlEndpoint, rodlURI);
 
         Locale.setDefault(Locale.ENGLISH);
+    }
+
+
+    private SearchServer createSearchServer() {
+        switch (searchType) {
+            case OPENSEARCH:
+                return new OpenSearchSearchServer(searchEndpointURI);
+            case SPARQL:
+                return new SparqlSearchServer(sparqlEndpoint);
+            case SOLR:
+            default:
+                return new SolrSearchServer(searchEndpointURI);
+        }
     }
 
 
@@ -150,7 +182,7 @@ public class PortalApplication extends AuthenticatedWebApplication {
             props.load(getClass().getClassLoader().getResourceAsStream(propertiesFile));
             rodlURI = new URI(props.getProperty("rodlURL"));
             sparqlEndpoint = new URI(props.getProperty("sparqlEndpointURL"));
-            searchEndpointURL = new URL(props.getProperty("searchEndpointURL"));
+            searchEndpointURI = new URI(props.getProperty("searchEndpointURL"));
             recommenderEndpointURL = new URL(props.getProperty("recommenderEndpointURL"));
             stabilityEndpointURL = new URL(props.getProperty("stabilityEndpointURL"));
             userAccessTokenEndpointURL = new URL(props.getProperty("userAccessTokenEndpointURL"));
@@ -161,6 +193,11 @@ public class PortalApplication extends AuthenticatedWebApplication {
             URI checklistUri = new URI(props.getProperty("checklist.uri"));
             URI minimUri = new URI(props.getProperty("checklist.minim.uri"));
             checklistService = new ChecklistEvaluationService(checklistUri, minimUri);
+            String type = props.getProperty("search.type");
+            searchType = SearchType.valueOf(type.trim().toUpperCase());
+            if (searchType == null) {
+                throw new Exception("Unrecognized search type: " + type);
+            }
         } catch (Exception e) {
             LOG.error("Failed to load properties: " + e.getMessage());
         }
@@ -239,11 +276,6 @@ public class PortalApplication extends AuthenticatedWebApplication {
     }
 
 
-    public URL getSearchEndpointURL() {
-        return searchEndpointURL;
-    }
-
-
     public URL getRecommenderEndpointURL() {
         return recommenderEndpointURL;
     }
@@ -303,6 +335,11 @@ public class PortalApplication extends AuthenticatedWebApplication {
 
     public ChecklistEvaluationService getChecklistService() {
         return checklistService;
+    }
+
+
+    public SearchServer getSearchServer() {
+        return searchServer;
     }
 
 }

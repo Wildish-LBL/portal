@@ -21,9 +21,10 @@
 				<li wicket:id="searchResultsListView"><a wicket:id="link"><span
 						wicket:id="researchObject.name">[uri]</span></a>&nbsp;<span
 					wicket:id="researchObject.title">[title]</span> <br /> <span
-					style="font-size: x-small"><!-- by <span
-						wicket:id="researchObject.creator"></span>,  --><span
-						wicket:id="researchObject.createdFormatted"></span></span>
+					style="font-size: x-small"> <!-- by <span
+						wicket:id="researchObject.creator"></span>,  --> <span
+						wicket:id="researchObject.createdFormatted"></span>
+				</span>
 
 					<div class="searchScore" wicket:id="searchScore">
 						<div>
@@ -36,6 +37,11 @@
 					<hr class="listLine" /></li>
 			</ol>
 			<p wicket:id="noResults">No results have been found.</p>
+		</div>
+	</div>
+	<div class="row centered">
+		<div class="span11">
+			<div wicket:id="pagination"></div>
 		</div>
 	</div>
 </wicket:extend>
