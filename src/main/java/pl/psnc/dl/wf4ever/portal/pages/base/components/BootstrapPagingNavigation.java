@@ -1,13 +1,13 @@
 package pl.psnc.dl.wf4ever.portal.pages.base.components;
 
+import org.apache.wicket.ajax.markup.html.navigation.paging.AjaxPagingNavigation;
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.html.link.AbstractLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.LoopItem;
 import org.apache.wicket.markup.html.navigation.paging.IPageable;
 import org.apache.wicket.markup.html.navigation.paging.IPagingLabelProvider;
-import org.apache.wicket.markup.html.navigation.paging.PagingNavigation;
 
-public class BootstrapPagingNavigation extends PagingNavigation {
+public class BootstrapPagingNavigation extends AjaxPagingNavigation {
 
     /** id. */
     private static final long serialVersionUID = -5495224054362925121L;
@@ -19,7 +19,7 @@ public class BootstrapPagingNavigation extends PagingNavigation {
 
 
     @Override
-    protected AbstractLink newPagingNavigationLink(String id, IPageable pageable, int pageIndex) {
+    protected Link<?> newPagingNavigationLink(String id, IPageable pageable, int pageIndex) {
         return new BootstrapPagingNavigationLink(id, pageable, pageIndex);
     }
 

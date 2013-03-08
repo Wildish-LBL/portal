@@ -69,7 +69,6 @@ public class SearchResultsPage extends Base {
 
         SimpleSearchResultsListView searchResultsList = new SimpleSearchResultsListView("searchResultsListView",
                 searchResults);
-        searchResultsList.setReuseItems(true);
         searchResultsDiv.add(searchResultsList);
 
         add(new BootstrapPagingNavigator("pagination", searchResultsList));

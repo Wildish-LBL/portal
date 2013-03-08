@@ -1,10 +1,10 @@
 package pl.psnc.dl.wf4ever.portal.pages.base.components;
 
+import org.apache.wicket.ajax.markup.html.navigation.paging.AjaxPagingNavigationLink;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.navigation.paging.IPageable;
-import org.apache.wicket.markup.html.navigation.paging.PagingNavigationLink;
 
-public class BootstrapPagingNavigationLink extends PagingNavigationLink<Void> {
+public class BootstrapPagingNavigationLink extends AjaxPagingNavigationLink {
 
     /** id. */
     private static final long serialVersionUID = -6475077411075979233L;

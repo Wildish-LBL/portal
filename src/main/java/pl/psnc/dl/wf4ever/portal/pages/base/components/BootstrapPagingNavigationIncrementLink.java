@@ -1,10 +1,10 @@
 package pl.psnc.dl.wf4ever.portal.pages.base.components;
 
+import org.apache.wicket.ajax.markup.html.navigation.paging.AjaxPagingNavigationIncrementLink;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.navigation.paging.IPageable;
-import org.apache.wicket.markup.html.navigation.paging.PagingNavigationIncrementLink;
 
-public class BootstrapPagingNavigationIncrementLink extends PagingNavigationIncrementLink<Void> {
+public class BootstrapPagingNavigationIncrementLink extends AjaxPagingNavigationIncrementLink {
 
     /** id. */
     private static final long serialVersionUID = -7116715462343351839L;
@@ -17,11 +17,7 @@ public class BootstrapPagingNavigationIncrementLink extends PagingNavigationIncr
 
     @Override
     protected void disableLink(final ComponentTag tag) {
-        // Remove any href from the old link
         tag.remove("href");
-
         tag.remove("onclick");
-
-        //        tag.put("disabled", "disabled");
     }
 }

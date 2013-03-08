@@ -27,7 +27,7 @@ final class SimpleSearchResultsListView extends PageableListView<SearchResult> {
     /** id. */
     private static final long serialVersionUID = 915182420617753899L;
 
-    public static final int RESULTS_PER_PAGE = 8;
+    public static final int RESULTS_PER_PAGE = 5;
 
 
     /**
