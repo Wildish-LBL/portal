@@ -14,9 +14,24 @@
 	<div class="row">
 		<div class="span12" wicket:id="feedbackPanel"></div>
 	</div>
-	<div class="row centered" id="searchResults">
-		<div class="span11" wicket:id="searchResultsDiv">
-			<h3>Search results for: <span wicket:id="searchKeywords"></span></h3>
+	<div class="row" id="searchResults">
+		<div class="span3">
+			<section class="box small" wicket:id="filters">
+				<h3 class="collapsible" wicket:id="name">
+					Label <img class="sh_button" src="images/l_open.gif" />
+				</h3>
+				<div class="boxDiv">
+					<ul>
+						<li wicket:id="options"><a wicket:id="link"><span wicket:id="label">label</span> (<span wicket:id="count">0</span>)</a></li>
+					</ul>
+
+				</div>
+			</section>
+		</div>
+		<div class="span9" wicket:id="searchResultsDiv">
+			<h3>
+				Search results for: <span wicket:id="searchKeywords"></span>
+			</h3>
 			<ol style="margin-right: 40px;">
 				<li wicket:id="searchResultsListView"><a wicket:id="link"><span
 						wicket:id="researchObject.name">[uri]</span></a>&nbsp;<span

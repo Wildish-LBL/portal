@@ -66,7 +66,7 @@ public abstract class UniversalStyledAjaxButton extends AjaxButton {
     protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
         target.appendJavaScript("hideBusy()");
         for (IAjaxLinkListener listener : listeners) {
-            listener.onAjaxLinkClicked(target);
+            listener.onAjaxLinkClicked(this, target);
         }
     }
 

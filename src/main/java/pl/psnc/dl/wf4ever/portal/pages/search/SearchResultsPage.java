@@ -1,10 +1,12 @@
 package pl.psnc.dl.wf4ever.portal.pages.search;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -16,6 +18,8 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.purl.wf4ever.rosrs.client.exception.SearchException;
+import org.purl.wf4ever.rosrs.client.search.Facet;
+import org.purl.wf4ever.rosrs.client.search.FacetValue;
 import org.purl.wf4ever.rosrs.client.search.FoundRO;
 import org.purl.wf4ever.rosrs.client.search.SearchServer;
 
@@ -23,6 +27,7 @@ import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.pages.base.Base;
 import pl.psnc.dl.wf4ever.portal.pages.base.components.BootstrapPagingNavigator;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
+import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 
 /**
@@ -31,7 +36,7 @@ import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
  * @author piotrekhol
  * 
  */
-public class SearchResultsPage extends Base {
+public class SearchResultsPage extends Base implements IAjaxLinkListener {
 
     /** id. */
     private static final long serialVersionUID = 1L;
@@ -83,12 +88,43 @@ public class SearchResultsPage extends Base {
         }
         searchResultsDiv.add((Component) searchResultsList);
 
+        //TODO to something as below
+        //        FacetsView facetsView = new FacetsView("filters", new PropertyModel<List<Facet>>(searchResults, "facets"));
+        FacetsView facetsView = new FacetsView("filters", new PropertyModel<List<Facet>>(this, "mockupFacets"));
+        facetsView.getListeners().add(this);
+        add(facetsView);
+
         final WebMarkupContainer noResults = new WebMarkupContainer("noResults");
         searchResultsDiv.add(noResults);
         //        noResults.setVisible(searchResults == null || searchResults.isEmpty());
         noResults.setVisible(false);
 
         add(new BootstrapPagingNavigator("pagination", searchResultsList));
+    }
+
+
+    public List<Facet> getMockupFacets() {
+        Facet facet1 = new Facet(null);
+        facet1.setName("facet1");
+        facet1.getValues().add(new FacetValue("option1a", 2, ""));
+        facet1.getValues().add(new FacetValue("option1b", 5, ""));
+        facet1.getValues().add(new FacetValue("option1c", 15, ""));
+        Facet facet2 = new Facet(null);
+        facet2.setName("facet2");
+        facet2.getValues().add(new FacetValue("option2a", 23, ""));
+        facet2.getValues().add(new FacetValue("option2b", 35, ""));
+        facet2.getValues().add(new FacetValue("option2c", 15, ""));
+        Facet facet3 = new Facet(null);
+        facet3.setName("facet3");
+        facet3.getValues().add(new FacetValue("option3a", 2, ""));
+        facet3.getValues().add(new FacetValue("option3b", 334245, ""));
+        facet3.getValues().add(new FacetValue("option3c", 15, ""));
+
+        List<Facet> facets = new ArrayList<>();
+        facets.add(facet1);
+        facets.add(facet2);
+        facets.add(facet3);
+        return facets;
     }
 
 
@@ -121,5 +157,13 @@ public class SearchResultsPage extends Base {
             }
         });
         score.add(bar);
+    }
+
+
+    @Override
+    public void onAjaxLinkClicked(Object source, AjaxRequestTarget target) {
+        FacetValue facetValue = (FacetValue) source;
+        //TODO pass this somehow to the search server or results list view or reload the page...
+        target.appendJavaScript("window.alert('Received a click from facet value: " + facetValue.getLabel() + "');");
     }
 }

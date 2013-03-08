@@ -17,5 +17,5 @@ public interface IAjaxLinkListener extends Serializable {
      * 
      * @param target
      */
-    void onAjaxLinkClicked(AjaxRequestTarget target);
+    void onAjaxLinkClicked(Object source, AjaxRequestTarget target);
 }

@@ -332,7 +332,7 @@ class AnnotatingBox extends Panel implements IAjaxLinkListener {
 
 
     @Override
-    public void onAjaxLinkClicked(AjaxRequestTarget target) {
+    public void onAjaxLinkClicked(Object source, AjaxRequestTarget target) {
         AbstractDefaultAjaxBehavior x = new AbstractDefaultAjaxBehavior() {
 
             @Override

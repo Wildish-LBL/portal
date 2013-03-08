@@ -265,7 +265,7 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
 
 
     @Override
-    public void onAjaxLinkClicked(AjaxRequestTarget target) {
+    public void onAjaxLinkClicked(Object source, AjaxRequestTarget target) {
         if (getSelectedFile() != null) {
             setCurrentlySelectedItem(getSelectedFile());
         } else {
@@ -282,7 +282,7 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
         target.add(itemInfoPanel);
         target.add(buttonsBar);
         for (IAjaxLinkListener listener : listeners) {
-            listener.onAjaxLinkClicked(target);
+            listener.onAjaxLinkClicked(null, target);
         }
         for (Component c : onLinkClickTarget) {
             target.add(c);

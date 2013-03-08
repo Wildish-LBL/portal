@@ -203,14 +203,14 @@ public class RoPage extends Base {
         foldersViewer.getSnapshotButton().addLinkListener(new IAjaxLinkListener() {
 
             @Override
-            public void onAjaxLinkClicked(AjaxRequestTarget target) {
+            public void onAjaxLinkClicked(Object source, AjaxRequestTarget target) {
                 createSnapshot(target);
             }
         });
         foldersViewer.getReleaseButton().addLinkListener(new IAjaxLinkListener() {
 
             @Override
-            public void onAjaxLinkClicked(AjaxRequestTarget target) {
+            public void onAjaxLinkClicked(Object source, AjaxRequestTarget target) {
                 createArchive(target);
             }
         });

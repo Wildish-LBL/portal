@@ -82,7 +82,7 @@ public class FilesPanel extends Panel {
                             setSelectedFile(thing);
                         }
                         for (IAjaxLinkListener listener : listeners) {
-                            listener.onAjaxLinkClicked(target);
+                            listener.onAjaxLinkClicked(thing, target);
                         }
                     }
                 };
