@@ -64,6 +64,8 @@ public class SearchResultsPage extends Base {
         searchResultsDiv.setOutputMarkupId(true);
         add(searchResultsDiv);
 
+        searchResultsDiv.add(new Label("searchKeywords", searchKeywords));
+
         IPageable searchResultsList = null;
 
         if (searchServer.supportsPagination()) {
