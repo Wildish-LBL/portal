@@ -39,7 +39,7 @@ public class SearchResultsPage extends Base {
     /** Logger. */
     private static final Logger LOGGER = Logger.getLogger(SearchResultsPage.class);
 
-    public static final int RESULTS_PER_PAGE = 5;
+    public static final int RESULTS_PER_PAGE = 10;
 
 
     /**

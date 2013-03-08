@@ -46,7 +46,7 @@ public class LazySearchResultsView extends AbstractPageableView<SearchResult> {
 
     @Override
     protected int internalGetItemCount() {
-        return 20;
+        return 50;
     }
 
 
