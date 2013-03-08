@@ -10,10 +10,10 @@ import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.purl.wf4ever.rosrs.client.exception.SearchException;
-import org.purl.wf4ever.rosrs.client.search.SearchResult;
+import org.purl.wf4ever.rosrs.client.search.FoundRO;
 import org.purl.wf4ever.rosrs.client.search.SearchServer;
 
-public class LazySearchResultsView extends AbstractPageableView<SearchResult> {
+public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
 
     /** id. */
     private static final long serialVersionUID = -3507871650130245421L;
@@ -33,9 +33,9 @@ public class LazySearchResultsView extends AbstractPageableView<SearchResult> {
 
 
     @Override
-    protected Iterator<IModel<SearchResult>> getItemModels(int offset, int size) {
+    protected Iterator<IModel<FoundRO>> getItemModels(int offset, int size) {
         try {
-            List<SearchResult> results = searchServer.search(query, offset, size);
+            List<FoundRO> results = searchServer.search(query, offset, size).getROsList();
             return new ModelIterator<>(results);
         } catch (SearchException e) {
             LOGGER.error("Can't search more data", e);
@@ -51,7 +51,7 @@ public class LazySearchResultsView extends AbstractPageableView<SearchResult> {
 
 
     @Override
-    protected void populateItem(Item<SearchResult> item) {
+    protected void populateItem(Item<FoundRO> item) {
         SearchResultsPage.populateItem(item);
     }
 

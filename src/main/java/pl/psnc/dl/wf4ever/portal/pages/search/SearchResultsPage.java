@@ -16,7 +16,7 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.purl.wf4ever.rosrs.client.exception.SearchException;
-import org.purl.wf4ever.rosrs.client.search.SearchResult;
+import org.purl.wf4ever.rosrs.client.search.FoundRO;
 import org.purl.wf4ever.rosrs.client.search.SearchServer;
 
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
@@ -72,9 +72,9 @@ public class SearchResultsPage extends Base {
             searchResultsList = new LazySearchResultsView("searchResultsListView", searchServer, searchKeywords,
                     RESULTS_PER_PAGE);
         } else {
-            List<SearchResult> searchResults = null;
+            List<FoundRO> searchResults = null;
             try {
-                searchResults = searchServer.search(searchKeywords);
+                searchResults = searchServer.search(searchKeywords).getROsList();
             } catch (SearchException e) {
                 error(e.getMessage());
                 LOGGER.error("Can't do the search for " + searchKeywords, e);
@@ -92,8 +92,8 @@ public class SearchResultsPage extends Base {
     }
 
 
-    public static void populateItem(ListItem<SearchResult> item) {
-        final SearchResult result = item.getModelObject();
+    public static void populateItem(ListItem<FoundRO> item) {
+        final FoundRO result = item.getModelObject();
         BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);
         link.getPageParameters().add("ro", result.getResearchObject().getUri().toString());
         link.add(new Label("researchObject.name", new PropertyModel<String>(result, "researchObject.name")));

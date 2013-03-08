@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.markup.html.list.PropertyListView;
-import org.purl.wf4ever.rosrs.client.search.SearchResult;
+import org.purl.wf4ever.rosrs.client.search.FoundRO;
 
 /**
  * A {@link PropertyListView} of search results.
@@ -13,7 +13,7 @@ import org.purl.wf4ever.rosrs.client.search.SearchResult;
  * @author piotrekhol
  * 
  */
-final class SimpleSearchResultsView extends PageableListView<SearchResult> {
+final class SimpleSearchResultsView extends PageableListView<FoundRO> {
 
     /** id. */
     private static final long serialVersionUID = 915182420617753899L;
@@ -29,13 +29,13 @@ final class SimpleSearchResultsView extends PageableListView<SearchResult> {
      * @param resultsPerPage
      *            maximum number of results per page
      */
-    SimpleSearchResultsView(String id, List<? extends SearchResult> model, int resultsPerPage) {
+    SimpleSearchResultsView(String id, List<? extends FoundRO> model, int resultsPerPage) {
         super(id, model, resultsPerPage);
     }
 
 
     @Override
-    protected void populateItem(ListItem<SearchResult> item) {
+    protected void populateItem(ListItem<FoundRO> item) {
         SearchResultsPage.populateItem(item);
     }
 }
