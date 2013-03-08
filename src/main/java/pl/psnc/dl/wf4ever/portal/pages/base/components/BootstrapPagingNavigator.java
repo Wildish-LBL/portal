@@ -1,6 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.pages.base.components;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.IAjaxLink;
 import org.apache.wicket.ajax.markup.html.navigation.paging.AjaxPagingNavigationIncrementLink;
 import org.apache.wicket.ajax.markup.html.navigation.paging.AjaxPagingNavigationLink;
 import org.apache.wicket.ajax.markup.html.navigation.paging.AjaxPagingNavigator;
@@ -40,7 +41,7 @@ public class BootstrapPagingNavigator extends AjaxPagingNavigator {
     }
 
 
-    class Wrapper extends AjaxPagingNavigationLink {
+    class Wrapper extends Link<Void> implements IAjaxLink {
 
         /** id. */
         private static final long serialVersionUID = -527364568167079132L;
@@ -49,7 +50,7 @@ public class BootstrapPagingNavigator extends AjaxPagingNavigator {
 
 
         public Wrapper(String id, AjaxPagingNavigationLink link, IPageable pageable) {
-            super(id, pageable, link.getPageNumber());
+            super(id);
             this.link = link;
             add(link);
         }
@@ -78,7 +79,7 @@ public class BootstrapPagingNavigator extends AjaxPagingNavigator {
     }
 
 
-    class WrapperIncrement extends AjaxPagingNavigationLink {
+    class WrapperIncrement extends Link<Void> implements IAjaxLink {
 
         /** id. */
         private static final long serialVersionUID = -527364568167079132L;
@@ -87,7 +88,7 @@ public class BootstrapPagingNavigator extends AjaxPagingNavigator {
 
 
         public WrapperIncrement(String id, AjaxPagingNavigationIncrementLink link, IPageable pageable) {
-            super(id, pageable, link.getPageNumber());
+            super(id);
             this.link = link;
             add(link);
         }
