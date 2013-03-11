@@ -72,20 +72,21 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
         searchResultsDiv.add(new Label("searchKeywords", searchKeywords));
 
         IPageable searchResultsList = null;
-
+        /*
         if (searchServer.supportsPagination()) {
             searchResultsList = new LazySearchResultsView("searchResultsListView", searchServer, searchKeywords,
                     RESULTS_PER_PAGE);
         } else {
-            List<FoundRO> searchResults = null;
-            try {
-                searchResults = searchServer.search(searchKeywords).getROsList();
-            } catch (SearchException e) {
-                error(e.getMessage());
-                LOGGER.error("Can't do the search for " + searchKeywords, e);
-            }
-            searchResultsList = new SimpleSearchResultsView("searchResultsListView", searchResults, RESULTS_PER_PAGE);
+            */
+        List<FoundRO> searchResults = null;
+        try {
+            searchResults = searchServer.search(searchKeywords).getROsList();
+        } catch (SearchException e) {
+            error(e.getMessage());
+            LOGGER.error("Can't do the search for " + searchKeywords, e);
         }
+        searchResultsList = new SimpleSearchResultsView("searchResultsListView", searchResults, RESULTS_PER_PAGE);
+        //}
         searchResultsDiv.add((Component) searchResultsList);
 
         //TODO to something as below
@@ -104,21 +105,21 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
 
 
     public List<Facet> getMockupFacets() {
-        Facet facet1 = new Facet(null);
+        Facet facet1 = new Facet(null, "Some facet");
         facet1.setName("facet1");
-        facet1.getValues().add(new FacetValue("option1a", 2, ""));
-        facet1.getValues().add(new FacetValue("option1b", 5, ""));
-        facet1.getValues().add(new FacetValue("option1c", 15, ""));
-        Facet facet2 = new Facet(null);
+        facet1.getValues().add(new FacetValue("option1a", 2));
+        facet1.getValues().add(new FacetValue("option1b", 5));
+        facet1.getValues().add(new FacetValue("option1c", 15));
+        Facet facet2 = new Facet(null, "Some facet 2");
         facet2.setName("facet2");
-        facet2.getValues().add(new FacetValue("option2a", 23, ""));
-        facet2.getValues().add(new FacetValue("option2b", 35, ""));
-        facet2.getValues().add(new FacetValue("option2c", 15, ""));
-        Facet facet3 = new Facet(null);
+        facet2.getValues().add(new FacetValue("option2a", 23));
+        facet2.getValues().add(new FacetValue("option2b", 35));
+        facet2.getValues().add(new FacetValue("option2c", 15));
+        Facet facet3 = new Facet(null, "Some facet 3");
         facet3.setName("facet3");
-        facet3.getValues().add(new FacetValue("option3a", 2, ""));
-        facet3.getValues().add(new FacetValue("option3b", 334245, ""));
-        facet3.getValues().add(new FacetValue("option3c", 15, ""));
+        facet3.getValues().add(new FacetValue("option3a", 2));
+        facet3.getValues().add(new FacetValue("option3b", 334245));
+        facet3.getValues().add(new FacetValue("option3c", 15));
 
         List<Facet> facets = new ArrayList<>();
         facets.add(facet1);
