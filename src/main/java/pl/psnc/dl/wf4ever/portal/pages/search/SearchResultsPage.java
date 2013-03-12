@@ -45,7 +45,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
     /** Logger. */
     private static final Logger LOGGER = Logger.getLogger(SearchResultsPage.class);
 
-    public static final int RESULTS_PER_PAGE = 10;
+    public static final int RESULTS_PER_PAGE = 15;
 
     private List<FacetEntry> facetsList = null;
     private List<FoundRO> ROsList = null;
@@ -55,12 +55,12 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
 
 
     public SearchResultsPage() {
-        this("");
+        this("", "");
     }
 
 
-    public SearchResultsPage(final String searchKeywords) {
-        this(searchKeywords, null, null);
+    public SearchResultsPage(final String searchKeywords, String originalKeywords) {
+        this(searchKeywords, null, originalKeywords);
 
     }
 
@@ -98,7 +98,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
         searchResultsDiv.setOutputMarkupId(true);
         add(searchResultsDiv);
 
-        searchResultsDiv.add(new Label("searchKeywords", originalKeywords));
+        searchResultsDiv.add(new Label("searchKeywords", this.originalKeywords));
 
         IPageable searchResultsList = null;
         /*
@@ -123,7 +123,8 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
 
         //TODO to something as below
         //        FacetsView facetsView = new FacetsView("filters", new PropertyModel<List<Facet>>(searchResults, "facets"));
-        FacetsView facetsView = new FacetsView("filters", this.selected, new PropertyModel<List<FacetEntry>>(this, "facets"));
+        FacetsView facetsView = new FacetsView("filters", this.selected, new PropertyModel<List<FacetEntry>>(this,
+                "facets"));
         facetsView.getListeners().add(this);
         add(facetsView);
 

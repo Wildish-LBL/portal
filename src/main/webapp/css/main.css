@@ -502,4 +502,8 @@ input.span1 {
 .selected_filter_label  {
 	font-weight: bold;
 }
+
+.not_numbered_list {
+	list-style: none;
+}
 /* visualization */
