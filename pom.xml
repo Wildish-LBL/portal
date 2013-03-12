@@ -3,7 +3,7 @@
 	<groupId>pl.psnc.dl.wf4ever</groupId>
 	<artifactId>portal</artifactId>
 	<packaging>war</packaging>
-	<version>4.0.9-SNAPSHOT</version>
+	<version>4.0.9</version>
 	<name>Research Object Digital Library Portal</name>
 	<description />
 	<organization>
@@ -288,7 +288,7 @@
 	</build>
 	<scm>
 		<developerConnection>scm:git:git@github.com:wf4ever/portal.git</developerConnection>
-	  <tag>portal-0.3.1</tag>
+	  <tag>portal-4.0.9</tag>
   </scm>
 	<distributionManagement>
 		<repository>
