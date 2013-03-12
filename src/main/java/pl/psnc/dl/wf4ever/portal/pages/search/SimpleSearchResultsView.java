@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.markup.html.list.PropertyListView;
-import org.purl.wf4ever.rosrs.client.search.FoundRO;
+import org.purl.wf4ever.rosrs.client.search.dataclasses.FoundRO;
 
 /**
  * A {@link PropertyListView} of search results.

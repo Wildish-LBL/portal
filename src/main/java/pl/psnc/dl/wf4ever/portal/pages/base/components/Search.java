@@ -6,6 +6,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.RequiredTextField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
+import org.purl.wf4ever.rosrs.client.search.utils.SolrQueryBuilder;
 
 import pl.psnc.dl.wf4ever.portal.pages.search.SearchResultsPage;
 
@@ -33,7 +34,7 @@ public class Search extends Panel {
             @Override
             protected void onSubmit() {
                 super.onSubmit();
-                setResponsePage(new SearchResultsPage(searchKeywords));
+                setResponsePage(new SearchResultsPage(SolrQueryBuilder.escapeString(searchKeywords)));
             }
         };
         searchForm.add(new Button("searchButtonBar"));

@@ -10,8 +10,8 @@ import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.purl.wf4ever.rosrs.client.exception.SearchException;
-import org.purl.wf4ever.rosrs.client.search.FoundRO;
 import org.purl.wf4ever.rosrs.client.search.SearchServer;
+import org.purl.wf4ever.rosrs.client.search.dataclasses.FoundRO;
 
 public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
 

@@ -7,12 +7,13 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
-import org.purl.wf4ever.rosrs.client.search.FacetValue;
+import org.purl.wf4ever.rosrs.client.search.dataclasses.FacetValue;
 
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
 
@@ -24,12 +25,13 @@ public class FacetValueView extends ListView<FacetValue> {
     /** Logger. */
     @SuppressWarnings("unused")
     private static final Logger LOGGER = Logger.getLogger(FacetValueView.class);
-
+    private List<FacetValue> selected;
     private Set<IAjaxLinkListener> listeners = new HashSet<>();
 
 
-    public FacetValueView(String id, IModel<? extends List<? extends FacetValue>> model) {
+    public FacetValueView(String id, List<FacetValue> selected, IModel<? extends List<? extends FacetValue>> model) {
         super(id, model);
+        this.selected = selected;
     }
 
 
@@ -52,6 +54,15 @@ public class FacetValueView extends ListView<FacetValue> {
         link.add(new Label("label", new PropertyModel<String>(item.getModel(), "label")));
         link.add(new Label("count", new PropertyModel<String>(item.getModel(), "count")));
         item.add(link);
+        if (facetValue.getCount() == 0) {
+            item.setVisible(false);
+        }
+        for (FacetValue val : selected) {
+            if (val.equals(facetValue)) {
+                link.add(new SimpleAttributeModifier("class", "selected_filter_label"));
+                break;
+            }
+        }
     }
 
 

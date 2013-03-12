@@ -18,10 +18,11 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.purl.wf4ever.rosrs.client.exception.SearchException;
-import org.purl.wf4ever.rosrs.client.search.Facet;
-import org.purl.wf4ever.rosrs.client.search.FacetValue;
-import org.purl.wf4ever.rosrs.client.search.FoundRO;
 import org.purl.wf4ever.rosrs.client.search.SearchServer;
+import org.purl.wf4ever.rosrs.client.search.dataclasses.FacetValue;
+import org.purl.wf4ever.rosrs.client.search.dataclasses.FoundRO;
+import org.purl.wf4ever.rosrs.client.search.dataclasses.SearchResult;
+import org.purl.wf4ever.rosrs.client.search.dataclasses.solr.FacetEntry;
 
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.pages.base.Base;
@@ -46,6 +47,23 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
 
     public static final int RESULTS_PER_PAGE = 10;
 
+    private List<FacetEntry> facetsList = null;
+    private List<FoundRO> ROsList = null;
+    private String keywords = null;
+    private List<FacetValue> selected = null;
+    private String originalKeywords = null;
+
+
+    public SearchResultsPage() {
+        this("");
+    }
+
+
+    public SearchResultsPage(final String searchKeywords) {
+        this(searchKeywords, null, null);
+
+    }
+
 
     /**
      * Constructor.
@@ -55,8 +73,19 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
      * @throws IOException
      *             can't connect to RODL
      */
-    public SearchResultsPage(final String searchKeywords) {
+    public SearchResultsPage(final String searchKeywords, List<FacetValue> selected, String originalKeywords) {
         super(new PageParameters());
+        if (selected == null) {
+            this.selected = new ArrayList<>();
+        } else {
+            this.selected = selected;
+        }
+        if (originalKeywords == null) {
+            this.originalKeywords = searchKeywords;
+        } else {
+            this.originalKeywords = originalKeywords;
+        }
+        keywords = searchKeywords;
         setDefaultModel(new CompoundPropertyModel<SearchResultsPage>(this));
 
         SearchServer searchServer = ((PortalApplication) getApplication()).getSearchServer();
@@ -69,7 +98,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
         searchResultsDiv.setOutputMarkupId(true);
         add(searchResultsDiv);
 
-        searchResultsDiv.add(new Label("searchKeywords", searchKeywords));
+        searchResultsDiv.add(new Label("searchKeywords", originalKeywords));
 
         IPageable searchResultsList = null;
         /*
@@ -78,20 +107,23 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
                     RESULTS_PER_PAGE);
         } else {
             */
-        List<FoundRO> searchResults = null;
+        SearchResult searchResult = null;
         try {
-            searchResults = searchServer.search(searchKeywords).getROsList();
+            searchResult = searchServer.search(searchKeywords);
+
         } catch (SearchException e) {
             error(e.getMessage());
             LOGGER.error("Can't do the search for " + searchKeywords, e);
         }
-        searchResultsList = new SimpleSearchResultsView("searchResultsListView", searchResults, RESULTS_PER_PAGE);
+        facetsList = searchResult.getFactesList();
+        ROsList = searchResult.getROsList();
+        searchResultsList = new SimpleSearchResultsView("searchResultsListView", ROsList, RESULTS_PER_PAGE);
         //}
         searchResultsDiv.add((Component) searchResultsList);
 
         //TODO to something as below
         //        FacetsView facetsView = new FacetsView("filters", new PropertyModel<List<Facet>>(searchResults, "facets"));
-        FacetsView facetsView = new FacetsView("filters", new PropertyModel<List<Facet>>(this, "mockupFacets"));
+        FacetsView facetsView = new FacetsView("filters", this.selected, new PropertyModel<List<FacetEntry>>(this, "facets"));
         facetsView.getListeners().add(this);
         add(facetsView);
 
@@ -104,28 +136,8 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
     }
 
 
-    public List<Facet> getMockupFacets() {
-        Facet facet1 = new Facet(null, "Some facet");
-        facet1.setName("facet1");
-        facet1.getValues().add(new FacetValue("option1a", 2));
-        facet1.getValues().add(new FacetValue("option1b", 5));
-        facet1.getValues().add(new FacetValue("option1c", 15));
-        Facet facet2 = new Facet(null, "Some facet 2");
-        facet2.setName("facet2");
-        facet2.getValues().add(new FacetValue("option2a", 23));
-        facet2.getValues().add(new FacetValue("option2b", 35));
-        facet2.getValues().add(new FacetValue("option2c", 15));
-        Facet facet3 = new Facet(null, "Some facet 3");
-        facet3.setName("facet3");
-        facet3.getValues().add(new FacetValue("option3a", 2));
-        facet3.getValues().add(new FacetValue("option3b", 334245));
-        facet3.getValues().add(new FacetValue("option3c", 15));
-
-        List<Facet> facets = new ArrayList<>();
-        facets.add(facet1);
-        facets.add(facet2);
-        facets.add(facet3);
-        return facets;
+    public List<FacetEntry> getFacets() {
+        return facetsList;
     }
 
 
@@ -163,8 +175,23 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
 
     @Override
     public void onAjaxLinkClicked(Object source, AjaxRequestTarget target) {
-        FacetValue facetValue = (FacetValue) source;
-        //TODO pass this somehow to the search server or results list view or reload the page...
-        target.appendJavaScript("window.alert('Received a click from facet value: " + facetValue.getLabel() + "');");
+        for (FacetValue val : selected) {
+            if (val.getLabel().equals(((FacetValue) (source)).getLabel())
+                    && val.getParamName().equals(((FacetValue) (source)).getParamName())) {
+                selected.remove(val);
+                keywords = originalKeywords;
+                for (FacetValue value : selected) {
+                    keywords += " AND " + value.getQuery();
+                }
+                setResponsePage(new SearchResultsPage(keywords, selected, originalKeywords));
+                return;
+            }
+        }
+        selected.add((FacetValue) (source));
+        keywords = originalKeywords;
+        for (FacetValue value : selected) {
+            keywords += " AND " + value.getQuery();
+        }
+        setResponsePage(new SearchResultsPage(keywords, selected, originalKeywords));
     }
 }

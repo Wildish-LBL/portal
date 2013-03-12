@@ -499,4 +499,7 @@ input.span1 {
 	padding-top: 3px;
 }
 
+.selected_filter_label  {
+	font-weight: bold;
+}
 /* visualization */
