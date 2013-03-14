@@ -24,14 +24,40 @@
 					<ul>
 						<li wicket:id="options"><a wicket:id="link" class="filter_label"><span wicket:id="label">label</span> (<span wicket:id="count">0</span>)</a></li>
 					</ul>
-
+				</div>
+			</section>
+			<section class="box small">
+				<h3 class="collapsible">
+					Filters Actions <img class="sh_button" src="images/l_open.gif" />
+				</h3>
+				<div class="boxDiv">
+					<ul>
+						<li><a href="#" wicket:id="submitFilters">Submit filters</a></li>
+						<li><a href="#" wicket:id="clearFilters">Clear filters</a></li>
+					</ul>
+				</div>
+			</section>
+			<section class="box small">
+				<h3 class="collapsible">
+					Sort by<img class="sh_button" src="images/l_open.gif" />
+				</h3>
+				<div class="boxDiv">
+					<ul>
+						<li><a href="#">name</a></li>
+						<li><a href="#">name(revert)</a></li>
+						<li><a href="#">number of resources</a></li>
+						<li><a href="#">number of resources(revert)</a></li>
+						<li><a href="#">creation date</a></li>
+						<li><a href="#">creation date(revert)</a></li>
+					</ul>
 				</div>
 			</section>
 		</div>
 		<div class="span9" wicket:id="searchResultsDiv">
 			<h3>
-				Search results for: <span wicket:id="searchKeywords"></span>
+				Search results for keywords: <span wicket:id="searchKeywords"></span>
 			</h3>
+			<p></p>
 			<ol style="margin-right: 40px;">
 				<li wicket:id="searchResultsListView" class="not_numbered_list"><a wicket:id="link"><span
 						wicket:id="researchObject.name">[uri]</span></a>&nbsp;<span

@@ -22,6 +22,7 @@ public class FacetsView extends ListView<FacetEntry> implements IAjaxLinkListene
 
     private Set<IAjaxLinkListener> listeners = new HashSet<>();
     private List<FacetValue> selected;
+    FacetValueView facetValueView;
 
 
     public FacetsView(String id, List<FacetValue> selected, IModel<? extends List<? extends FacetEntry>> model) {
@@ -35,10 +36,11 @@ public class FacetsView extends ListView<FacetEntry> implements IAjaxLinkListene
     protected void populateItem(ListItem<FacetEntry> item) {
         FacetEntry facet = item.getModelObject();
         item.add(new Label("name", new PropertyModel<String>(facet, "name")));
-        FacetValueView facetValueView = new FacetValueView("options", selected, new PropertyModel<List<FacetValue>>(
-                item.getModel(), "values"));
+        facetValueView = new FacetValueView("options", selected, new PropertyModel<List<FacetValue>>(item.getModel(),
+                "values"));
         facetValueView.getListeners().add(this);
         item.add(facetValueView);
+        item.setVisible(facetValueView.hasVisible());
 
     }
 

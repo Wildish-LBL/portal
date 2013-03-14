@@ -3,10 +3,13 @@ package pl.psnc.dl.wf4ever.portal.pages.search;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.log4j.Logger;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -73,7 +76,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
      * @throws IOException
      *             can't connect to RODL
      */
-    public SearchResultsPage(final String searchKeywords, List<FacetValue> selected, String originalKeywords) {
+    public SearchResultsPage(final String searchKeywords, final List<FacetValue> selected, String originalKeywords) {
         super(new PageParameters());
         if (selected == null) {
             this.selected = new ArrayList<>();
@@ -85,6 +88,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
         } else {
             this.originalKeywords = originalKeywords;
         }
+
         keywords = searchKeywords;
         setDefaultModel(new CompoundPropertyModel<SearchResultsPage>(this));
 
@@ -99,6 +103,17 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
         add(searchResultsDiv);
 
         searchResultsDiv.add(new Label("searchKeywords", this.originalKeywords));
+
+        Map<String, String> queryMap = new HashedMap();
+
+        for (FacetValue value : getSelected()) {
+            if (queryMap.containsKey(value.getParamName())) {
+                String queryPart = queryMap.get(value.getParamName()) + " OR " + value.getLabel();
+                queryMap.put(value.getParamName(), queryPart);
+            } else {
+                queryMap.put(value.getParamName(), value.getLabel());
+            }
+        }
 
         IPageable searchResultsList = null;
         /*
@@ -123,7 +138,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
 
         //TODO to something as below
         //        FacetsView facetsView = new FacetsView("filters", new PropertyModel<List<Facet>>(searchResults, "facets"));
-        FacetsView facetsView = new FacetsView("filters", this.selected, new PropertyModel<List<FacetEntry>>(this,
+        FacetsView facetsView = new FacetsView("filters", getSelected(), new PropertyModel<List<FacetEntry>>(this,
                 "facets"));
         facetsView.getListeners().add(this);
         add(facetsView);
@@ -134,6 +149,48 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
         noResults.setVisible(false);
 
         add(new BootstrapPagingNavigator("pagination", searchResultsList));
+        final Component parent = this;
+        AjaxLink<Object> submitFilters = new AjaxLink<Object>("submitFilters") {
+
+            @Override
+            public void onClick(AjaxRequestTarget target) {
+                Map<String, String> queryMap = new HashedMap();
+                target.add(parent);
+                for (FacetValue value : getSelected()) {
+                    if (queryMap.containsKey(value.getParamName())) {
+                        String queryPart = queryMap.get(value.getParamName()) + " OR " + value.getQuery();
+                        queryMap.put(value.getParamName(), queryPart);
+                    } else {
+                        queryMap.put(value.getParamName(), value.getQuery());
+                    }
+                }
+                String finalQuery = getOriginalKeywords();
+                for (String key : queryMap.keySet()) {
+                    finalQuery += " AND (" + queryMap.get(key) + ")";
+                }
+                setResponsePage(new SearchResultsPage(finalQuery, getSelected(), getOriginalKeywords()));
+            }
+        };
+        add(submitFilters);
+
+        AjaxLink<Object> clearFilters = new AjaxLink<Object>("clearFilters") {
+
+            @Override
+            public void onClick(AjaxRequestTarget target) {
+                setResponsePage(new SearchResultsPage(getOriginalKeywords(), null, getOriginalKeywords()));
+            }
+        };
+        add(clearFilters);
+    }
+
+
+    public List<FacetValue> getSelected() {
+        return selected;
+    }
+
+
+    public String getOriginalKeywords() {
+        return this.originalKeywords;
     }
 
 
@@ -184,15 +241,16 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
                 for (FacetValue value : selected) {
                     keywords += " AND " + value.getQuery();
                 }
-                setResponsePage(new SearchResultsPage(keywords, selected, originalKeywords));
+                //setResponsePage(new SearchResultsPage(keywords, selected, originalKeywords));
                 return;
             }
         }
+
         selected.add((FacetValue) (source));
         keywords = originalKeywords;
         for (FacetValue value : selected) {
             keywords += " AND " + value.getQuery();
         }
-        setResponsePage(new SearchResultsPage(keywords, selected, originalKeywords));
+        //setResponsePage(new SearchResultsPage(keywords, selected, originalKeywords));
     }
 }

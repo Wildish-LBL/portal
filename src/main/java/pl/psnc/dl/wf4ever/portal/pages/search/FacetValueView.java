@@ -32,13 +32,14 @@ public class FacetValueView extends ListView<FacetValue> {
     public FacetValueView(String id, List<FacetValue> selected, IModel<? extends List<? extends FacetValue>> model) {
         super(id, model);
         this.selected = selected;
+        this.setOutputMarkupId(true);
     }
 
 
     @Override
-    protected void populateItem(ListItem<FacetValue> item) {
+    protected void populateItem(final ListItem<FacetValue> item) {
         final FacetValue facetValue = item.getModelObject();
-        AjaxLink<Void> link = new AjaxLink<Void>("link") {
+        final AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
             /** id. */
             private static final long serialVersionUID = 8456829392076370486L;
@@ -46,6 +47,12 @@ public class FacetValueView extends ListView<FacetValue> {
 
             @Override
             public void onClick(AjaxRequestTarget target) {
+                if (selected.contains(facetValue)) {
+                    item.add(new SimpleAttributeModifier("class", ""));
+                } else {
+                    item.add(new SimpleAttributeModifier("class", "selected_filter_label"));
+                }
+                target.add(item);
                 for (IAjaxLinkListener listener : listeners) {
                     listener.onAjaxLinkClicked(facetValue, target);
                 }
@@ -54,15 +61,35 @@ public class FacetValueView extends ListView<FacetValue> {
         link.add(new Label("label", new PropertyModel<String>(item.getModel(), "label")));
         link.add(new Label("count", new PropertyModel<String>(item.getModel(), "count")));
         item.add(link);
+
+        item.setOutputMarkupId(true);
+        link.setOutputMarkupId(true);
+
         if (facetValue.getCount() == 0) {
             item.setVisible(false);
         }
         for (FacetValue val : selected) {
             if (val.equals(facetValue)) {
-                link.add(new SimpleAttributeModifier("class", "selected_filter_label"));
+                item.add(new SimpleAttributeModifier("class", "selected_filter_label"));
+                item.setVisible(true);
                 break;
             }
         }
+    }
+
+
+    public boolean hasVisible() {
+        for (FacetValue value : getList()) {
+            if (value.getCount() > 0) {
+                return true;
+            }
+            for (FacetValue selectedVal : selected) {
+                if (selectedVal.equals(value)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 
