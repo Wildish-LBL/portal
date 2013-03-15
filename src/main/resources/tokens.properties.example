@@ -1,0 +1,4 @@
+myExpConsumerKey = xxx
+myExpConsumerSecret = xxx
+dLibraClientId = xxx
+callbackURL = http://sandbox.wf4ever-project.org/portal/oauth
