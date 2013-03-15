@@ -54,12 +54,21 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
 
     private List<FacetEntry> facetsList = null;
     private List<FoundRO> ROsList = null;
-    private String keywords = null;
+    private String searchKeywords = null;
     private List<FacetValue> selected = null;
     private List<FacetValue> savedSelected = null;
     private String originalKeywords = null;
     IPageable searchResultsList = null;
     ROSortMode roSortMode;
+
+    private WebMarkupContainer searchResultsDiv;
+    private AjaxLink<Object> clearFilters;
+    private AjaxLink<Object> sortByName;
+    private AjaxLink<Object> sortByNameDesc;
+    private AjaxLink<Object> sortBySize;
+    private AjaxLink<Object> sortBySizeDesc;
+    private AjaxLink<Object> sortByDate;
+    private AjaxLink<Object> sortByDateDesc;
 
 
     public SearchResultsPage() {
@@ -78,105 +87,17 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
     public SearchResultsPage(final String searchKeywords, final List<FacetValue> selected,
             final String originalKeywords, ROSortMode sortMode) {
         super(new PageParameters());
-        savedSelected = new ArrayList<>();
-        if (selected != null) {
-            savedSelected.addAll(selected);
-        }
-
-        if (selected == null) {
-            this.selected = new ArrayList<>();
-        } else {
-            this.selected = selected;
-        }
-        if (originalKeywords == null) {
-            this.originalKeywords = searchKeywords;
-        } else {
-            this.originalKeywords = originalKeywords;
-        }
-        if (sortMode == null) {
-            sortMode = ROSortMode.NAME;
-        }
-        roSortMode = sortMode;
-        keywords = searchKeywords;
+        initValues(searchKeywords, selected, originalKeywords, sortMode);
+        searchResultsDiv = new WebMarkupContainer("searchResultsDiv");
+        searchResultsDiv.setOutputMarkupId(true);
+        add(searchResultsDiv);
+        buildFiltersSortLinks();
         setDefaultModel(new CompoundPropertyModel<SearchResultsPage>(this));
         SearchServer searchServer = ((PortalApplication) getApplication()).getSearchServer();
 
         final MyFeedbackPanel feedbackPanel = new MyFeedbackPanel("feedbackPanel");
         feedbackPanel.setOutputMarkupId(true);
         add(feedbackPanel);
-
-        final WebMarkupContainer searchResultsDiv = new WebMarkupContainer("searchResultsDiv");
-        searchResultsDiv.setOutputMarkupId(true);
-        add(searchResultsDiv);
-
-        AjaxLink<Object> clearFilters = new AjaxLink<Object>("clearFilters") {
-
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                setResponsePage(new SearchResultsPage(getOriginalKeywords(), null, getOriginalKeywords(), roSortMode));
-            }
-        };
-        add(clearFilters);
-        AjaxLink<Object> sortByName = new AjaxLink<Object>("sortByName") {
-
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                setResponsePage(new SearchResultsPage(keywords, savedSelected, getOriginalKeywords(), ROSortMode.NAME));
-            }
-        };
-        add(sortByName);
-
-        AjaxLink<Object> sortByNameDesc = new AjaxLink<Object>("sortByNameDesc") {
-
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                setResponsePage(new SearchResultsPage(keywords, savedSelected, getOriginalKeywords(),
-                        ROSortMode.NAME_DESC));
-            }
-        };
-        add(sortByNameDesc);
-
-        AjaxLink<Object> sortBySize = new AjaxLink<Object>("sortBySize") {
-
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                setResponsePage(new SearchResultsPage(keywords, savedSelected, getOriginalKeywords(),
-                        ROSortMode.NUMBER_OF_RESOURCES));
-            }
-        };
-        add(sortBySize);
-
-        AjaxLink<Object> sortBySizeDesc = new AjaxLink<Object>("sortBySizeDesc") {
-
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                setResponsePage(new SearchResultsPage(keywords, savedSelected, originalKeywords,
-                        ROSortMode.NUMBER_OF_RESOURCES_DESC));
-            }
-        };
-        add(sortBySizeDesc);
-
-        AjaxLink<Object> sortByDate = new AjaxLink<Object>("sortByDate") {
-
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                setResponsePage(new SearchResultsPage(keywords, savedSelected, originalKeywords,
-                        ROSortMode.CREATION_DATE));
-            }
-        };
-        add(sortByDate);
-
-        AjaxLink<Object> sortByDateDesc = new AjaxLink<Object>("sortByDateDesc") {
-
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                setResponsePage(new SearchResultsPage(keywords, savedSelected, originalKeywords,
-                        ROSortMode.CREATION_DATE_DESC));
-            }
-        };
-        add(sortByDateDesc);
-
-        searchResultsDiv.add(new Label("searchKeywords", this.originalKeywords));
 
         /*
         if (searchServer.supportsPagination()) {
@@ -212,20 +133,21 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
                 sortByDateDesc.add(new SimpleAttributeModifier("class", "selected_filter_label"));
                 break;
         }
+
+        Map<String, String> queryMap = new HashedMap();
+        for (FacetValue value : savedSelected) {
+            if (queryMap.containsKey(value.getParamName())) {
+                String queryPart = queryMap.get(value.getParamName()) + " OR " + value.getQuery();
+                queryMap.put(value.getParamName(), queryPart);
+            } else {
+                queryMap.put(value.getParamName(), value.getQuery());
+            }
+        }
+        String finalQuery = getOriginalKeywords();
+        for (String key : queryMap.keySet()) {
+            finalQuery += " AND (" + queryMap.get(key) + ")";
+        }
         try {
-            Map<String, String> queryMap = new HashedMap();
-            for (FacetValue value : savedSelected) {
-                if (queryMap.containsKey(value.getParamName())) {
-                    String queryPart = queryMap.get(value.getParamName()) + " OR " + value.getQuery();
-                    queryMap.put(value.getParamName(), queryPart);
-                } else {
-                    queryMap.put(value.getParamName(), value.getQuery());
-                }
-            }
-            String finalQuery = getOriginalKeywords();
-            for (String key : queryMap.keySet()) {
-                finalQuery += " AND (" + queryMap.get(key) + ")";
-            }
             searchResult = searchServer.search(finalQuery, null, null, sortMap);
         } catch (SearchException e) {
             error(e.getMessage());
@@ -274,6 +196,104 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
         };
         add(submitFilters);
 
+    }
+
+
+    private void initValues(String searchKeywords, final List<FacetValue> selected, final String originalKeywords,
+            ROSortMode sortMode) {
+        savedSelected = new ArrayList<>();
+        if (selected != null) {
+            savedSelected.addAll(selected);
+        }
+
+        if (selected == null) {
+            this.selected = new ArrayList<>();
+        } else {
+            this.selected = selected;
+        }
+        if (originalKeywords == null) {
+            this.originalKeywords = searchKeywords;
+        } else {
+            this.originalKeywords = originalKeywords;
+        }
+        if (sortMode == null) {
+            sortMode = ROSortMode.NAME;
+        }
+        roSortMode = sortMode;
+        this.searchKeywords = searchKeywords;
+
+    }
+
+
+    private void buildFiltersSortLinks() {
+        clearFilters = new AjaxLink<Object>("clearFilters") {
+
+            @Override
+            public void onClick(AjaxRequestTarget target) {
+                setResponsePage(new SearchResultsPage(originalKeywords, null, originalKeywords, roSortMode));
+            }
+        };
+        add(clearFilters);
+        sortByName = new AjaxLink<Object>("sortByName") {
+
+            @Override
+            public void onClick(AjaxRequestTarget target) {
+                setResponsePage(new SearchResultsPage(searchKeywords, savedSelected, originalKeywords, ROSortMode.NAME));
+            }
+        };
+        add(sortByName);
+
+        sortByNameDesc = new AjaxLink<Object>("sortByNameDesc") {
+
+            @Override
+            public void onClick(AjaxRequestTarget target) {
+                setResponsePage(new SearchResultsPage(searchKeywords, savedSelected, originalKeywords,
+                        ROSortMode.NAME_DESC));
+            }
+        };
+        add(sortByNameDesc);
+
+        sortBySize = new AjaxLink<Object>("sortBySize") {
+
+            @Override
+            public void onClick(AjaxRequestTarget target) {
+                setResponsePage(new SearchResultsPage(searchKeywords, savedSelected, originalKeywords,
+                        ROSortMode.NUMBER_OF_RESOURCES));
+            }
+        };
+        add(sortBySize);
+
+        sortBySizeDesc = new AjaxLink<Object>("sortBySizeDesc") {
+
+            @Override
+            public void onClick(AjaxRequestTarget target) {
+                setResponsePage(new SearchResultsPage(searchKeywords, savedSelected, originalKeywords,
+                        ROSortMode.NUMBER_OF_RESOURCES_DESC));
+            }
+        };
+        add(sortBySizeDesc);
+
+        sortByDate = new AjaxLink<Object>("sortByDate") {
+
+            @Override
+            public void onClick(AjaxRequestTarget target) {
+                setResponsePage(new SearchResultsPage(searchKeywords, savedSelected, originalKeywords,
+                        ROSortMode.CREATION_DATE));
+            }
+        };
+        add(sortByDate);
+
+        sortByDateDesc = new AjaxLink<Object>("sortByDateDesc") {
+
+            @Override
+            public void onClick(AjaxRequestTarget target) {
+                setResponsePage(new SearchResultsPage(searchKeywords, savedSelected, originalKeywords,
+                        ROSortMode.CREATION_DATE_DESC));
+            }
+        };
+        add(sortByDateDesc);
+
+        searchResultsDiv.add(new Label("searchKeywords", originalKeywords));
     }
 
 
@@ -330,18 +350,18 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
             if (val.getLabel().equals(((FacetValue) (source)).getLabel())
                     && val.getParamName().equals(((FacetValue) (source)).getParamName())) {
                 selected.remove(val);
-                keywords = originalKeywords;
+                searchKeywords = originalKeywords;
                 for (FacetValue value : selected) {
-                    keywords += " AND " + value.getQuery();
+                    searchKeywords += " AND " + value.getQuery();
                 }
                 return;
             }
         }
 
         selected.add((FacetValue) (source));
-        keywords = originalKeywords;
+        searchKeywords = originalKeywords;
         for (FacetValue value : selected) {
-            keywords += " AND " + value.getQuery();
+            searchKeywords += " AND " + value.getQuery();
         }
     }
 }
