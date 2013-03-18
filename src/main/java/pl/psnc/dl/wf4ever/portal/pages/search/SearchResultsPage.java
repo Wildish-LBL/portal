@@ -72,7 +72,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
 
 
     public SearchResultsPage() {
-        this("", null, "", null);
+        this("", null, "", null, null, null);
     }
 
 
@@ -85,7 +85,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
      *             can't connect to RODL
      */
     public SearchResultsPage(final String searchKeywords, final List<FacetValue> selected,
-            final String originalKeywords, ROSortMode sortMode) {
+            final String originalKeywords, ROSortMode sortMode, Integer limit, Integer offset) {
         super(new PageParameters());
         initValues(searchKeywords, selected, originalKeywords, sortMode);
         searchResultsDiv = new WebMarkupContainer("searchResultsDiv");
@@ -148,7 +148,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
             finalQuery += " AND (" + queryMap.get(key) + ")";
         }
         try {
-            searchResult = searchServer.search(finalQuery, null, null, sortMap);
+            searchResult = searchServer.search(finalQuery, offset, limit, sortMap);
         } catch (SearchException e) {
             error(e.getMessage());
             LOGGER.error("Can't do the search for " + searchKeywords, e);
@@ -191,7 +191,8 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
                 for (String key : queryMap.keySet()) {
                     finalQuery += " AND (" + queryMap.get(key) + ")";
                 }
-                setResponsePage(new SearchResultsPage(finalQuery, getSelected(), getOriginalKeywords(), roSortMode));
+                setResponsePage(new SearchResultsPage(finalQuery, getSelected(), getOriginalKeywords(), roSortMode,
+                        null, null));
             }
         };
         add(submitFilters);
@@ -230,7 +231,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
 
             @Override
             public void onClick(AjaxRequestTarget target) {
-                setResponsePage(new SearchResultsPage(originalKeywords, null, originalKeywords, roSortMode));
+                setResponsePage(new SearchResultsPage(originalKeywords, null, originalKeywords, roSortMode, null, null));
             }
         };
         add(clearFilters);
@@ -238,7 +239,8 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
 
             @Override
             public void onClick(AjaxRequestTarget target) {
-                setResponsePage(new SearchResultsPage(searchKeywords, savedSelected, originalKeywords, ROSortMode.NAME));
+                setResponsePage(new SearchResultsPage(searchKeywords, savedSelected, originalKeywords, ROSortMode.NAME,
+                        null, null));
             }
         };
         add(sortByName);
@@ -248,7 +250,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
             @Override
             public void onClick(AjaxRequestTarget target) {
                 setResponsePage(new SearchResultsPage(searchKeywords, savedSelected, originalKeywords,
-                        ROSortMode.NAME_DESC));
+                        ROSortMode.NAME_DESC, null, null));
             }
         };
         add(sortByNameDesc);
@@ -258,7 +260,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
             @Override
             public void onClick(AjaxRequestTarget target) {
                 setResponsePage(new SearchResultsPage(searchKeywords, savedSelected, originalKeywords,
-                        ROSortMode.NUMBER_OF_RESOURCES));
+                        ROSortMode.NUMBER_OF_RESOURCES, null, null));
             }
         };
         add(sortBySize);
@@ -268,7 +270,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
             @Override
             public void onClick(AjaxRequestTarget target) {
                 setResponsePage(new SearchResultsPage(searchKeywords, savedSelected, originalKeywords,
-                        ROSortMode.NUMBER_OF_RESOURCES_DESC));
+                        ROSortMode.NUMBER_OF_RESOURCES_DESC, null, null));
             }
         };
         add(sortBySizeDesc);
@@ -278,7 +280,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
             @Override
             public void onClick(AjaxRequestTarget target) {
                 setResponsePage(new SearchResultsPage(searchKeywords, savedSelected, originalKeywords,
-                        ROSortMode.CREATION_DATE));
+                        ROSortMode.CREATION_DATE, null, null));
             }
         };
         add(sortByDate);
@@ -288,7 +290,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
             @Override
             public void onClick(AjaxRequestTarget target) {
                 setResponsePage(new SearchResultsPage(searchKeywords, savedSelected, originalKeywords,
-                        ROSortMode.CREATION_DATE_DESC));
+                        ROSortMode.CREATION_DATE_DESC, null, null));
             }
         };
         add(sortByDateDesc);

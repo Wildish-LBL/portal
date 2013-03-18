@@ -35,7 +35,7 @@ public class Search extends Panel {
             protected void onSubmit() {
                 super.onSubmit();
                 setResponsePage(new SearchResultsPage(SolrQueryBuilder.escapeString(searchKeywords), null,
-                        searchKeywords, null));
+                        searchKeywords, null, null, null));
             }
         };
         searchForm.add(new Button("searchButtonBar"));
