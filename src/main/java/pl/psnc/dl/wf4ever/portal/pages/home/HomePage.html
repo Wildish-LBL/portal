@@ -95,12 +95,14 @@
 					Recommendations <img class="sh_button" src="images/l_open.gif" />
 				</h3>
 				<div class="boxDiv">
-					<form class="form-horizontal" wicket:id="recommenderForm">
-						<label class="control-label" for="myExpId">Your
-							myExperiment ID</label> <input id="myExperiment-input" type="text"
-							class="span1" wicket:id="myExpId" />
-						<button class="btn" id="myExp-recommendation-serach-button"
-							wicket:id="confirmMyExpId" type="submit">OK</button>
+					<form class="form" wicket:id="recommenderForm">
+						<fieldset>
+							<label class="control-label" for="myExpId">Your
+								myExperiment ID</label> <input id="myExperiment-input" type="text"
+								class="span1" wicket:id="myExpId" />
+							<button class="btn" id="myExp-recommendation-search-button"
+								wicket:id="confirmMyExpId" type="submit">OK</button>
+						</fieldset>
 					</form>
 					<script type="text/javascript">
 						$(document).ready(function() {

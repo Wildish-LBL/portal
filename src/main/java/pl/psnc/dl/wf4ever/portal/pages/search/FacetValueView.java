@@ -7,7 +7,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.SimpleAttributeModifier;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -17,6 +17,12 @@ import org.purl.wf4ever.rosrs.client.search.dataclasses.FacetValue;
 
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
 
+/**
+ * A view of options for a facet.
+ * 
+ * @author piotrekhol
+ * 
+ */
 public class FacetValueView extends ListView<FacetValue> {
 
     /** id. */
@@ -25,10 +31,24 @@ public class FacetValueView extends ListView<FacetValue> {
     /** Logger. */
     @SuppressWarnings("unused")
     private static final Logger LOGGER = Logger.getLogger(FacetValueView.class);
+
+    /** selected values for this facet. */
     private List<FacetValue> selected;
+
+    /** listeners for change in facet value selection. */
     private Set<IAjaxLinkListener> listeners = new HashSet<>();
 
 
+    /**
+     * Constructor.
+     * 
+     * @param id
+     *            markup id
+     * @param selected
+     *            selected values for this facet
+     * @param model
+     *            model for a list of available facet values
+     */
     public FacetValueView(String id, List<FacetValue> selected, IModel<? extends List<? extends FacetValue>> model) {
         super(id, model);
         this.selected = selected;
@@ -48,9 +68,9 @@ public class FacetValueView extends ListView<FacetValue> {
             @Override
             public void onClick(AjaxRequestTarget target) {
                 if (selected.contains(facetValue)) {
-                    item.add(new SimpleAttributeModifier("class", ""));
+                    item.add(AttributeAppender.replace("class", ""));
                 } else {
-                    item.add(new SimpleAttributeModifier("class", "selected_filter_label"));
+                    item.add(AttributeAppender.replace("class", "selected_filter_label"));
                 }
                 target.add(item);
                 for (IAjaxLinkListener listener : listeners) {
@@ -70,7 +90,7 @@ public class FacetValueView extends ListView<FacetValue> {
         }
         for (FacetValue val : selected) {
             if (val.equals(facetValue)) {
-                item.add(new SimpleAttributeModifier("class", "selected_filter_label"));
+                item.add(AttributeAppender.replace("class", "selected_filter_label"));
                 item.setVisible(true);
                 break;
             }
@@ -78,7 +98,12 @@ public class FacetValueView extends ListView<FacetValue> {
     }
 
 
-    public boolean hasVisible() {
+    /**
+     * Should this facet value be visible?
+     * 
+     * @return true if any value has a count greater than 0 or is selected, false otherwise
+     */
+    public boolean hasVisibleValues() {
         for (FacetValue value : getList()) {
             if (value.getCount() > 0) {
                 return true;

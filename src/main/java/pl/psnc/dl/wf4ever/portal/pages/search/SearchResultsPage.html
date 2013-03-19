@@ -17,54 +17,53 @@
 	<div class="row" id="searchResults">
 		<div class="span3">
 			<section class="box small" wicket:id="filters">
-				<h3 class="collapsible" >
-					<span wicket:id="name">Label</span> <img class="sh_button" src="images/l_open.gif" />
-				</h3>
-				<div class="boxDiv">
-					<ul>
-						<li wicket:id="options"><a wicket:id="link" class="filter_label"><span wicket:id="label">label</span> (<span wicket:id="count">0</span>)</a></li>
-					</ul>
-				</div>
-			</section>
-			<section class="box small">
 				<h3 class="collapsible">
-					Filters Actions <img class="sh_button" src="images/l_open.gif" />
+					<span wicket:id="name">Label</span> <img class="sh_button"
+						src="images/l_open.gif" />
 				</h3>
 				<div class="boxDiv">
 					<ul>
-						<li><a href="#" wicket:id="submitFilters">Submit filters</a></li>
-						<li><a href="#" wicket:id="clearFilters">Clear filters</a></li>
+						<li wicket:id="options"><a wicket:id="link"
+							class="filter_label"><span wicket:id="label">label</span> (<span
+								wicket:id="count">0</span>)</a></li>
 					</ul>
 				</div>
 			</section>
-			<section class="box small">
-				<h3 class="collapsible">
-					Sort by<img class="sh_button" src="images/l_open.gif" />
-				</h3>
-				<div class="boxDiv">
-					<ul>
-						<li><a href="#" wicket:id="sortByName">name</a></li>
-						<li><a href="#" wicket:id="sortByNameDesc">name(desc)</a></li>
-						<li><a href="#" wicket:id="sortBySize">number of resources</a></li>
-						<li><a href="#" wicket:id="sortBySizeDesc">number of resources(desc)</a></li>
-						<li><a href="#" wicket:id="sortByDate">creation date</a></li>
-						<li><a href="#"wicket:id="sortByDateDesc">creation date(desc)</a></li>
-					</ul>
-				</div>
-			</section>
+			<div class="box small">
+				<button class="btn btn-block btn-primary" type="button"
+					wicket:id="submitFilters">Apply filters</button>
+				<button class="btn btn-block" type="button" wicket:id="clearFilters">Clear
+					filters</button>
+			</div>
 		</div>
-		<div class="span9" wicket:id="searchResultsDiv">
+		<div class="span9">
 			<h3>
 				Search results for keywords: <span wicket:id="searchKeywords"></span>
 			</h3>
-			<p></p>
-			<ol style="margin-right: 40px;">
-				<li wicket:id="searchResultsListView" class="not_numbered_list"><a wicket:id="link"><span
-						wicket:id="researchObject.name">[uri]</span></a>&nbsp;<span
+
+			<form class="form-horizontal">
+				<div class="control-group">
+					<label class="control-label" for="sort"
+						style="text-align: left; width: auto;">Sort by:</label>
+					<div class="controls"
+						style="display: inline-block; margin-left: 10px;">
+						<select class="span4" id="sort" wicket:id="sortListView">
+						</select>
+					</div>
+				</div>
+			</form>
+
+			<ol style="margin-right: 40px;" wicket:id="searchResultsDiv">
+				<li wicket:id="searchResultsListView" class="not_numbered_list"><span
+					wicket:id="index" style="margin-right: 15px;"></span> <a
+					wicket:id="link"><span wicket:id="researchObject.name">[uri]</span></a>&nbsp;<span
 					wicket:id="researchObject.title">[title]</span> <br /> <span
 					style="font-size: x-small"> <!-- by <span
-						wicket:id="researchObject.creator"></span>,  --> <span
-						wicket:id="researchObject.createdFormatted"></span>
+						wicket:id="researchObject.creator"></span>,  --> Created on: <span
+						wicket:id="created"></span>&nbsp;Resources:
+						<span wicket:id="numberOfResources"></span>&nbsp;Annotations: <span
+						wicket:id="numberOfAnnotations"></span>&nbsp;Status: <span
+						wicket:id="status"></span>
 				</span>
 
 					<div class="searchScore" wicket:id="searchScore">

@@ -137,6 +137,13 @@ body {
 	background: #d2e2ef;
 	color: #414141;
 	word-wrap: break-word;
+	font-size: 13px;
+	line-height: 18px;
+}
+
+label, input, button, select, textarea {
+    font-size: inherit;
+    line-height: inherit;
 }
 
 a {
@@ -481,10 +488,6 @@ p {
 
 input.span1 {
 	width: 155px;
-}
-#myExp-recommendation-serach-button {
-	
-	margin-left: -45px
 }
 
 .spaceDiv {

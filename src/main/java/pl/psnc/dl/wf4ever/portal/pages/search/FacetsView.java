@@ -15,16 +15,34 @@ import org.purl.wf4ever.rosrs.client.search.dataclasses.solr.FacetEntry;
 
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
 
+/**
+ * A list of facets.
+ * 
+ * @author piotrekhol
+ * 
+ */
 public class FacetsView extends ListView<FacetEntry> implements IAjaxLinkListener {
 
     /** id. */
     private static final long serialVersionUID = -7767129758537264701L;
 
-    private Set<IAjaxLinkListener> listeners = new HashSet<>();
+    /** selected facet values, for all facets. */
     private List<FacetValue> selected;
-    FacetValueView facetValueView;
+
+    /** listeners for change in facet value selection. */
+    private Set<IAjaxLinkListener> listeners = new HashSet<>();
 
 
+    /**
+     * Constructor.
+     * 
+     * @param id
+     *            markup id
+     * @param selected
+     *            selected facet values, for all facets
+     * @param model
+     *            model for all facets
+     */
     public FacetsView(String id, List<FacetValue> selected, IModel<? extends List<? extends FacetEntry>> model) {
         super(id, model);
         this.selected = selected;
@@ -36,11 +54,11 @@ public class FacetsView extends ListView<FacetEntry> implements IAjaxLinkListene
     protected void populateItem(ListItem<FacetEntry> item) {
         FacetEntry facet = item.getModelObject();
         item.add(new Label("name", new PropertyModel<String>(facet, "name")));
-        facetValueView = new FacetValueView("options", selected, new PropertyModel<List<FacetValue>>(item.getModel(),
-                "values"));
+        FacetValueView facetValueView = new FacetValueView("options", selected, new PropertyModel<List<FacetValue>>(
+                item.getModel(), "values"));
         facetValueView.getListeners().add(this);
         item.add(facetValueView);
-        item.setVisible(facetValueView.hasVisible());
+        item.setVisible(facetValueView.hasVisibleValues());
 
     }
 
