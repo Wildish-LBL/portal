@@ -20,6 +20,8 @@ import org.apache.wicket.markup.html.navigation.paging.IPageable;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.purl.wf4ever.rosrs.client.exception.SearchException;
 import org.purl.wf4ever.rosrs.client.search.SearchServer;
 import org.purl.wf4ever.rosrs.client.search.SearchServer.SortOrder;
@@ -221,8 +223,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
         item.add(new Label("researchObject.title", new PropertyModel<String>(result, "researchObject.title")));
         //            item.add(new CreatorsPanel("researchObject.creator", new PropertyModel<List<Creator>>(result,
         //                    "researchObject.creators")));
-        item.add(new Label("researchObject.createdFormatted", new PropertyModel<String>(result,
-                "researchObject.createdFormatted")));
+        item.add(new Label("created", DateTimeFormat.shortDate().print(result.getCreated())));
         item.add(new Label("numberOfResources", new PropertyModel<String>(result, "numberOfResources")));
         item.add(new Label("numberOfAnnotations", new PropertyModel<String>(result, "numberOfAnnotations")));
         item.add(new Label("status", new PropertyModel<String>(result, "status")));
