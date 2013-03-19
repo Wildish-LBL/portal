@@ -1,8 +1,10 @@
 package pl.psnc.dl.wf4ever.portal.pages.search;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.markup.repeater.AbstractPageableView;
@@ -11,7 +13,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.purl.wf4ever.rosrs.client.exception.SearchException;
 import org.purl.wf4ever.rosrs.client.search.SearchServer;
+import org.purl.wf4ever.rosrs.client.search.SearchServer.SortOrder;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.FoundRO;
+import org.purl.wf4ever.rosrs.client.search.dataclasses.SearchResult;
 
 public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
 
@@ -23,11 +27,17 @@ public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
     private SearchServer searchServer;
     private String query;
 
+    private Map<String, SortOrder> sortFields;
 
-    public LazySearchResultsView(String id, SearchServer searchServer, String query, int resultsPerPage) {
+    private List<SearchResultsListener> listeners = new ArrayList<>();
+
+
+    public LazySearchResultsView(String id, SearchServer searchServer, String query, int resultsPerPage,
+            Map<String, SearchServer.SortOrder> sortFields) {
         super(id);
         this.searchServer = searchServer;
         this.query = query;
+        this.sortFields = sortFields;
         setItemsPerPage(resultsPerPage);
     }
 
@@ -35,8 +45,11 @@ public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
     @Override
     protected Iterator<IModel<FoundRO>> getItemModels(int offset, int size) {
         try {
-            List<FoundRO> results = searchServer.search(query, offset, size, null).getROsList();
-            return new ModelIterator<>(results);
+            SearchResult results = searchServer.search(query, offset, size, sortFields);
+            for (SearchResultsListener listener : listeners) {
+                listener.onSearchResultsAvailable(results);
+            }
+            return new ModelIterator<>(results.getROsList());
         } catch (SearchException e) {
             LOGGER.error("Can't search more data", e);
             return null;
@@ -53,6 +66,11 @@ public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
     @Override
     protected void populateItem(Item<FoundRO> item) {
         SearchResultsPage.populateItem(item);
+    }
+
+
+    public List<SearchResultsListener> getListeners() {
+        return listeners;
     }
 
 

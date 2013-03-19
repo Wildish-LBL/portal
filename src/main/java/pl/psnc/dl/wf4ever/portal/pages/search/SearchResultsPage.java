@@ -44,7 +44,7 @@ import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
  * @author piotrekhol
  * 
  */
-public class SearchResultsPage extends Base implements IAjaxLinkListener {
+public class SearchResultsPage extends Base implements IAjaxLinkListener, SearchResultsListener {
 
     /** id. */
     private static final long serialVersionUID = 1L;
@@ -55,7 +55,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
     public static final int RESULTS_PER_PAGE = 15;
 
     private List<FacetEntry> facetsList = null;
-    private List<FoundRO> ROsList = null;
+    private List<FoundRO> rosList = null;
     private String searchKeywords = null;
     private List<FacetValue> selected = null;
     private List<FacetValue> savedSelected = null;
@@ -64,6 +64,8 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
 
     private WebMarkupContainer searchResultsDiv;
     private AjaxLink<Object> clearFilters;
+
+    private Map<String, SortOrder> sortMap;
 
 
     public SearchResultsPage() {
@@ -82,7 +84,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
     public SearchResultsPage(final String searchKeywords, final List<FacetValue> selected,
             final String originalKeywords, Map<String, SortOrder> _sortMap) {
         super(new PageParameters());
-        final Map<String, SortOrder> sortMap = _sortMap != null ? _sortMap : new HashMap<String, SortOrder>();
+        sortMap = _sortMap != null ? _sortMap : new HashMap<String, SortOrder>();
         this.savedSelected = new ArrayList<>();
         this.selected = new ArrayList<>();
         if (selected != null) {
@@ -108,8 +110,10 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
         add(feedbackPanel);
 
         if (searchServer.supportsPagination()) {
-            searchResultsList = new LazySearchResultsView("searchResultsListView", searchServer, searchKeywords,
-                    RESULTS_PER_PAGE);
+            LazySearchResultsView lazySearchResultsList = new LazySearchResultsView("searchResultsListView",
+                    searchServer, searchKeywords, RESULTS_PER_PAGE, sortMap);
+            lazySearchResultsList.getListeners().add(this);
+            searchResultsList = lazySearchResultsList;
         } else {
             SearchResult searchResult = null;
 
@@ -133,8 +137,9 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
                 LOGGER.error("Can't do the search for " + searchKeywords, e);
             }
             facetsList = searchResult.getFacetsList();
-            ROsList = searchResult.getROsList();
-            searchResultsList = new SimpleSearchResultsView("searchResultsListView", ROsList, RESULTS_PER_PAGE);
+            rosList = searchResult.getROsList();
+            searchResultsList = new SimpleSearchResultsView("searchResultsListView", rosList, RESULTS_PER_PAGE);
+            add(buildFiltersSortLinks());
         }
         searchResultsDiv.add((Component) searchResultsList);
         searchResultsDiv.setOutputMarkupId(true);
@@ -180,18 +185,16 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
             }
         };
         add(clearFilters);
-
-        add(buildFiltersSortLinks(sortMap));
     }
 
 
-    private AbstractRepeater buildFiltersSortLinks(final Map<String, SearchServer.SortOrder> sortMap) {
+    private AbstractRepeater buildFiltersSortLinks() {
         RepeatingView sortView = new RepeatingView("sortListView");
         if (facetsList != null)
             for (final FacetEntry facet : facetsList) {
                 if (facet.isSorteable()) {
-                    sortView.add(createSortLink(sortView.newChildId(), sortMap, facet, SortOrder.ASC));
-                    sortView.add(createSortLink(sortView.newChildId(), sortMap, facet, SortOrder.DESC));
+                    sortView.add(createSortLink(sortView.newChildId(), facet, SortOrder.ASC));
+                    sortView.add(createSortLink(sortView.newChildId(), facet, SortOrder.DESC));
                 }
             }
 
@@ -199,8 +202,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
     }
 
 
-    private WebMarkupContainer createSortLink(String id, final Map<String, SearchServer.SortOrder> sortMap,
-            final FacetEntry facet, final SearchServer.SortOrder order) {
+    private WebMarkupContainer createSortLink(String id, final FacetEntry facet, final SearchServer.SortOrder order) {
         WebMarkupContainer item = new WebMarkupContainer(id);
         @SuppressWarnings("serial")
         AjaxLink<?> link = new AjaxLink<Void>("link") {
@@ -291,6 +293,15 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
         searchKeywords = originalKeywords;
         for (FacetValue value : selected) {
             searchKeywords += " AND " + value.getQuery();
+        }
+    }
+
+
+    @Override
+    public void onSearchResultsAvailable(SearchResult searchResult) {
+        if (facetsList == null) {
+            facetsList = searchResult.getFacetsList();
+            add(buildFiltersSortLinks());
         }
     }
 }
