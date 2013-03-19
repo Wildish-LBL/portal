@@ -1,6 +1,5 @@
 package pl.psnc.dl.wf4ever.portal.pages.search;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,55 +51,56 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
     /** Logger. */
     private static final Logger LOGGER = Logger.getLogger(SearchResultsPage.class);
 
+    /** Results per page. */
     public static final int RESULTS_PER_PAGE = 15;
 
-    private List<FacetEntry> facetsList = null;
-    private List<FoundRO> rosList = null;
-    private String searchKeywords = null;
-    private List<FacetValue> selected = null;
-    private List<FacetValue> savedSelected = null;
-    private String originalKeywords = null;
-    IPageable searchResultsList = null;
+    /** Facets to display. */
+    private List<FacetEntry> facetsList;
 
-    private WebMarkupContainer searchResultsDiv;
-    private AjaxLink<Object> clearFilters;
+    /** The keywords provided by the user. */
+    private String searchKeywords;
 
-    private Map<String, SortOrder> sortMap;
+    /** The facet values selected and submitted by the user. */
+    private List<FacetValue> selectedFacetValues = new ArrayList<FacetValue>();
+
+    /** The list of fields used for sorting. In practice, contains only 1 element. */
+    private Map<String, SortOrder> sortFields = new HashMap<String, SortOrder>();
+
+    /** The component displaying the list of results. */
+    IPageable searchResultsList;
 
 
+    /**
+     * Default constructor, displays all it can find.
+     */
     public SearchResultsPage() {
-        this("", null, "", null);
+        this("", null, null);
     }
 
 
     /**
      * Constructor.
      * 
-     * @param parameters
-     *            page params
-     * @throws IOException
-     *             can't connect to RODL
+     * @param searchKeywords
+     *            The keywords provided by the user
+     * @param selectedFacetValues
+     *            The facet values selected and submitted by the user
+     * @param sortMap
+     *            The list of fields used for sorting
      */
-    public SearchResultsPage(final String searchKeywords, final List<FacetValue> selected,
-            final String originalKeywords, Map<String, SortOrder> _sortMap) {
+    public SearchResultsPage(String searchKeywords, List<FacetValue> selectedFacetValues, Map<String, SortOrder> sortMap) {
         super(new PageParameters());
-        sortMap = _sortMap != null ? _sortMap : new HashMap<String, SortOrder>();
-        this.savedSelected = new ArrayList<>();
-        this.selected = new ArrayList<>();
-        if (selected != null) {
-            savedSelected.addAll(selected);
-            this.selected = selected;
+        if (sortMap != null) {
+            this.sortFields = sortMap;
         }
-        if (originalKeywords == null) {
-            this.originalKeywords = searchKeywords;
-        } else {
-            this.originalKeywords = originalKeywords;
+        if (selectedFacetValues != null) {
+            this.selectedFacetValues = selectedFacetValues;
         }
         this.searchKeywords = searchKeywords;
 
-        searchResultsDiv = new WebMarkupContainer("searchResultsDiv");
+        WebMarkupContainer searchResultsDiv = new WebMarkupContainer("searchResultsDiv");
         searchResultsDiv.setOutputMarkupId(true);
-        searchResultsDiv.add(new Label("searchKeywords", originalKeywords));
+        searchResultsDiv.add(new Label("searchKeywords", searchKeywords));
         add(searchResultsDiv);
         setDefaultModel(new CompoundPropertyModel<SearchResultsPage>(this));
         SearchServer searchServer = ((PortalApplication) getApplication()).getSearchServer();
@@ -109,36 +109,24 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
         feedbackPanel.setOutputMarkupId(true);
         add(feedbackPanel);
 
+        String query = buildQuery(searchKeywords, selectedFacetValues);
+
         if (searchServer.supportsPagination()) {
             LazySearchResultsView lazySearchResultsList = new LazySearchResultsView("searchResultsListView",
-                    searchServer, searchKeywords, RESULTS_PER_PAGE, sortMap);
+                    searchServer, query, RESULTS_PER_PAGE, sortMap);
             lazySearchResultsList.getListeners().add(this);
             searchResultsList = lazySearchResultsList;
         } else {
             SearchResult searchResult = null;
-
-            Map<String, String> queryMap = new HashMap<>();
-            for (FacetValue value : savedSelected) {
-                if (queryMap.containsKey(value.getParamName())) {
-                    String queryPart = queryMap.get(value.getParamName()) + " OR " + value.getQuery();
-                    queryMap.put(value.getParamName(), queryPart);
-                } else {
-                    queryMap.put(value.getParamName(), value.getQuery());
-                }
-            }
-            String finalQuery = getOriginalKeywords();
-            for (String key : queryMap.keySet()) {
-                finalQuery += " AND (" + queryMap.get(key) + ")";
-            }
             try {
-                searchResult = searchServer.search(finalQuery, null, null, sortMap);
+                searchResult = searchServer.search(query, null, null, sortMap);
+                facetsList = searchResult.getFacetsList();
             } catch (SearchException e) {
                 error(e.getMessage());
                 LOGGER.error("Can't do the search for " + searchKeywords, e);
             }
-            facetsList = searchResult.getFacetsList();
-            rosList = searchResult.getROsList();
-            searchResultsList = new SimpleSearchResultsView("searchResultsListView", rosList, RESULTS_PER_PAGE);
+            searchResultsList = new SimpleSearchResultsView("searchResultsListView", searchResult.getROsList(),
+                    RESULTS_PER_PAGE);
             add(buildFiltersSortLinks());
         }
         searchResultsDiv.add((Component) searchResultsList);
@@ -155,53 +143,40 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
         noResults.setVisible(false);
 
         add(new BootstrapPagingNavigator("pagination", searchResultsList));
-        AjaxLink<Object> submitFilters = new AjaxLink<Object>("submitFilters") {
-
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                Map<String, String> queryMap = new HashMap<>();
-                target.add(SearchResultsPage.this);
-                for (FacetValue value : getSelected()) {
-                    if (queryMap.containsKey(value.getParamName())) {
-                        String queryPart = queryMap.get(value.getParamName()) + " OR " + value.getQuery();
-                        queryMap.put(value.getParamName(), queryPart);
-                    } else {
-                        queryMap.put(value.getParamName(), value.getQuery());
-                    }
-                }
-                String finalQuery = getOriginalKeywords();
-                for (String key : queryMap.keySet()) {
-                    finalQuery += " AND (" + queryMap.get(key) + ")";
-                }
-                setResponsePage(new SearchResultsPage(finalQuery, getSelected(), getOriginalKeywords(), sortMap));
-            }
-        };
-        add(submitFilters);
-        clearFilters = new AjaxLink<Object>("clearFilters") {
-
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                setResponsePage(new SearchResultsPage(originalKeywords, null, originalKeywords, sortMap));
-            }
-        };
-        add(clearFilters);
+        add(new SubmitFiltersButton("submitFilters"));
+        add(new ClearFiltersButton("clearFilters"));
     }
 
 
+    /**
+     * Create a repeater that will return a list of links for sorting.
+     * 
+     * @return a repeater
+     */
     private AbstractRepeater buildFiltersSortLinks() {
         RepeatingView sortView = new RepeatingView("sortListView");
-        if (facetsList != null)
-            for (final FacetEntry facet : facetsList) {
-                if (facet.isSorteable()) {
-                    sortView.add(createSortLink(sortView.newChildId(), facet, SortOrder.ASC));
-                    sortView.add(createSortLink(sortView.newChildId(), facet, SortOrder.DESC));
-                }
+        for (final FacetEntry facet : facetsList) {
+            if (facet.isSorteable()) {
+                sortView.add(createSortLink(sortView.newChildId(), facet, SortOrder.ASC));
+                sortView.add(createSortLink(sortView.newChildId(), facet, SortOrder.DESC));
             }
+        }
 
         return sortView;
     }
 
 
+    /**
+     * Create one link for sorting.
+     * 
+     * @param id
+     *            component id
+     * @param facet
+     *            facet used for sorting
+     * @param order
+     *            order of sorting
+     * @return a link
+     */
     private WebMarkupContainer createSortLink(String id, final FacetEntry facet, final SearchServer.SortOrder order) {
         WebMarkupContainer item = new WebMarkupContainer(id);
         @SuppressWarnings("serial")
@@ -210,13 +185,13 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
             @Override
             public void onClick(AjaxRequestTarget target) {
                 // this is to limit the sort to one field only, remove to allow more fields
-                sortMap.clear();
+                sortFields.clear();
 
-                sortMap.put(facet.getFieldName(), order);
-                setResponsePage(new SearchResultsPage(searchKeywords, savedSelected, originalKeywords, sortMap));
+                sortFields.put(facet.getFieldName(), order);
+                setResponsePage(new SearchResultsPage(searchKeywords, selectedFacetValues, sortFields));
             }
         };
-        if (sortMap.get(facet.getFieldName()) == order) {
+        if (sortFields.get(facet.getFieldName()) == order) {
             link.add(AttributeModifier.replace("class", "selected_filter_label"));
         }
         item.add(link);
@@ -229,12 +204,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
 
 
     public List<FacetValue> getSelected() {
-        return selected;
-    }
-
-
-    public String getOriginalKeywords() {
-        return this.originalKeywords;
+        return selectedFacetValues;
     }
 
 
@@ -243,6 +213,13 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
     }
 
 
+    /**
+     * Populate one item with an RO that has been found. Useful for the results view that have a different generation
+     * mechanism, but want to share the rendering.
+     * 
+     * @param item
+     *            the item to populate
+     */
     public static void populateItem(ListItem<FoundRO> item) {
         final FoundRO result = item.getModelObject();
         BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);
@@ -277,23 +254,15 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
 
     @Override
     public void onAjaxLinkClicked(Object source, AjaxRequestTarget target) {
-        for (FacetValue val : selected) {
-            if (val.getLabel().equals(((FacetValue) (source)).getLabel())
-                    && val.getParamName().equals(((FacetValue) (source)).getParamName())) {
-                selected.remove(val);
-                searchKeywords = originalKeywords;
-                for (FacetValue value : selected) {
-                    searchKeywords += " AND " + value.getQuery();
-                }
+        FacetValue facetValue = (FacetValue) source;
+        for (FacetValue val : selectedFacetValues) {
+            if (val.getLabel().equals(facetValue.getLabel()) && val.getParamName().equals(facetValue.getParamName())) {
+                selectedFacetValues.remove(val);
                 return;
             }
         }
 
-        selected.add((FacetValue) (source));
-        searchKeywords = originalKeywords;
-        for (FacetValue value : selected) {
-            searchKeywords += " AND " + value.getQuery();
-        }
+        selectedFacetValues.add(facetValue);
     }
 
 
@@ -304,4 +273,94 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
             add(buildFiltersSortLinks());
         }
     }
+
+
+    /**
+     * Build a query using AND and OR predicates.
+     * 
+     * @param keywords
+     *            the keywords to look for
+     * @param facetValues
+     *            the facets to filter by
+     * @return the query
+     */
+    public String buildQuery(String keywords, List<FacetValue> facetValues) {
+        Map<String, String> queryMap = new HashMap<>();
+        if (facetValues != null) {
+            for (FacetValue value : facetValues) {
+                if (queryMap.containsKey(value.getParamName())) {
+                    String queryPart = queryMap.get(value.getParamName()) + " OR " + value.getQuery();
+                    queryMap.put(value.getParamName(), queryPart);
+                } else {
+                    queryMap.put(value.getParamName(), value.getQuery());
+                }
+            }
+        }
+        String finalQuery = keywords;
+        for (String key : queryMap.keySet()) {
+            finalQuery += " AND (" + queryMap.get(key) + ")";
+        }
+        return finalQuery;
+    }
+
+
+    /**
+     * A button for clearing all filters.
+     * 
+     * @author piotrekhol
+     * 
+     */
+    private final class ClearFiltersButton extends AjaxLink<Void> {
+
+        /** id. */
+        private static final long serialVersionUID = -7451742937861956150L;
+
+
+        /**
+         * Constructor.
+         * 
+         * @param id
+         *            markup id
+         */
+        private ClearFiltersButton(String id) {
+            super(id);
+        }
+
+
+        @Override
+        public void onClick(AjaxRequestTarget target) {
+            setResponsePage(new SearchResultsPage(searchKeywords, null, sortFields));
+        }
+    }
+
+
+    /**
+     * A button for applying the selected filters.
+     * 
+     * @author piotrekhol
+     * 
+     */
+    private final class SubmitFiltersButton extends AjaxLink<Void> {
+
+        /** id. */
+        private static final long serialVersionUID = 6125597609903621105L;
+
+
+        /**
+         * Constructor.
+         * 
+         * @param id
+         *            markup id
+         */
+        private SubmitFiltersButton(String id) {
+            super(id);
+        }
+
+
+        @Override
+        public void onClick(AjaxRequestTarget target) {
+            setResponsePage(new SearchResultsPage(searchKeywords, selectedFacetValues, sortFields));
+        }
+    }
+
 }

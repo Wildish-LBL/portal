@@ -38,4 +38,5 @@ final class SimpleSearchResultsView extends PageableListView<FoundRO> {
     protected void populateItem(ListItem<FoundRO> item) {
         SearchResultsPage.populateItem(item);
     }
+
 }
