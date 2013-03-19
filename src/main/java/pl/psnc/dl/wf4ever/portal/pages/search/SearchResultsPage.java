@@ -220,6 +220,9 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
         //                    "researchObject.creators")));
         item.add(new Label("researchObject.createdFormatted", new PropertyModel<String>(result,
                 "researchObject.createdFormatted")));
+        item.add(new Label("numberOfResources", new PropertyModel<String>(result, "numberOfResources")));
+        item.add(new Label("numberOfAnnotations", new PropertyModel<String>(result, "numberOfAnnotations")));
+        item.add(new Label("status", new PropertyModel<String>(result, "status")));
         WebMarkupContainer score = new WebMarkupContainer("searchScore");
         item.add(score);
         score.setVisible(result.getScore() >= 0);

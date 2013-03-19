@@ -43,8 +43,10 @@
 
 			<form class="form-horizontal">
 				<div class="control-group">
-					<label class="control-label" for="sort" style="text-align: left; width: auto;">Sort by:</label>
-					<div class="controls" style="display:inline-block; margin-left: 10px;">
+					<label class="control-label" for="sort"
+						style="text-align: left; width: auto;">Sort by:</label>
+					<div class="controls"
+						style="display: inline-block; margin-left: 10px;">
 						<select class="span4" id="sort" wicket:id="sortListView">
 						</select>
 					</div>
@@ -57,7 +59,10 @@
 					wicket:id="researchObject.title">[title]</span> <br /> <span
 					style="font-size: x-small"> <!-- by <span
 						wicket:id="researchObject.creator"></span>,  --> <span
-						wicket:id="researchObject.createdFormatted"></span>
+						wicket:id="researchObject.createdFormatted"></span>&nbsp;Resources:
+						<span wicket:id="numberOfResources"></span>&nbsp;Annotations:
+						<span wicket:id="numberOfAnnotations"></span>&nbsp;Status:
+						<span wicket:id="status"></span>
 				</span>
 
 					<div class="searchScore" wicket:id="searchScore">
