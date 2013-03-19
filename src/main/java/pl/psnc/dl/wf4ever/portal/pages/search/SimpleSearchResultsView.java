@@ -35,7 +35,7 @@ final class SimpleSearchResultsView extends PageableListView<FoundRO> {
 
     @Override
     protected void populateItem(ListItem<FoundRO> item) {
-        SearchResultsPage.populateItem(item);
+        SearchResultsPage.populateItem(item, getModel().getObject().indexOf(item.getModelObject()) + 1);
     }
 
 }

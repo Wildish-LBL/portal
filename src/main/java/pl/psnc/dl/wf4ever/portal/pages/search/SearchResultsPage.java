@@ -208,9 +208,12 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
      * 
      * @param item
      *            the item to populate
+     * @param index
+     *            index of this result in the overall list
      */
-    public static void populateItem(ListItem<FoundRO> item) {
+    public static void populateItem(ListItem<FoundRO> item, int index) {
         final FoundRO result = item.getModelObject();
+        item.add(new Label("index", "" + index + "."));
         BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);
         link.getPageParameters().add("ro", result.getResearchObject().getUri().toString());
         link.add(new Label("researchObject.name", new PropertyModel<String>(result, "researchObject.name")));

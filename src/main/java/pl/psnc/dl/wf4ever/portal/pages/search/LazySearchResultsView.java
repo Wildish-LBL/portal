@@ -44,6 +44,9 @@ public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
     /** listeners for event of getting new search results. */
     private List<SearchResultsListener> listeners = new ArrayList<>();
 
+    /** current offset. */
+    private int offset;
+
 
     /**
      * Constructor.
@@ -72,6 +75,7 @@ public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
     @Override
     protected Iterator<IModel<FoundRO>> getItemModels(int offset, int size) {
         try {
+            this.offset = offset;
             SearchResult results = searchServer.search(query, offset, size, sortFields.getObject());
             for (SearchResultsListener listener : listeners) {
                 listener.onSearchResultsAvailable(results);
@@ -92,7 +96,7 @@ public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
 
     @Override
     protected void populateItem(Item<FoundRO> item) {
-        SearchResultsPage.populateItem(item);
+        SearchResultsPage.populateItem(item, offset + item.getIndex() + 1);
     }
 
 

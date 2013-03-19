@@ -54,15 +54,16 @@
 			</form>
 
 			<ol style="margin-right: 40px;" wicket:id="searchResultsDiv">
-				<li wicket:id="searchResultsListView" class="not_numbered_list"><a
+				<li wicket:id="searchResultsListView" class="not_numbered_list"><span
+					wicket:id="index" style="margin-right: 15px;"></span> <a
 					wicket:id="link"><span wicket:id="researchObject.name">[uri]</span></a>&nbsp;<span
 					wicket:id="researchObject.title">[title]</span> <br /> <span
 					style="font-size: x-small"> <!-- by <span
 						wicket:id="researchObject.creator"></span>,  --> <span
 						wicket:id="researchObject.createdFormatted"></span>&nbsp;Resources:
-						<span wicket:id="numberOfResources"></span>&nbsp;Annotations:
-						<span wicket:id="numberOfAnnotations"></span>&nbsp;Status:
-						<span wicket:id="status"></span>
+						<span wicket:id="numberOfResources"></span>&nbsp;Annotations: <span
+						wicket:id="numberOfAnnotations"></span>&nbsp;Status: <span
+						wicket:id="status"></span>
 				</span>
 
 					<div class="searchScore" wicket:id="searchScore">
