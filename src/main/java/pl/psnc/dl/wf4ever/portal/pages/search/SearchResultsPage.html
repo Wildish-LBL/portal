@@ -17,21 +17,47 @@
 	<div class="row" id="searchResults">
 		<div class="span3">
 			<section class="box small" wicket:id="filters">
-				<h3 class="collapsible" wicket:id="name">
-					Label <img class="sh_button" src="images/l_open.gif" />
+				<h3 class="collapsible" >
+					<span wicket:id="name">Label</span> <img class="sh_button" src="images/l_open.gif" />
 				</h3>
 				<div class="boxDiv">
 					<ul>
 						<li wicket:id="options"><a wicket:id="link" class="filter_label"><span wicket:id="label">label</span> (<span wicket:id="count">0</span>)</a></li>
 					</ul>
-
+				</div>
+			</section>
+			<section class="box small">
+				<h3 class="collapsible">
+					Filters Actions <img class="sh_button" src="images/l_open.gif" />
+				</h3>
+				<div class="boxDiv">
+					<ul>
+						<li><a href="#" wicket:id="submitFilters">Submit filters</a></li>
+						<li><a href="#" wicket:id="clearFilters">Clear filters</a></li>
+					</ul>
+				</div>
+			</section>
+			<section class="box small">
+				<h3 class="collapsible">
+					Sort by<img class="sh_button" src="images/l_open.gif" />
+				</h3>
+				<div class="boxDiv">
+					<ul>
+						<li><a href="#" wicket:id="sortByName">name</a></li>
+						<li><a href="#" wicket:id="sortByNameDesc">name(desc)</a></li>
+						<li><a href="#" wicket:id="sortBySize">number of resources</a></li>
+						<li><a href="#" wicket:id="sortBySizeDesc">number of resources(desc)</a></li>
+						<li><a href="#" wicket:id="sortByDate">creation date</a></li>
+						<li><a href="#"wicket:id="sortByDateDesc">creation date(desc)</a></li>
+					</ul>
 				</div>
 			</section>
 		</div>
 		<div class="span9" wicket:id="searchResultsDiv">
 			<h3>
-				Search results for: <span wicket:id="searchKeywords"></span>
+				Search results for keywords: <span wicket:id="searchKeywords"></span>
 			</h3>
+			<p></p>
 			<ol style="margin-right: 40px;">
 				<li wicket:id="searchResultsListView" class="not_numbered_list"><a wicket:id="link"><span
 						wicket:id="researchObject.name">[uri]</span></a>&nbsp;<span

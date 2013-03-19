@@ -35,7 +35,7 @@ public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
     @Override
     protected Iterator<IModel<FoundRO>> getItemModels(int offset, int size) {
         try {
-            List<FoundRO> results = searchServer.search(query, offset, size).getROsList();
+            List<FoundRO> results = searchServer.search(query, offset, size, null).getROsList();
             return new ModelIterator<>(results);
         } catch (SearchException e) {
             LOGGER.error("Can't search more data", e);
