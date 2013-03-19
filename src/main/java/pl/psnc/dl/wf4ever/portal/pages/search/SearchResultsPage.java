@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -14,11 +13,10 @@ import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.navigation.paging.IPageable;
-import org.apache.wicket.markup.repeater.AbstractRepeater;
-import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -43,7 +41,8 @@ import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
  * @author piotrekhol
  * 
  */
-public class SearchResultsPage extends Base implements IAjaxLinkListener, SearchResultsListener {
+public class SearchResultsPage extends Base implements IAjaxLinkListener, SearchResultsListener,
+        SortOptionChangeListener {
 
     /** id. */
     private static final long serialVersionUID = 1L;
@@ -63,8 +62,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
     /** The facet values selected and submitted by the user. */
     private List<FacetValue> selectedFacetValues = new ArrayList<FacetValue>();
 
-    /** The list of fields used for sorting. In practice, contains only 1 element. */
-    private Map<String, SortOrder> sortFields = new HashMap<String, SortOrder>();
+    private SortOption sortOption;
 
     /** The component displaying the list of results. */
     IPageable searchResultsList;
@@ -85,22 +83,22 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
      *            The keywords provided by the user
      * @param selectedFacetValues
      *            The facet values selected and submitted by the user
-     * @param sortMap
-     *            The list of fields used for sorting
+     * @param sortOption
+     *            The field used for sorting
      */
-    public SearchResultsPage(String searchKeywords, List<FacetValue> selectedFacetValues, Map<String, SortOrder> sortMap) {
+    public SearchResultsPage(String searchKeywords, List<FacetValue> selectedFacetValues, SortOption sortOption) {
         super(new PageParameters());
-        if (sortMap != null) {
-            this.sortFields = sortMap;
+        if (sortOption != null) {
+            this.sortOption = sortOption;
         }
         if (selectedFacetValues != null) {
             this.selectedFacetValues = selectedFacetValues;
         }
         this.searchKeywords = searchKeywords;
+        add(new Label("searchKeywords", searchKeywords));
 
         WebMarkupContainer searchResultsDiv = new WebMarkupContainer("searchResultsDiv");
         searchResultsDiv.setOutputMarkupId(true);
-        searchResultsDiv.add(new Label("searchKeywords", searchKeywords));
         add(searchResultsDiv);
         setDefaultModel(new CompoundPropertyModel<SearchResultsPage>(this));
         SearchServer searchServer = ((PortalApplication) getApplication()).getSearchServer();
@@ -113,13 +111,14 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
 
         if (searchServer.supportsPagination()) {
             LazySearchResultsView lazySearchResultsList = new LazySearchResultsView("searchResultsListView",
-                    searchServer, query, RESULTS_PER_PAGE, sortMap);
+                    searchServer, query, RESULTS_PER_PAGE, new PropertyModel<Map<String, SearchServer.SortOrder>>(this,
+                            "sortFields"));
             lazySearchResultsList.getListeners().add(this);
             searchResultsList = lazySearchResultsList;
         } else {
             SearchResult searchResult = null;
             try {
-                searchResult = searchServer.search(query, null, null, sortMap);
+                searchResult = searchServer.search(query, null, null, getSortFields());
                 facetsList = searchResult.getFacetsList();
             } catch (SearchException e) {
                 error(e.getMessage());
@@ -127,7 +126,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
             }
             searchResultsList = new SimpleSearchResultsView("searchResultsListView", searchResult.getROsList(),
                     RESULTS_PER_PAGE);
-            add(buildFiltersSortLinks());
+            add(buildSortLinks());
         }
         searchResultsDiv.add((Component) searchResultsList);
         searchResultsDiv.setOutputMarkupId(true);
@@ -138,7 +137,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
         add(facetsView);
 
         final WebMarkupContainer noResults = new WebMarkupContainer("noResults");
-        searchResultsDiv.add(noResults);
+        add(noResults);
         //        noResults.setVisible(searchResults == null || searchResults.isEmpty());
         noResults.setVisible(false);
 
@@ -153,53 +152,18 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
      * 
      * @return a repeater
      */
-    private AbstractRepeater buildFiltersSortLinks() {
-        RepeatingView sortView = new RepeatingView("sortListView");
+    private DropDownChoice<SortOption> buildSortLinks() {
+        List<SortOption> sortOptions = new ArrayList<>();
         for (final FacetEntry facet : facetsList) {
             if (facet.isSorteable()) {
-                sortView.add(createSortLink(sortView.newChildId(), facet, SortOrder.ASC));
-                sortView.add(createSortLink(sortView.newChildId(), facet, SortOrder.DESC));
+                sortOptions.add(new SortOption(facet, SortOrder.ASC));
+                sortOptions.add(new SortOption(facet, SortOrder.DESC));
             }
         }
-
-        return sortView;
-    }
-
-
-    /**
-     * Create one link for sorting.
-     * 
-     * @param id
-     *            component id
-     * @param facet
-     *            facet used for sorting
-     * @param order
-     *            order of sorting
-     * @return a link
-     */
-    private WebMarkupContainer createSortLink(String id, final FacetEntry facet, final SearchServer.SortOrder order) {
-        WebMarkupContainer item = new WebMarkupContainer(id);
-        @SuppressWarnings("serial")
-        AjaxLink<?> link = new AjaxLink<Void>("link") {
-
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                // this is to limit the sort to one field only, remove to allow more fields
-                sortFields.clear();
-
-                sortFields.put(facet.getFieldName(), order);
-                setResponsePage(new SearchResultsPage(searchKeywords, selectedFacetValues, sortFields));
-            }
-        };
-        if (sortFields.get(facet.getFieldName()) == order) {
-            link.add(AttributeModifier.replace("class", "selected_filter_label"));
-        }
-        item.add(link);
-
-        Label nameLabel = new Label("name", facet.getName() + (order == SortOrder.ASC ? " (asc)" : " (desc)"));
-        link.add(nameLabel);
-
-        return item;
+        SortDropDownChoice dropDown = new SortDropDownChoice("sortListView", new PropertyModel<SortOption>(this,
+                "sortOption"), sortOptions);
+        dropDown.getListeners().add(this);
+        return dropDown;
     }
 
 
@@ -210,6 +174,25 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
 
     public List<FacetEntry> getFacets() {
         return facetsList;
+    }
+
+
+    public SortOption getSortOption() {
+        return sortOption;
+    }
+
+
+    public void setSortOption(SortOption sortOption) {
+        this.sortOption = sortOption;
+    }
+
+
+    public Map<String, SearchServer.SortOrder> getSortFields() {
+        Map<String, SearchServer.SortOrder> sortFields = new HashMap<>();
+        if (sortOption != null) {
+            sortFields.put(sortOption.getFacetEntry().getFieldName(), sortOption.getSortOrder());
+        }
+        return sortFields;
     }
 
 
@@ -270,8 +253,15 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
     public void onSearchResultsAvailable(SearchResult searchResult) {
         if (facetsList == null) {
             facetsList = searchResult.getFacetsList();
-            add(buildFiltersSortLinks());
+            add(buildSortLinks());
         }
+    }
+
+
+    @Override
+    public void onSortOptionChanged(SortOption newSortOption) {
+        sortOption = newSortOption;
+        setResponsePage(new SearchResultsPage(searchKeywords, selectedFacetValues, newSortOption));
     }
 
 
@@ -329,7 +319,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
 
         @Override
         public void onClick(AjaxRequestTarget target) {
-            setResponsePage(new SearchResultsPage(searchKeywords, null, sortFields));
+            setResponsePage(new SearchResultsPage(searchKeywords, null, sortOption));
         }
     }
 
@@ -359,7 +349,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
 
         @Override
         public void onClick(AjaxRequestTarget target) {
-            setResponsePage(new SearchResultsPage(searchKeywords, selectedFacetValues, sortFields));
+            setResponsePage(new SearchResultsPage(searchKeywords, selectedFacetValues, sortOption));
         }
     }
 

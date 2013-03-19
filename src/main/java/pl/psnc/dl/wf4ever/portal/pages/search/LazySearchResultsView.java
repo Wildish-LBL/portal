@@ -11,6 +11,7 @@ import org.apache.wicket.markup.repeater.AbstractPageableView;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.exception.SearchException;
 import org.purl.wf4ever.rosrs.client.search.SearchServer;
 import org.purl.wf4ever.rosrs.client.search.SearchServer.SortOrder;
@@ -27,17 +28,17 @@ public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
     private SearchServer searchServer;
     private String query;
 
-    private Map<String, SortOrder> sortFields;
+    private IModel<Map<String, SortOrder>> sortFields;
 
     private List<SearchResultsListener> listeners = new ArrayList<>();
 
 
     public LazySearchResultsView(String id, SearchServer searchServer, String query, int resultsPerPage,
-            Map<String, SearchServer.SortOrder> sortFields) {
+            PropertyModel<Map<String, SortOrder>> sortFieldsModel) {
         super(id);
         this.searchServer = searchServer;
         this.query = query;
-        this.sortFields = sortFields;
+        this.sortFields = sortFieldsModel;
         setItemsPerPage(resultsPerPage);
     }
 
@@ -45,7 +46,7 @@ public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
     @Override
     protected Iterator<IModel<FoundRO>> getItemModels(int offset, int size) {
         try {
-            SearchResult results = searchServer.search(query, offset, size, sortFields);
+            SearchResult results = searchServer.search(query, offset, size, sortFields.getObject());
             for (SearchResultsListener listener : listeners) {
                 listener.onSearchResultsAvailable(results);
             }
