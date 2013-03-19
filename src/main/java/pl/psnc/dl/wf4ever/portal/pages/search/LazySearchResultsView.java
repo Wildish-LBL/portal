@@ -18,6 +18,12 @@ import org.purl.wf4ever.rosrs.client.search.SearchServer.SortOrder;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.FoundRO;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.SearchResult;
 
+/**
+ * A search results generator that fetches new results for each results page separately.
+ * 
+ * @author piotrekhol
+ * 
+ */
 public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
 
     /** id. */
@@ -25,14 +31,34 @@ public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
 
     /** Logger. */
     private static final Logger LOGGER = Logger.getLogger(LazySearchResultsView.class);
+
+    /** search server from which the results are fetched. */
     private SearchServer searchServer;
+
+    /** query to send to the search server. */
     private String query;
 
+    /** model of the sort fields. */
     private IModel<Map<String, SortOrder>> sortFields;
 
+    /** listeners for event of getting new search results. */
     private List<SearchResultsListener> listeners = new ArrayList<>();
 
 
+    /**
+     * Constructor.
+     * 
+     * @param id
+     *            markup id
+     * @param searchServer
+     *            search server from which the results are fetched
+     * @param query
+     *            query to send to the search server
+     * @param resultsPerPage
+     *            how many results should be fetched for each page
+     * @param sortFieldsModel
+     *            model of the sort fields
+     */
     public LazySearchResultsView(String id, SearchServer searchServer, String query, int resultsPerPage,
             PropertyModel<Map<String, SortOrder>> sortFieldsModel) {
         super(id);
@@ -85,20 +111,21 @@ public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
      */
     private static final class ModelIterator<T extends Serializable> implements Iterator<IModel<T>> {
 
+        /** items. */
         private final Iterator<? extends T> items;
+
+        /** items count. */
         private final int max;
+
+        /** index for the iterator. */
         private int index;
 
 
         /**
-         * Constructor
+         * Constructor.
          * 
-         * @param dataProvider
-         *            data provider
-         * @param offset
-         *            index of first item
-         * @param count
-         *            max number of items to return
+         * @param items
+         *            items
          */
         public ModelIterator(List<T> items) {
             this.items = items.iterator();
@@ -106,25 +133,19 @@ public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
         }
 
 
-        /**
-         * @see java.util.Iterator#remove()
-         */
+        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }
 
 
-        /**
-         * @see java.util.Iterator#hasNext()
-         */
+        @Override
         public boolean hasNext() {
             return items != null && items.hasNext() && (index < max);
         }
 
 
-        /**
-         * @see java.util.Iterator#next()
-         */
+        @Override
         public IModel<T> next() {
             index++;
             return new Model<T>(items.next());

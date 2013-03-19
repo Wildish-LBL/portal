@@ -62,6 +62,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
     /** The facet values selected and submitted by the user. */
     private List<FacetValue> selectedFacetValues = new ArrayList<FacetValue>();
 
+    /** Currently selected sort option. */
     private SortOption sortOption;
 
     /** The component displaying the list of results. */
@@ -187,6 +188,11 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
     }
 
 
+    /**
+     * Get the sort fields map as required by the search server.
+     * 
+     * @return a map that contains at most one sort option - the currently selected one
+     */
     public Map<String, SearchServer.SortOrder> getSortFields() {
         Map<String, SearchServer.SortOrder> sortFields = new HashMap<>();
         if (sortOption != null) {
@@ -260,7 +266,6 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
 
     @Override
     public void onSortOptionChanged(SortOption newSortOption) {
-        sortOption = newSortOption;
         setResponsePage(new SearchResultsPage(searchKeywords, selectedFacetValues, newSortOption));
     }
 

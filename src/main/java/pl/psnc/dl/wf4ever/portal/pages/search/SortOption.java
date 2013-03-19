@@ -4,13 +4,29 @@ import org.purl.wf4ever.rosrs.client.search.SearchServer;
 import org.purl.wf4ever.rosrs.client.search.SearchServer.SortOrder;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.solr.FacetEntry;
 
+/**
+ * A sort option - a facet plus the sort order.
+ * 
+ * @author piotrekhol
+ * 
+ */
 public class SortOption {
 
+    /** Facet to sort by. */
     private final FacetEntry facetEntry;
 
+    /** Sort order - descending or ascending. */
     private final SearchServer.SortOrder sortOrder;
 
 
+    /**
+     * Constructor.
+     * 
+     * @param facetEntry
+     *            facet to sort by
+     * @param sortOrder
+     *            sort order
+     */
     public SortOption(FacetEntry facetEntry, SortOrder sortOrder) {
         this.facetEntry = facetEntry;
         this.sortOrder = sortOrder;
@@ -43,7 +59,7 @@ public class SortOption {
      * @return the facet name and the sort order
      */
     public String getValue() {
-        return facetEntry.getName() + (sortOrder == SortOrder.ASC ? " ascending" : " descending");
+        return facetEntry.getName() + ", " + (sortOrder == SortOrder.ASC ? "ascending" : "descending");
     }
 
 
