@@ -2,28 +2,30 @@ package pl.psnc.dl.wf4ever.portal.pages.search;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.log4j.Logger;
-import org.apache.solr.client.solrj.SolrQuery.ORDER;
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.Behavior;
-import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.navigation.paging.IPageable;
+import org.apache.wicket.markup.repeater.AbstractRepeater;
+import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.purl.wf4ever.rosrs.client.exception.SearchException;
 import org.purl.wf4ever.rosrs.client.search.SearchServer;
+import org.purl.wf4ever.rosrs.client.search.SearchServer.SortOrder;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.FacetValue;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.FoundRO;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.SearchResult;
@@ -59,16 +61,9 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
     private List<FacetValue> savedSelected = null;
     private String originalKeywords = null;
     IPageable searchResultsList = null;
-    ROSortMode roSortMode;
 
     private WebMarkupContainer searchResultsDiv;
     private AjaxLink<Object> clearFilters;
-    private AjaxLink<Object> sortByName;
-    private AjaxLink<Object> sortByNameDesc;
-    private AjaxLink<Object> sortBySize;
-    private AjaxLink<Object> sortBySizeDesc;
-    private AjaxLink<Object> sortByDate;
-    private AjaxLink<Object> sortByDateDesc;
 
 
     public SearchResultsPage() {
@@ -85,13 +80,26 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
      *             can't connect to RODL
      */
     public SearchResultsPage(final String searchKeywords, final List<FacetValue> selected,
-            final String originalKeywords, ROSortMode sortMode) {
+            final String originalKeywords, Map<String, SortOrder> _sortMap) {
         super(new PageParameters());
-        initValues(searchKeywords, selected, originalKeywords, sortMode);
+        final Map<String, SortOrder> sortMap = _sortMap != null ? _sortMap : new HashMap<String, SortOrder>();
+        this.savedSelected = new ArrayList<>();
+        this.selected = new ArrayList<>();
+        if (selected != null) {
+            savedSelected.addAll(selected);
+            this.selected = selected;
+        }
+        if (originalKeywords == null) {
+            this.originalKeywords = searchKeywords;
+        } else {
+            this.originalKeywords = originalKeywords;
+        }
+        this.searchKeywords = searchKeywords;
+
         searchResultsDiv = new WebMarkupContainer("searchResultsDiv");
         searchResultsDiv.setOutputMarkupId(true);
+        searchResultsDiv.add(new Label("searchKeywords", originalKeywords));
         add(searchResultsDiv);
-        buildFiltersSortLinks();
         setDefaultModel(new CompoundPropertyModel<SearchResultsPage>(this));
         SearchServer searchServer = ((PortalApplication) getApplication()).getSearchServer();
 
@@ -99,68 +107,38 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
         feedbackPanel.setOutputMarkupId(true);
         add(feedbackPanel);
 
-        /*
         if (searchServer.supportsPagination()) {
             searchResultsList = new LazySearchResultsView("searchResultsListView", searchServer, searchKeywords,
                     RESULTS_PER_PAGE);
         } else {
-            */
-        SearchResult searchResult = null;
-        Map<String, ORDER> sortMap = new HashedMap();
-        switch (roSortMode) {
-            case NAME:
-                sortMap.put("uri", ORDER.asc);
-                sortByName.add(new SimpleAttributeModifier("class", "selected_filter_label"));
-                break;
-            case NAME_DESC:
-                sortMap.put("uri", ORDER.desc);
-                sortByNameDesc.add(new SimpleAttributeModifier("class", "selected_filter_label"));
-                break;
-            case NUMBER_OF_RESOURCES:
-                sortMap.put("resources_size", ORDER.asc);
-                sortBySize.add(new SimpleAttributeModifier("class", "selected_filter_label"));
-                break;
-            case NUMBER_OF_RESOURCES_DESC:
-                sortMap.put("resources_size", ORDER.desc);
-                sortBySizeDesc.add(new SimpleAttributeModifier("class", "selected_filter_label"));
-                break;
-            case CREATION_DATE:
-                sortMap.put("created", ORDER.asc);
-                sortByDate.add(new SimpleAttributeModifier("class", "selected_filter_label"));
-                break;
-            case CREATION_DATE_DESC:
-                sortMap.put("created", ORDER.desc);
-                sortByDateDesc.add(new SimpleAttributeModifier("class", "selected_filter_label"));
-                break;
-        }
+            SearchResult searchResult = null;
 
-        Map<String, String> queryMap = new HashedMap();
-        for (FacetValue value : savedSelected) {
-            if (queryMap.containsKey(value.getParamName())) {
-                String queryPart = queryMap.get(value.getParamName()) + " OR " + value.getQuery();
-                queryMap.put(value.getParamName(), queryPart);
-            } else {
-                queryMap.put(value.getParamName(), value.getQuery());
+            Map<String, String> queryMap = new HashMap<>();
+            for (FacetValue value : savedSelected) {
+                if (queryMap.containsKey(value.getParamName())) {
+                    String queryPart = queryMap.get(value.getParamName()) + " OR " + value.getQuery();
+                    queryMap.put(value.getParamName(), queryPart);
+                } else {
+                    queryMap.put(value.getParamName(), value.getQuery());
+                }
             }
+            String finalQuery = getOriginalKeywords();
+            for (String key : queryMap.keySet()) {
+                finalQuery += " AND (" + queryMap.get(key) + ")";
+            }
+            try {
+                searchResult = searchServer.search(finalQuery, null, null, sortMap);
+            } catch (SearchException e) {
+                error(e.getMessage());
+                LOGGER.error("Can't do the search for " + searchKeywords, e);
+            }
+            facetsList = searchResult.getFacetsList();
+            ROsList = searchResult.getROsList();
+            searchResultsList = new SimpleSearchResultsView("searchResultsListView", ROsList, RESULTS_PER_PAGE);
         }
-        String finalQuery = getOriginalKeywords();
-        for (String key : queryMap.keySet()) {
-            finalQuery += " AND (" + queryMap.get(key) + ")";
-        }
-        try {
-            searchResult = searchServer.search(finalQuery, null, null, sortMap);
-        } catch (SearchException e) {
-            error(e.getMessage());
-            LOGGER.error("Can't do the search for " + searchKeywords, e);
-        }
-        facetsList = searchResult.getFactesList();
-        ROsList = searchResult.getROsList();
-        searchResultsList = new SimpleSearchResultsView("searchResultsListView", ROsList, RESULTS_PER_PAGE);
-        //}
         searchResultsDiv.add((Component) searchResultsList);
         searchResultsDiv.setOutputMarkupId(true);
-        //TODO to something as below
-        //        FacetsView facetsView = new FacetsView("filters", new PropertyModel<List<Facet>>(searchResults, "facets"));
+
         FacetsView facetsView = new FacetsView("filters", getSelected(), new PropertyModel<List<FacetEntry>>(this,
                 "facets"));
         facetsView.getListeners().add(this);
@@ -172,13 +150,12 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
         noResults.setVisible(false);
 
         add(new BootstrapPagingNavigator("pagination", searchResultsList));
-        final Component parent = this;
         AjaxLink<Object> submitFilters = new AjaxLink<Object>("submitFilters") {
 
             @Override
             public void onClick(AjaxRequestTarget target) {
-                Map<String, String> queryMap = new HashedMap();
-                target.add(parent);
+                Map<String, String> queryMap = new HashMap<>();
+                target.add(SearchResultsPage.this);
                 for (FacetValue value : getSelected()) {
                     if (queryMap.containsKey(value.getParamName())) {
                         String queryPart = queryMap.get(value.getParamName()) + " OR " + value.getQuery();
@@ -191,109 +168,61 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener {
                 for (String key : queryMap.keySet()) {
                     finalQuery += " AND (" + queryMap.get(key) + ")";
                 }
-                setResponsePage(new SearchResultsPage(finalQuery, getSelected(), getOriginalKeywords(), roSortMode));
+                setResponsePage(new SearchResultsPage(finalQuery, getSelected(), getOriginalKeywords(), sortMap));
             }
         };
         add(submitFilters);
-
-    }
-
-
-    private void initValues(String searchKeywords, final List<FacetValue> selected, final String originalKeywords,
-            ROSortMode sortMode) {
-        savedSelected = new ArrayList<>();
-        if (selected != null) {
-            savedSelected.addAll(selected);
-        }
-
-        if (selected == null) {
-            this.selected = new ArrayList<>();
-        } else {
-            this.selected = selected;
-        }
-        if (originalKeywords == null) {
-            this.originalKeywords = searchKeywords;
-        } else {
-            this.originalKeywords = originalKeywords;
-        }
-        if (sortMode == null) {
-            sortMode = ROSortMode.NAME;
-        }
-        roSortMode = sortMode;
-        this.searchKeywords = searchKeywords;
-
-    }
-
-
-    private void buildFiltersSortLinks() {
         clearFilters = new AjaxLink<Object>("clearFilters") {
 
             @Override
             public void onClick(AjaxRequestTarget target) {
-                setResponsePage(new SearchResultsPage(originalKeywords, null, originalKeywords, roSortMode));
+                setResponsePage(new SearchResultsPage(originalKeywords, null, originalKeywords, sortMap));
             }
         };
         add(clearFilters);
-        sortByName = new AjaxLink<Object>("sortByName") {
+
+        add(buildFiltersSortLinks(sortMap));
+    }
+
+
+    private AbstractRepeater buildFiltersSortLinks(final Map<String, SearchServer.SortOrder> sortMap) {
+        RepeatingView sortView = new RepeatingView("sortListView");
+        if (facetsList != null)
+            for (final FacetEntry facet : facetsList) {
+                if (facet.isSorteable()) {
+                    sortView.add(createSortLink(sortView.newChildId(), sortMap, facet, SortOrder.ASC));
+                    sortView.add(createSortLink(sortView.newChildId(), sortMap, facet, SortOrder.DESC));
+                }
+            }
+
+        return sortView;
+    }
+
+
+    private WebMarkupContainer createSortLink(String id, final Map<String, SearchServer.SortOrder> sortMap,
+            final FacetEntry facet, final SearchServer.SortOrder order) {
+        WebMarkupContainer item = new WebMarkupContainer(id);
+        @SuppressWarnings("serial")
+        AjaxLink<?> link = new AjaxLink<Void>("link") {
 
             @Override
             public void onClick(AjaxRequestTarget target) {
-                setResponsePage(new SearchResultsPage(searchKeywords, savedSelected, originalKeywords, ROSortMode.NAME));
+                // this is to limit the sort to one field only, remove to allow more fields
+                sortMap.clear();
+
+                sortMap.put(facet.getFieldName(), order);
+                setResponsePage(new SearchResultsPage(searchKeywords, savedSelected, originalKeywords, sortMap));
             }
         };
-        add(sortByName);
+        if (sortMap.get(facet.getFieldName()) == order) {
+            link.add(AttributeModifier.replace("class", "selected_filter_label"));
+        }
+        item.add(link);
 
-        sortByNameDesc = new AjaxLink<Object>("sortByNameDesc") {
+        Label nameLabel = new Label("name", facet.getName() + (order == SortOrder.ASC ? " (asc)" : " (desc)"));
+        link.add(nameLabel);
 
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                setResponsePage(new SearchResultsPage(searchKeywords, savedSelected, originalKeywords,
-                        ROSortMode.NAME_DESC));
-            }
-        };
-        add(sortByNameDesc);
-
-        sortBySize = new AjaxLink<Object>("sortBySize") {
-
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                setResponsePage(new SearchResultsPage(searchKeywords, savedSelected, originalKeywords,
-                        ROSortMode.NUMBER_OF_RESOURCES));
-            }
-        };
-        add(sortBySize);
-
-        sortBySizeDesc = new AjaxLink<Object>("sortBySizeDesc") {
-
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                setResponsePage(new SearchResultsPage(searchKeywords, savedSelected, originalKeywords,
-                        ROSortMode.NUMBER_OF_RESOURCES_DESC));
-            }
-        };
-        add(sortBySizeDesc);
-
-        sortByDate = new AjaxLink<Object>("sortByDate") {
-
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                setResponsePage(new SearchResultsPage(searchKeywords, savedSelected, originalKeywords,
-                        ROSortMode.CREATION_DATE));
-            }
-        };
-        add(sortByDate);
-
-        sortByDateDesc = new AjaxLink<Object>("sortByDateDesc") {
-
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                setResponsePage(new SearchResultsPage(searchKeywords, savedSelected, originalKeywords,
-                        ROSortMode.CREATION_DATE_DESC));
-            }
-        };
-        add(sortByDateDesc);
-
-        searchResultsDiv.add(new Label("searchKeywords", originalKeywords));
+        return item;
     }
 
 
