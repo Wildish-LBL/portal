@@ -55,7 +55,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
     public static final int RESULTS_PER_PAGE = 15;
 
     /** Facets to display. */
-    private List<FacetEntry> facetsList;
+    private transient List<FacetEntry> facetsList;
 
     /** The keywords provided by the user. */
     private String searchKeywords;
@@ -65,6 +65,9 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
 
     /** Currently selected sort option. */
     private SortOption sortOption;
+
+    /** Number of results. */
+    private long resultsCount;
 
     /** The component displaying the list of results. */
     IPageable searchResultsList;
@@ -98,6 +101,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
         }
         this.searchKeywords = searchKeywords;
         add(new Label("searchKeywords", searchKeywords));
+        add(new Label("resultsCount", new PropertyModel<>(this, "resultsCount")));
 
         WebMarkupContainer searchResultsDiv = new WebMarkupContainer("searchResultsDiv");
         searchResultsDiv.setOutputMarkupId(true);
@@ -118,17 +122,17 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
             lazySearchResultsList.getListeners().add(this);
             searchResultsList = lazySearchResultsList;
         } else {
-            SearchResult searchResult = null;
+            List<FoundRO> found;
             try {
-                searchResult = searchServer.search(query, null, null, getSortFields());
-                facetsList = searchResult.getFacetsList();
+                SearchResult searchResult = searchServer.search(query, null, null, getSortFields());
+                onSearchResultsAvailable(searchResult);
+                found = searchResult.getROsList();
             } catch (SearchException e) {
                 error(e.getMessage());
                 LOGGER.error("Can't do the search for " + searchKeywords, e);
+                found = new ArrayList<>();
             }
-            searchResultsList = new SimpleSearchResultsView("searchResultsListView", searchResult.getROsList(),
-                    RESULTS_PER_PAGE);
-            add(buildSortLinks());
+            searchResultsList = new SimpleSearchResultsView("searchResultsListView", found, RESULTS_PER_PAGE);
         }
         searchResultsDiv.add((Component) searchResultsList);
         searchResultsDiv.setOutputMarkupId(true);
@@ -203,6 +207,16 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
     }
 
 
+    public long getResultsCount() {
+        return resultsCount;
+    }
+
+
+    public void setResultsCount(long resultsCount) {
+        this.resultsCount = resultsCount;
+    }
+
+
     /**
      * Populate one item with an RO that has been found. Useful for the results view that have a different generation
      * mechanism, but want to share the rendering.
@@ -267,6 +281,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
             facetsList = searchResult.getFacetsList();
             add(buildSortLinks());
         }
+        resultsCount = searchResult.getNumFound();
     }
 
 

@@ -32,6 +32,12 @@ public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
     /** Logger. */
     private static final Logger LOGGER = Logger.getLogger(LazySearchResultsView.class);
 
+    /** search server from which the results are fetched. */
+    private SearchServer searchServer;
+
+    /** query to send to the search server. */
+    private String query;
+
     /** model of the sort fields. */
     private IModel<Map<String, SortOrder>> sortFields;
 
@@ -39,9 +45,10 @@ public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
     private List<SearchResultsListener> listeners = new ArrayList<>();
 
     /** current offset. */
-    private int offset = 0;
-    /** Search results. */
-    SearchResult results;
+    private int offset;
+
+    /** number of all results. */
+    private long resultCount;
 
 
     /**
@@ -61,34 +68,40 @@ public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
     public LazySearchResultsView(String id, SearchServer searchServer, String query, int resultsPerPage,
             PropertyModel<Map<String, SortOrder>> sortFieldsModel) {
         super(id);
+        this.searchServer = searchServer;
+        this.query = query;
         this.sortFields = sortFieldsModel;
-        setItemsPerPage(resultsPerPage);
         try {
-            results = searchServer.search(query, offset, resultsPerPage, sortFields.getObject());
+            SearchResult results = searchServer.search(query, 0, 1, sortFields.getObject());
+            this.resultCount = results.getNumFound();
         } catch (SearchException e) {
-            LOGGER.error("Can't search data", e);
+            LOGGER.error("Can't search the initial data, setting the results count to 50", e);
+            this.resultCount = 50;
         }
+
+        setItemsPerPage(resultsPerPage);
     }
 
 
     @Override
     protected Iterator<IModel<FoundRO>> getItemModels(int offset, int size) {
-        if (results == null) {
+        try {
+            SearchResult results = searchServer.search(query, offset, size, sortFields.getObject());
+            this.offset = offset;
+            for (SearchResultsListener listener : listeners) {
+                listener.onSearchResultsAvailable(results);
+            }
+            return new ModelIterator<>(results.getROsList());
+        } catch (SearchException e) {
+            LOGGER.error("Can't search more data", e);
             return null;
         }
-        this.offset = offset;
-        for (SearchResultsListener listener : listeners) {
-            listener.onSearchResultsAvailable(results);
-        }
-        return new ModelIterator<>(results.getROsList());
-
     }
 
 
     @Override
     protected int internalGetItemCount() {
-        Long l = results.getNumFound();
-        return new Integer(l.toString());
+        return (int) resultCount;
     }
 
 

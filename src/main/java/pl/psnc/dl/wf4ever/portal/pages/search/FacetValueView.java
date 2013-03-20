@@ -12,7 +12,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.FacetValue;
 
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
@@ -78,8 +77,8 @@ public class FacetValueView extends ListView<FacetValue> {
                 }
             }
         };
-        link.add(new Label("label", new PropertyModel<String>(item.getModel(), "label")));
-        link.add(new Label("count", new PropertyModel<String>(item.getModel(), "count")));
+        link.add(new Label("label", facetValue.getLabel()));
+        link.add(new Label("count", "" + facetValue.getCount()));
         item.add(link);
 
         item.setOutputMarkupId(true);

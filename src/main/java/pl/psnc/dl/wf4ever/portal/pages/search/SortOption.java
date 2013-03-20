@@ -1,5 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.pages.search;
 
+import java.io.Serializable;
+
 import org.purl.wf4ever.rosrs.client.search.SearchServer;
 import org.purl.wf4ever.rosrs.client.search.SearchServer.SortOrder;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.solr.FacetEntry;
@@ -10,7 +12,10 @@ import org.purl.wf4ever.rosrs.client.search.dataclasses.solr.FacetEntry;
  * @author piotrekhol
  * 
  */
-public class SortOption {
+public class SortOption implements Serializable {
+
+    /** id. */
+    private static final long serialVersionUID = -7469548685436393112L;
 
     /** Facet to sort by. */
     private final FacetEntry facetEntry;
