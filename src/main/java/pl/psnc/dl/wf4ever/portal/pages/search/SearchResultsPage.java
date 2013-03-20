@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -234,8 +235,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
         link.add(new Label("researchObject.name", new PropertyModel<String>(result, "researchObject.name")));
         item.add(link);
         item.add(new Label("researchObject.title", new PropertyModel<String>(result, "researchObject.title")));
-        //            item.add(new CreatorsPanel("researchObject.creator", new PropertyModel<List<Creator>>(result,
-        //                    "researchObject.creators")));
+        item.add(new Label("creators", StringUtils.join(result.getCreators(), ", ")));
         item.add(new Label("created", DateTimeFormat.shortDate().print(result.getCreated())));
         item.add(new Label("numberOfResources", new PropertyModel<String>(result, "numberOfResources")));
         item.add(new Label("numberOfAnnotations", new PropertyModel<String>(result, "numberOfAnnotations")));
