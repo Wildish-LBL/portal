@@ -37,51 +37,56 @@
 			</div>
 		</div>
 		<div class="span9">
-			<h3>
-				Search results for keywords: <span wicket:id="searchKeywords"></span> (<span wicket:id="resultsCount">Unknown number of</span> results)
-			</h3>
+			<div class="row">
+				<div class="span9">
+					<h3>
+						Search results for keywords: <span wicket:id="searchKeywords"></span>
+						(<span wicket:id="resultsCount">Unknown number of</span> results)
+					</h3>
 
-			<form class="form-horizontal">
-				<div class="control-group">
-					<label class="control-label" for="sort"
-						style="text-align: left; width: auto;">Sort by:</label>
-					<div class="controls"
-						style="display: inline-block; margin-left: 10px;">
-						<select class="span4" id="sort" wicket:id="sortListView">
-						</select>
-					</div>
-				</div>
-			</form>
+					<form class="form-horizontal">
+						<div class="control-group">
+							<label class="control-label" for="sort"
+								style="text-align: left; width: auto;">Sort by:</label>
+							<div class="controls"
+								style="display: inline-block; margin-left: 10px;">
+								<select class="span4" id="sort" wicket:id="sortListView">
+								</select>
+							</div>
+						</div>
+					</form>
 
-			<ol style="margin-right: 40px;" wicket:id="searchResultsDiv">
-				<li wicket:id="searchResultsListView" class="not_numbered_list"><span
-					wicket:id="index" style="margin-right: 15px;"></span> <a
-					wicket:id="link"><span wicket:id="researchObject.name">[uri]</span></a>&nbsp;<span
-					wicket:id="researchObject.title">[title]</span> <br /> <span
-					style="font-size: x-small"> <!-- by <span
+					<ol style="margin-right: 40px;" wicket:id="searchResultsDiv">
+						<li wicket:id="searchResultsListView" class="not_numbered_list"><span
+							wicket:id="index" style="margin-right: 15px;"></span> <a
+							wicket:id="link"><span wicket:id="researchObject.name">[uri]</span></a>&nbsp;<span
+							wicket:id="researchObject.title">[title]</span> <br /> <span
+							style="font-size: x-small"> <!-- by <span
 						wicket:id="researchObject.creator"></span>,  --> Created on: <span
-						wicket:id="created"></span>&nbsp;Resources:
-						<span wicket:id="numberOfResources"></span>&nbsp;Annotations: <span
-						wicket:id="numberOfAnnotations"></span>&nbsp;Status: <span
-						wicket:id="status"></span>
-				</span>
+								wicket:id="created"></span>&nbsp;Resources: <span
+								wicket:id="numberOfResources"></span>&nbsp;Annotations: <span
+								wicket:id="numberOfAnnotations"></span>&nbsp;Status: <span
+								wicket:id="status"></span>
+						</span>
 
-					<div class="searchScore" wicket:id="searchScore">
-						<div>
-							Score: <span wicket:id="scoreInPercent">[score]</span>%
-						</div>
-						<div class="meter">
-							<span wicket:id="percentBar" style="width: 25%"></span>
-						</div>
-					</div> <br />
-					<hr class="listLine" /></li>
-			</ol>
-			<p wicket:id="noResults">No results have been found.</p>
-		</div>
-	</div>
-	<div class="row centered">
-		<div class="span11">
-			<div wicket:id="pagination"></div>
+							<div class="searchScore" wicket:id="searchScore">
+								<div>
+									Score: <span wicket:id="scoreInPercent">[score]</span>%
+								</div>
+								<div class="meter">
+									<span wicket:id="percentBar" style="width: 25%"></span>
+								</div>
+							</div> <br />
+							<hr class="listLine" /></li>
+					</ol>
+					<p wicket:id="noResults">No results have been found.</p>
+				</div>
+			</div>
+			<div class="row ">
+				<div class="span9">
+					<div wicket:id="pagination"></div>
+				</div>
+			</div>
 		</div>
 	</div>
 </wicket:extend>
