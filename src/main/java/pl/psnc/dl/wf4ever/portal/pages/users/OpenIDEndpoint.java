@@ -72,7 +72,7 @@ public class OpenIDEndpoint extends WebPage {
         boolean newAccount = false;
         if (!session.getUms().userExistsInDlibra(user.getOpenId())) {
             try {
-                ClientResponse response = session.getUms().createUser(user.getOpenId(), user.getFullName());
+                ClientResponse response = session.getUms().createOrUpdateUser(user.getOpenId(), user.getFullName());
                 if (response.getStatus() == HttpServletResponse.SC_CREATED) {
                     newAccount = true;
                     getSession().info("New account has been created.");
@@ -89,6 +89,7 @@ public class OpenIDEndpoint extends WebPage {
             }
         }
         try {
+            session.getUms().createOrUpdateUser(user.getOpenId(), user.getFullName());
             String token = session.getUms().createAccessToken(user.getOpenId(), app.getDLibraClientId());
             session.signIn(token);
         } catch (UniformInterfaceException e) {
