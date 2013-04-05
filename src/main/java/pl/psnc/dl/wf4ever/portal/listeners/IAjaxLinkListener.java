@@ -15,7 +15,10 @@ public interface IAjaxLinkListener extends Serializable {
     /**
      * On click event.
      * 
+     * @param source
+     *            the object that was clicked
      * @param target
+     *            the Ajax target related to this event (add to it the components that should be refreshed)
      */
     void onAjaxLinkClicked(Object source, AjaxRequestTarget target);
 }
