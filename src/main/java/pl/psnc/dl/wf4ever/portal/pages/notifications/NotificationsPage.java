@@ -55,7 +55,7 @@ public class NotificationsPage extends Base {
                 (Notification) null);
 
         List<Notification> notifications = null;
-        NotificationService notificationService = new NotificationService(getRodlURI().resolve("notifications/"), null);
+        NotificationService notificationService = new NotificationService(getRodlURI(), null);
         try {
             notifications = notificationService.getNotifications(null, null, null);
         } catch (NotificationsException e) {
