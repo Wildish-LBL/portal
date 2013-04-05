@@ -28,6 +28,7 @@ import pl.psnc.dl.wf4ever.portal.pages.SparqlEndpointPage;
 import pl.psnc.dl.wf4ever.portal.pages.all.AllRosPage;
 import pl.psnc.dl.wf4ever.portal.pages.home.HomePage;
 import pl.psnc.dl.wf4ever.portal.pages.my.MyRosPage;
+import pl.psnc.dl.wf4ever.portal.pages.notifications.NotificationsPage;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
 import pl.psnc.dl.wf4ever.portal.pages.search.SearchResultsPage;
 import pl.psnc.dl.wf4ever.portal.pages.users.AccessTokensPage;
@@ -138,6 +139,7 @@ public class PortalApplication extends AuthenticatedWebApplication {
         mountPage("/generate", GenerateAccessTokenPage.class);
         mountPage("/authorize", OAuthAuthorizationEndpointPage.class);
         mountPage("/search", SearchResultsPage.class);
+        mountPage("/notifications", NotificationsPage.class);
 
         loadProperties("portal.properties");
         loadTokens("tokens.properties");
