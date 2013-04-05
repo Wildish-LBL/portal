@@ -11,7 +11,9 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
+import org.purl.wf4ever.rosrs.client.exception.NotificationsException;
 import org.purl.wf4ever.rosrs.client.notifications.Notification;
+import org.purl.wf4ever.rosrs.client.notifications.NotificationService;
 
 import pl.psnc.dl.wf4ever.portal.listeners.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.base.Base;
@@ -29,7 +31,6 @@ public class NotificationsPage extends Base {
     private static final long serialVersionUID = 1L;
 
     /** Logger. */
-    @SuppressWarnings("unused")
     private static final Logger LOGGER = Logger.getLogger(NotificationsPage.class);
 
 
@@ -53,8 +54,14 @@ public class NotificationsPage extends Base {
         CompoundPropertyModel<Notification> selectedNotification = new CompoundPropertyModel<Notification>(
                 (Notification) null);
 
-        //mock
-        List<Notification> notifications = getMockNotifications();
+        List<Notification> notifications = null;
+        NotificationService notificationService = new NotificationService(getRodlURI().resolve("notifications/"), null);
+        try {
+            notifications = notificationService.getNotifications(null, null, null);
+        } catch (NotificationsException e) {
+            error(e.getMessage());
+            LOGGER.error("Can't load notifications", e);
+        }
 
         NotificationsList notificationsList = new NotificationsList("notificationsList", notifications,
                 selectedNotification);
