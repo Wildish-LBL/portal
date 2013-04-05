@@ -6,13 +6,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.purl.wf4ever.rosrs.client.notifications.Notification;
 
+import pl.psnc.dl.wf4ever.portal.listeners.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.base.Base;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 
@@ -28,7 +29,8 @@ public class NotificationsPage extends Base {
     private static final long serialVersionUID = 1L;
 
     /** Logger. */
-    private static final Logger LOG = Logger.getLogger(NotificationsPage.class);
+    @SuppressWarnings("unused")
+    private static final Logger LOGGER = Logger.getLogger(NotificationsPage.class);
 
 
     /**
@@ -48,11 +50,30 @@ public class NotificationsPage extends Base {
         feedbackPanel.setOutputMarkupId(true);
         add(feedbackPanel);
 
+        CompoundPropertyModel<Notification> selectedNotification = new CompoundPropertyModel<Notification>(
+                (Notification) null);
+
         //mock
         List<Notification> notifications = getMockNotifications();
 
-        ListView<Notification> notificationsList = new NotificationsList("notificationsList", notifications);
+        NotificationsList notificationsList = new NotificationsList("notificationsList", notifications,
+                selectedNotification);
         add(notificationsList);
+        final NotificationPanel notificationPanel = new NotificationPanel("notificationPanel", selectedNotification);
+        notificationPanel.setOutputMarkupId(true);
+        add(notificationPanel);
+
+        notificationsList.getListeners().add(new IAjaxLinkListener() {
+
+            /** id. */
+            private static final long serialVersionUID = 4881609835726044109L;
+
+
+            @Override
+            public void onAjaxLinkClicked(Object source, AjaxRequestTarget target) {
+                target.add(notificationPanel);
+            }
+        });
     }
 
 
