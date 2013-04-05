@@ -1,4 +1,4 @@
-package pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours;
+package pl.psnc.dl.wf4ever.portal.listeners;
 
 import java.io.Serializable;
 

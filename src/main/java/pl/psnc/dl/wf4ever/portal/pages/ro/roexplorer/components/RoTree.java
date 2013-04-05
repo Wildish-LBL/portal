@@ -20,8 +20,8 @@ import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 import org.purl.wf4ever.rosrs.client.Thing;
 
+import pl.psnc.dl.wf4ever.portal.listeners.ITreeListener;
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
-import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.ITreeListener;
 
 /**
  * An extended {@link Tree}.

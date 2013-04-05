@@ -32,10 +32,10 @@ import org.purl.wf4ever.rosrs.client.Statement;
 import org.purl.wf4ever.rosrs.client.Thing;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
+import pl.psnc.dl.wf4ever.portal.listeners.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.ro.components.EditLinkFragment;
 import pl.psnc.dl.wf4ever.portal.pages.ro.components.ExternalLinkFragment;
 import pl.psnc.dl.wf4ever.portal.pages.ro.components.InternalLinkFragment;
-import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.util.CreatorsPanel;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 

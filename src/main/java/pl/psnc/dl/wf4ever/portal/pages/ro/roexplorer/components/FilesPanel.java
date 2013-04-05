@@ -18,7 +18,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.purl.wf4ever.rosrs.client.Resource;
 
-import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
+import pl.psnc.dl.wf4ever.portal.listeners.IAjaxLinkListener;
 
 /**
  * List of files displayed as tails.

@@ -31,10 +31,10 @@ import org.purl.wf4ever.rosrs.client.search.dataclasses.SearchResult;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.solr.FacetEntry;
 
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
+import pl.psnc.dl.wf4ever.portal.listeners.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.base.Base;
 import pl.psnc.dl.wf4ever.portal.pages.base.components.BootstrapPagingNavigator;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
-import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 
 /**

@@ -35,12 +35,12 @@ import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
+import pl.psnc.dl.wf4ever.portal.listeners.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
 import pl.psnc.dl.wf4ever.portal.pages.base.Base;
 import pl.psnc.dl.wf4ever.portal.pages.ro.behaviours.JobStatusUpdatingBehaviour;
 import pl.psnc.dl.wf4ever.portal.pages.ro.behaviours.OnDomReadyAjaxBehaviour;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.ROExplorer;
-import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.ui.components.LoadingCircle;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;

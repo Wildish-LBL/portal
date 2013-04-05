@@ -14,7 +14,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.IModel;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.FacetValue;
 
-import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
+import pl.psnc.dl.wf4ever.portal.listeners.IAjaxLinkListener;
 
 /**
  * A view of options for a facet.

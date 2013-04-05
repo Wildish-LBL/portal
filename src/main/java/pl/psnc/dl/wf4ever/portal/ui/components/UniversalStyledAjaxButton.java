@@ -13,7 +13,7 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.form.Form;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
-import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
+import pl.psnc.dl.wf4ever.portal.listeners.IAjaxLinkListener;
 
 /**
  * A specific {@link AjaxButton} that performs certain JavaScript functions during actions.

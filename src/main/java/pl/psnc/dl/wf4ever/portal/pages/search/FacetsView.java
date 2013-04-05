@@ -13,7 +13,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.FacetValue;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.solr.FacetEntry;
 
-import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.behaviours.IAjaxLinkListener;
+import pl.psnc.dl.wf4ever.portal.listeners.IAjaxLinkListener;
 
 /**
  * A list of facets.
