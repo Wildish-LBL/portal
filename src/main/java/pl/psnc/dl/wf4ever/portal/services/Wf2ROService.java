@@ -3,9 +3,9 @@ package pl.psnc.dl.wf4ever.portal.services;
 import java.io.IOException;
 import java.net.URI;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.http.HttpStatus;
 import org.apache.log4j.Logger;
 import org.purl.wf4ever.rosrs.client.evo.JobStatus;
 import org.purl.wf4ever.rosrs.client.evo.JobStatus.State;
@@ -62,7 +62,7 @@ public final class Wf2ROService {
 
         ClientResponse response = webResource.path("jobs").type(MediaType.APPLICATION_JSON_TYPE)
                 .post(ClientResponse.class, config);
-        if (response.getStatus() != HttpServletResponse.SC_CREATED) {
+        if (response.getStatus() != HttpStatus.SC_CREATED) {
             throw new IOException("Service returned response " + response.toString());
         }
         if (response.getLocation() == null) {

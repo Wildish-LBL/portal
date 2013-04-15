@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
+import org.apache.http.HttpStatus;
 
 import pl.psnc.dl.wf4ever.portal.model.Recommendation;
 import pl.psnc.dl.wf4ever.portal.model.Recommendations;
@@ -51,7 +51,7 @@ public final class RecommenderService {
         WebResource webResource = client.resource(baseURI.toString()).path("recommendation").path("user").path(myExpId)
                 .queryParam("max", "" + limit);
         ClientResponse response = webResource.get(ClientResponse.class);
-        if (response.getStatus() != HttpServletResponse.SC_OK) {
+        if (response.getStatus() != HttpStatus.SC_OK) {
             throw new IOException("Wrong response status: " + response.getClientResponseStatus());
         }
 
