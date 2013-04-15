@@ -2,10 +2,13 @@ package pl.psnc.dl.wf4ever.portal.pages.ro;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.apache.wicket.ajax.AjaxEventBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.form.ChoiceRenderer;
+import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.Radio;
 import org.apache.wicket.markup.html.form.RadioGroup;
@@ -44,6 +47,9 @@ class UploadResourceModal extends Panel {
     /** Type of currently added resource. */
     private ResourceType resourceType = ResourceType.LOCAL;
 
+    /** Resource class. */
+    private ResourceClass resourceClass = null;
+
     /** Resource URI. */
     private URI resourceURI;
 
@@ -64,8 +70,6 @@ class UploadResourceModal extends Panel {
      *            wicket id
      * @param roPage
      *            owning page
-     * @param set
-     *            set of resource groups to choose from
      */
     public UploadResourceModal(String id, final RoPage roPage) {
         super(id);
@@ -87,6 +91,11 @@ class UploadResourceModal extends Panel {
         fileDiv.setOutputMarkupId(true);
         fileDiv.setOutputMarkupPlaceholderTag(true);
         form.add(fileDiv);
+
+        DropDownChoice<ResourceClass> resourceClassDropDown = new DropDownChoice<>("typeList",
+                new PropertyModel<ResourceClass>(this, "resourceClass"), ResourceClass.RESOURCE_CLASSES,
+                new ChoiceRenderer<ResourceClass>("name", "uri"));
+        form.add(resourceClassDropDown);
 
         RadioGroup<ResourceType> radioGroup = new RadioGroup<ResourceType>("radioGroup",
                 new PropertyModel<ResourceType>(this, "resourceType"));
@@ -138,16 +147,16 @@ class UploadResourceModal extends Panel {
                         final FileUpload uploadedFile = fileUpload.getFileUpload();
                         if (uploadedFile != null) {
                             try {
-                                roPage.onResourceAdd(target, uploadedFile);
+                                roPage.onResourceAdd(target, uploadedFile, resourceClass);
                                 target.appendJavaScript("$('#upload-resource-modal').modal('hide')");
-                            } catch (IOException | ROSRSException | ROException e) {
+                            } catch (IOException | ROSRSException | ROException | URISyntaxException e) {
                                 error(e);
                             }
                         }
                         break;
                     case REMOTE:
                         try {
-                            roPage.onRemoteResourceAdded(target, resourceURI);
+                            roPage.onRemoteResourceAdded(target, resourceURI, resourceClass);
                             target.appendJavaScript("$('#upload-resource-modal').modal('hide')");
                         } catch (ROSRSException | ROException e) {
                             error(e);
@@ -210,5 +219,15 @@ class UploadResourceModal extends Panel {
 
     public void setResourceType(ResourceType resourceType) {
         this.resourceType = resourceType;
+    }
+
+
+    public ResourceClass getResourceClass() {
+        return resourceClass;
+    }
+
+
+    public void setResourceClass(ResourceClass resourceClass) {
+        this.resourceClass = resourceClass;
     }
 }

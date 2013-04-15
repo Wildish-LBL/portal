@@ -27,6 +27,7 @@ import org.purl.wf4ever.checklist.client.ChecklistEvaluationService;
 import org.purl.wf4ever.checklist.client.EvaluationResult;
 import org.purl.wf4ever.rosrs.client.Annotation;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
+import org.purl.wf4ever.rosrs.client.Resource;
 import org.purl.wf4ever.rosrs.client.Statement;
 import org.purl.wf4ever.rosrs.client.Thing;
 import org.purl.wf4ever.rosrs.client.evo.JobStatus;
@@ -45,6 +46,9 @@ import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.ui.components.LoadingCircle;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
+import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.sun.jersey.api.client.ClientResponse;
 
 /**
@@ -323,19 +327,35 @@ public class RoPage extends Base {
      *            response target
      * @param uploadedFile
      *            the uploaded file
-     * @param selectedResourceGroups
-     *            resource groups of the file
+     * @param resourceClass
+     *            resource class, if any
      * @throws ROSRSException
      *             unexpected response code
      * @throws IOException
      *             can't get the uploaded file
      * @throws ROException
+     * @throws URISyntaxException
      */
-    void onResourceAdd(AjaxRequestTarget target, final FileUpload uploadedFile)
-            throws ROSRSException, IOException, ROException {
-        researchObject.aggregate(uploadedFile.getClientFileName(), uploadedFile.getInputStream(),
+    void onResourceAdd(AjaxRequestTarget target, final FileUpload uploadedFile, ResourceClass resourceClass)
+            throws ROSRSException, IOException, ROException, URISyntaxException {
+        Resource resource = researchObject.aggregate(uploadedFile.getClientFileName(), uploadedFile.getInputStream(),
             uploadedFile.getContentType());
+        if (resourceClass != null) {
+            OntModel model = ModelFactory.createOntologyModel();
+            Individual ind = model.createIndividual(resource.getUri().toString(),
+                model.createResource(resourceClass.getUri().toString()));
+            Statement stmt = new Statement(ind.listProperties().next(), null);
+            resource.annotate(null, Annotation.wrapAnnotationBody(Arrays.asList(stmt)), "application/rdf+xml");
+        }
         target.add(foldersViewer);
+
+        try {
+            ChecklistEvaluationService service = ((PortalApplication) getApplication()).getChecklistService();
+            qualityEvaluation = service.evaluate(researchObject.getUri(), "ready-to-release");
+            foldersViewer.onQualityEvaluated(target);
+        } catch (Exception e) {
+            feedbackPanel.error("Could not calculate the quality: " + e.getLocalizedMessage());
+        }
     }
 
 
@@ -377,16 +397,16 @@ public class RoPage extends Base {
      *            request target
      * @param resourceURI
      *            remote resource URI
+     * @param resourceClass
      * @throws ROSRSException
      *             aggregating the resource caused unexpected response
      * @throws ROException
      */
-    public void onRemoteResourceAdded(AjaxRequestTarget target, URI resourceURI)
+    public void onRemoteResourceAdded(AjaxRequestTarget target, URI resourceURI, ResourceClass resourceClass)
             throws ROSRSException, ROException {
         URI absoluteResourceURI = researchObject.getUri().resolve(resourceURI);
         researchObject.aggregate(absoluteResourceURI);
         target.add(foldersViewer);
-
     }
 
 
