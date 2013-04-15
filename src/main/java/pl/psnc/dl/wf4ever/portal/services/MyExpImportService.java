@@ -550,8 +550,6 @@ public final class MyExpImportService {
             } else if (res instanceof File) {
                 annTargetURI = researchObjectURI.resolve(((File) res).getFilenameURI());
             } else {
-                LOG.warn("Cannot annotate workflow because its URI is unknown");
-                errors.add(String.format("Cannot annotate workflow %s because its URI is unknown", res.getUri()));
                 incrementStepsComplete();
                 return;
             }
