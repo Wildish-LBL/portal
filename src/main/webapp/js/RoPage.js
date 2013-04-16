@@ -39,8 +39,8 @@ function showStmtEdit(content) {
 	$('#objectValue').wysiwyg({
 		css : 'css/bootstrap.min.css'
 	}).wysiwyg('setContent', content);
-	$('#propertyURI').onchange = checkStmtPropertyType;
-	$('#objectType').onclick = checkStmtEditType;
+	$('#propertyURI').on("change", checkStmtPropertyType);
+	$('#objectType').on("click", checkStmtEditType);
 	checkStmtPropertyType();
 	checkStmtEditType();
 }
@@ -48,20 +48,20 @@ function showStmtEdit(content) {
 function checkStmtEditType() {
 	var type = document.getElementById('objectType');
 	if (type.checked) {
-		$('#objectValueDiv').style.display = "none";
-		$('#objectURIDiv').style.display = "";
+		$('#objectValueDiv').css("display", "none");
+		$('#objectURIDiv').css("display", "");
 	} else {
-		$('#objectValueDiv').style.display = "";
-		$('#objectURIDiv').style.display = "none";
+		$('#objectValueDiv').css("display", "");
+		$('#objectURIDiv').css("display", "none");
 	}
 }
 
 function checkStmtPropertyType() {
 	var type = document.getElementById('propertyURI');
 	if (type.value == "") {
-		$('#customPropertyURIDiv').style.display = "";
+		$('#customPropertyURIDiv').css("display", "");
 	} else {
-		$('#customPropertyURIDiv').style.display = "none";
+		$('#customPropertyURIDiv').css("display", "none");
 		$('#customPropertyURI').value = "";
 	}
 }
@@ -75,9 +75,9 @@ function showRelEdit() {
 function checkStmtRelationType() {
 	var type = document.getElementById('relationURI');
 	if (type.value == "") {
-		$('#customRelationURIDiv').style.display = "";
+		$('#customRelationURIDiv').css("display", "");
 	} else {
-		$('#customRelationURIDiv').style.display = "none";
+		$('#customRelationURIDiv').css("display", "none");
 		$('#customRelationURI').value = "";
 	}
 }
