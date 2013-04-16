@@ -25,6 +25,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.purl.wf4ever.checklist.client.ChecklistEvaluationService;
 import org.purl.wf4ever.checklist.client.EvaluationResult;
+import org.purl.wf4ever.rosrs.client.Annotable;
 import org.purl.wf4ever.rosrs.client.Annotation;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.Resource;
@@ -425,7 +426,8 @@ public class RoPage extends Base {
     void onStatementAdd(List<Statement> statements)
             throws URISyntaxException, ROSRSException, ROException {
         InputStream in = Annotation.wrapAnnotationBody(statements);
-        researchObject.annotate(".ro/" + UUID.randomUUID().toString(), in, RDFFormat.RDFXML.getDefaultMIMEType());
+        ((Annotable) itemModel.getObject()).annotate(".ro/" + UUID.randomUUID().toString(), in,
+            RDFFormat.RDFXML.getDefaultMIMEType());
     }
 
 
