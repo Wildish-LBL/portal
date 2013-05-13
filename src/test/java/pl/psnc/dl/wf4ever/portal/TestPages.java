@@ -1,11 +1,8 @@
 package pl.psnc.dl.wf4ever.portal;
 
-import java.net.URISyntaxException;
-
 import org.apache.wicket.util.tester.WicketTester;
 import org.junit.Before;
 import org.junit.Test;
-import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
 import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
@@ -35,46 +32,71 @@ public class TestPages {
 
     /**
      * Tests if the page loads.
-     * 
-     * @throws URISyntaxException
-     *             RO list returned by RODL is incorrect
-     * @throws ROSRSException
-     *             the list of ROs could not be fetched from ROSRS
      */
     @Test
-    public void homepageRendersSuccessfully()
-            throws URISyntaxException, ROSRSException {
-        //start and render the test page
+    public void homepageRendersSuccessfully() {
         tester.startPage(HomePage.class);
         //assert rendered page class
         tester.assertRenderedPage(HomePage.class);
+    }
 
+
+    /**
+     * Tests if the page loads.
+     */
+    @Test
+    public void allROsRendersSuccessfully() {
         tester.startPage(AllRosPage.class);
         tester.assertRenderedPage(AllRosPage.class);
+    }
 
+
+    /**
+     * Tests if the page loads.
+     */
+    @Test
+    public void sparqlEndpointRendersSuccessfully() {
         tester.startPage(SparqlEndpointPage.class);
         tester.assertRenderedPage(SparqlEndpointPage.class);
+    }
 
+
+    /**
+     * Tests if the page loads.
+     */
+    @Test
+    public void authenticationPageRendersSuccessfully() {
         tester.startPage(AuthenticationPage.class);
         tester.assertRenderedPage(AuthenticationPage.class);
+    }
 
+
+    /**
+     * Tests if the page loads.
+     */
+    @Test
+    public void errorPageRendersSuccessfully() {
         tester.startPage(ErrorPage.class);
         tester.assertRenderedPage(ErrorPage.class);
+    }
 
+
+    /**
+     * Tests if the page loads.
+     */
+    @Test
+    public void contactPageRendersSuccessfully() {
         tester.startPage(ContactPage.class);
         tester.assertRenderedPage(ContactPage.class);
+    }
 
+
+    /**
+     * Tests if the page loads.
+     */
+    @Test
+    public void helpRendersSuccessfully() {
         tester.startPage(HelpPage.class);
         tester.assertRenderedPage(HelpPage.class);
-        //
-        //        ROSRService rosrs = new ROSRService(((PortalApplication) tester.getApplication()).getRodlURI(), null);
-        //        List<URI> ros = rosrs.getROList(true);
-        //        if (!ros.isEmpty()) {
-        //            URI ro = ros.get(0);
-        //            PageParameters parameters = new PageParameters();
-        //            parameters.add("ro", ro);
-        //            tester.startPage(RoPage.class, parameters);
-        //            tester.assertRenderedPage(RoPage.class);
-        //        }
     }
 }
