@@ -151,6 +151,7 @@ public class PortalApplication extends AuthenticatedWebApplication {
         searchServer = createSearchServer();
 
         rssService = new RSSService(this.getServletContext().getRealPath("/"), sparqlEndpoint, rodlURI);
+        rssService.start();
 
         Locale.setDefault(Locale.ENGLISH);
     }
