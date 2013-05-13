@@ -51,6 +51,10 @@
 			<id>dlibra-snapshots</id>
 			<url>http://maven.man.poznan.pl/repository/dlibra-libs-snapshots-public/</url>
 		</repository>
+		<repository>
+			<id>psnc</id>
+			<url>http://maven.man.poznan.pl/repository/repo/</url>
+		</repository>
 	</repositories>
 	<dependencies>
 		<dependency>
