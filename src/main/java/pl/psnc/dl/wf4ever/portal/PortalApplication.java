@@ -110,6 +110,9 @@ public class PortalApplication extends AuthenticatedWebApplication {
     /** Service for performing searches in RODL. */
     private SearchServer searchServer;
 
+    /** Service for generating RSS feeds. */
+    private RSSService rssService;
+
 
     @Override
     public Class<? extends WebPage> getHomePage() {
@@ -147,7 +150,7 @@ public class PortalApplication extends AuthenticatedWebApplication {
 
         searchServer = createSearchServer();
 
-        RSSService.start(null, sparqlEndpoint, rodlURI);
+        rssService = new RSSService(this.getServletContext().getRealPath("/"), sparqlEndpoint, rodlURI);
 
         Locale.setDefault(Locale.ENGLISH);
     }

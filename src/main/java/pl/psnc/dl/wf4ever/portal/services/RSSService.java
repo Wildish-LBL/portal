@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.apache.wicket.protocol.http.WebApplication;
 import org.purl.wf4ever.rosrs.client.Creator;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
@@ -32,7 +31,7 @@ import com.sun.syndication.io.SyndFeedOutput;
  * @author piotrekhol
  * 
  */
-public final class RSSService {
+public class RSSService {
 
     /** Logger. */
     private static final Logger LOG = Logger.getLogger(RSSService.class);
@@ -44,39 +43,38 @@ public final class RSSService {
     public static final long USER_RESOLUTION_INTERVAL = 60 * 1000;
 
     /** The background thread. */
-    private static final UpdatingThread UPDATING_THREAD = new UpdatingThread();
+    private final UpdatingThread updatingThread = new UpdatingThread();
 
     /** File name of recent ROs feed. */
     public static final String RECENT_ROS_FILENAME = "feed.xml";
 
 
     /**
-     * Private constructor.
+     * Constructor.
+     * 
+     * @param basePath
+     *            application path
+     * @param sparqlEndpoint
+     *            SPARQL endpoint URI
+     * @param rodl
+     *            RODL URI, for creator resolution
      */
-    private RSSService() {
-        // nope
+    public RSSService(String basePath, URI sparqlEndpoint, URI rodl) {
+        updatingThread.setSparqlEndpoint(sparqlEndpoint);
+        updatingThread.setRodl(rodl);
+        updatingThread.setBasePath(basePath);
     }
 
 
     /**
      * Starts the background feed updating thread. Can be called only once.
      * 
-     * @param application
-     *            application URI
-     * @param sparqlEndpoint
-     *            SPARQL endpoint URI
-     * @param rodl
-     *            RODL URI, for creator resolution
      */
-    public static void start(URI application, URI sparqlEndpoint, URI rodl) {
-        if (UPDATING_THREAD.isAlive()) {
+    public void start() {
+        if (updatingThread.isAlive()) {
             throw new IllegalStateException("RSS updating thread has already been started");
         }
-        UPDATING_THREAD.setApplication(application);
-        UPDATING_THREAD.setSparqlEndpoint(sparqlEndpoint);
-        UPDATING_THREAD.setRodl(rodl);
-        UPDATING_THREAD.setBasePath(WebApplication.get().getServletContext().getRealPath("/"));
-        UPDATING_THREAD.start();
+        updatingThread.start();
     }
 
 
@@ -87,9 +85,6 @@ public final class RSSService {
      * 
      */
     private static class UpdatingThread extends Thread {
-
-        /** Application URI. */
-        private URI application;
 
         /** SPARQL endpoint. */
         private URI sparqlEndpoint;
@@ -148,9 +143,6 @@ public final class RSSService {
             feed.setFeedType("atom_1.0");
             feed.setTitle("5 most recent Research Objects in RODL");
             feed.setPublishedDate(new Date());
-            if (getApplication() != null) {
-                feed.setLink(getApplication().resolve(RECENT_ROS_FILENAME).toString());
-            }
 
             for (ResearchObject ro : ros) {
                 SyndEntry entry = new SyndEntryImpl();
@@ -199,16 +191,6 @@ public final class RSSService {
             output.output(feed, writer);
             writer.close();
             LOG.info("Saved recent ROs feed under: " + basePath + "/" + filename);
-        }
-
-
-        public URI getApplication() {
-            return application;
-        }
-
-
-        public void setApplication(URI application) {
-            this.application = application;
         }
 
 
