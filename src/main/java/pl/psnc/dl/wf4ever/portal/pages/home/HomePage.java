@@ -94,8 +94,8 @@ public class HomePage extends Base {
         add(feedbackPanel);
 
         ResultSet results;
-        List<ResearchObject> roHeaders = RODLUtilities.getMostRecentROs(
-            ((PortalApplication) getApplication()).getSparqlEndpointURI(), rodlURI, MySession.get().getUsernames(), 10);
+        List<ResearchObject> roHeaders = RODLUtilities.getMostRecentROs(((PortalApplication) getApplication())
+                .getSparqlEndpointURI(), rodlURI, MySession.get().getUms(), MySession.get().getUsernames(), 10);
 
         results = QueryExecutionFactory.sparqlService(
             ((PortalApplication) getApplication()).getSparqlEndpointURI().toString(),

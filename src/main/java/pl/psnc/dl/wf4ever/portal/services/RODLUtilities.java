@@ -15,8 +15,6 @@ import org.purl.wf4ever.rosrs.client.Creator;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.users.UserManagementService;
 
-import pl.psnc.dl.wf4ever.portal.MySession;
-
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -47,6 +45,8 @@ public final class RODLUtilities {
     /**
      * Get most recent Research Objects.
      * 
+     * @param ums
+     *            user management service
      * @param cnt
      *            number of ROs to get
      * @param sparqlEndpoint
@@ -59,14 +59,13 @@ public final class RODLUtilities {
      * @throws IOException
      *             when cannot connect to SPARQL endpoint
      */
-    public static List<ResearchObject> getMostRecentROs(URI sparqlEndpoint, URI rodlURI, Map<URI, Creator> usernames,
-            int cnt)
+    public static List<ResearchObject> getMostRecentROs(URI sparqlEndpoint, URI rodlURI, UserManagementService ums,
+            Map<URI, Creator> usernames, int cnt)
             throws IOException {
         QueryExecution x = QueryExecutionFactory.sparqlService(sparqlEndpoint.toString(),
             MyQueryFactory.getxMostRecentROs(cnt));
         ResultSet results = x.execSelect();
         List<ResearchObject> roHeaders = new ArrayList<>();
-        UserManagementService ums = MySession.get().getUms();
         while (results.hasNext()) {
             QuerySolution solution = results.next();
             if (solution.getResource("ro") == null) {
