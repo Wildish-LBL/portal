@@ -46,9 +46,18 @@ import pl.psnc.dl.wf4ever.portal.services.RSSService;
  */
 public class PortalApplication extends AuthenticatedWebApplication {
 
+    /**
+     * Search backend type.
+     * 
+     * @author piotrekhol
+     * 
+     */
     public enum SearchType {
+        /** OpenSearch, i.e. dLibra. */
         OPENSEARCH,
+        /** SPARQL endpoint. */
         SPARQL,
+        /** A Solr server. */
         SOLR
     }
 
@@ -157,6 +166,11 @@ public class PortalApplication extends AuthenticatedWebApplication {
     }
 
 
+    /**
+     * Initialize a search service client depending on the field {@link SearchType}.
+     * 
+     * @return opensearch, sparql or Solr endpoint, default is Solr
+     */
     private SearchServer createSearchServer() {
         switch (searchType) {
             case OPENSEARCH:
@@ -198,7 +212,11 @@ public class PortalApplication extends AuthenticatedWebApplication {
             version = props.getProperty("application.version");
             URI checklistUri = new URI(props.getProperty("checklist.uri"));
             URI minimUri = new URI(props.getProperty("checklist.minim.uri"));
-            checklistService = new ChecklistEvaluationService(checklistUri, minimUri);
+            try {
+                checklistService = new ChecklistEvaluationService(checklistUri, minimUri);
+            } catch (Exception e) {
+                LOG.error("Failed to initialize the checklist service", e);
+            }
             String type = props.getProperty("search.type");
             searchType = SearchType.valueOf(type.trim().toUpperCase());
             if (searchType == null) {
