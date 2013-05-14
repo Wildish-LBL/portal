@@ -54,10 +54,12 @@ public class NotificationsPage extends Base {
         CompoundPropertyModel<Notification> selectedNotification = new CompoundPropertyModel<Notification>(
                 (Notification) null);
 
+        URI researchObjectUri = parameters.get("ro").isNull() ? null : URI.create(parameters.get("ro").toString());
+
         List<Notification> notifications = null;
         NotificationService notificationService = new NotificationService(getRodlURI(), null);
         try {
-            notifications = notificationService.getNotifications(null, null, null);
+            notifications = notificationService.getNotifications(researchObjectUri, null, null);
         } catch (NotificationsException e) {
             error(e.getMessage());
             LOGGER.error("Can't load notifications", e);

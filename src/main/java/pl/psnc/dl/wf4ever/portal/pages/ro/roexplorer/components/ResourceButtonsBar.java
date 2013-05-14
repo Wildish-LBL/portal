@@ -24,8 +24,8 @@ import pl.psnc.dl.wf4ever.portal.ui.components.UniversalStyledAjaxButton;
 public class ResourceButtonsBar extends Panel {
 
     /** Logger. */
-    private static final Logger LOG = Logger.getLogger(ResourceStatusBar.class);
-    /** Serialziation. */
+    private static final Logger LOG = Logger.getLogger(ResourceButtonsBar.class);
+    /** Serialization. */
     private static final long serialVersionUID = 1L;
     /** Folder buttons container. */
     WebMarkupContainer folderButtonsContainer;

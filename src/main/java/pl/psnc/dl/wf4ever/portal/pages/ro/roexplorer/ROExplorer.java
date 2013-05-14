@@ -25,12 +25,14 @@ import org.purl.wf4ever.rosrs.client.Resource;
 import org.purl.wf4ever.rosrs.client.Thing;
 import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
+import org.purl.wf4ever.rosrs.client.notifications.Notification;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.listeners.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.listeners.ITreeListener;
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.FilesPanel;
+import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.NotificationsPanel;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.QualityBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ROButtonsBar;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ROStatusBar;
@@ -52,10 +54,11 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
 
     /** Logger. */
     private static final Logger LOG = Logger.getLogger(ROExplorer.class);
+
     /** Makes wicket happy. */
     private static final long serialVersionUID = 1L;
 
-    /** Failes panel. */
+    /** Files panel. */
     private FilesPanel filesPanel;
     /** Tree component. */
     private RoTree roTree;
@@ -85,6 +88,8 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
     private EvaluationResult qualityEvaluationResult;
     private QualityBar qualityPanel;
 
+    private NotificationsPanel notificationsIndicator;
+
 
     /**
      * Constructor.
@@ -98,7 +103,7 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
      * @param qualityModel
      */
     public ROExplorer(String id, ResearchObject researchObject, IModel<Thing> itemModel,
-            IModel<EvaluationResult> qualityModel) {
+            IModel<EvaluationResult> qualityModel, IModel<List<Notification>> notificationsModel) {
         // Last clicked item (file or Folder). 
         super(id, itemModel);
         //setting variables
@@ -114,6 +119,10 @@ public class ROExplorer extends Panel implements ITreeStateListener, ITreeListen
                 new PropertyModel<Thing>(this, "currentlySelectedItem")));
         add(itemInfoPanel);
         buttonsBar = new ResourceButtonsBar("buttons-panel");
+        buttonsBar.setVisible(false);
+        add(buttonsBar);
+        notificationsIndicator = new NotificationsPanel("notifications", researchObject, notificationsModel);
+        add(notificationsIndicator);
         buttonsBar.setVisible(false);
         add(buttonsBar);
         roStatusBar = new ROStatusBar("research-object-info-panel", new CompoundPropertyModel<Thing>(

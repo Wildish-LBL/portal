@@ -32,8 +32,11 @@ import org.purl.wf4ever.rosrs.client.Resource;
 import org.purl.wf4ever.rosrs.client.Statement;
 import org.purl.wf4ever.rosrs.client.Thing;
 import org.purl.wf4ever.rosrs.client.evo.JobStatus;
+import org.purl.wf4ever.rosrs.client.exception.NotificationsException;
 import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
+import org.purl.wf4ever.rosrs.client.notifications.Notification;
+import org.purl.wf4ever.rosrs.client.notifications.NotificationService;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
@@ -108,6 +111,9 @@ public class RoPage extends Base {
 
     /** Selected resource model. */
     private CompoundPropertyModel<Thing> itemModel;
+
+    /** Notifications about this RO. */
+    private List<Notification> notifications;
 
     /** Loading information. */
     private static final String LOADING_OBJECT = "Loading Research Object metadata.<br />Please wait...";
@@ -202,8 +208,16 @@ public class RoPage extends Base {
             }
         });
 
+        NotificationService notificationService = new NotificationService(getRodlURI(), null);
+        try {
+            notifications = notificationService.getNotifications(researchObject.getUri(), null, null);
+        } catch (NotificationsException e) {
+            LOG.error("Can't load notifications", e);
+            error("Can't load notifications: " + e.getMessage());
+        }
         foldersViewer = new ROExplorer("folders-viewer", researchObject, itemModel,
-                new PropertyModel<EvaluationResult>(this, "qualityEvaluation"));
+                new PropertyModel<EvaluationResult>(this, "qualityEvaluation"), new PropertyModel<List<Notification>>(
+                        this, "notifications"));
         foldersViewer.setOutputMarkupId(true);
         foldersViewer.getSnapshotButton().addLinkListener(new IAjaxLinkListener() {
 
@@ -318,6 +332,11 @@ public class RoPage extends Base {
 
     public void setQualityEvaluation(EvaluationResult qualityEvaluation) {
         this.qualityEvaluation = qualityEvaluation;
+    }
+
+
+    public List<Notification> getNotifications() {
+        return notifications;
     }
 
 
