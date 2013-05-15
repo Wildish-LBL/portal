@@ -5,6 +5,7 @@
 			<div class="inspan12">
 				<ul class="breadcrumb">
 					<li><a href="home">Home</a></li>
+					<li><a href="#">Notifications</a></li>
 				</ul>
 			</div>
 		</div>
@@ -14,26 +15,7 @@
 	</div>
 	<div class="row">
 		<div class="span6">
-			<table class="table table-striped">
-				<thead>
-					<tr>
-						<th>Notifications</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr wicket:id="notificationsList">
-						<td><div style="float: left">
-								<p wicket:id="source" class="muted"></p>
-							</div>
-							<div style="float: right">
-								<p wicket:id="published" class="text-info"></p>
-							</div>
-							<div style="clear: both">
-								<p wicket:id="title"></p>
-							</div></td>
-					</tr>
-				</tbody>
-			</table>
+			<div wicket:id="notificationsList"></div>
 		</div>
 		<div wicket:id="notificationPanel" class="span6"></div>
 	</div>

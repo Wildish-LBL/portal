@@ -1,0 +1,33 @@
+.notificationHeader {
+	cursor: pointer;
+}
+
+.notificationHeader .source {
+	float: left;
+	color: #999999;
+}
+
+.notificationHeader .published {
+	float: right;
+	color: #3A87AD;
+}
+
+.notificationHeader .title {
+	clear: both
+}
+
+.selected .notificationHeader {
+	background-color: #3A87AD !important;
+}
+
+.selected .notificationHeader .source {
+	color: white;
+}
+
+.selected .notificationHeader .published {
+	color: white;
+}
+
+.selected .notificationHeader .title {
+	color: white;
+}
