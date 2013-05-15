@@ -32,6 +32,7 @@ import pl.psnc.dl.wf4ever.portal.ui.components.UniversalStyledAjaxButton;
 public class NotificationsPanel extends Panel implements IAjaxLinkListener {
 
     /** Logger. */
+    @SuppressWarnings("unused")
     private static final Logger LOG = Logger.getLogger(NotificationsPanel.class);
 
     /** id. */
@@ -49,8 +50,6 @@ public class NotificationsPanel extends Panel implements IAjaxLinkListener {
         TODAY,
         /** The latest notification has been generated in the previous 7 days. */
         THIS_WEEK,
-        /** The latest notification has been generated in the previous 30 days. */
-        THIS_MONTH,
         /** No notifications in the previous 30 days. */
         DEFAULT
     }
@@ -101,9 +100,6 @@ public class NotificationsPanel extends Panel implements IAjaxLinkListener {
                     case THIS_WEEK:
                         tag.append("class", "btn-warning", " ");
                         break;
-                    case THIS_MONTH:
-                        tag.append("class", "btn-success", " ");
-                        break;
                     default:
                         break;
                 }
@@ -132,8 +128,6 @@ public class NotificationsPanel extends Panel implements IAjaxLinkListener {
                 recentStatus = RecentStatus.TODAY;
             } else if (now.minusDays(7).isBefore(latest)) {
                 recentStatus = RecentStatus.THIS_WEEK;
-            } else if (now.minusDays(30).isBefore(latest)) {
-                recentStatus = RecentStatus.THIS_MONTH;
             } else {
                 recentStatus = RecentStatus.DEFAULT;
             }
