@@ -1,9 +1,10 @@
 <?xml version="1.0"?>
 <wicket:panel xmlns:wicket="http://wicket.apache.org">
+<script type="text/javascript">$(document).ready(function() {$('#notificationIndicator').tooltip()})</script>
 	<form class="form-stacked" wicket:id="form" style="margin-bottom: auto">
 		<div class="btn-toolbar padded" style="vertical-align: center;">
 			<div class="btn-group">
-				<button class="btn" type="submit" wicket:id="button">
+				<button class="btn" type="submit" wicket:id="button" id="notificationIndicator" data-toggle="tooltip" data-container="body">
 					<i class="icon-envelope"></i> <span wicket:id="text">0</span>
 				</button>
 			</div>

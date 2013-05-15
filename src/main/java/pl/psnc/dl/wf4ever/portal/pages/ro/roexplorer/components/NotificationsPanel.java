@@ -12,8 +12,10 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.notifications.Notification;
 
@@ -60,6 +62,8 @@ public class NotificationsPanel extends Panel implements IAjaxLinkListener {
 
     private ResearchObject researchObject;
 
+    private DateTime latest;
+
 
     /**
      * Constructor.
@@ -70,32 +74,17 @@ public class NotificationsPanel extends Panel implements IAjaxLinkListener {
      *            research object for this indicator
      */
     public NotificationsPanel(String id, ResearchObject researchObject, IModel<List<Notification>> notificationsModel) {
-        super(id);
+        super(id, notificationsModel);
         this.researchObject = researchObject;
-        List<Notification> notifications = notificationsModel.getObject();
         Form<Void> form = new Form<Void>("form");
         add(form);
-        if (!notifications.isEmpty()) {
-            DateTime latest = notifications.get(notifications.size() - 1).getPublished();
-            DateTime now = DateTime.now();
-            if (now.minusHours(24).isAfter(latest)) {
-                recentStatus = RecentStatus.TODAY;
-            } else if (now.minusDays(7).isAfter(latest)) {
-                recentStatus = RecentStatus.THIS_WEEK;
-            } else if (now.minusDays(30).isAfter(latest)) {
-                recentStatus = RecentStatus.THIS_MONTH;
-            } else {
-                recentStatus = RecentStatus.DEFAULT;
-            }
-        }
         button = new UniversalStyledAjaxButton("button", null) {
 
             /** id. */
             private static final long serialVersionUID = -7013354628009246474L;
         };
-        button.add(new Label("text", "" + notifications.size()));
+        button.add(new Label("text", new PropertyModel<>(notificationsModel, "size")));
         button.addLinkListener(this);
-        button.setEnabled(!notifications.isEmpty());
         button.add(new Behavior() {
 
             /** id. */
@@ -121,9 +110,36 @@ public class NotificationsPanel extends Panel implements IAjaxLinkListener {
                 if (!component.isEnabled()) {
                     tag.append("class", "disabled", " ");
                 }
+                if (latest != null) {
+                    tag.append("title", "Last message: " + DateTimeFormat.shortDateTime().print(latest), " ");
+                } else {
+                    tag.append("title", "There are no messages", " ");
+                }
             }
         });
         form.add(button);
+    }
+
+
+    @Override
+    protected void onConfigure() {
+        @SuppressWarnings("unchecked")
+        List<Notification> notifications = (List<Notification>) getDefaultModelObject();
+        if (!notifications.isEmpty()) {
+            latest = notifications.get(notifications.size() - 1).getPublished();
+            DateTime now = DateTime.now();
+            if (now.minusHours(24).isBefore(latest)) {
+                recentStatus = RecentStatus.TODAY;
+            } else if (now.minusDays(7).isBefore(latest)) {
+                recentStatus = RecentStatus.THIS_WEEK;
+            } else if (now.minusDays(30).isBefore(latest)) {
+                recentStatus = RecentStatus.THIS_MONTH;
+            } else {
+                recentStatus = RecentStatus.DEFAULT;
+            }
+        }
+        button.setEnabled(!notifications.isEmpty());
+        super.onConfigure();
     }
 
 
