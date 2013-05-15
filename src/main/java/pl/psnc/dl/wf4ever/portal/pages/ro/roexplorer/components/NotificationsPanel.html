@@ -1,12 +1,22 @@
 <?xml version="1.0"?>
 <wicket:panel xmlns:wicket="http://wicket.apache.org">
-<script type="text/javascript">$(document).ready(function() {$('#notificationIndicator').tooltip()})</script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$('#notificationIndicator').tooltip()
+		})
+	</script>
 	<form class="form-stacked" wicket:id="form" style="margin-bottom: auto">
-		<div class="btn-toolbar padded" style="vertical-align: center;">
-			<div class="btn-group">
-				<button class="btn" type="submit" wicket:id="button" id="notificationIndicator" data-toggle="tooltip" data-container="body">
+		<div class="btn-toolbar padded">
+			<div class="btn-group" style="float: left">
+				<button class="btn" type="submit" wicket:id="button"
+					id="notificationIndicator" data-toggle="tooltip"
+					data-container="body">
 					<i class="icon-envelope"></i> <span wicket:id="text">0</span>
 				</button>
+			</div>
+			<div>
+				<a wicket:id="rss"><img alt="atom10" src="images/atom-icon.svg"
+					style="height: 30px; margin-left: 20px;" /></a>
 			</div>
 		</div>
 	</form>

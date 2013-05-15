@@ -10,15 +10,19 @@ import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.notifications.Notification;
+import org.purl.wf4ever.rosrs.client.notifications.NotificationService;
 
+import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.listeners.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.notifications.NotificationsPage;
 import pl.psnc.dl.wf4ever.portal.ui.components.UniversalStyledAjaxButton;
@@ -114,6 +118,10 @@ public class NotificationsPanel extends Panel implements IAjaxLinkListener {
             }
         });
         form.add(button);
+        NotificationService notificationService = new NotificationService(
+                ((PortalApplication) WebApplication.get()).getRodlURI(), null);
+        form.add(new ExternalLink("rss", notificationService.getNotificationsUri(researchObject.getUri(), null, null)
+                .toString()));
     }
 
 
