@@ -28,15 +28,28 @@ public class NotificationPanel extends Panel {
         /** id. */
         private static final long serialVersionUID = -8334879852621791873L;
 
-        private transient DateTimeFormatter fullDateFormatter = new DateTimeFormatterBuilder().appendMonthOfYearText()
-                .appendLiteral(' ').appendDayOfMonth(1).appendLiteral(", ").appendYear(4, 4).appendLiteral(" ")
-                .appendHourOfDay(2).appendLiteral(":").appendMinuteOfHour(2).toFormatter();
+        private transient DateTimeFormatter fullDateFormatter = buildDateTimeFormatter();
+
+
+        protected DateTimeFormatter buildDateTimeFormatter() {
+            return new DateTimeFormatterBuilder().appendMonthOfYearText().appendLiteral(' ').appendDayOfMonth(1)
+                    .appendLiteral(", ").appendYear(4, 4).appendLiteral(" ").appendHourOfDay(2).appendLiteral(":")
+                    .appendMinuteOfHour(2).toFormatter();
+        }
+
+
+        protected DateTimeFormatter getDateTimeFormatter() {
+            if (fullDateFormatter == null) {
+                fullDateFormatter = buildDateTimeFormatter();
+            }
+            return fullDateFormatter;
+        }
 
 
         @Override
         public String getObject() {
             Notification notification = (Notification) getDefaultModelObject();
-            return notification != null ? fullDateFormatter.print(notification.getPublished()) : null;
+            return notification != null ? getDateTimeFormatter().print(notification.getPublished()) : null;
         }
 
     }
