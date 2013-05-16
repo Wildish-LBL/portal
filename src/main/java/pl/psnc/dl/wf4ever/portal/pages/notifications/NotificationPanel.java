@@ -18,7 +18,7 @@ public class NotificationPanel extends Panel {
         super(id, model);
         add(new Label("title"));
         add(new Label("published", new PublishedDateModel()));
-        add(new Label("source"));
+        add(new Label("sourceName"));
         add(new Label("content").setEscapeModelStrings(false));
     }
 

@@ -68,7 +68,7 @@ final class NotificationsList extends Panel {
         protected void populateItem(final ListItem<Notification> item) {
             item.add(new Label("title"));
             item.add(new Label("published", formatDateTime(item.getModelObject().getPublished())));
-            item.add(new Label("source"));
+            item.add(new Label("sourceName"));
             item.add(new AjaxEventBehavior("onclick") {
 
                 /** id. */
