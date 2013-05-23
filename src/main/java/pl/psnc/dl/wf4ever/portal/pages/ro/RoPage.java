@@ -202,6 +202,7 @@ public class RoPage extends Base {
                     qualityEvaluation = service.evaluate(researchObject.getUri(), "ready-to-release");
                     foldersViewer.onQualityEvaluated(target);
                 } catch (Exception e) {
+                    LOG.error("Could not calculate the quality", e);
                     feedbackPanel.error("Could not calculate the quality: " + e.getLocalizedMessage());
                 }
                 super.respond(target);
