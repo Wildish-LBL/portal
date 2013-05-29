@@ -40,14 +40,14 @@ import org.purl.wf4ever.rosrs.client.notifications.NotificationService;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
+import pl.psnc.dl.wf4ever.portal.components.LoadingCircle;
+import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.listeners.IAjaxLinkListener;
+import pl.psnc.dl.wf4ever.portal.pages.BasePage;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
-import pl.psnc.dl.wf4ever.portal.pages.base.Base;
 import pl.psnc.dl.wf4ever.portal.pages.ro.behaviours.JobStatusUpdatingBehaviour;
 import pl.psnc.dl.wf4ever.portal.pages.ro.behaviours.OnDomReadyAjaxBehaviour;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.ROExplorer;
-import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
-import pl.psnc.dl.wf4ever.portal.ui.components.LoadingCircle;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
 import com.hp.hpl.jena.ontology.Individual;
@@ -61,7 +61,7 @@ import com.sun.jersey.api.client.ClientResponse;
  * @author piotrekhol
  * 
  */
-public class RoPage extends Base {
+public class RoPage extends BasePage {
 
     /** id. */
     private static final long serialVersionUID = 1L;

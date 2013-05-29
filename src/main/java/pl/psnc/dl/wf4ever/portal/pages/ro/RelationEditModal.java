@@ -23,10 +23,10 @@ import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Statement;
 import org.purl.wf4ever.rosrs.client.Thing;
 
+import pl.psnc.dl.wf4ever.portal.components.UniversalStyledAjaxButton;
+import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
+import pl.psnc.dl.wf4ever.portal.components.form.RequiredURITextField;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.RoTree;
-import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
-import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
-import pl.psnc.dl.wf4ever.portal.pages.util.RequiredURITextField;
 
 import com.hp.hpl.jena.vocabulary.DCTerms;
 
@@ -79,7 +79,7 @@ class RelationEditModal extends Panel {
     private List<Statement> statements = new ArrayList<>();
 
     /** Button for adding more relations. */
-    private MyAjaxButton anotherButton;
+    private UniversalStyledAjaxButton anotherButton;
 
 
     /**
@@ -152,7 +152,7 @@ class RelationEditModal extends Panel {
             }
         });
 
-        form.add(new MyAjaxButton("save", form) {
+        form.add(new UniversalStyledAjaxButton("save", form) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -186,7 +186,7 @@ class RelationEditModal extends Panel {
                 target.add(feedbackPanel);
             }
         });
-        anotherButton = new MyAjaxButton("another", form) {
+        anotherButton = new UniversalStyledAjaxButton("another", form) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -214,7 +214,7 @@ class RelationEditModal extends Panel {
             }
         };
         form.add(anotherButton);
-        form.add(new MyAjaxButton("cancel", form) {
+        form.add(new UniversalStyledAjaxButton("cancel", form) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -350,12 +350,12 @@ class RelationEditModal extends Panel {
     }
 
 
-    public MyAjaxButton getAnotherButton() {
+    public UniversalStyledAjaxButton getAnotherButton() {
         return anotherButton;
     }
 
 
-    public void setAnotherButton(MyAjaxButton anotherButton) {
+    public void setAnotherButton(UniversalStyledAjaxButton anotherButton) {
         this.anotherButton = anotherButton;
     }
 

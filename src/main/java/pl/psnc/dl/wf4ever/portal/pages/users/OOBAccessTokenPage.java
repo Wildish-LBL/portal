@@ -7,7 +7,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.purl.wf4ever.rosrs.client.users.User;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
-import pl.psnc.dl.wf4ever.portal.pages.base.Base;
+import pl.psnc.dl.wf4ever.portal.pages.BasePage;
 
 import com.sun.jersey.api.client.UniformInterfaceException;
 
@@ -19,7 +19,7 @@ import com.sun.jersey.api.client.UniformInterfaceException;
  * @author Piotr Hołubowicz
  * 
  */
-public class OOBAccessTokenPage extends Base {
+public class OOBAccessTokenPage extends BasePage {
 
     /** id. */
     private static final long serialVersionUID = 1L;

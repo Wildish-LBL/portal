@@ -1,4 +1,4 @@
-package pl.psnc.dl.wf4ever.portal.pages.home;
+package pl.psnc.dl.wf4ever.portal.pages;
 
 import java.io.IOException;
 import java.net.URI;
@@ -27,15 +27,11 @@ import org.purl.wf4ever.rosrs.client.ResearchObject;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
+import pl.psnc.dl.wf4ever.portal.components.UniversalStyledAjaxButton;
+import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.model.Recommendation;
-import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
-import pl.psnc.dl.wf4ever.portal.pages.HelpPage;
-import pl.psnc.dl.wf4ever.portal.pages.all.AllRosPage;
-import pl.psnc.dl.wf4ever.portal.pages.base.Base;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
 import pl.psnc.dl.wf4ever.portal.pages.util.CreatorsPanel;
-import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
-import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.services.MyQueryFactory;
 import pl.psnc.dl.wf4ever.portal.services.RODLUtilities;
 import pl.psnc.dl.wf4ever.portal.services.RSSService;
@@ -51,7 +47,7 @@ import com.hp.hpl.jena.query.ResultSet;
  * @author piotrekhol
  * 
  */
-public class HomePage extends Base {
+public class HomePage extends BasePage {
 
     /** id. */
     private static final long serialVersionUID = 1L;
@@ -143,7 +139,7 @@ public class HomePage extends Base {
         add(recommenderForm);
 
         recommenderForm.add(new RequiredTextField<String>("myExpId", new PropertyModel<String>(this, "myExpId")));
-        recommenderForm.add(new MyAjaxButton("confirmMyExpId", recommenderForm) {
+        recommenderForm.add(new UniversalStyledAjaxButton("confirmMyExpId", recommenderForm) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

@@ -23,9 +23,9 @@ import org.purl.wf4ever.rosrs.client.notifications.Notification;
 import org.purl.wf4ever.rosrs.client.notifications.NotificationService;
 
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
+import pl.psnc.dl.wf4ever.portal.components.UniversalStyledAjaxButton;
 import pl.psnc.dl.wf4ever.portal.listeners.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.notifications.NotificationsPage;
-import pl.psnc.dl.wf4ever.portal.ui.components.UniversalStyledAjaxButton;
 
 /**
  * An indicator of a number of notifications for this RO.

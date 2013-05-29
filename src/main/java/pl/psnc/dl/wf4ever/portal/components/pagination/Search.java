@@ -1,4 +1,4 @@
-package pl.psnc.dl.wf4ever.portal.pages.base.components;
+package pl.psnc.dl.wf4ever.portal.components.pagination;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.markup.html.form.Button;

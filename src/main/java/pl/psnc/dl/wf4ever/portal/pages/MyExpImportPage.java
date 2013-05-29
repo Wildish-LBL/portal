@@ -7,7 +7,6 @@ import org.apache.wicket.authroles.authorization.strategies.role.annotations.Aut
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportWizard;
-import pl.psnc.dl.wf4ever.portal.pages.base.Base;
 
 /**
  * This page contains the myExperiment import wizard.
@@ -16,7 +15,7 @@ import pl.psnc.dl.wf4ever.portal.pages.base.Base;
  * 
  */
 @AuthorizeInstantiation("USER")
-public class MyExpImportPage extends Base {
+public class MyExpImportPage extends BasePage {
 
     /** id. */
     private static final long serialVersionUID = 4637256013660809942L;

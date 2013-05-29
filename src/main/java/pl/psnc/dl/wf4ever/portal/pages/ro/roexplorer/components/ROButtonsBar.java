@@ -8,8 +8,8 @@ import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.evo.EvoType;
 
-import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.modals.DownloadMetadataModal;
-import pl.psnc.dl.wf4ever.portal.ui.components.UniversalStyledAjaxButton;
+import pl.psnc.dl.wf4ever.portal.components.UniversalStyledAjaxButton;
+import pl.psnc.dl.wf4ever.portal.modals.DownloadMetadataModal;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
 /**

@@ -1,4 +1,4 @@
-package pl.psnc.dl.wf4ever.portal.pages.my;
+package pl.psnc.dl.wf4ever.portal.pages;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -30,12 +30,11 @@ import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
-import pl.psnc.dl.wf4ever.portal.pages.MyExpImportPage;
-import pl.psnc.dl.wf4ever.portal.pages.base.Base;
+import pl.psnc.dl.wf4ever.portal.components.UniversalStyledAjaxButton;
+import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
 import pl.psnc.dl.wf4ever.portal.pages.util.ModelIteratorAdapter;
-import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
-import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
+
 /**
  * A page with user's own Research Objects.
  * 
@@ -43,7 +42,7 @@ import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
  * 
  */
 @AuthorizeInstantiation("USER")
-public class MyRosPage extends Base {
+public class MyRosPage extends BasePage {
 
     /** id. */
     private static final long serialVersionUID = 1L;
@@ -127,7 +126,7 @@ public class MyRosPage extends Base {
         addFeedbackPanel.setOutputMarkupId(true);
         addForm.add(addFeedbackPanel);
 
-        form.add(new MyAjaxButton("delete", form) {
+        form.add(new UniversalStyledAjaxButton("delete", form) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -144,7 +143,7 @@ public class MyRosPage extends Base {
         deleteFeedbackPanel.setOutputMarkupId(true);
         add(deleteFeedbackPanel);
 
-        add(new MyAjaxButton("confirmDelete", form) {
+        add(new UniversalStyledAjaxButton("confirmDelete", form) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -163,7 +162,7 @@ public class MyRosPage extends Base {
             }
         });
 
-        add(new MyAjaxButton("cancelDelete", form) {
+        add(new UniversalStyledAjaxButton("cancelDelete", form) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -172,7 +171,7 @@ public class MyRosPage extends Base {
             }
         });
 
-        form.add(new MyAjaxButton("add", form) {
+        form.add(new UniversalStyledAjaxButton("add", form) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -181,7 +180,7 @@ public class MyRosPage extends Base {
             }
         });
 
-        addForm.add(new MyAjaxButton("confirmAdd", addForm) {
+        addForm.add(new UniversalStyledAjaxButton("confirmAdd", addForm) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> addForm) {
@@ -208,7 +207,7 @@ public class MyRosPage extends Base {
             }
         });
 
-        addForm.add(new MyAjaxButton("cancelAdd", addForm) {
+        addForm.add(new UniversalStyledAjaxButton("cancelAdd", addForm) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

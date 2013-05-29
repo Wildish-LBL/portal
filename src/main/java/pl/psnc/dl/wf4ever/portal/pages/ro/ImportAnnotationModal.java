@@ -10,8 +10,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.lang.Bytes;
 import org.purl.wf4ever.rosrs.client.Thing;
 
-import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
-import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
+import pl.psnc.dl.wf4ever.portal.components.UniversalStyledAjaxButton;
+import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 
 /**
  * Modal window for importing an annotation body.
@@ -57,7 +57,7 @@ class ImportAnnotationModal extends Panel {
         final FileUploadField fileUpload = new FileUploadField("fileUpload");
         form.add(fileUpload);
 
-        form.add(new MyAjaxButton("confirmUploadResource", form) {
+        form.add(new UniversalStyledAjaxButton("confirmUploadResource", form) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -76,7 +76,7 @@ class ImportAnnotationModal extends Panel {
             }
 
         });
-        form.add(new MyAjaxButton("cancelUploadResource", form) {
+        form.add(new UniversalStyledAjaxButton("cancelUploadResource", form) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

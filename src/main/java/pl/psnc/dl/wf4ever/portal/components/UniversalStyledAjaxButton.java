@@ -1,4 +1,4 @@
-package pl.psnc.dl.wf4ever.portal.ui.components;
+package pl.psnc.dl.wf4ever.portal.components;
 
 import java.util.ArrayList;
 import java.util.List;

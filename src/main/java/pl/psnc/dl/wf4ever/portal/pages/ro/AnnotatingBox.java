@@ -32,12 +32,12 @@ import org.purl.wf4ever.rosrs.client.Statement;
 import org.purl.wf4ever.rosrs.client.Thing;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
+import pl.psnc.dl.wf4ever.portal.components.UniversalStyledAjaxButton;
 import pl.psnc.dl.wf4ever.portal.listeners.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.pages.ro.components.EditLinkFragment;
 import pl.psnc.dl.wf4ever.portal.pages.ro.components.ExternalLinkFragment;
 import pl.psnc.dl.wf4ever.portal.pages.ro.components.InternalLinkFragment;
 import pl.psnc.dl.wf4ever.portal.pages.util.CreatorsPanel;
-import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 
 /**
  * A list of annotations of a resource.
@@ -127,7 +127,7 @@ class AnnotatingBox extends Panel implements IAjaxLinkListener {
         };
         group.add(annList);
 
-        addStatement = new MyAjaxButton("addAnnotation", annForm) {
+        addStatement = new UniversalStyledAjaxButton("addAnnotation", annForm) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -145,7 +145,7 @@ class AnnotatingBox extends Panel implements IAjaxLinkListener {
             }
         };
 
-        deleteStatement = new MyAjaxButton("deleteAnnotation", annForm) {
+        deleteStatement = new UniversalStyledAjaxButton("deleteAnnotation", annForm) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -179,7 +179,7 @@ class AnnotatingBox extends Panel implements IAjaxLinkListener {
             }
         };
 
-        addRelation = new MyAjaxButton("addRelation", annForm) {
+        addRelation = new UniversalStyledAjaxButton("addRelation", annForm) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -197,7 +197,7 @@ class AnnotatingBox extends Panel implements IAjaxLinkListener {
             }
         };
 
-        importAnnotation = new MyAjaxButton("importAnnotation", annForm) {
+        importAnnotation = new UniversalStyledAjaxButton("importAnnotation", annForm) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

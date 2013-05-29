@@ -1,4 +1,4 @@
-package pl.psnc.dl.wf4ever.portal.pages.util;
+package pl.psnc.dl.wf4ever.portal.components.form;
 
 import java.net.URI;
 

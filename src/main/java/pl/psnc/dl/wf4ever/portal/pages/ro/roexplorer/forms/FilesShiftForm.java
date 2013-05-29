@@ -13,7 +13,7 @@ import org.apache.wicket.markup.html.form.IFormSubmitListener;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 
-import pl.psnc.dl.wf4ever.portal.ui.forms.fields.UriTextField;
+import pl.psnc.dl.wf4ever.portal.components.form.UriTextField;
 
 /**
  * Hidden form supporting drag and drop files displacement.

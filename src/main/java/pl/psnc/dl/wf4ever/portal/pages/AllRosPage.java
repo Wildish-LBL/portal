@@ -1,4 +1,4 @@
-package pl.psnc.dl.wf4ever.portal.pages.all;
+package pl.psnc.dl.wf4ever.portal.pages;
 
 import java.io.IOException;
 import java.net.URI;
@@ -26,10 +26,9 @@ import org.purl.wf4ever.rosrs.client.users.UserManagementService;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
-import pl.psnc.dl.wf4ever.portal.pages.base.Base;
+import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
 import pl.psnc.dl.wf4ever.portal.pages.util.CreatorsPanel;
-import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.services.MyQueryFactory;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
@@ -45,7 +44,7 @@ import com.hp.hpl.jena.rdf.model.Literal;
  * @author piotrekhol
  * 
  */
-public class AllRosPage extends Base {
+public class AllRosPage extends BasePage {
 
     /** id. */
     private static final long serialVersionUID = 1L;

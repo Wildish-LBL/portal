@@ -17,9 +17,9 @@ import org.purl.wf4ever.rosrs.client.exception.NotificationsException;
 import org.purl.wf4ever.rosrs.client.notifications.Notification;
 import org.purl.wf4ever.rosrs.client.notifications.NotificationService;
 
+import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.listeners.IAjaxLinkListener;
-import pl.psnc.dl.wf4ever.portal.pages.base.Base;
-import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
+import pl.psnc.dl.wf4ever.portal.pages.BasePage;
 
 /**
  * The home page.
@@ -27,7 +27,7 @@ import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
  * @author piotrekhol
  * 
  */
-public class NotificationsPage extends Base {
+public class NotificationsPage extends BasePage {
 
     /** id. */
     private static final long serialVersionUID = 1L;

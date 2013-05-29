@@ -1,4 +1,4 @@
-package pl.psnc.dl.wf4ever.portal.pages.base;
+package pl.psnc.dl.wf4ever.portal.pages;
 
 import java.net.URI;
 
@@ -12,11 +12,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
-import pl.psnc.dl.wf4ever.portal.pages.SparqlEndpointPage;
-import pl.psnc.dl.wf4ever.portal.pages.base.components.Login;
-import pl.psnc.dl.wf4ever.portal.pages.base.components.Search;
-import pl.psnc.dl.wf4ever.portal.pages.home.HomePage;
-import pl.psnc.dl.wf4ever.portal.pages.my.MyRosPage;
+import pl.psnc.dl.wf4ever.portal.components.pagination.Login;
+import pl.psnc.dl.wf4ever.portal.components.pagination.Search;
 import pl.psnc.dl.wf4ever.portal.pages.users.ProfilePage;
 
 /**
@@ -25,7 +22,7 @@ import pl.psnc.dl.wf4ever.portal.pages.users.ProfilePage;
  * @author piotrekhol
  * 
  */
-public class Base extends WebPage {
+public class BasePage extends WebPage {
 
     /** id. */
     private static final long serialVersionUID = 1L;
@@ -42,7 +39,7 @@ public class Base extends WebPage {
      * @param parameters
      *            may contain redirection params
      */
-    public Base(final PageParameters parameters) {
+    public BasePage(final PageParameters parameters) {
         getSession().bind();
         MySession.get().persist();
         final WebMarkupContainer redirect = new WebMarkupContainer("redirect");

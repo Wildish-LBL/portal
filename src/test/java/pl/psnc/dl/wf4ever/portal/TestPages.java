@@ -4,12 +4,12 @@ import org.apache.wicket.util.tester.WicketTester;
 import org.junit.Before;
 import org.junit.Test;
 
+import pl.psnc.dl.wf4ever.portal.pages.AllRosPage;
 import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
 import pl.psnc.dl.wf4ever.portal.pages.HelpPage;
+import pl.psnc.dl.wf4ever.portal.pages.HomePage;
 import pl.psnc.dl.wf4ever.portal.pages.SparqlEndpointPage;
-import pl.psnc.dl.wf4ever.portal.pages.all.AllRosPage;
-import pl.psnc.dl.wf4ever.portal.pages.home.HomePage;
 import pl.psnc.dl.wf4ever.portal.pages.users.AuthenticationPage;
 
 /**

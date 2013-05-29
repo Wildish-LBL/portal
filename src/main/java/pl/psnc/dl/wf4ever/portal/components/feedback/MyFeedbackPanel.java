@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package pl.psnc.dl.wf4ever.portal.pages.util;
+package pl.psnc.dl.wf4ever.portal.components.feedback;
 
 import java.io.Serializable;
 import java.util.Collections;

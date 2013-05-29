@@ -1,4 +1,4 @@
-package pl.psnc.dl.wf4ever.portal.ui.components;
+package pl.psnc.dl.wf4ever.portal.components;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;

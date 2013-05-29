@@ -10,8 +10,8 @@ import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
 
-import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
-import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
+import pl.psnc.dl.wf4ever.portal.components.UniversalStyledAjaxButton;
+import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
 /**
@@ -64,7 +64,7 @@ class DownloadMetadataModal extends Panel {
                     }
                 });
         form.add(formatDropDown);
-        form.add(new MyAjaxButton("confirmDownloadMetadata", form) {
+        form.add(new UniversalStyledAjaxButton("confirmDownloadMetadata", form) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -73,7 +73,7 @@ class DownloadMetadataModal extends Panel {
                 target.appendJavaScript("window.location.href='" + roPage.getROMetadataLink(getFormat()) + "'");
             }
         });
-        form.add(new MyAjaxButton("cancelDownloadMetadata", form) {
+        form.add(new UniversalStyledAjaxButton("cancelDownloadMetadata", form) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

@@ -22,9 +22,9 @@ import org.apache.wicket.util.lang.Bytes;
 import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
-import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
-import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
-import pl.psnc.dl.wf4ever.portal.pages.util.RequiredURITextField;
+import pl.psnc.dl.wf4ever.portal.components.UniversalStyledAjaxButton;
+import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
+import pl.psnc.dl.wf4ever.portal.components.form.RequiredURITextField;
 
 /**
  * A modal for adding resources to the RO.
@@ -136,7 +136,7 @@ class UploadResourceModal extends Panel {
                 "resourceURI"));
         resourceDiv.add(resourceURIField);
 
-        form.add(new MyAjaxButton("confirmUploadResource", form) {
+        form.add(new UniversalStyledAjaxButton("confirmUploadResource", form) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -174,7 +174,7 @@ class UploadResourceModal extends Panel {
             }
 
         });
-        form.add(new MyAjaxButton("cancelUploadResource", form) {
+        form.add(new UniversalStyledAjaxButton("cancelUploadResource", form) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

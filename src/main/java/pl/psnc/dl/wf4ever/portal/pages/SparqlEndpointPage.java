@@ -19,10 +19,9 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
-import pl.psnc.dl.wf4ever.portal.pages.base.Base;
-import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
-import pl.psnc.dl.wf4ever.portal.pages.util.MyComponentFeedbackPanel;
-import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
+import pl.psnc.dl.wf4ever.portal.components.UniversalStyledAjaxButton;
+import pl.psnc.dl.wf4ever.portal.components.feedback.MyComponentFeedbackPanel;
+import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
@@ -33,7 +32,7 @@ import com.sun.jersey.api.client.WebResource;
  * @author piotrekhol
  * 
  */
-public class SparqlEndpointPage extends Base {
+public class SparqlEndpointPage extends BasePage {
 
     /** id. */
     private static final long serialVersionUID = 1L;
@@ -87,7 +86,7 @@ public class SparqlEndpointPage extends Base {
         resultLabel.setOutputMarkupId(true);
         form.add(resultLabel);
 
-        form.add(new MyAjaxButton("execute", form) {
+        form.add(new UniversalStyledAjaxButton("execute", form) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -115,7 +114,7 @@ public class SparqlEndpointPage extends Base {
             }
         });
 
-        form.add(new MyAjaxButton("generateURL", form) {
+        form.add(new UniversalStyledAjaxButton("generateURL", form) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

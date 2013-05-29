@@ -1,4 +1,4 @@
-package pl.psnc.dl.wf4ever.portal.pages.base.components;
+package pl.psnc.dl.wf4ever.portal.components.pagination;
 
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.markup.html.basic.Label;

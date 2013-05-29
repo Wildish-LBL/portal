@@ -1,7 +1,7 @@
 /**
  * 
  */
-package pl.psnc.dl.wf4ever.portal.pages.util;
+package pl.psnc.dl.wf4ever.portal.components.feedback;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.panel.ComponentFeedbackPanel;

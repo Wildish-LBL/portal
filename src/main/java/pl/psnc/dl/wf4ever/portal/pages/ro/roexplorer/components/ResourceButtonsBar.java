@@ -13,7 +13,7 @@ import org.purl.wf4ever.rosrs.client.Resource;
 import org.purl.wf4ever.rosrs.client.Thing;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
-import pl.psnc.dl.wf4ever.portal.ui.components.UniversalStyledAjaxButton;
+import pl.psnc.dl.wf4ever.portal.components.UniversalStyledAjaxButton;
 
 /**
  * Buttons bar for selected folder or resource.

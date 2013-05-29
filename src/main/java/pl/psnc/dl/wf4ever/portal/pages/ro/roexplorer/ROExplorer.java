@@ -28,6 +28,7 @@ import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 import org.purl.wf4ever.rosrs.client.notifications.Notification;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
+import pl.psnc.dl.wf4ever.portal.components.UniversalStyledAjaxButton;
 import pl.psnc.dl.wf4ever.portal.listeners.IAjaxLinkListener;
 import pl.psnc.dl.wf4ever.portal.listeners.ITreeListener;
 import pl.psnc.dl.wf4ever.portal.model.RoTreeModel;
@@ -41,7 +42,6 @@ import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.ResourceStatusBa
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.RoTree;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.forms.FilesShiftForm;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.models.TreeNodeContentModel;
-import pl.psnc.dl.wf4ever.portal.ui.components.UniversalStyledAjaxButton;
 
 /**
  * Basic RO files and folders viewer.

@@ -17,8 +17,8 @@ import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.Resource;
 import org.purl.wf4ever.rosrs.client.Thing;
 
+import pl.psnc.dl.wf4ever.portal.components.UniversalStyledAjaxButton;
 import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.components.RoTree;
-import pl.psnc.dl.wf4ever.portal.pages.util.MyAjaxButton;
 
 /**
  * The part of RO page that displays the RO structure.
@@ -49,10 +49,10 @@ class RoViewerBox extends WebMarkupContainer {
     private Fragment physicalTreeLoading;
 
     /** Delete resource button. */
-    private MyAjaxButton deleteResource;
+    private UniversalStyledAjaxButton deleteResource;
 
     /** Add resource button. */
-    private MyAjaxButton addResource;
+    private UniversalStyledAjaxButton addResource;
 
     /** Selected item. */
     private Thing selectedItem;
@@ -61,7 +61,7 @@ class RoViewerBox extends WebMarkupContainer {
     private AjaxButton downloadROMetadata;
 
     /** Edit resource button. */
-    private MyAjaxButton editResource;
+    private UniversalStyledAjaxButton editResource;
 
     /** Download resource button. */
     private ExternalLink downloadResource;
@@ -112,7 +112,7 @@ class RoViewerBox extends WebMarkupContainer {
         Form<?> roForm = new Form<Void>("roForm");
         add(roForm);
 
-        addResource = new MyAjaxButton("addResource", roForm) {
+        addResource = new UniversalStyledAjaxButton("addResource", roForm) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -121,7 +121,7 @@ class RoViewerBox extends WebMarkupContainer {
 
         };
 
-        editResource = new MyAjaxButton("editResource", roForm) {
+        editResource = new UniversalStyledAjaxButton("editResource", roForm) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -131,7 +131,7 @@ class RoViewerBox extends WebMarkupContainer {
 
         };
 
-        deleteResource = new MyAjaxButton("deleteResource", roForm) {
+        deleteResource = new UniversalStyledAjaxButton("deleteResource", roForm) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -154,7 +154,7 @@ class RoViewerBox extends WebMarkupContainer {
         downloadResource.setAfterDisabledLink("");
 
         downloadROZipped = new ExternalLink("downloadROZipped", new PropertyModel<String>(roPage, "ROZipLink"));
-        downloadROMetadata = new MyAjaxButton("downloadMetadata", roForm) {
+        downloadROMetadata = new UniversalStyledAjaxButton("downloadMetadata", roForm) {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

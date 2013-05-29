@@ -1,11 +1,10 @@
-package pl.psnc.dl.wf4ever.portal.ui.forms.fields;
+package pl.psnc.dl.wf4ever.portal.components.form;
 
 import java.net.URI;
 
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.util.convert.IConverter;
 
-import pl.psnc.dl.wf4ever.portal.pages.util.URIConverter;
 
 /**
  * Universal Uri html input.
