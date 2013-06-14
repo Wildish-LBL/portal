@@ -7,8 +7,8 @@ import org.apache.wicket.extensions.wizard.WizardModel;
 import org.apache.wicket.feedback.ContainerFeedbackMessageFilter;
 import org.apache.wicket.model.CompoundPropertyModel;
 
-import pl.psnc.dl.wf4ever.portal.pages.my.MyRosPage;
-import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
+import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
+import pl.psnc.dl.wf4ever.portal.pages.MyRosPage;
 
 /**
  * The wizard.

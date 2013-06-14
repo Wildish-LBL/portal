@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.model.CompoundPropertyModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.joda.time.DateTime;
@@ -17,9 +17,12 @@ import org.purl.wf4ever.rosrs.client.exception.NotificationsException;
 import org.purl.wf4ever.rosrs.client.notifications.Notification;
 import org.purl.wf4ever.rosrs.client.notifications.NotificationService;
 
-import pl.psnc.dl.wf4ever.portal.listeners.IAjaxLinkListener;
-import pl.psnc.dl.wf4ever.portal.pages.base.Base;
-import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
+import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
+import pl.psnc.dl.wf4ever.portal.events.ResourceSelectedEvent;
+import pl.psnc.dl.wf4ever.portal.pages.BasePage;
+
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 
 /**
  * The home page.
@@ -27,13 +30,16 @@ import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
  * @author piotrekhol
  * 
  */
-public class NotificationsPage extends Base {
+public class NotificationsPage extends BasePage {
 
     /** id. */
     private static final long serialVersionUID = 1L;
 
     /** Logger. */
     private static final Logger LOGGER = Logger.getLogger(NotificationsPage.class);
+
+    /** Notification preview panel on the right side. */
+    private NotificationPreviewPanel notificationPanel;
 
 
     /**
@@ -66,28 +72,45 @@ public class NotificationsPage extends Base {
             error(e.getMessage());
             LOGGER.error("Can't load notifications", e);
         }
-
-        NotificationsList notificationsList = new NotificationsList("notificationsList", notifications,
-                selectedNotification);
-        add(notificationsList);
-        final NotificationPanel notificationPanel = new NotificationPanel("notificationPanel", selectedNotification);
-        notificationPanel.setOutputMarkupId(true);
-        add(notificationPanel);
-
-        notificationsList.getListeners().add(new IAjaxLinkListener() {
+        LoadableDetachableModel<EventBus> eventBusModel = new LoadableDetachableModel<EventBus>() {
 
             /** id. */
-            private static final long serialVersionUID = 4881609835726044109L;
+            private static final long serialVersionUID = 5225667860067218852L;
 
 
             @Override
-            public void onAjaxLinkClicked(Object source, AjaxRequestTarget target) {
-                target.add(notificationPanel);
+            protected EventBus load() {
+                return new EventBus();
             }
-        });
+        };
+        eventBusModel.getObject().register(this);
+
+        NotificationsList notificationsList = new NotificationsList("notificationsList", notifications,
+                selectedNotification, eventBusModel);
+        add(notificationsList);
+        notificationPanel = new NotificationPreviewPanel("notificationPanel", selectedNotification);
+        notificationPanel.setOutputMarkupId(true);
+        add(notificationPanel);
     }
 
 
+    /**
+     * Update the notification panel when a notification is selected.
+     * 
+     * @param event
+     *            AJAX event
+     */
+    @Subscribe
+    public void onNotificationSelected(ResourceSelectedEvent event) {
+        event.getTarget().add(notificationPanel);
+    }
+
+
+    /**
+     * Create mock notifications for testing.
+     * 
+     * @return a list of 3 notifications
+     */
     protected List<Notification> getMockNotifications() {
         List<Notification> notifications = new ArrayList<>();
         URI source = URI.create("http://sandbox.wf4ever-project.org/roevaluate/");

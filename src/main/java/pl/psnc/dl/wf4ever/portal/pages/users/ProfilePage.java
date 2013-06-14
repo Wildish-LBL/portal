@@ -13,8 +13,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.purl.wf4ever.rosrs.client.users.User;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
-import pl.psnc.dl.wf4ever.portal.pages.base.Base;
-import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
+import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
+import pl.psnc.dl.wf4ever.portal.pages.BasePage;
 
 /**
  * This class allows to manage your account in RODL and unregister.
@@ -23,7 +23,7 @@ import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
  * 
  */
 @AuthorizeInstantiation("USER")
-public class ProfilePage extends Base {
+public class ProfilePage extends BasePage {
 
     /** id. */
     private static final long serialVersionUID = 1L;

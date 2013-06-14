@@ -18,8 +18,8 @@ import org.purl.wf4ever.rosrs.client.users.User;
 import org.purl.wf4ever.rosrs.client.users.UserManagementService;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
-import pl.psnc.dl.wf4ever.portal.pages.base.Base;
-import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
+import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
+import pl.psnc.dl.wf4ever.portal.pages.BasePage;
 
 /**
  * This page presents a list of access tokens of the current user.
@@ -28,7 +28,7 @@ import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
  * 
  */
 @AuthorizeInstantiation("USER")
-public class AccessTokensPage extends Base {
+public class AccessTokensPage extends BasePage {
 
     /** id. */
     private static final long serialVersionUID = 1L;

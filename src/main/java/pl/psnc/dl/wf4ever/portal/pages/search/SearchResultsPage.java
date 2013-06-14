@@ -19,6 +19,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.navigation.paging.IPageable;
 import org.apache.wicket.model.CompoundPropertyModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.joda.time.format.DateTimeFormat;
@@ -31,11 +32,14 @@ import org.purl.wf4ever.rosrs.client.search.dataclasses.SearchResult;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.solr.FacetEntry;
 
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
-import pl.psnc.dl.wf4ever.portal.listeners.IAjaxLinkListener;
-import pl.psnc.dl.wf4ever.portal.pages.base.Base;
-import pl.psnc.dl.wf4ever.portal.pages.base.components.BootstrapPagingNavigator;
+import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
+import pl.psnc.dl.wf4ever.portal.components.pagination.BootstrapPagingNavigator;
+import pl.psnc.dl.wf4ever.portal.events.FacetValueClickedEvent;
+import pl.psnc.dl.wf4ever.portal.pages.BasePage;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
-import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
+
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 
 /**
  * The home page.
@@ -43,8 +47,7 @@ import pl.psnc.dl.wf4ever.portal.pages.util.MyFeedbackPanel;
  * @author piotrekhol
  * 
  */
-public class SearchResultsPage extends Base implements IAjaxLinkListener, SearchResultsListener,
-        SortOptionChangeListener {
+public class SearchResultsPage extends BasePage implements SearchResultsListener, SortOptionChangeListener {
 
     /** id. */
     private static final long serialVersionUID = 1L;
@@ -94,6 +97,19 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
      */
     public SearchResultsPage(String searchKeywords, List<FacetValue> selectedFacetValues, SortOption sortOption) {
         super(new PageParameters());
+        LoadableDetachableModel<EventBus> eventBusModel = new LoadableDetachableModel<EventBus>() {
+
+            /** id. */
+            private static final long serialVersionUID = 5225667860067218852L;
+
+
+            @Override
+            protected EventBus load() {
+                return new EventBus();
+            }
+        };
+        eventBusModel.getObject().register(this);
+
         if (sortOption != null) {
             this.sortOption = sortOption;
         }
@@ -139,8 +155,7 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
         searchResultsDiv.setOutputMarkupId(true);
 
         FacetsView facetsView = new FacetsView("filters", getSelected(), new PropertyModel<List<FacetEntry>>(this,
-                "facets"));
-        facetsView.getListeners().add(this);
+                "facets"), eventBusModel);
         add(facetsView);
 
         final WebMarkupContainer noResults = new WebMarkupContainer("noResults");
@@ -261,17 +276,22 @@ public class SearchResultsPage extends Base implements IAjaxLinkListener, Search
     }
 
 
-    @Override
-    public void onAjaxLinkClicked(Object source, AjaxRequestTarget target) {
-        FacetValue facetValue = (FacetValue) source;
+    /**
+     * Select or deselect a facet value after it has been clicked.
+     * 
+     * @param event
+     *            AJAX event
+     */
+    @Subscribe
+    public void onFacetValueClicked(FacetValueClickedEvent event) {
         for (FacetValue val : selectedFacetValues) {
-            if (val.getLabel().equals(facetValue.getLabel()) && val.getParamName().equals(facetValue.getParamName())) {
+            if (val.getLabel().equals(event.getFacetValue().getLabel())
+                    && val.getParamName().equals(event.getFacetValue().getParamName())) {
                 selectedFacetValues.remove(val);
                 return;
             }
         }
-
-        selectedFacetValues.add(facetValue);
+        selectedFacetValues.add(event.getFacetValue());
     }
 
 

@@ -4,7 +4,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import pl.psnc.dl.wf4ever.portal.pages.base.Base;
 
 /**
  * A static page for displaying errors.
@@ -14,7 +13,7 @@ import pl.psnc.dl.wf4ever.portal.pages.base.Base;
  * @author Piotr Hołubowicz
  * 
  */
-public class ErrorPage extends Base {
+public class ErrorPage extends BasePage {
 
     /** id. */
     private static final long serialVersionUID = -3233388849667095897L;

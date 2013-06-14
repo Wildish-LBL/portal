@@ -1,8 +1,6 @@
 package pl.psnc.dl.wf4ever.portal.pages.search;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -14,7 +12,9 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.IModel;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.FacetValue;
 
-import pl.psnc.dl.wf4ever.portal.listeners.IAjaxLinkListener;
+import pl.psnc.dl.wf4ever.portal.events.FacetValueClickedEvent;
+
+import com.google.common.eventbus.EventBus;
 
 /**
  * A view of options for a facet.
@@ -34,8 +34,8 @@ public class FacetValueView extends ListView<FacetValue> {
     /** selected values for this facet. */
     private List<FacetValue> selected;
 
-    /** listeners for change in facet value selection. */
-    private Set<IAjaxLinkListener> listeners = new HashSet<>();
+    /** Event bus model for posting {@link FacetValueClickedEvent} events. */
+    private IModel<EventBus> eventBusModel;
 
 
     /**
@@ -47,9 +47,13 @@ public class FacetValueView extends ListView<FacetValue> {
      *            selected values for this facet
      * @param model
      *            model for a list of available facet values
+     * @param eventBusModel
+     *            event bus model for posting {@link FacetValueClickedEvent} events
      */
-    public FacetValueView(String id, List<FacetValue> selected, IModel<? extends List<? extends FacetValue>> model) {
+    public FacetValueView(String id, List<FacetValue> selected, IModel<? extends List<? extends FacetValue>> model,
+            IModel<EventBus> eventBusModel) {
         super(id, model);
+        this.eventBusModel = eventBusModel;
         this.selected = selected;
         this.setOutputMarkupId(true);
     }
@@ -72,9 +76,7 @@ public class FacetValueView extends ListView<FacetValue> {
                     item.add(AttributeAppender.replace("class", "selected_filter_label"));
                 }
                 target.add(item);
-                for (IAjaxLinkListener listener : listeners) {
-                    listener.onAjaxLinkClicked(facetValue, target);
-                }
+                eventBusModel.getObject().post(new FacetValueClickedEvent(target, facetValue));
             }
         };
         link.add(new Label("label", facetValue.getLabel()));
@@ -116,8 +118,4 @@ public class FacetValueView extends ListView<FacetValue> {
         return false;
     }
 
-
-    public Set<IAjaxLinkListener> getListeners() {
-        return listeners;
-    }
 }

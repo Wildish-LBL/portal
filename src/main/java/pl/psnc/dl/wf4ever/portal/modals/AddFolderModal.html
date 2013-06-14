@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<wicket:panel xmlns:wicket="http://wicket.apache.org">
+	<div id="add-folder-modal" class="modal hide">
+		<form class="form-horizontal" wicket:id="form">
+			<div class="modal-header">
+				<a wicket:id="close" class="close">&times;</a>
+				<h3>Create a folder</h3>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="span6" wicket:id="feedbackPanel"></div>
+				</div>
+				<fieldset>
+					<div class="control-group">
+						<label class="control-label" for="folder-name">Folder name</label>
+						<div class="controls">
+							<input class="span4" wicket:id="folder-name" id="folder-name"
+								type="text" />
+							<p class="help-block">Provide the folder name without '/'</p>
+						</div>
+					</div>
+				</fieldset>
+			</div>
+			<div class="modal-footer">
+				<a class="btn btn-primary" wicket:id="ok"
+					type="submit">OK</a> <a class="btn"
+					wicket:id="cancel">Cancel</a>
+			</div>
+		</form>
+	</div>
+</wicket:panel>

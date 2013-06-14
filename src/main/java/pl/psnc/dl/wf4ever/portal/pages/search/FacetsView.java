@@ -1,10 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.pages.search;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -13,7 +10,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.FacetValue;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.solr.FacetEntry;
 
-import pl.psnc.dl.wf4ever.portal.listeners.IAjaxLinkListener;
+import com.google.common.eventbus.EventBus;
 
 /**
  * A list of facets.
@@ -21,7 +18,7 @@ import pl.psnc.dl.wf4ever.portal.listeners.IAjaxLinkListener;
  * @author piotrekhol
  * 
  */
-public class FacetsView extends ListView<FacetEntry> implements IAjaxLinkListener {
+public class FacetsView extends ListView<FacetEntry> {
 
     /** id. */
     private static final long serialVersionUID = -7767129758537264701L;
@@ -29,8 +26,8 @@ public class FacetsView extends ListView<FacetEntry> implements IAjaxLinkListene
     /** selected facet values, for all facets. */
     private List<FacetValue> selected;
 
-    /** listeners for change in facet value selection. */
-    private Set<IAjaxLinkListener> listeners = new HashSet<>();
+    /** event bus model that is passed to individual values so that they can post events about clicks. */
+    private IModel<EventBus> eventBusModel;
 
 
     /**
@@ -42,9 +39,13 @@ public class FacetsView extends ListView<FacetEntry> implements IAjaxLinkListene
      *            selected facet values, for all facets
      * @param model
      *            model for all facets
+     * @param eventBusModel
+     *            event bus model that is passed to individual values so that they can post events about clicks
      */
-    public FacetsView(String id, List<FacetValue> selected, IModel<? extends List<? extends FacetEntry>> model) {
+    public FacetsView(String id, List<FacetValue> selected, IModel<? extends List<? extends FacetEntry>> model,
+            IModel<EventBus> eventBusModel) {
         super(id, model);
+        this.eventBusModel = eventBusModel;
         this.selected = selected;
     }
 
@@ -55,24 +56,10 @@ public class FacetsView extends ListView<FacetEntry> implements IAjaxLinkListene
         FacetEntry facet = item.getModelObject();
         item.add(new Label("name", new PropertyModel<String>(facet, "name")));
         FacetValueView facetValueView = new FacetValueView("options", selected, new PropertyModel<List<FacetValue>>(
-                item.getModel(), "values"));
-        facetValueView.getListeners().add(this);
+                item.getModel(), "values"), eventBusModel);
         item.add(facetValueView);
         item.setVisible(facetValueView.hasVisibleValues());
 
-    }
-
-
-    public Set<IAjaxLinkListener> getListeners() {
-        return listeners;
-    }
-
-
-    @Override
-    public void onAjaxLinkClicked(Object source, AjaxRequestTarget target) {
-        for (IAjaxLinkListener listener : listeners) {
-            listener.onAjaxLinkClicked(source, target);
-        }
     }
 
 }

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:wicket>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+	<wicket:panel>
+		<table class="table table-hover table-condensed table-expandable">
+			<thead>
+				<tr>
+					<th></th>
+					<th>Resource</th>
+					<th>Type</th>
+					<th>Comments</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr wicket:id="folders">
+					<td><i class="icon-folder-open"></i></td>
+					<td class="resource-name"><div><a href="#" wicket:id="name-link"><span
+							wicket:id="name">-</span></a></div></td>
+					<td>Folder</td>
+					<td wicket:id="comments-cnt">-</td>
+				</tr>
+				<tr wicket:id="files">
+					<td><i class="icon-file"></i></td>
+					<td class="resource-name"><div wicket:id="name">-</div></td>
+					<td>File</td>
+					<td wicket:id="comments-cnt">-</td>
+				</tr>
+				<tr wicket:id="unrooted-header">
+					<td colspan="4"><p class="text-center muted">
+							<em>Resources not in any folder</em>
+						</p></td>
+				</tr>
+				<tr wicket:id="unrooted-files">
+					<td><i class="icon-file"></i></td>
+					<td class="resource-name"><div wicket:id="name">-</div></td>
+					<td>File</td>
+					<td wicket:id="comments-cnt">-</td>
+				</tr>
+			</tbody>
+		</table>
+	</wicket:panel>
+</body>
+</html>
