@@ -50,12 +50,16 @@ public class ResourceSummaryPanel extends Panel {
         eventBusModel.getObject().register(this);
         setOutputMarkupId(true);
 
+        EditableTextPanel titlePanel = new EditableTextPanel("titlePanel", new AnnotationTripleModel(
+                AnnotationTripleModel.ANY_ANNOTATION, model, URI.create(DCTerms.title.getURI())), null, false);
+        titlePanel.setCanDelete(false);
         EditableTextPanel descriptionPanel = new EditableTextPanel("descriptionPanel", new AnnotationTripleModel(
                 AnnotationTripleModel.ANY_ANNOTATION, model, URI.create(DCTerms.description.getURI())), null, true);
         descriptionPanel.setCanDelete(false);
 
         add(new ExternalLink("uri", new PropertyModel<String>(model, "uri.toString"), new PropertyModel<URI>(model,
                 "uri")));
+        add(titlePanel);
         add(new Label("author", new PropertyModel<String>(model, "author.name")));
         add(new Label("createdFormatted", new PropertyModel<String>(model, "createdFormatted")));
         add(new Label("annotations", new PropertyModel<Integer>(model, "annotations.size")));

@@ -55,12 +55,10 @@ public class RoSummaryPanel extends Panel {
         setOutputMarkupId(true);
 
         EditableTextPanel titlePanel = new EditableTextPanel("titlePanel", new AnnotationTripleModel(
-                AnnotationTripleModel.ANY_ANNOTATION, model.getObject(), URI.create(DCTerms.title.getURI())), null,
-                false);
+                AnnotationTripleModel.ANY_ANNOTATION, model, URI.create(DCTerms.title.getURI())), null, false);
         titlePanel.setCanDelete(false);
         EditableTextPanel descriptionPanel = new EditableTextPanel("descriptionPanel", new AnnotationTripleModel(
-                AnnotationTripleModel.ANY_ANNOTATION, model.getObject(), URI.create(DCTerms.description.getURI())),
-                null, true);
+                AnnotationTripleModel.ANY_ANNOTATION, model, URI.create(DCTerms.description.getURI())), null, true);
         descriptionPanel.setCanDelete(false);
 
         add(new ExternalLink("uri", new PropertyModel<String>(model, "uri.toString"), new PropertyModel<URI>(model,
