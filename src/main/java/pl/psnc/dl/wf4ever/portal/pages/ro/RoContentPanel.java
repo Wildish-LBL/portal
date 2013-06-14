@@ -27,7 +27,7 @@ import pl.psnc.dl.wf4ever.portal.events.aggregation.DuplicateEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddReadyEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.MoveEvent;
-import pl.psnc.dl.wf4ever.portal.events.aggregation.RenameEvent;
+import pl.psnc.dl.wf4ever.portal.events.aggregation.UpdateClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceAddReadyEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceAddedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceDeleteClickedEvent;
@@ -153,7 +153,7 @@ public class RoContentPanel extends Panel {
 
 
     @Subscribe
-    public void onResourceRename(RenameEvent event) {
+    public void onResourceRename(UpdateClickedEvent event) {
         //TODO
     }
 

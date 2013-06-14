@@ -16,7 +16,7 @@ import pl.psnc.dl.wf4ever.portal.events.ResourceSelectedEvent;
 import pl.psnc.dl.wf4ever.portal.events.ShowAllAnnotationsEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.DuplicateEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.MoveEvent;
-import pl.psnc.dl.wf4ever.portal.events.aggregation.RenameEvent;
+import pl.psnc.dl.wf4ever.portal.events.aggregation.UpdateClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceDeleteClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotateEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.CommentAddClickedEvent;
@@ -63,7 +63,7 @@ public class ResourceActionsPanel extends Panel {
         form = new Form<Void>("form");
         add(form);
         form.add(new ExternalLink("download", new PropertyModel<String>(model, "uri")));
-        form.add(new AuthenticatedAjaxEventButton("rename", form, eventBusModel, RenameEvent.class));
+        form.add(new AuthenticatedAjaxEventButton("update", form, eventBusModel, UpdateClickedEvent.class));
         form.add(new AuthenticatedAjaxEventButton("delete", form, eventBusModel, ResourceDeleteClickedEvent.class));
         form.add(new AuthenticatedAjaxEventButton("move", form, eventBusModel, MoveEvent.class));
         form.add(new AuthenticatedAjaxEventButton("duplicate", form, eventBusModel, DuplicateEvent.class));

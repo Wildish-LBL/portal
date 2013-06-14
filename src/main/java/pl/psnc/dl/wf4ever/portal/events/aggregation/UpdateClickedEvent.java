@@ -5,12 +5,12 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import pl.psnc.dl.wf4ever.portal.events.AbstractClickAjaxEvent;
 
 /**
- * A resource has been renamed.
+ * User wants to upload a new version of the resource.
  * 
  * @author piotrekhol
  * 
  */
-public class RenameEvent extends AbstractClickAjaxEvent {
+public class UpdateClickedEvent extends AbstractClickAjaxEvent {
 
     /**
      * Constructor.
@@ -18,7 +18,7 @@ public class RenameEvent extends AbstractClickAjaxEvent {
      * @param target
      *            AJAX request target
      */
-    public RenameEvent(AjaxRequestTarget target) {
+    public UpdateClickedEvent(AjaxRequestTarget target) {
         super(target);
     }
 
