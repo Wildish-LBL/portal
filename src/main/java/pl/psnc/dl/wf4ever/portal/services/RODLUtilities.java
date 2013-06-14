@@ -3,17 +3,13 @@ package pl.psnc.dl.wf4ever.portal.services;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
-import org.purl.wf4ever.rosrs.client.Creator;
+import org.purl.wf4ever.rosrs.client.Person;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
-import org.purl.wf4ever.rosrs.client.users.UserManagementService;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.query.QueryExecution;
@@ -59,8 +55,7 @@ public final class RODLUtilities {
      * @throws IOException
      *             when cannot connect to SPARQL endpoint
      */
-    public static List<ResearchObject> getMostRecentROs(URI sparqlEndpoint, URI rodlURI, UserManagementService ums,
-            Map<URI, Creator> usernames, int cnt)
+    public static List<ResearchObject> getMostRecentROs(URI sparqlEndpoint, URI rodlURI, int cnt)
             throws IOException {
         QueryExecution x = QueryExecutionFactory.sparqlService(sparqlEndpoint.toString(),
             MyQueryFactory.getxMostRecentROs(cnt));
@@ -73,12 +68,6 @@ public final class RODLUtilities {
             }
             URI uri = URI.create(solution.getResource("ro").getURI());
             Literal creators = solution.getLiteral("creators");
-            Set<Creator> authors = new HashSet<>();
-            if (creators != null) {
-                for (String creator : creators.getString().split(", ")) {
-                    authors.add(Creator.get(ums, usernames, creator));
-                }
-            }
             DateTime created = null;
             Object date = solution.getLiteral("created").getValue();
             if (date instanceof XSDDateTime) {
@@ -93,7 +82,7 @@ public final class RODLUtilities {
             }
             ResearchObject ro = new ResearchObject(uri, null);
             ro.setCreated(created);
-            ro.setCreators(authors);
+            ro.setAuthor(new Person(null, creators != null ? creators.getString() : "Unknown"));
             roHeaders.add(ro);
         }
         return roHeaders;

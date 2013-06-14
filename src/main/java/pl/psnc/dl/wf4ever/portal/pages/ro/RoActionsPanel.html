@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<wicket:panel xmlns:wicket="http://wicket.apache.org">
+	<form class="form-inline" wicket:id="form">
+		<div class="btn-toolbar">
+			<div class="btn-group">
+				<a class="btn dropdown-toggle" data-toggle="dropdown"
+					href="#">Download... <span class="caret"></span>
+				</a>
+				<ul class="dropdown-menu">
+					<li><a href="#"
+						data-original-title="Download the RO as a ZIP archive"
+						class="my-tooltip" data-toggle="tooltip" data-placement="right"
+						data-container="body" wicket:id="downloadROZipped"> <i
+							class="icon-download"></i> ZIP
+					</a></li>
+					<li><a href="#"
+						data-original-title="Download the RDF metadata of the RO"
+						class="my-tooltip" data-toggle="tooltip" data-placement="right"
+						data-container="body" wicket:id="downloadMetadata"
+						id="downloadMetadata26"> <i class="icon-download"></i>
+							metadata
+					</a></li>
+				</ul>
+			</div>
+			<div class="btn-group">
+				<a class="btn dropdown-toggle" data-toggle="dropdown"
+					href="#">Evolution... <span class="caret"></span>
+				</a>
+				<ul class="dropdown-menu">
+					<li><a href="#"
+						data-original-title="Create a snapshot of the RO"
+						class="my-tooltip" data-toggle="tooltip" data-placement="right"
+						data-container="body" wicket:id="snapshot-ro-button"> <i
+							class="icon-camera"></i> snapshot
+					</a></li>
+					<li><a href="#"
+						data-original-title="Create an archive of the RO"
+						class="my-tooltip" data-toggle="tooltip" data-placement="right"
+						data-container="body" wicket:id="release-ro-button"> <i
+							class="icon-share"></i> release
+					</a></li>
+				</ul>
+			</div>
+		</div>
+	</form>
+</wicket:panel>

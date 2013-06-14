@@ -4,8 +4,6 @@
 package pl.psnc.dl.wf4ever.portal;
 
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.Session;
@@ -14,7 +12,6 @@ import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.util.cookies.CookieUtils;
 import org.openid4java.discovery.DiscoveryInformation;
-import org.purl.wf4ever.rosrs.client.Creator;
 import org.purl.wf4ever.rosrs.client.ROSRService;
 import org.purl.wf4ever.rosrs.client.users.User;
 import org.purl.wf4ever.rosrs.client.users.UserManagementService;
@@ -57,9 +54,6 @@ public class MySession extends AbstractAuthenticatedWebSession {
 
     /** Cookie key. */
     private static final String MYEXP_KEY_SECRET = "myexp2";
-
-    /** Usernames cache. */
-    private final Map<URI, Creator> usernames = new HashMap<>();
 
     /** OpenID discovery information. */
     private DiscoveryInformation discoveryInformation;
@@ -168,7 +162,7 @@ public class MySession extends AbstractAuthenticatedWebSession {
 
     @Override
     public Roles getRoles() {
-        return isSignedIn() ? new Roles(Roles.USER) : null;
+        return isSignedIn() ? new Roles(Roles.USER) : new Roles();
     }
 
 
@@ -214,16 +208,6 @@ public class MySession extends AbstractAuthenticatedWebSession {
 
     public User getUser() {
         return user;
-    }
-
-
-    /**
-     * The usernames cache.
-     * 
-     * @return the usernames
-     */
-    public Map<URI, Creator> getUsernames() {
-        return usernames;
     }
 
 

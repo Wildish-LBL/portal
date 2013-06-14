@@ -5,10 +5,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.markup.html.basic.Label;
@@ -20,15 +18,12 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
-import org.purl.wf4ever.rosrs.client.Creator;
+import org.purl.wf4ever.rosrs.client.Person;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
-import org.purl.wf4ever.rosrs.client.users.UserManagementService;
 
-import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
-import pl.psnc.dl.wf4ever.portal.pages.util.CreatorsPanel;
 import pl.psnc.dl.wf4ever.portal.services.MyQueryFactory;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
@@ -74,19 +69,11 @@ public class AllRosPage extends BasePage {
         ResultSet results = x.execSelect();
         List<ResearchObject> roHeaders = new ArrayList<>();
         final Map<ResearchObject, Integer> resCnts = new HashMap<>();
-        Map<URI, Creator> usernames = MySession.get().getUsernames();
-        UserManagementService ums = MySession.get().getUms();
         while (results.hasNext()) {
             QuerySolution solution = results.next();
             URI uri = new URI(solution.getResource("ro").getURI());
             int resCnt = solution.getLiteral("resCnt").getInt();
             Literal creators = solution.getLiteral("creators");
-            Set<Creator> authors = new HashSet<>();
-            if (creators != null) {
-                for (String creator : creators.getString().split(", ")) {
-                    authors.add(Creator.get(ums, usernames, creator));
-                }
-            }
             DateTime created = null;
             Object date = solution.getLiteral("created").getValue();
             if (date instanceof XSDDateTime) {
@@ -101,7 +88,7 @@ public class AllRosPage extends BasePage {
             }
             ResearchObject ro = new ResearchObject(uri, null);
             ro.setCreated(created);
-            ro.setCreators(authors);
+            ro.setAuthor(new Person(null, creators != null ? creators.getString() : "Unknown"));
             roHeaders.add(ro);
             resCnts.put(ro, resCnt);
         }
@@ -119,7 +106,7 @@ public class AllRosPage extends BasePage {
                 link.add(new Label("name"));
                 item.add(link);
                 item.add(new Label("resourcesCnt", "" + resCnts.get(ro)));
-                item.add(new CreatorsPanel("creators", new PropertyModel<Set<Creator>>(ro, "creators")));
+                item.add(new Label("creator", new PropertyModel<String>(ro, "author.name")));
                 item.add(new Label("createdFormatted"));
             }
 

@@ -3,7 +3,6 @@ package pl.psnc.dl.wf4ever.portal.pages;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.Application;
@@ -22,16 +21,13 @@ import org.apache.wicket.protocol.http.IRequestLogger;
 import org.apache.wicket.protocol.http.RequestLogger;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.purl.wf4ever.rosrs.client.Creator;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
-import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.components.UniversalStyledAjaxButton;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.model.Recommendation;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
-import pl.psnc.dl.wf4ever.portal.pages.util.CreatorsPanel;
 import pl.psnc.dl.wf4ever.portal.services.MyQueryFactory;
 import pl.psnc.dl.wf4ever.portal.services.RODLUtilities;
 import pl.psnc.dl.wf4ever.portal.services.RSSService;
@@ -90,8 +86,8 @@ public class HomePage extends BasePage {
         add(feedbackPanel);
 
         ResultSet results;
-        List<ResearchObject> roHeaders = RODLUtilities.getMostRecentROs(((PortalApplication) getApplication())
-                .getSparqlEndpointURI(), rodlURI, MySession.get().getUms(), MySession.get().getUsernames(), 10);
+        List<ResearchObject> roHeaders = RODLUtilities.getMostRecentROs(
+            ((PortalApplication) getApplication()).getSparqlEndpointURI(), rodlURI, 10);
 
         results = QueryExecutionFactory.sparqlService(
             ((PortalApplication) getApplication()).getSparqlEndpointURI().toString(),
@@ -215,13 +211,6 @@ public class HomePage extends BasePage {
     }
 
 
-    /**
-     * public String getSearchKeywords() { return searchKeywords; }
-     * 
-     * 
-     * public void setSearchKeywords(String searchKeywords) { this.searchKeywords = searchKeywords; }
-     */
-
     public String getMyExpId() {
         return myExpId;
     }
@@ -275,7 +264,7 @@ public class HomePage extends BasePage {
             link.getPageParameters().add("ro", ro.getUri().toString());
             link.add(new Label("name"));
             item.add(link);
-            item.add(new CreatorsPanel("creator", new PropertyModel<Set<Creator>>(ro, "creators")));
+            item.add(new Label("creator", new PropertyModel<String>(ro, "author.name")));
             item.add(new Label("createdFormatted"));
         }
     }

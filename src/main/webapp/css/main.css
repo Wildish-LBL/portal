@@ -241,7 +241,7 @@ table.resourceList td.link {
 	/*	width: 960px;*/
 	padding: 0 0px;
 	padding-top: 0px;
-	background: #fff url('../images/bottomback.gif') bottom repeat-x;
+	background: #fff url('bottomback.gif') bottom repeat-x;
 	-moz-border-radius: 5px;
 	-webkit-border-radius: 5px;
 	border-radius: 5px;
@@ -321,7 +321,7 @@ table.resourceList td.link {
 }
 
 .box.small .boxDiv ul li {
-	list-style-image: url("../images/expanded.gif");
+	list-style-image: url("expanded.gif");
 }
 
 div.separated {
@@ -510,3 +510,22 @@ input.span1 {
 	list-style: none;
 }
 /* visualization */
+
+.dl-horizontal.narrow dt {
+	width: 100px;
+	margin-bottom: 2px;
+}
+
+.dl-horizontal.narrow dd {
+	margin-left: 120px;
+	margin-bottom: 2px;
+}
+
+.table-expandable tr {
+	cursor: pointer;
+}
+
+.td-details {
+	cursor: default;
+	background-color: inherit !important;
+}

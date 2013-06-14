@@ -33,7 +33,7 @@ import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.components.UniversalStyledAjaxButton;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
-import pl.psnc.dl.wf4ever.portal.pages.util.ModelIteratorAdapter;
+import pl.psnc.dl.wf4ever.portal.utils.ModelIteratorAdapter;
 
 /**
  * A page with user's own Research Objects.

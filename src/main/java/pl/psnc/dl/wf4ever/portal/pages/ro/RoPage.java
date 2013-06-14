@@ -4,23 +4,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.swing.tree.TreeModel;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.RestartResponseException;
-import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.markup.html.IHeaderResponse;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.model.CompoundPropertyModel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.purl.wf4ever.checklist.client.ChecklistEvaluationService;
@@ -28,9 +23,9 @@ import org.purl.wf4ever.checklist.client.EvaluationResult;
 import org.purl.wf4ever.rosrs.client.Annotable;
 import org.purl.wf4ever.rosrs.client.Annotation;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
-import org.purl.wf4ever.rosrs.client.Resource;
 import org.purl.wf4ever.rosrs.client.Statement;
 import org.purl.wf4ever.rosrs.client.Thing;
+import org.purl.wf4ever.rosrs.client.Utils;
 import org.purl.wf4ever.rosrs.client.evo.JobStatus;
 import org.purl.wf4ever.rosrs.client.exception.NotificationsException;
 import org.purl.wf4ever.rosrs.client.exception.ROException;
@@ -40,19 +35,31 @@ import org.purl.wf4ever.rosrs.client.notifications.NotificationService;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
-import pl.psnc.dl.wf4ever.portal.components.LoadingCircle;
+import pl.psnc.dl.wf4ever.portal.components.NotificationsIndicator;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
-import pl.psnc.dl.wf4ever.portal.listeners.IAjaxLinkListener;
+import pl.psnc.dl.wf4ever.portal.events.MetadataDownloadEvent;
+import pl.psnc.dl.wf4ever.portal.events.RoEvolutionLoadedEvent;
+import pl.psnc.dl.wf4ever.portal.events.aggregation.AggregationChangedEvent;
+import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationAddedEvent;
+import pl.psnc.dl.wf4ever.portal.events.annotations.ImportAnnotationReadyEvent;
+import pl.psnc.dl.wf4ever.portal.events.evo.JobFinishedEvent;
+import pl.psnc.dl.wf4ever.portal.events.evo.ReleaseCreateEvent;
+import pl.psnc.dl.wf4ever.portal.events.evo.ReleaseCreatedEvent;
+import pl.psnc.dl.wf4ever.portal.events.evo.SnapshotCreateEvent;
+import pl.psnc.dl.wf4ever.portal.events.evo.SnapshotCreatedEvent;
+import pl.psnc.dl.wf4ever.portal.modals.DownloadMetadataModal;
+import pl.psnc.dl.wf4ever.portal.modals.ImportAnnotationModal;
 import pl.psnc.dl.wf4ever.portal.pages.BasePage;
 import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
-import pl.psnc.dl.wf4ever.portal.pages.ro.behaviours.JobStatusUpdatingBehaviour;
-import pl.psnc.dl.wf4ever.portal.pages.ro.behaviours.OnDomReadyAjaxBehaviour;
-import pl.psnc.dl.wf4ever.portal.pages.ro.roexplorer.ROExplorer;
+import pl.psnc.dl.wf4ever.portal.pages.ro.behaviors.ChecklistEvaluateBehavior;
+import pl.psnc.dl.wf4ever.portal.pages.ro.behaviors.EvolutionInfoLoadBehavior;
+import pl.psnc.dl.wf4ever.portal.pages.ro.behaviors.JobStatusUpdatingBehaviour;
+import pl.psnc.dl.wf4ever.portal.pages.ro.behaviors.RoLoadBehavior;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
-import com.hp.hpl.jena.ontology.Individual;
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.google.common.collect.Multimap;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import com.sun.jersey.api.client.ClientResponse;
 
 /**
@@ -67,47 +74,19 @@ public class RoPage extends BasePage {
     private static final long serialVersionUID = 1L;
 
     /** Logger. */
-    private static final Logger LOG = Logger.getLogger(RoPage.class);
-
-    /** Can the user edit the RO. */
-    boolean canEdit = false;
-
-    /** The part showing the RO annotations. */
-    final AnnotatingBox annotatingBox;
-
-    /** The modal window for editing annotations. */
-    final StatementEditModal stmtEditForm;
-
-    /** The modal window for editing relations. */
-    final RelationEditModal relEditForm;
-
-    /** The modal window for importing annotations. */
-    private final ImportAnnotationModal importAnnotationModal;
-
-    /** The modal window for adding resources. */
-    private UploadResourceModal uploadResourceModal;
+    static final Logger LOG = Logger.getLogger(RoPage.class);
 
     /** The feedback panel. */
-    MyFeedbackPanel feedbackPanel;
+    private MyFeedbackPanel feedbackPanel;
 
+    /** The research object. */
     protected ResearchObject researchObject;
 
+    /** Checklist quality evaluation of this RO. */
     protected EvaluationResult qualityEvaluation;
-
-    /** Regex pattern for parsing Link HTTP headers. */
-    private static final Pattern LINK_HEADER = Pattern.compile("<(.+)>; rel=(.+)");
 
     /** Template for HTML Link Headers. */
     private static final String HTML_LINK_TEMPLATE = "<link rel=\"%s\" href=\"%s\"/>";
-
-    private ROExplorer foldersViewer;
-    private WebMarkupContainer roExplorerParent;
-    RoEvoBox roevoBox;
-    private LoadingCircle loadingEvoCircle;
-    private LoadingCircle loadingAnnotationCircle;
-    private static final String LOADING_ANNOTATIONS_OBJECT = "Loading annotations.<br />Please wait...";
-    /** Loading image. */
-    private LoadingCircle loadingCircle;
 
     /** Selected resource model. */
     private CompoundPropertyModel<Thing> itemModel;
@@ -115,9 +94,8 @@ public class RoPage extends BasePage {
     /** Notifications about this RO. */
     private List<Notification> notifications;
 
-    /** Loading information. */
-    private static final String LOADING_OBJECT = "Loading Research Object metadata.<br />Please wait...";
-    private static final String LOADING_EVO_OBJECT = "Loading ROEVO history.<br />Please wait...";
+    /** Loadable event bus model. */
+    private IModel<EventBus> eventBusModel;
 
 
     /**
@@ -128,7 +106,6 @@ public class RoPage extends BasePage {
      * @throws URISyntaxException
      *             if URIs returned by the RODL are incorrect
      */
-    @SuppressWarnings("serial")
     public RoPage(final PageParameters parameters)
             throws URISyntaxException {
         super(parameters);
@@ -143,70 +120,11 @@ public class RoPage extends BasePage {
         feedbackPanel = new MyFeedbackPanel("feedbackPanel");
         feedbackPanel.setOutputMarkupId(true);
         add(feedbackPanel);
-        if (MySession.get().isSignedIn()) {
-            //            List<URI> uris = ROSRService.getROList(rodlURI, MySession.get().getdLibraAccessToken());
-            //            canEdit = uris.contains(roURI);
-            canEdit = true;
+        if (!MySession.get().getRoles().contains(Roles.USER)) {
+            info("<b>Sign in</b> to edit this research object.");
         }
-        add(new Label("title", researchObject.getUri().toString()));
 
         itemModel = new CompoundPropertyModel<Thing>((Thing) null);
-
-        loadingCircle = new LoadingCircle("folders-viewer", LOADING_OBJECT);
-        loadingEvoCircle = new LoadingCircle("ro-evo-box", LOADING_EVO_OBJECT);
-        loadingAnnotationCircle = new LoadingCircle("ro-evo-box", LOADING_ANNOTATIONS_OBJECT);
-        loadingEvoCircle.setOutputMarkupId(true);
-        loadingAnnotationCircle.setOutputMarkupId(true);
-        roExplorerParent = new WebMarkupContainer("ro-explorer-parent");
-        add(roExplorerParent);
-        roExplorerParent.setOutputMarkupId(true);
-        roExplorerParent.add(loadingCircle);
-
-        add(new OnDomReadyAjaxBehaviour(feedbackPanel) {
-
-            @Override
-            protected void respond(AjaxRequestTarget target) {
-                if (!researchObject.isLoaded()) {
-                    try {
-                        researchObject.load();
-                        onRoLoaded(target);
-                    } catch (Exception e) {
-                        error("Research object cannot be loaded: " + e.getMessage());
-                        LOG.error("Research object cannot be loaded", e);
-                    }
-                }
-                super.respond(target);
-            }
-        });
-        add(new OnDomReadyAjaxBehaviour(feedbackPanel) {
-
-            @Override
-            protected void respond(AjaxRequestTarget target) {
-                try {
-                    if (!researchObject.isEvolutionInformationLoaded()) {
-                        researchObject.loadEvolutionInformation();
-                        onRoEvoLoaded(target);
-                    }
-                } catch (Exception e) {
-                    feedbackPanel.error("Could not load the evolution information: " + e.getLocalizedMessage());
-                }
-                super.respond(target);
-            }
-        });
-        add(new OnDomReadyAjaxBehaviour(feedbackPanel) {
-
-            @Override
-            protected void respond(AjaxRequestTarget target) {
-                try {
-                    ChecklistEvaluationService service = ((PortalApplication) getApplication()).getChecklistService();
-                    qualityEvaluation = service.evaluate(researchObject.getUri(), "ready-to-release");
-                    foldersViewer.onQualityEvaluated(target);
-                } catch (Exception e) {
-                    feedbackPanel.error("Could not calculate the quality: " + e.getLocalizedMessage());
-                }
-                super.respond(target);
-            }
-        });
 
         NotificationService notificationService = new NotificationService(getRodlURI(), null);
         try {
@@ -215,86 +133,86 @@ public class RoPage extends BasePage {
             LOG.error("Can't load notifications", e);
             error("Can't load notifications: " + e.getMessage());
         }
-        foldersViewer = new ROExplorer("folders-viewer", researchObject, itemModel,
-                new PropertyModel<EvaluationResult>(this, "qualityEvaluation"), new PropertyModel<List<Notification>>(
-                        this, "notifications"));
-        foldersViewer.setOutputMarkupId(true);
-        foldersViewer.getSnapshotButton().addLinkListener(new IAjaxLinkListener() {
+
+        IModel<ResearchObject> researchObjectModel = new Model<ResearchObject>(researchObject);
+        this.setDefaultModel(researchObjectModel);
+        IModel<List<Notification>> notificationsModel = new PropertyModel<List<Notification>>(this, "notifications");
+        IModel<EvaluationResult> qualityModel = new PropertyModel<EvaluationResult>(this, "qualityEvaluation");
+        eventBusModel = new LoadableDetachableModel<EventBus>() {
+
+            /** id. */
+            private static final long serialVersionUID = 5225667860067218852L;
+
 
             @Override
-            public void onAjaxLinkClicked(Object source, AjaxRequestTarget target) {
-                createSnapshot(target);
+            protected EventBus load() {
+                return new EventBus();
             }
-        });
-        foldersViewer.getReleaseButton().addLinkListener(new IAjaxLinkListener() {
+        };
+        eventBusModel.getObject().register(this);
 
-            @Override
-            public void onAjaxLinkClicked(Object source, AjaxRequestTarget target) {
-                createArchive(target);
-            }
-        });
-        annotatingBox = new AnnotatingBox(this, itemModel);
-        foldersViewer.appendOnNodeClickTarget(annotatingBox);
-        /*****************************************************************************/
-        add(annotatingBox);
-        //add(load)
-        annotatingBox.selectedStatements.clear();
-        foldersViewer.addLinkListener(annotatingBox);
-        foldersViewer.appendOnLinkClickTarget(annotatingBox);
-        add(new DownloadMetadataModal("downloadMetadataModal", this));
-        uploadResourceModal = new UploadResourceModal("uploadResourceModal", this);
-        add(uploadResourceModal);
-        stmtEditForm = new StatementEditModal("statementEditModal", RoPage.this, new CompoundPropertyModel<Statement>(
-                (Statement) null));
-        add(stmtEditForm);
-        relEditForm = new RelationEditModal("relationEditModal", RoPage.this, new CompoundPropertyModel<Statement>(
-                (Statement) null), "loadingROFragment");
-        add(relEditForm);
-        importAnnotationModal = new ImportAnnotationModal("importAnnotationModal", this, itemModel);
-        add(importAnnotationModal);
-        add(loadingEvoCircle);
+        add(new RoSummaryPanel("ro-summary", researchObjectModel, eventBusModel));
+        add(new RoActionsPanel("ro-actions", researchObjectModel, eventBusModel));
+        add(new NotificationsIndicator("notifications", researchObjectModel, notificationsModel, eventBusModel));
+        add(new QualityBar("health-progress-bar", qualityModel, eventBusModel));
+        add(new RoCommentsPanel("comments", researchObjectModel, eventBusModel));
+        add(new RoContentPanel("content", researchObjectModel, eventBusModel));
+        add(new RoEvoBox("ro-evo-box", researchObjectModel));
+
+        add(new DownloadMetadataModal("download-metadata-modal", eventBusModel));
+        add(new ImportAnnotationModal("import-annotation-modal", eventBusModel));
+
+        add(new RoLoadBehavior(feedbackPanel, researchObjectModel, eventBusModel));
+        add(new ChecklistEvaluateBehavior(feedbackPanel, researchObjectModel, eventBusModel,
+                ((PortalApplication) getApplication()).getChecklistService(), qualityModel));
+        add(new EvolutionInfoLoadBehavior(feedbackPanel, researchObjectModel, eventBusModel));
     }
 
 
-    @SuppressWarnings("serial")
-    protected void createSnapshot(AjaxRequestTarget target) {
+    /**
+     * Start the snapshot creation process.
+     * 
+     * @param event
+     *            AJAX event
+     */
+    @Subscribe
+    public void createSnapshot(SnapshotCreateEvent event) {
         final JobStatus status = researchObject.snapshot(researchObject.getName().substring(0,
             researchObject.getName().length() - 1)
                 + "-snapshot");
-        feedbackPanel.add(new JobStatusUpdatingBehaviour(feedbackPanel, status, "snapshot") {
-
-            @Override
-            public void onSuccess(AjaxRequestTarget target) {
-                researchObject.loadEvolutionInformation();
-                RoEvoBox newRoevoBox = new RoEvoBox("ro-evo-box", researchObject);
-                roevoBox.replaceWith(newRoevoBox);
-                roevoBox = newRoevoBox;
-                target.add(roevoBox);
-            }
-        });
-
-        target.add(feedbackPanel);
+        feedbackPanel.add(new JobStatusUpdatingBehaviour(feedbackPanel, status, "snapshot", eventBusModel,
+                SnapshotCreatedEvent.class));
+        event.getTarget().add(feedbackPanel);
     }
 
 
-    @SuppressWarnings("serial")
-    protected void createArchive(AjaxRequestTarget target) {
+    /**
+     * Start the release creation process.
+     * 
+     * @param event
+     *            AJAX event
+     */
+    @Subscribe
+    public void createArchive(ReleaseCreateEvent event) {
         final JobStatus status = researchObject.archive(researchObject.getName().substring(0,
             researchObject.getName().length() - 1)
                 + "-release");
-        feedbackPanel.add(new JobStatusUpdatingBehaviour(feedbackPanel, status, "release") {
+        feedbackPanel.add(new JobStatusUpdatingBehaviour(feedbackPanel, status, "release", eventBusModel,
+                ReleaseCreatedEvent.class));
+        event.getTarget().add(feedbackPanel);
+    }
 
-            @Override
-            public void onSuccess(AjaxRequestTarget target) {
-                researchObject.loadEvolutionInformation();
-                RoEvoBox newRoevoBox = new RoEvoBox("ro-evo-box", researchObject);
-                roevoBox.replaceWith(newRoevoBox);
-                roevoBox = newRoevoBox;
-                target.add(roevoBox);
-            }
-        });
 
-        target.add(feedbackPanel);
+    /**
+     * Reload the evolution information when a snapshot or release is created.
+     * 
+     * @param event
+     *            AJAX event
+     */
+    @Subscribe
+    public void onJobFinished(JobFinishedEvent event) {
+        researchObject.loadEvolutionInformation();
+        eventBusModel.getObject().post(new RoEvolutionLoadedEvent(event.getTarget()));
     }
 
 
@@ -304,13 +222,11 @@ public class RoPage extends BasePage {
         try {
             ClientResponse head = MySession.get().getRosrs()
                     .getResourceHead(researchObject.getUri().resolve(".ro/manifest.rdf"));
-            List<String> links = head.getHeaders().get("Link");
-            if (links != null) {
-                for (String link : links) {
-                    Matcher m = LINK_HEADER.matcher(link);
-                    if (m.matches()) {
-                        response.renderString(String.format(HTML_LINK_TEMPLATE, m.group(2), m.group(1)));
-                    }
+            List<String> headers = head.getHeaders().get("Link");
+            if (headers != null && !headers.isEmpty()) {
+                Multimap<String, URI> links = Utils.getLinkHeaders(headers);
+                for (Entry<String, URI> link : links.entries()) {
+                    response.renderString(String.format(HTML_LINK_TEMPLATE, link.getKey(), link.getValue()));
                 }
             }
             head.close();
@@ -320,18 +236,8 @@ public class RoPage extends BasePage {
     }
 
 
-    public TreeModel getPhysicalResourcesTree() {
-        return null;
-    }
-
-
     public EvaluationResult getQualityEvaluation() {
         return qualityEvaluation;
-    }
-
-
-    public void setQualityEvaluation(EvaluationResult qualityEvaluation) {
-        this.qualityEvaluation = qualityEvaluation;
     }
 
 
@@ -341,92 +247,32 @@ public class RoPage extends BasePage {
 
 
     /**
-     * Called when the user wants to add a local resource.
+     * Redirect to the metadata file.
      * 
-     * @param target
-     *            response target
-     * @param uploadedFile
-     *            the uploaded file
-     * @param resourceClass
-     *            resource class, if any
-     * @throws ROSRSException
-     *             unexpected response code
-     * @throws IOException
-     *             can't get the uploaded file
-     * @throws ROException
-     * @throws URISyntaxException
+     * @param event
+     *            AJAX event
      */
-    void onResourceAdd(AjaxRequestTarget target, final FileUpload uploadedFile, ResourceClass resourceClass)
-            throws ROSRSException, IOException, ROException, URISyntaxException {
-        Resource resource = researchObject.aggregate(uploadedFile.getClientFileName(), uploadedFile.getInputStream(),
-            uploadedFile.getContentType());
-        if (resourceClass != null) {
-            OntModel model = ModelFactory.createOntologyModel();
-            Individual ind = model.createIndividual(resource.getUri().toString(),
-                model.createResource(resourceClass.getUri().toString()));
-            Statement stmt = new Statement(ind.listProperties().next(), null);
-            resource.annotate(null, Annotation.wrapAnnotationBody(Arrays.asList(stmt)), "application/rdf+xml");
-        }
-        target.add(foldersViewer);
-
-        try {
-            ChecklistEvaluationService service = ((PortalApplication) getApplication()).getChecklistService();
-            qualityEvaluation = service.evaluate(researchObject.getUri(), "ready-to-release");
-            foldersViewer.onQualityEvaluated(target);
-        } catch (Exception e) {
-            feedbackPanel.error("Could not calculate the quality: " + e.getLocalizedMessage());
-        }
+    @Subscribe
+    public void onMetadataDownload(MetadataDownloadEvent event) {
+        event.getTarget().appendJavaScript("window.location.href='" + getROMetadataLink(event.getFormat()) + "'");
     }
 
 
     /**
-     * Called when a user wants to a delete an aggregated resource.
+     * When the aggregation has changed, recalculate the quality.
      * 
-     * @param resource
-     *            remote or local resource
-     * @param target
-     *            request target
-     * @throws IOException
-     *             when cannot connect to RODL
-     * @throws ROSRSException
-     *             deleting the resource caused an unexpected response
+     * @param event
+     *            AJAX event
      */
-    public void onResourceDelete(org.purl.wf4ever.rosrs.client.Resource resource, AjaxRequestTarget target)
-            throws IOException, ROSRSException {
-        resource.delete();
-        target.add(foldersViewer);
-    }
-
-
-    /**
-     * Called when the currently selected aggregated resource has changed.
-     * 
-     * @param target
-     *            request target
-     */
-    public void onResourceSelected(AjaxRequestTarget target) {
-        annotatingBox.selectedStatements.clear();
-        target.add(annotatingBox);
-    }
-
-
-    /**
-     * Called when a remote resource is added.
-     * 
-     * @param target
-     *            request target
-     * @param resourceURI
-     *            remote resource URI
-     * @param resourceClass
-     * @throws ROSRSException
-     *             aggregating the resource caused unexpected response
-     * @throws ROException
-     */
-    public void onRemoteResourceAdded(AjaxRequestTarget target, URI resourceURI, ResourceClass resourceClass)
-            throws ROSRSException, ROException {
-        URI absoluteResourceURI = researchObject.getUri().resolve(resourceURI);
-        researchObject.aggregate(absoluteResourceURI);
-        target.add(foldersViewer);
+    @Subscribe
+    public void onAggregationChanged(AggregationChangedEvent event) {
+        ChecklistEvaluationService service = ((PortalApplication) getApplication()).getChecklistService();
+        IModel<EvaluationResult> qualityModel = new PropertyModel<EvaluationResult>(this, "qualityEvaluation");
+        @SuppressWarnings("unchecked")
+        ChecklistEvaluateBehavior behavior = new ChecklistEvaluateBehavior(feedbackPanel,
+                (IModel<ResearchObject>) this.getDefaultModel(), eventBusModel, service, qualityModel);
+        this.add(behavior);
+        event.getTarget().appendJavaScript(behavior.getCallbackScript());
     }
 
 
@@ -439,9 +285,9 @@ public class RoPage extends BasePage {
      *             URIs retrieved from RODL are incorrect
      * @throws ROSRSException
      *             requests to RODL returned incorrect responses
-     * @throws ROException
-     * @throws IOException
+     * @throws ROException .
      */
+    @Deprecated
     void onStatementAdd(List<Statement> statements)
             throws URISyntaxException, ROSRSException, ROException {
         InputStream in = Annotation.wrapAnnotationBody(statements);
@@ -458,6 +304,7 @@ public class RoPage extends BasePage {
      * @throws ROSRSException
      *             requests to RODL returned incorrect responses
      */
+    @Deprecated
     void onStatementEdit(Statement statement)
             throws ROSRSException {
         statement.getAnnotation().update();
@@ -465,64 +312,24 @@ public class RoPage extends BasePage {
 
 
     /**
-     * Called after an annotation has been created or edited.
-     * 
-     * @param target
-     *            request target.
-     */
-    void onStatementAddedEdited(AjaxRequestTarget target) {
-        //FIXME isn't it the same as the next one?
-        target.add(annotatingBox);
-    }
-
-
-    /**
-     * Called when a relation is added or edited.
-     * 
-     * @param statement
-     *            the relation
-     * @param target
-     *            request target
-     */
-    void onRelationAddedEdited(Statement statement, AjaxRequestTarget target) {
-        //        this.annotatingBox.getModelObject().setAnnotations(
-        //            this.annotatingBox.getModelObject().RoFactory.createAnnotations(rodlURI, roURI, this.annotatingBox
-        //                    .getModelObject().getUri(), MySession.get().getUsernames()));
-        target.add(annotatingBox);
-    }
-
-
-    /**
      * Called when an annotation body has been uploaded.
      * 
-     * @param target
-     *            request target
-     * @param uploadedFile
-     *            uploaded file
-     * @param aggregatedResource
-     *            resource annotated
-     * @throws IOException
-     *             can't get the uploaded file
-     * @throws URISyntaxException
-     *             problems with creating the annotation
-     * @throws ROSRSException
-     *             uploading the annotation body returned an unexpected response
+     * @param event
+     *            AJAX event
      */
-    public void onAnnotationImport(AjaxRequestTarget target, FileUpload uploadedFile, Thing aggregatedResource)
-            throws IOException, URISyntaxException, ROSRSException {
-        String contentType = RDFFormat.forFileName(uploadedFile.getClientFileName(), RDFFormat.RDFXML)
+    @Subscribe
+    public void onAnnotationImport(ImportAnnotationReadyEvent event) {
+        String contentType = RDFFormat.forFileName(event.getUploadedFile().getClientFileName(), RDFFormat.RDFXML)
                 .getDefaultMIMEType();
-        MySession
-                .get()
-                .getRosrs()
-                .addAnnotation(researchObject.getUri(), new HashSet<>(Arrays.asList(aggregatedResource.getUri())),
-                    uploadedFile.getClientFileName(), uploadedFile.getInputStream(), contentType);
-        setResponsePage(RoPage.class, getPageParameters());
-    }
-
-
-    public MyFeedbackPanel getFeedbackPanel() {
-        return feedbackPanel;
+        Annotable annotable = event.getAnnotableModel().getObject();
+        try {
+            annotable.annotate(event.getUploadedFile().getClientFileName(), event.getUploadedFile().getInputStream(),
+                contentType);
+        } catch (ROSRSException | ROException | IOException e) {
+            error(e.getMessage());
+            LOG.error("Can't import annotations", e);
+        }
+        eventBusModel.getObject().post(new AnnotationAddedEvent(event.getTarget(), event.getAnnotableModel()));
     }
 
 
@@ -541,20 +348,6 @@ public class RoPage extends BasePage {
     public String getROMetadataLink(RDFFormat format) {
         return researchObject.getUri()
                 .resolve(".ro/manifest." + format.getDefaultFileExtension() + "?original=manifest.rdf").toString();
-    }
-
-
-    public void onRoLoaded(AjaxRequestTarget target) {
-        foldersViewer.onRoLoaded(target);
-        loadingCircle.replaceWith(foldersViewer);
-        target.add(roExplorerParent);
-    }
-
-
-    public void onRoEvoLoaded(AjaxRequestTarget target) {
-        roevoBox = new RoEvoBox("ro-evo-box", researchObject);
-        loadingEvoCircle.replaceWith(roevoBox);
-        target.add(roevoBox);
     }
 
 }

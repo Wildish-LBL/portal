@@ -129,6 +129,7 @@ public class MyFeedbackPanel extends Panel implements IFeedback {
      */
     public MyFeedbackPanel(final String id, IFeedbackMessageFilter filter) {
         super(id);
+        setEscapeModelStrings(false);
         WebMarkupContainer messagesContainer = new WebMarkupContainer("feedbackul") {
 
             private static final long serialVersionUID = 1L;

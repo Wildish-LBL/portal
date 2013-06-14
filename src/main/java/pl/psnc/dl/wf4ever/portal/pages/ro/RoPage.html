@@ -2,35 +2,88 @@
 <wicket:extend xmlns:wicket="http://wicket.apache.org">
 	<script type="text/javascript" src="js/RoPage.js"></script>
 	<script type="text/javascript" src="js/jit.js"></script>
-	<script type="text/javascript" src="js/InteractiveView.js"></script>
 	<script type="text/javascript" src="js/EvolutionView.js"></script>
-	<div class="row">
-		<div class="span12">
-			<div class="inspan12">
-				<ul class="breadcrumb">
-					<li><a href="home">Home</a> <span class="divider">/</span></li>
-					<li><a href="#">Research Object: <span wicket:id="title"></span></a></li>
-				</ul>
-			</div>
-		</div>
-	</div>
 	<div class="row">
 		<div class="span12" wicket:id="feedbackPanel"></div>
 	</div>
-	<div class="row" wicket:id="ro-explorer-parent">
-		<div class="span12" wicket:id="folders-viewer"></div>
+
+	<div>
+		<ul class="nav nav-tabs" id="tabs">
+			<li><a href="#ro" data-toggle="tab">Overview</a></li>
+			<li><a href="#content" data-toggle="tab">Content</a></li>
+			<li><a href="#relations" data-toggle="tab">Dependencies</a></li>
+			<li><a href="#quality" data-toggle="tab">Quality</a></li>
+			<li><a href="#notifications" data-toggle="tab">Notifications</a></li>
+			<li><a href="#history" data-toggle="tab">History</a></li>
+		</ul>
 	</div>
-
-
-	<div class="row centered">
-		<div class="span11">
-			<div class="tmpDashedContainer" wicket:id="ro-evo-box"></div>
+	<script>
+		$('#tabs a').click(function(e) {
+			e.preventDefault();
+			$(this).tab('show');
+		})
+		$(function() {
+			$('#tabs a:first').tab('show');
+		})
+	</script>
+	<div class="tab-content">
+		<div class="tab-pane active" id="ro">
+			<div class="row">
+				<div class="span8">
+					<div wicket:id="ro-summary"></div>
+				</div>
+				<div class="span4">
+					<div wicket:id="ro-actions"></div>
+					<div wicket:id="notifications"></div>
+					<div wicket:id="health-progress-bar"></div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="span12">
+					<hr />
+				</div>
+			</div>
+			<div class="row">
+				<div class="span12">
+					<div wicket:id="comments"></div>
+				</div>
+			</div>
+		</div>
+		<div class="tab-pane" id="content">
+			<div class="row">
+				<div class="span12">
+					<div wicket:id="content"></div>
+				</div>
+			</div>
+		</div>
+		<div class="tab-pane" id="dependencies">
+			<div class="row">
+				<div class="span12"></div>
+			</div>
+		</div>
+		<div class="tab-pane" id="quality">
+			<div class="row">
+				<div class="span12"></div>
+			</div>
+		</div>
+		<div class="tab-pane" id="notifications">
+			<div class="row">
+				<div class="span12"></div>
+			</div>
+		</div>
+		<div class="tab-pane" id="history">
+			<div class="row">
+				<div class="span11">
+					<div wicket:id="ro-evo-box"></div>
+				</div>
+			</div>
 		</div>
 	</div>
-	<div class="row centered">
-		<div class="span11" wicket:id="annotatingBox"></div>
-	</div>
-	<div wicket:id="statementEditModal"></div>
+	<div wicket:id="download-metadata-modal"></div>
+	<div wicket:id="import-annotation-modal"></div>
+
+
+	<!-- 	<div wicket:id="statementEditModal"></div>
 	<div wicket:id="relationEditModal"></div>
 	<div wicket:id="downloadMetadataModal"></div>
 	<div wicket:id="uploadResourceModal"></div>
@@ -52,5 +105,5 @@
 			Loading Research Object metadata.<br />Please wait...
 		</p>
 	</wicket:fragment>
-
+ -->
 </wicket:extend>

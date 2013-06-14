@@ -1,8 +1,5 @@
 package pl.psnc.dl.wf4ever.portal.components;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.IAjaxCallDecorator;
@@ -13,7 +10,6 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.form.Form;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
-import pl.psnc.dl.wf4ever.portal.listeners.IAjaxLinkListener;
 
 /**
  * A specific {@link AjaxButton} that performs certain JavaScript functions during actions.
@@ -25,9 +21,6 @@ public abstract class UniversalStyledAjaxButton extends AjaxButton {
 
     /** id. */
     private static final long serialVersionUID = 6819868729651344345L;
-
-    /** Listeners for the selected resource. */
-    private List<IAjaxLinkListener> listeners = new ArrayList<>();
 
 
     /**
@@ -65,9 +58,6 @@ public abstract class UniversalStyledAjaxButton extends AjaxButton {
     @Override
     protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
         target.appendJavaScript("hideBusy()");
-        for (IAjaxLinkListener listener : listeners) {
-            listener.onAjaxLinkClicked(this, target);
-        }
     }
 
 
@@ -102,17 +92,6 @@ public abstract class UniversalStyledAjaxButton extends AjaxButton {
     @Override
     public MySession getSession() {
         return (MySession) super.getSession();
-    }
-
-
-    /**
-     * Add new link listener.
-     * 
-     * @param listener
-     *            link listener
-     */
-    public void addLinkListener(IAjaxLinkListener listener) {
-        listeners.add(listener);
     }
 
 }

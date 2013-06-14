@@ -4,19 +4,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.apache.wicket.protocol.http.WebApplication;
-import org.purl.wf4ever.rosrs.client.Creator;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
-import org.purl.wf4ever.rosrs.client.users.UserManagementService;
-
-import pl.psnc.dl.wf4ever.portal.PortalApplication;
 
 import com.sun.syndication.feed.synd.SyndContent;
 import com.sun.syndication.feed.synd.SyndContentImpl;
@@ -24,8 +16,6 @@ import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndEntryImpl;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.feed.synd.SyndFeedImpl;
-import com.sun.syndication.feed.synd.SyndPerson;
-import com.sun.syndication.feed.synd.SyndPersonImpl;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.SyndFeedOutput;
 
@@ -64,8 +54,7 @@ public class RSSService {
      *            RODL URI, for creator resolution
      */
     public RSSService(String basePath, URI sparqlEndpoint, URI rodl) {
-        PortalApplication app = (PortalApplication) WebApplication.get();
-        updatingThread = new UpdatingThread(new UserManagementService(app.getRodlURI(), app.getAdminToken()));
+        updatingThread = new UpdatingThread();
         updatingThread.setSparqlEndpoint(sparqlEndpoint);
         updatingThread.setRodl(rodl);
         updatingThread.setBasePath(basePath);
@@ -101,17 +90,11 @@ public class RSSService {
         /** Base path of the webapp. */
         private String basePath;
 
-        /** Username cache. */
-        private Map<URI, Creator> usernamesCache = new HashMap<>();
-
-        private final UserManagementService ums;
-
 
         /**
          * Constructor.
          */
-        public UpdatingThread(UserManagementService ums) {
-            this.ums = ums;
+        public UpdatingThread() {
             setDaemon(true);
         }
 
@@ -145,8 +128,7 @@ public class RSSService {
         @SuppressWarnings("unchecked")
         private SyndFeed generateRecentROsFeed()
                 throws IOException {
-            List<ResearchObject> ros = RODLUtilities.getMostRecentROs(getSparqlEndpoint(), getRodl(), ums,
-                usernamesCache, 5);
+            List<ResearchObject> ros = RODLUtilities.getMostRecentROs(getSparqlEndpoint(), getRodl(), 5);
 
             SyndFeed feed = new SyndFeedImpl();
             feed.setFeedType("atom_1.0");
@@ -164,16 +146,9 @@ public class RSSService {
                 description.setValue(ro.getName());
                 description.setType("text");
                 entry.setDescription(description);
-                List<SyndPerson> authors = new ArrayList<>();
-                for (Creator c : ro.getCreators()) {
-                    SyndPerson author = new SyndPersonImpl();
-                    author.setName(c.getValue());
-                    if (c.getURI() != null) {
-                        author.setUri(c.getURI().toString());
-                    }
-                    authors.add(author);
+                if (ro.getAuthor() != null) {
+                    entry.setAuthor(ro.getAuthor().getName());
                 }
-                entry.setAuthors(authors);
                 feed.getEntries().add(entry);
             }
             LOG.debug("Generated recent ROs feed");

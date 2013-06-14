@@ -1,6 +1,5 @@
 package pl.psnc.dl.wf4ever.portal.pages.notifications;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -19,7 +18,9 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
 import org.purl.wf4ever.rosrs.client.notifications.Notification;
 
-import pl.psnc.dl.wf4ever.portal.listeners.IAjaxLinkListener;
+import pl.psnc.dl.wf4ever.portal.events.ResourceSelectedEvent;
+
+import com.google.common.eventbus.EventBus;
 
 final class NotificationsList extends Panel {
 
@@ -33,23 +34,18 @@ final class NotificationsList extends Panel {
     private PropertyListView<Notification> list;
 
     private IModel<Notification> selectedNotificationModel;
-
-    private List<IAjaxLinkListener> listeners = new ArrayList<>();
+    private IModel<EventBus> eventBusModel;
 
 
     public NotificationsList(String id, List<? extends Notification> notifications,
-            IModel<Notification> selectedNotificationModel) {
+            IModel<Notification> selectedNotificationModel, IModel<EventBus> eventBusModel) {
         super(id);
+        this.eventBusModel = eventBusModel;
         this.selectedNotificationModel = selectedNotificationModel;
         list = new NotificationsPropertyListView("list", notifications);
         list.setReuseItems(true);
         add(list);
         setOutputMarkupId(true);
-    }
-
-
-    public List<IAjaxLinkListener> getListeners() {
-        return listeners;
     }
 
 
@@ -79,9 +75,7 @@ final class NotificationsList extends Panel {
                 protected void onEvent(AjaxRequestTarget target) {
                     selectedNotificationModel.setObject(item.getModelObject());
                     target.add(NotificationsList.this);
-                    for (IAjaxLinkListener listener : listeners) {
-                        listener.onAjaxLinkClicked(item, target);
-                    }
+                    eventBusModel.getObject().post(new ResourceSelectedEvent(target));
                 }
             });
             item.add(new Behavior() {

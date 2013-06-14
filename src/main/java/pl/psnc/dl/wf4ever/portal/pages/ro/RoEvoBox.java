@@ -1,6 +1,3 @@
-/**
- * 
- */
 package pl.psnc.dl.wf4ever.portal.pages.ro;
 
 import java.util.ArrayList;
@@ -21,10 +18,15 @@ import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
+import pl.psnc.dl.wf4ever.portal.components.LoadingCircle;
+import pl.psnc.dl.wf4ever.portal.events.RoEvolutionLoadedEvent;
 import pl.psnc.dl.wf4ever.portal.model.RoEvoNode;
+
+import com.google.common.eventbus.Subscribe;
 
 /**
  * A panel for displaying the RO evolution surroundings.
@@ -40,10 +42,11 @@ public class RoEvoBox extends Panel {
     /** Logger. */
     @SuppressWarnings("unused")
     private static final Logger LOG = Logger.getLogger(RoEvoBox.class);
+    private WebMarkupContainer tmp;
 
-    private final ResearchObject researchObject;
+    private Map<ResearchObject, RoEvoNode> allNodes;
 
-    private final Map<ResearchObject, RoEvoNode> allNodes;
+    private IModel<ResearchObject> researchObjectModel;
 
     /** next unassigned index. */
     private static int nextIndex;
@@ -59,14 +62,19 @@ public class RoEvoBox extends Panel {
      * @param researchObjectURI
      *            RO URI
      */
-    @SuppressWarnings("serial")
-    public RoEvoBox(String id, final ResearchObject researchObject) {
+    public RoEvoBox(String id, IModel<ResearchObject> researchObjectModel) {
         super(id);
-        this.researchObject = researchObject;
+        this.researchObjectModel = researchObjectModel;
 
         setOutputMarkupId(true);
         setOutputMarkupPlaceholderTag(true);
 
+        init();
+    }
+
+
+    protected void init() {
+        this.removeAll();
         WebMarkupContainer live = new WebMarkupContainer("live");
         add(live);
         WebMarkupContainer snapshots = new WebMarkupContainer("snapshots");
@@ -82,21 +90,21 @@ public class RoEvoBox extends Panel {
         List<ResearchObject> preorder = new ArrayList<>();
         List<ResearchObject> postorder = new ArrayList<>();
 
-        if (!researchObject.isEvolutionInformationLoaded()) {
-            researchObject.loadEvolutionInformation();
+        if (!researchObjectModel.getObject().isEvolutionInformationLoaded()) {
+            researchObjectModel.getObject().loadEvolutionInformation();
         }
         nextIndex = 0;
-        switch (researchObject.getEvoType()) {
+        switch (researchObjectModel.getObject().getEvoType()) {
             case LIVE: {
                 Set<ResearchObject> snapshotsAndArchives = new HashSet<>();
-                snapshotsAndArchives.addAll(researchObject.getSnapshots());
-                snapshotsAndArchives.addAll(researchObject.getArchives());
+                snapshotsAndArchives.addAll(researchObjectModel.getObject().getSnapshots());
+                snapshotsAndArchives.addAll(researchObjectModel.getObject().getArchives());
                 for (ResearchObject ro : snapshotsAndArchives) {
                     if (!preorder.contains(ro)) {
                         visit(ro, preorder, postorder);
                     }
                 }
-                addNode(liveNodes, researchObject);
+                addNode(liveNodes, researchObjectModel.getObject());
                 for (ResearchObject ro : postorder) {
                     switch (ro.getEvoType()) {
                         case SNAPSHOT:
@@ -111,8 +119,8 @@ public class RoEvoBox extends Panel {
                 break;
             case SNAPSHOT:
             case ARCHIVE: {
-                addNode(liveNodes, researchObject.getLiveRO());
-                visit(researchObject, preorder, postorder);
+                addNode(liveNodes, researchObjectModel.getObject().getLiveRO());
+                visit(researchObjectModel.getObject(), preorder, postorder);
                 for (ResearchObject ro : postorder) {
                     switch (ro.getEvoType()) {
                         case SNAPSHOT:
@@ -142,6 +150,27 @@ public class RoEvoBox extends Panel {
                 response.renderOnLoadJavaScript(getDrawJavaScript());
             }
         });
+    }
+
+
+    @Override
+    protected void onConfigure() {
+        super.onConfigure();
+        if (!researchObjectModel.getObject().isEvolutionInformationLoaded()) {
+            tmp = new LoadingCircle(getId(), "Loading...");
+            this.replaceWith(tmp);
+        }
+    }
+
+
+    @Subscribe
+    public void onRoEvolutionLoaded(RoEvolutionLoadedEvent event) {
+        if (tmp != null) {
+            tmp.replaceWith(this);
+            tmp = null;
+        }
+        init();
+        event.getTarget().add(this);
     }
 
 
@@ -197,7 +226,7 @@ public class RoEvoBox extends Panel {
         item.add(new ExternalLink("labelOrIdentifier", new PropertyModel<String>(node, "researchObject.uri.toString"),
                 new PropertyModel<>(node, "labelOrIdentifier")));
         StringBuilder cssClasses = new StringBuilder();
-        if (researchObject.equals(item.getModelObject().getResearchObject())) {
+        if (researchObjectModel.getObject().equals(item.getModelObject().getResearchObject())) {
             cssClasses.append(" active");
         }
         item.add(new AttributeAppender("style", "left: " + x + "px;"));

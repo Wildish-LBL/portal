@@ -5,7 +5,6 @@ import java.net.URI;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.util.convert.IConverter;
 
-
 /**
  * Universal Uri html input.
  * 
@@ -13,6 +12,10 @@ import org.apache.wicket.util.convert.IConverter;
  * 
  */
 public class UriTextField extends TextField<URI> {
+
+    /** id. */
+    private static final long serialVersionUID = -3819365767762711211L;
+
 
     /**
      * Constructor.

@@ -3,7 +3,7 @@
 	<div id="download-metadata-modal" class="modal hide">
 		<form class="form-horizontal" wicket:id="downloadMetadataForm">
 			<div class="modal-header">
-				<a class="close">&times;</a>
+				<a wicket:id="close" class="close">&times;</a>
 				<h3>Choose format</h3>
 			</div>
 			<div class="modal-body control-group">
@@ -19,9 +19,8 @@
 				</fieldset>
 			</div>
 			<div class="modal-footer">
-				<a class="btn btn-primary" wicket:id="confirmDownloadMetadata"
-					type="submit">OK</a> <a class="btn"
-					wicket:id="cancelDownloadMetadata">Cancel</a>
+				<a class="btn btn-primary" wicket:id="ok" type="submit">OK</a> <a
+					class="btn" wicket:id="cancel">Cancel</a>
 			</div>
 		</form>
 	</div>

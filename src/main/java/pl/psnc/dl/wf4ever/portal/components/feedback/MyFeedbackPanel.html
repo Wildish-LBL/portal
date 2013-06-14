@@ -17,12 +17,19 @@
 -->
 <html xmlns:wicket="http://wicket.apache.org">
 <body>
-<wicket:panel>
-  <div wicket:id="feedbackul" class="feedbackPanel">
-    <div wicket:id="messages">
-      <div wicket:id="message" class="errorlevel">A message</div>
-    </div>
-  </div>
-</wicket:panel>
+	<wicket:panel>
+		<div wicket:id="feedbackul" class="feedbackPanel">
+			<div wicket:id="messages"
+				style="margin-top: 5px; margin-bottom: 5px;">
+				<script type="text/javascript">
+					$(document).ready(function() {
+						$(".alert").alert();
+					})
+				</script>
+				<span wicket:id="message"> A message </span> <a class="close"
+					data-dismiss="alert" href="#">&times;</a>
+			</div>
+		</div>
+	</wicket:panel>
 </body>
 </html>
