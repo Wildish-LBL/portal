@@ -1,4 +1,4 @@
-package pl.psnc.dl.wf4ever.portal.components.pagination;
+package pl.psnc.dl.wf4ever.portal.components;
 
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.markup.html.basic.Label;
@@ -11,11 +11,19 @@ import pl.psnc.dl.wf4ever.portal.PortalApplication;
 
 public class Login extends Panel {
 
+    /** id. */
+    private static final long serialVersionUID = 2324973592678492491L;
+
+
     public Login(String id) {
         super(id);
         Label userNameLabel = new Label("username-text", new PropertyModel<String>(this, "usernameText"));
         Label signInLabel = new Label("sign-in-text", new PropertyModel<String>(this, "signInButtonText"));
-        Link signInLink = new Link<Void>("sign-in-link") {
+        Link<?> signInLink = new Link<Void>("sign-in-link") {
+
+            /** id. */
+            private static final long serialVersionUID = 2390673188045652888L;
+
 
             @Override
             public void onClick() {

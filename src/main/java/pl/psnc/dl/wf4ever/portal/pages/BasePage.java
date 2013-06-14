@@ -12,8 +12,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
-import pl.psnc.dl.wf4ever.portal.components.pagination.Login;
-import pl.psnc.dl.wf4ever.portal.components.pagination.Search;
+import pl.psnc.dl.wf4ever.portal.components.Login;
+import pl.psnc.dl.wf4ever.portal.components.Search;
 import pl.psnc.dl.wf4ever.portal.pages.users.ProfilePage;
 
 /**
