@@ -30,9 +30,6 @@ public class FolderBreadcrumbsPanel extends Panel {
     /** id. */
     private static final long serialVersionUID = 6161074268125343983L;
 
-    /** "no folders" label. */
-    private WebMarkupContainer noFolders;
-
 
     /**
      * Constructor.
@@ -50,8 +47,21 @@ public class FolderBreadcrumbsPanel extends Panel {
             final IModel<EventBus> eventBusModel) {
         super(id, model);
         eventBusModel.getObject().register(this);
-
         setOutputMarkupId(true);
+        AjaxLink<String> home = new AjaxLink<String>("home-link") {
+
+            /** id. */
+            private static final long serialVersionUID = 3495158432497901769L;
+
+
+            @Override
+            public void onClick(AjaxRequestTarget target) {
+                folderModel.setObject(null);
+                eventBusModel.getObject().post(new FolderChangeEvent(target));
+            }
+        };
+        add(home);
+
         add(new ListView<Folder>("folder-item", model) {
 
             /** id. */
@@ -79,20 +89,9 @@ public class FolderBreadcrumbsPanel extends Panel {
                 };
                 item.add(link);
                 link.add(new Label("folder", name));
-                WebMarkupContainer divider = new WebMarkupContainer("divider");
-                item.add(divider);
-                divider.setVisible(item.getIndex() < model.getObject().size() - 1);
+                item.add(new WebMarkupContainer("divider"));
             }
-
         });
-        noFolders = new WebMarkupContainer("no-folders");
-        add(noFolders);
-    }
-
-
-    @Override
-    protected void onConfigure() {
-        noFolders.setVisible(((List<?>) getDefaultModelObject()).isEmpty());
     }
 
 

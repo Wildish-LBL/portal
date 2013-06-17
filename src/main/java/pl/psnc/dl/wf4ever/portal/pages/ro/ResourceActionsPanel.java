@@ -16,8 +16,8 @@ import pl.psnc.dl.wf4ever.portal.events.ResourceSelectedEvent;
 import pl.psnc.dl.wf4ever.portal.events.ShowAllAnnotationsEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.DuplicateEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.MoveEvent;
-import pl.psnc.dl.wf4ever.portal.events.aggregation.UpdateClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceDeleteClickedEvent;
+import pl.psnc.dl.wf4ever.portal.events.aggregation.UpdateClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotateEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.CommentAddClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.ImportAnnotationClickedEvent;
@@ -55,7 +55,7 @@ public class ResourceActionsPanel extends Panel {
      *            event bus model for the button clicks
      */
     public ResourceActionsPanel(String id, final IModel<Resource> model, final IModel<EventBus> eventBusModel) {
-        super(id);
+        super(id, model);
         eventBusModel.getObject().register(this);
 
         setOutputMarkupId(true);
@@ -74,6 +74,12 @@ public class ResourceActionsPanel extends Panel {
                 ImportAnnotationClickedEvent.class));
         form.add(new AuthenticatedAjaxEventButton("annotate", form, eventBusModel, AnnotateEvent.class));
         form.add(new AjaxEventButton("show-all", form, eventBusModel, ShowAllAnnotationsEvent.class));
+    }
+
+
+    @Override
+    protected void onConfigure() {
+        setEnabled(getDefaultModelObject() != null);
     }
 
 

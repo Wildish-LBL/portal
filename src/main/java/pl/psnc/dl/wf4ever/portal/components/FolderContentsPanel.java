@@ -10,11 +10,11 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.IHeaderResponse;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.resource.CssResourceReference;
@@ -127,12 +127,6 @@ public class FolderContentsPanel extends Panel {
     /** Event bus. */
     private IModel<EventBus> eventBusModel;
 
-    /** A div separating the folder contents from the unrooted resources. */
-    private WebMarkupContainer unrootedHeader;
-
-    /** Unrooted resources. */
-    private IModel<List<Resource>> unrootedResourcesModel;
-
 
     /**
      * Constructor.
@@ -143,21 +137,39 @@ public class FolderContentsPanel extends Panel {
      *            current folder
      * @param resourceModel
      *            currently selected resource
+     * @param rootFolders
+     *            root folders
      * @param unrootedResourcesModel
-     *            unrooted resources
+     *            unrooted resources, will be displayed alongside root folders
      * @param eventBusModel
      *            event bus
      */
     public FolderContentsPanel(String id, final IModel<Folder> model, final IModel<Resource> resourceModel,
-            final IModel<List<Resource>> unrootedResourcesModel, final IModel<EventBus> eventBusModel) {
+            final IModel<List<Folder>> rootFolders, final IModel<List<Resource>> unrootedResourcesModel,
+            final IModel<EventBus> eventBusModel) {
         super(id, model);
         setOutputMarkupId(true);
         this.resourceModel = resourceModel;
-        this.unrootedResourcesModel = unrootedResourcesModel;
         this.eventBusModel = eventBusModel;
         eventBusModel.getObject().register(this);
 
-        add(new ListView<Folder>("folders", new PropertyModel<List<Folder>>(model, "subfolders")) {
+        IModel<List<Folder>> foldersModel = new AbstractReadOnlyModel<List<Folder>>() {
+
+            /** id. */
+            private static final long serialVersionUID = -1522760963878243661L;
+
+
+            @Override
+            public List<Folder> getObject() {
+                if (model.getObject() != null) {
+                    return model.getObject().getSubfolders();
+                } else {
+                    return rootFolders.getObject();
+                }
+            }
+
+        };
+        add(new ListView<Folder>("folders", foldersModel) {
 
             /** id. */
             private static final long serialVersionUID = 1L;
@@ -186,25 +198,23 @@ public class FolderContentsPanel extends Panel {
             }
 
         });
-        add(new ListView<Resource>("files", new PropertyModel<List<Resource>>(model, "resources")) {
+        IModel<List<Resource>> resourcesModel = new AbstractReadOnlyModel<List<Resource>>() {
 
             /** id. */
-            private static final long serialVersionUID = 1L;
+            private static final long serialVersionUID = -1522760963878243661L;
 
 
             @Override
-            protected void populateItem(ListItem<Resource> item) {
-                Resource resource = item.getModelObject();
-                item.add(new Label("name", new PropertyModel<String>(resource, "name")));
-                item.add(new Label("comments-cnt", "" + resource.getPropertyValues(RDFS.comment).size()));
-                item.add(new ResourceClickedBehaviour(resource, "onclick"));
-                item.add(new ResourceSelectedBehaviour(resource));
+            public List<Resource> getObject() {
+                if (model.getObject() != null) {
+                    return model.getObject().getResources();
+                } else {
+                    return unrootedResourcesModel.getObject();
+                }
             }
 
-        });
-        unrootedHeader = new WebMarkupContainer("unrooted-header");
-        add(unrootedHeader);
-        add(new ListView<Resource>("unrooted-files", unrootedResourcesModel) {
+        };
+        add(new ListView<Resource>("files", resourcesModel) {
 
             /** id. */
             private static final long serialVersionUID = 1L;
@@ -239,7 +249,6 @@ public class FolderContentsPanel extends Panel {
         } catch (ROSRSException e) {
             LOG.error("Can't load folder: " + this.getDefaultModelObjectAsString(), e);
         }
-        unrootedHeader.setVisible(!unrootedResourcesModel.getObject().isEmpty());
     }
 
 

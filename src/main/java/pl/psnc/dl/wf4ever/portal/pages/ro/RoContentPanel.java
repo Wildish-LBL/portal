@@ -3,7 +3,6 @@ package pl.psnc.dl.wf4ever.portal.pages.ro;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -27,11 +26,11 @@ import pl.psnc.dl.wf4ever.portal.events.aggregation.DuplicateEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddReadyEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.MoveEvent;
-import pl.psnc.dl.wf4ever.portal.events.aggregation.UpdateClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceAddReadyEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceAddedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceDeleteClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceDeletedEvent;
+import pl.psnc.dl.wf4ever.portal.events.aggregation.UpdateClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotateEvent;
 import pl.psnc.dl.wf4ever.portal.modals.AddFolderModal;
 import pl.psnc.dl.wf4ever.portal.modals.UploadResourceModal;
@@ -93,11 +92,12 @@ public class RoContentPanel extends Panel {
         IModel<Resource> resourceModel = new PropertyModel<Resource>(this, "currentResource");
         IModel<List<Resource>> unrootedResourcesModel = new PropertyModel<List<Resource>>(getDefaultModel(),
                 "resourcesWithoutFolders");
+        IModel<List<Folder>> rootFolders = new PropertyModel<List<Folder>>(getDefaultModel(), "rootFolders");
         folderHierarchyModel = new FolderHierarchyModel(folderModel);
 
         add(new FolderBreadcrumbsPanel("folder-breadcrumbs", folderHierarchyModel, folderModel, eventBusModel));
         add(new FolderActionsPanel("folder-actions", folderModel, eventBusModel));
-        add(new FolderContentsPanel("folder-contents", folderModel, resourceModel, unrootedResourcesModel,
+        add(new FolderContentsPanel("folder-contents", folderModel, resourceModel, rootFolders, unrootedResourcesModel,
                 eventBusModel));
         add(new ResourceActionsPanel("resource-actions", resourceModel, eventBusModel));
         add(new ResourceSummaryPanel("resource-summary", resourceModel, eventBusModel));
@@ -129,13 +129,7 @@ public class RoContentPanel extends Panel {
      */
     @Subscribe
     public void onRoLoaded(RoLoadedEvent event) {
-        Set<Folder> rootFolders = ((ResearchObject) getDefaultModelObject()).getRootFolders();
-        if (rootFolders.isEmpty()) {
-            changeFolder(null, event.getTarget());
-        } else {
-            // pick any
-            changeFolder(rootFolders.iterator().next(), event.getTarget());
-        }
+        changeFolder(null, event.getTarget());
         event.getTarget().add(this);
     }
 
@@ -148,7 +142,7 @@ public class RoContentPanel extends Panel {
      */
     @Subscribe
     public void onFolderChange(FolderChangeEvent event) {
-        this.currentResource = currentFolder;
+        this.currentResource = null;
     }
 
 
@@ -256,8 +250,7 @@ public class RoContentPanel extends Panel {
         if (currentFolder != null) {
             currentFolder.addSubFolder(event.getFolderName()).getResource();
         } else {
-            Folder folder = ((ResearchObject) this.getDefaultModelObject()).createFolder(event.getFolderName());
-            changeFolder(folder, event.getTarget());
+            ((ResearchObject) this.getDefaultModelObject()).createFolder(event.getFolderName());
         }
         FolderAddedEvent event2 = new FolderAddedEvent(event.getTarget());
         eventBusModel.getObject().post(event2);
@@ -274,7 +267,7 @@ public class RoContentPanel extends Panel {
      */
     protected void changeFolder(Folder newFolder, AjaxRequestTarget target) {
         currentFolder = newFolder;
-        currentResource = currentFolder;
+        currentResource = null;
         FolderChangeEvent event2 = new FolderChangeEvent(target);
         eventBusModel.getObject().post(event2);
     }

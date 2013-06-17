@@ -134,6 +134,8 @@ public class PortalApplication extends AuthenticatedWebApplication {
         super.init();
 
         getSecuritySettings().setAuthorizationStrategy(new AnnotationsRoleAuthorizationStrategy(this));
+        getMarkupSettings().setDefaultBeforeDisabledLink(null);
+        getMarkupSettings().setDefaultAfterDisabledLink(null);
 
         mountPage("/home", HomePage.class);
         mountPage("/myros", MyRosPage.class);

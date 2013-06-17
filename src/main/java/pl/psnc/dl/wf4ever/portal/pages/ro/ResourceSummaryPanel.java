@@ -48,7 +48,7 @@ public class ResourceSummaryPanel extends Panel {
     public ResourceSummaryPanel(String id, IModel<Resource> model, IModel<EventBus> eventBusModel) {
         super(id, model);
         eventBusModel.getObject().register(this);
-        setOutputMarkupId(true);
+        setOutputMarkupPlaceholderTag(true);
 
         EditableTextPanel titlePanel = new EditableTextPanel("titlePanel", new AnnotationTripleModel(
                 AnnotationTripleModel.ANY_ANNOTATION, model, URI.create(DCTerms.title.getURI())), null, false);
@@ -65,6 +65,12 @@ public class ResourceSummaryPanel extends Panel {
         add(new Label("annotations", new PropertyModel<Integer>(model, "annotations.size")));
         add(descriptionPanel);
     }
+
+
+    @Override
+    protected void onConfigure() {
+        setVisible(getDefaultModelObject() != null);
+    };
 
 
     /**

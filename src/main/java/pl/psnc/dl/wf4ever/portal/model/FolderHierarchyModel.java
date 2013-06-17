@@ -47,7 +47,10 @@ public class FolderHierarchyModel implements IModel<List<Folder>> {
             }
         } else {
             Folder last = list.get(list.size() - 1);
-            if (last.equals(folderModel.getObject())) {
+            if (folderModel.getObject() == null) {
+                list.clear();
+                return list;
+            } else if (last.equals(folderModel.getObject())) {
                 return list;
             } else if (last.getSubfolders().contains(folderModel.getObject())) {
                 list.add(folderModel.getObject());
