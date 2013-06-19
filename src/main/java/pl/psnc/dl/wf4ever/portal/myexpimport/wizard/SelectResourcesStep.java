@@ -22,7 +22,7 @@ import org.scribe.oauth.OAuthService;
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.FileHeader;
-import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
+import pl.psnc.dl.wf4ever.portal.pages.Error404Page;
 import pl.psnc.dl.wf4ever.portal.pages.ImmediateRedirectPage;
 import pl.psnc.dl.wf4ever.portal.services.MyExpApi;
 import pl.psnc.dl.wf4ever.portal.services.MyExpImportService;
@@ -163,7 +163,7 @@ public class SelectResourcesStep extends WizardStep {
                             service));
                     } catch (Exception e) {
                         LOG.error(e);
-                        throw new RestartResponseException(ErrorPage.class, new PageParameters().add("message",
+                        throw new RestartResponseException(Error404Page.class, new PageParameters().add("message",
                             e.getMessage() != null ? e.getMessage() : "Unknown error"));
                     }
                     personalItems.setVisible(true);

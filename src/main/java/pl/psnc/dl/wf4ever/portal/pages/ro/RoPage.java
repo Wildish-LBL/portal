@@ -50,7 +50,7 @@ import pl.psnc.dl.wf4ever.portal.events.evo.SnapshotCreatedEvent;
 import pl.psnc.dl.wf4ever.portal.modals.DownloadMetadataModal;
 import pl.psnc.dl.wf4ever.portal.modals.ImportAnnotationModal;
 import pl.psnc.dl.wf4ever.portal.pages.BasePage;
-import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
+import pl.psnc.dl.wf4ever.portal.pages.Error404Page;
 import pl.psnc.dl.wf4ever.portal.pages.ro.behaviors.ChecklistEvaluateBehavior;
 import pl.psnc.dl.wf4ever.portal.pages.ro.behaviors.EvolutionInfoLoadBehavior;
 import pl.psnc.dl.wf4ever.portal.pages.ro.behaviors.JobStatusUpdatingBehaviour;
@@ -113,8 +113,8 @@ public class RoPage extends BasePage {
             URI roURI = new URI(parameters.get("ro").toString());
             researchObject = new ResearchObject(roURI, MySession.get().getRosrs());
         } else {
-            throw new RestartResponseException(ErrorPage.class, new PageParameters().add("message",
-                "The RO URI is missing"));
+            throw new RestartResponseException(Error404Page.class, new PageParameters().add("message",
+                "The RO URI is missing."));
         }
 
         feedbackPanel = new MyFeedbackPanel("feedbackPanel");
@@ -157,7 +157,7 @@ public class RoPage extends BasePage {
         add(new QualityBar("health-progress-bar", qualityModel, eventBusModel));
         add(new RoCommentsPanel("comments", researchObjectModel, eventBusModel));
         add(new RoContentPanel("content", researchObjectModel, eventBusModel));
-        add(new RoEvoBox("ro-evo-box", researchObjectModel));
+        add(new RoEvoBox("ro-evo-box", researchObjectModel, eventBusModel));
 
         add(new DownloadMetadataModal("download-metadata-modal", eventBusModel));
         add(new ImportAnnotationModal("import-annotation-modal", eventBusModel));
@@ -230,8 +230,10 @@ public class RoPage extends BasePage {
                 }
             }
             head.close();
-        } catch (ROSRSException e) {
+        } catch (Exception e) {
             LOG.error("Unexpected response when getting RO head", e);
+            throw new RestartResponseException(Error404Page.class, new PageParameters().add("message", "The RO "
+                    + researchObject.getUri() + " appears to be incorrect."));
         }
     }
 

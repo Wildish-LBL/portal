@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import pl.psnc.dl.wf4ever.portal.pages.AllRosPage;
 import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
-import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
+import pl.psnc.dl.wf4ever.portal.pages.Error404Page;
 import pl.psnc.dl.wf4ever.portal.pages.HelpPage;
 import pl.psnc.dl.wf4ever.portal.pages.HomePage;
 import pl.psnc.dl.wf4ever.portal.pages.SparqlEndpointPage;
@@ -76,8 +76,8 @@ public class TestPages {
      */
     @Test
     public void errorPageRendersSuccessfully() {
-        tester.startPage(ErrorPage.class);
-        tester.assertRenderedPage(ErrorPage.class);
+        tester.startPage(Error404Page.class);
+        tester.assertRenderedPage(Error404Page.class);
     }
 
 

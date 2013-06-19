@@ -26,6 +26,7 @@ import pl.psnc.dl.wf4ever.portal.components.LoadingCircle;
 import pl.psnc.dl.wf4ever.portal.events.RoEvolutionLoadedEvent;
 import pl.psnc.dl.wf4ever.portal.model.RoEvoNode;
 
+import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 /**
@@ -57,18 +58,26 @@ public class RoEvoBox extends Panel {
      * 
      * @param id
      *            wicket id
+     * @param eventBusModel
      * @param sparqlEndpointURI
      *            RODL SPARQL endpoint URI
      * @param researchObjectURI
      *            RO URI
      */
-    public RoEvoBox(String id, IModel<ResearchObject> researchObjectModel) {
-        super(id);
+    public RoEvoBox(String id, IModel<ResearchObject> researchObjectModel, IModel<EventBus> eventBusModel) {
+        super(id, researchObjectModel);
         this.researchObjectModel = researchObjectModel;
+        eventBusModel.getObject().register(this);
 
-        setOutputMarkupId(true);
         setOutputMarkupPlaceholderTag(true);
+        setVisible(false);
+    }
 
+
+    @Subscribe
+    public void onRoEvolutionInfoLoaded(RoEvolutionLoadedEvent event) {
+        setVisible(true);
+        event.getTarget().add(this);
         init();
     }
 

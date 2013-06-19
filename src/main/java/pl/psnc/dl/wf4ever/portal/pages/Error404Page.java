@@ -1,9 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.pages;
 
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 
 /**
  * A static page for displaying errors.
@@ -13,7 +11,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
  * @author Piotr Hołubowicz
  * 
  */
-public class ErrorPage extends BasePage {
+public class Error404Page extends BasePage {
 
     /** id. */
     private static final long serialVersionUID = -3233388849667095897L;
@@ -28,13 +26,13 @@ public class ErrorPage extends BasePage {
      * @param pageParameters
      *            page params, should contain the MESSAGE query param
      */
-    public ErrorPage(PageParameters pageParameters) {
+    public Error404Page(PageParameters pageParameters) {
         super(pageParameters);
 
         if (pageParameters.get(MESSAGE) != null) {
-            add(new Label("message", new Model<String>(pageParameters.get(MESSAGE).toString())));
+            add(new Label("message", pageParameters.get(MESSAGE).toString()));
         } else {
-            add(new Label("message"));
+            add(new Label("message").setVisible(false));
         }
     }
 }

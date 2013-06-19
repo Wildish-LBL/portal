@@ -21,7 +21,7 @@ import org.purl.wf4ever.rosrs.client.search.SparqlSearchServer;
 
 import pl.psnc.dl.wf4ever.portal.pages.AllRosPage;
 import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
-import pl.psnc.dl.wf4ever.portal.pages.ErrorPage;
+import pl.psnc.dl.wf4ever.portal.pages.Error404Page;
 import pl.psnc.dl.wf4ever.portal.pages.HelpPage;
 import pl.psnc.dl.wf4ever.portal.pages.HomePage;
 import pl.psnc.dl.wf4ever.portal.pages.MyExpImportPage;
@@ -145,7 +145,7 @@ public class PortalApplication extends AuthenticatedWebApplication {
         mountPage("/myexpimport", MyExpImportPage.class);
         mountPage("/oauth", OAuthPage.class);
         mountPage("/authenticate", AuthenticationPage.class);
-        mountPage("/error", ErrorPage.class);
+        mountPage("/error404", Error404Page.class);
         mountPage("/contact", ContactPage.class);
         mountPage("/help", HelpPage.class);
         mountPage("/profile", ProfilePage.class);
