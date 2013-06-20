@@ -8,7 +8,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
  * @author piotrekhol
  * 
  */
-public class NotificationsIndicatorClickedEvent extends AbstractClickAjaxEvent {
+public class NotificationsIndicatorClickedEvent extends AbstractAjaxEvent implements AbstractClickAjaxEvent {
 
     /**
      * Constructor.

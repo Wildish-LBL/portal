@@ -17,11 +17,11 @@ import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
 import pl.psnc.dl.wf4ever.portal.components.FolderBreadcrumbsPanel;
 import pl.psnc.dl.wf4ever.portal.components.FolderContentsPanel;
+import pl.psnc.dl.wf4ever.portal.components.annotations.AdvancedAnnotationsPanel;
 import pl.psnc.dl.wf4ever.portal.components.annotations.CommentsList;
 import pl.psnc.dl.wf4ever.portal.events.AddLinkEvent;
 import pl.psnc.dl.wf4ever.portal.events.FolderChangeEvent;
 import pl.psnc.dl.wf4ever.portal.events.RoLoadedEvent;
-import pl.psnc.dl.wf4ever.portal.events.ShowAllAnnotationsEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.DuplicateEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddReadyEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddedEvent;
@@ -31,7 +31,6 @@ import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceAddedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceDeleteClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceDeletedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.UpdateClickedEvent;
-import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotateEvent;
 import pl.psnc.dl.wf4ever.portal.modals.AddFolderModal;
 import pl.psnc.dl.wf4ever.portal.modals.UploadResourceModal;
 import pl.psnc.dl.wf4ever.portal.model.FolderHierarchyModel;
@@ -102,22 +101,9 @@ public class RoContentPanel extends Panel {
         add(new ResourceActionsPanel("resource-actions", resourceModel, eventBusModel));
         add(new ResourceSummaryPanel("resource-summary", resourceModel, eventBusModel));
         add(new CommentsList("resource-comments", resourceModel, eventBusModel));
+        add(new AdvancedAnnotationsPanel("advanced-annotations", "resource-basic-view", resourceModel, eventBusModel));
         add(new UploadResourceModal("upload-resource-modal", eventBusModel));
         add(new AddFolderModal("add-folder-modal", eventBusModel));
-    }
-
-
-    @Subscribe
-    public void onAnnotateClicked(AnnotateEvent event) {
-        //TODO
-        System.out.println("annotate");
-    }
-
-
-    @Subscribe
-    public void onShowAllAnnotationsClicked(ShowAllAnnotationsEvent event) {
-        //TODO        
-        System.out.println("show all");
     }
 
 

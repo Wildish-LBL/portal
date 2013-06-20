@@ -14,13 +14,13 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.purl.wf4ever.rosrs.client.Annotable;
 import org.purl.wf4ever.rosrs.client.Annotation;
+import org.purl.wf4ever.rosrs.client.AnnotationTriple;
+import org.purl.wf4ever.rosrs.client.AnnotationTripleByDateComparator;
 
 import pl.psnc.dl.wf4ever.portal.components.form.EditableTextPanel;
 import pl.psnc.dl.wf4ever.portal.events.ResourceSelectedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AbstractAnnotationEditedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.CommentAddClickedEvent;
-import pl.psnc.dl.wf4ever.portal.model.AnnotationTriple;
-import pl.psnc.dl.wf4ever.portal.model.AnnotationTripleByDateComparator;
 import pl.psnc.dl.wf4ever.portal.model.AnnotationTripleModel;
 
 import com.google.common.eventbus.EventBus;
@@ -174,7 +174,7 @@ public class CommentsList extends Panel {
             final IModel<EventBus> eventBusModel) {
         super(id, annotableModel);
         eventBusModel.getObject().register(this);
-        setOutputMarkupId(true);
+        setOutputMarkupPlaceholderTag(true);
         IModel<List<AnnotationTriple>> listModel = new CommentsToListModel(annotableModel);
         noComments = new WebMarkupContainer("no-comments");
         add(noComments);

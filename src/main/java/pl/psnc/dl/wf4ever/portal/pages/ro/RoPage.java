@@ -36,6 +36,7 @@ import org.purl.wf4ever.rosrs.client.notifications.NotificationService;
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.components.NotificationsIndicator;
+import pl.psnc.dl.wf4ever.portal.components.annotations.AdvancedAnnotationsPanel;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.events.MetadataDownloadEvent;
 import pl.psnc.dl.wf4ever.portal.events.RoEvolutionLoadedEvent;
@@ -156,6 +157,7 @@ public class RoPage extends BasePage {
         add(new NotificationsIndicator("notifications", researchObjectModel, notificationsModel, eventBusModel));
         add(new QualityBar("health-progress-bar", qualityModel, eventBusModel));
         add(new RoCommentsPanel("comments", researchObjectModel, eventBusModel));
+        add(new AdvancedAnnotationsPanel("advanced-annotations", "ro-basic-view", researchObjectModel, eventBusModel));
         add(new RoContentPanel("content", researchObjectModel, eventBusModel));
         add(new RoEvoBox("ro-evo-box", researchObjectModel, eventBusModel));
 

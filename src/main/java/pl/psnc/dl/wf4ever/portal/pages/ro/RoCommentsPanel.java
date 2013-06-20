@@ -7,11 +7,9 @@ import org.apache.wicket.model.IModel;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
 import pl.psnc.dl.wf4ever.portal.components.annotations.CommentsList;
-import pl.psnc.dl.wf4ever.portal.components.form.AjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.components.form.AnnotationEditAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.RoLoadedEvent;
-import pl.psnc.dl.wf4ever.portal.events.ShowAllAnnotationsEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotateEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.CommentAddClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.ImportAnnotationClickedEvent;
@@ -53,6 +51,7 @@ public class RoCommentsPanel extends Panel {
      */
     public RoCommentsPanel(String id, final IModel<ResearchObject> model, IModel<EventBus> eventBusModel) {
         super(id, model);
+        setOutputMarkupPlaceholderTag(true);
         eventBusModel.getObject().register(this);
 
         form = new Form<Void>("form");
@@ -62,7 +61,6 @@ public class RoCommentsPanel extends Panel {
         form.add(new AnnotationEditAjaxEventButton("import-annotations", form, model, eventBusModel,
                 ImportAnnotationClickedEvent.class));
         form.add(new AuthenticatedAjaxEventButton("annotate", form, eventBusModel, AnnotateEvent.class));
-        form.add(new AjaxEventButton("show-all", form, eventBusModel, ShowAllAnnotationsEvent.class));
 
         commentsList = new CommentsList("comments-list", model, eventBusModel);
         eventBusModel.getObject().register(commentsList);
@@ -87,12 +85,4 @@ public class RoCommentsPanel extends Panel {
         //TODO
         System.out.println("annotate");
     }
-
-
-    @Subscribe
-    public void onShowAllAnnotationsClicked(ShowAllAnnotationsEvent event) {
-        //TODO
-        System.out.println("show all");
-    }
-
 }

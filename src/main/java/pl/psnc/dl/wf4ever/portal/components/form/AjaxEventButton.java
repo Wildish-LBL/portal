@@ -34,7 +34,7 @@ public class AjaxEventButton extends AjaxButton {
     protected IModel<EventBus> eventBusModel;
 
     /** the class of the event to post. */
-    protected Class<? extends AbstractAjaxEvent> eventClass;
+    protected Class<? extends AbstractClickAjaxEvent> eventClass;
 
 
     /**
@@ -67,7 +67,7 @@ public class AjaxEventButton extends AjaxButton {
      * @param eventClass
      *            the class of the event to post
      */
-    public AjaxEventButton(String id, IModel<EventBus> eventBusModel, Class<? extends AbstractAjaxEvent> eventClass) {
+    public AjaxEventButton(String id, IModel<EventBus> eventBusModel, Class<? extends AbstractClickAjaxEvent> eventClass) {
         super(id);
         this.eventBusModel = eventBusModel;
         this.eventClass = eventClass;
@@ -93,7 +93,7 @@ public class AjaxEventButton extends AjaxButton {
      */
     protected AbstractAjaxEvent newEvent(AjaxRequestTarget target) {
         try {
-            return eventClass.getConstructor(AjaxRequestTarget.class).newInstance(target);
+            return (AbstractAjaxEvent) eventClass.getConstructor(AjaxRequestTarget.class).newInstance(target);
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
             LOG.error("Can't create the default event", e);

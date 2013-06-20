@@ -9,8 +9,8 @@
 					class="btn btn-small my-tooltip" type="submit" wicket:id="download">
 					<i class="icon-download"></i> Download
 				</button>
-				<button data-original-title="upload a new version" data-toggle="tooltip"
-					data-placement="top" data-container="body"
+				<button data-original-title="upload a new version"
+					data-toggle="tooltip" data-placement="top" data-container="body"
 					class="btn btn-small my-tooltip" type="submit" wicket:id="update">
 					<i class="icon-upload"></i> Update
 				</button>
@@ -25,6 +25,11 @@
 					wicket:id="add-comment">
 					<i class="icon-plus"></i> Comment
 				</button>
+				<button data-target="#resource-advanced-view" data-toggle="tab" data-original-title="show all annotations" 
+					data-placement="top" data-container="body"
+					class="btn btn-small my-tooltip" type="submit" wicket:id="show-all">
+					<i class="icon-list"></i> Show all
+				</button>
 				<div class="btn-group">
 					<a class="btn btn-small dropdown-toggle" data-toggle="dropdown"
 						href="#">More... <span class="caret"></span>
@@ -32,36 +37,18 @@
 					<ul class="dropdown-menu">
 						<li><a href="#" data-original-title="move to another folder"
 							data-toggle="tooltip" data-placement="right"
-							data-container="body" class="my-tooltip" type="submit" wicket:id="move"><i
-								class="icon-folder-open"></i> Move </a></li>
+							data-container="body" class="my-tooltip" type="submit"
+							wicket:id="move"><i class="icon-folder-open"></i> Move </a></li>
 						<li><a href="#"
 							data-original-title="create a duplicate of this resource"
 							data-toggle="tooltip" data-placement="right"
-							data-container="body" class="my-tooltip" wicket:id="duplicate"><i class="icon-file"></i>
-								Duplicate</a></li>
+							data-container="body" class="my-tooltip" wicket:id="duplicate"><i
+								class="icon-file"></i> Duplicate</a></li>
 						<li><a href="#"
 							data-original-title="create a link to this resource"
 							data-toggle="tooltip" data-placement="right"
 							data-container="body" class="my-tooltip" wicket:id="link-add"><i
 								class="icon-share-alt"></i> Link</a></li>
-						<li><a href="#"
-							data-original-title="import an RDF file with annotations"
-							data-toggle="tooltip" data-placement="right"
-							data-container="body" class="my-tooltip" type="submit"
-							wicket:id="import-annotations"> <i class="icon-upload"></i>
-								Import
-						</a></li>
-						<li><a href="#"
-							data-original-title="create a custom annotation"
-							data-toggle="tooltip" data-placement="right"
-							data-container="body" class="my-tooltip" type="submit"
-							wicket:id="annotate"> <i class="icon-tag"></i> Annotate
-						</a></li>
-						<li><a href="#" data-original-title="show all annotations"
-							data-toggle="tooltip" data-placement="right"
-							data-container="body" class="my-tooltip" type="submit"
-							wicket:id="show-all"> <i class="icon-list"></i> Show all (5)
-						</a></li>
 					</ul>
 				</div>
 			</div>

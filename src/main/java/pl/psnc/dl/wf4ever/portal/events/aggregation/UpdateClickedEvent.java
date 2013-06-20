@@ -2,6 +2,7 @@ package pl.psnc.dl.wf4ever.portal.events.aggregation;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
+import pl.psnc.dl.wf4ever.portal.events.AbstractAjaxEvent;
 import pl.psnc.dl.wf4ever.portal.events.AbstractClickAjaxEvent;
 
 /**
@@ -10,7 +11,7 @@ import pl.psnc.dl.wf4ever.portal.events.AbstractClickAjaxEvent;
  * @author piotrekhol
  * 
  */
-public class UpdateClickedEvent extends AbstractClickAjaxEvent {
+public class UpdateClickedEvent extends AbstractAjaxEvent implements AbstractClickAjaxEvent {
 
     /**
      * Constructor.

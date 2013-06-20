@@ -9,7 +9,7 @@ import org.purl.wf4ever.rosrs.client.search.dataclasses.FacetValue;
  * @author piotrekhol
  * 
  */
-public class FacetValueClickedEvent extends AbstractClickAjaxEvent {
+public class FacetValueClickedEvent extends AbstractAjaxEvent implements AbstractClickAjaxEvent {
 
     /** Facet value that is clicked. */
     private final FacetValue facetValue;

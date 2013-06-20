@@ -20,6 +20,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Annotable;
 
 import pl.psnc.dl.wf4ever.portal.events.AbstractAjaxEvent;
+import pl.psnc.dl.wf4ever.portal.events.AbstractClickAjaxEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationAddedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationCancelledEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationDeletedEvent;
@@ -534,7 +535,7 @@ public class EditableTextPanel extends Panel {
 
 
     /** A click event. */
-    class EditEvent extends AbstractAjaxEvent {
+    class EditEvent extends AbstractAjaxEvent implements AbstractClickAjaxEvent {
 
         /**
          * Constructor.
@@ -550,7 +551,7 @@ public class EditableTextPanel extends Panel {
 
 
     /** A click event. */
-    class DeleteEvent extends AbstractAjaxEvent {
+    class DeleteEvent extends AbstractAjaxEvent implements AbstractClickAjaxEvent {
 
         /**
          * Constructor.
@@ -566,7 +567,7 @@ public class EditableTextPanel extends Panel {
 
 
     /** A click event. */
-    class ApplyEvent extends AbstractAjaxEvent {
+    class ApplyEvent extends AbstractAjaxEvent implements AbstractClickAjaxEvent {
 
         /**
          * Constructor.
@@ -582,7 +583,7 @@ public class EditableTextPanel extends Panel {
 
 
     /** A click event. */
-    class CancelEvent extends AbstractAjaxEvent {
+    class CancelEvent extends AbstractAjaxEvent implements AbstractClickAjaxEvent {
 
         /**
          * Constructor.

@@ -59,7 +59,8 @@ public class AnnotationEditAjaxEventButton extends AjaxEventButton {
     @Override
     protected AbstractAjaxEvent newEvent(AjaxRequestTarget target) {
         try {
-            return eventClass.getConstructor(AjaxRequestTarget.class, IModel.class).newInstance(target, annotableModel);
+            return (AbstractAjaxEvent) eventClass.getConstructor(AjaxRequestTarget.class, IModel.class).newInstance(
+                target, annotableModel);
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
             LOG.error("Can't create the (target,model) event", e);

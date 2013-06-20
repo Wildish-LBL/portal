@@ -8,7 +8,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
  * @author piotrekhol
  * 
  */
-public class OkClickedEvent extends AbstractClickAjaxEvent {
+public class OkClickedEvent extends AbstractAjaxEvent implements AbstractClickAjaxEvent {
 
     /**
      * Constructor.

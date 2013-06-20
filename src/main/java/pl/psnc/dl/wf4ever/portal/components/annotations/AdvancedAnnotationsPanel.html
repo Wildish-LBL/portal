@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<html xmlns:wicket="http://wicket.apache.org">
+<body>
+	<wicket:panel xmlns:wicket="http://wicket.apache.org">
+		<form class="form-inline" wicket:id="form">
+			<div class="btn-toolbar">
+				<button data-target="" data-toggle="tab"
+					data-original-title="go back to the basic view"
+					data-placement="top" data-container="body"
+					class="btn btn-small btn-info my-tooltip" type="submit"
+					wicket:id="show-basic">
+					<i class="icon-list icon-white"></i> Basic view
+				</button>
+				<button data-original-title="import an RDF file with annotations"
+					data-toggle="tooltip" data-placement="top" data-container="body"
+					class=" btn btn-small my-tooltip" type="submit"
+					wicket:id="import-annotations">
+					<i class="icon-upload"></i> Import
+				</button>
+				<button data-original-title="create a custom annotation"
+					data-toggle="tooltip" data-placement="top" data-container="body"
+					class=" btn btn-small my-tooltip" type="submit"
+					wicket:id="annotate">
+					<i class="icon-tag"></i> Annotate
+				</button>
+			</div>
+		</form>
+		<p>
+			<em>The advanced annotations view</em>
+		</p>
+		<table class="table table-striped buttons-hover advanced-annotations">
+			<tbody>
+				<tr wicket:id="annotation-triple">
+					<td wicket:id="property" data-original-title=""
+						data-toggle="tooltip" data-placement="left" class="property my-tooltip"
+						data-container="body"><span wicket:id="property-name"></span></td>
+					<td wicket:id="value" class="annotation-triple-value my-tooltip"
+						data-original-title="" data-toggle="tooltip"
+						data-placement="right" data-container="body"><div
+							class="buttons-hover-inside" data-original-title="">
+							<span wicket:id="value"></span>
+							<div class="btn-group">
+								<button data-original-title="edit" data-toggle="tooltip"
+									data-placement="top" class="btn btn-mini my-tooltip"
+									data-container="body" type="submit">
+									<i class="icon-edit"></i>
+								</button>
+								<button data-original-title="delete" data-toggle="tooltip"
+									data-placement="top" class="btn btn-mini my-tooltip"
+									data-container="body" type="submit">
+									<i class="icon-trash"></i>
+								</button>
+							</div>
+						</div></td>
+				</tr>
+			</tbody>
+		</table>
+	</wicket:panel>
+</body>
+</html>

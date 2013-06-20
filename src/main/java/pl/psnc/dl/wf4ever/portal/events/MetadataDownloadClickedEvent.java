@@ -8,7 +8,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
  * @author piotrekhol
  * 
  */
-public class MetadataDownloadClickedEvent extends AbstractClickAjaxEvent {
+public class MetadataDownloadClickedEvent extends AbstractAjaxEvent implements AbstractClickAjaxEvent {
 
     /**
      * Constructor.

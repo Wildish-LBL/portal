@@ -3,7 +3,7 @@
 <body>
 	<wicket:panel xmlns:wicket="http://wicket.apache.org">
 		<div class="row">
-			<div class="span5 offset7">
+			<div class="span5">
 				<form class="form-inline" wicket:id="form">
 					<div class="btn-toolbar">
 						<button data-original-title="add a comment" data-toggle="tooltip"
@@ -24,11 +24,10 @@
 							wicket:id="annotate">
 							<i class="icon-tag"></i> Annotate
 						</button>
-						<button data-original-title="show all annotations"
-							data-toggle="tooltip" data-placement="top" data-container="body"
-							class="btn btn-small my-tooltip" type="submit"
-							wicket:id="show-all">
-							<i class="icon-list"></i> Show all (2)
+						<button data-target="#ro-advanced-view" data-toggle="tab" data-original-title="show all annotations"
+							 data-placement="top" data-container="body"
+							class="btn btn-small my-tooltip" type="submit">
+							<i class="icon-list"></i> Show all
 						</button>
 					</div>
 				</form>

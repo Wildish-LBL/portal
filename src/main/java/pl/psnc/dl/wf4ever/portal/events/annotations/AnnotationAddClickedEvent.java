@@ -4,6 +4,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 import org.purl.wf4ever.rosrs.client.Annotable;
 
+import pl.psnc.dl.wf4ever.portal.events.AbstractAjaxEvent;
 import pl.psnc.dl.wf4ever.portal.events.AbstractClickAjaxEvent;
 
 /**
@@ -12,7 +13,7 @@ import pl.psnc.dl.wf4ever.portal.events.AbstractClickAjaxEvent;
  * @author piotrekhol
  * 
  */
-public abstract class AnnotationAddClickedEvent extends AbstractClickAjaxEvent {
+public abstract class AnnotationAddClickedEvent extends AbstractAjaxEvent implements AbstractClickAjaxEvent {
 
     /** The resource that should be commented. */
     private final IModel<? extends Annotable> annotableModel;

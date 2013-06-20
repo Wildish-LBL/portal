@@ -1,0 +1,11 @@
+table.advanced-annotations {
+	table-layout: fixed;
+}
+
+table.advanced-annotations td.property {
+	width: 120px;
+}
+
+table.advanced-annotations td.annotation-triple-value > div {
+	word-wrap: break-word;
+}
