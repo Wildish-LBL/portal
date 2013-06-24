@@ -13,6 +13,7 @@ import org.apache.wicket.authroles.authorization.strategies.role.annotations.Ann
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
+import org.apache.wicket.settings.IRequestCycleSettings.RenderStrategy;
 import org.purl.wf4ever.checklist.client.ChecklistEvaluationService;
 import org.purl.wf4ever.rosrs.client.search.OpenSearchSearchServer;
 import org.purl.wf4ever.rosrs.client.search.SearchServer;
@@ -136,6 +137,7 @@ public class PortalApplication extends AuthenticatedWebApplication {
         getSecuritySettings().setAuthorizationStrategy(new AnnotationsRoleAuthorizationStrategy(this));
         getMarkupSettings().setDefaultBeforeDisabledLink(null);
         getMarkupSettings().setDefaultAfterDisabledLink(null);
+        getRequestCycleSettings().setRenderStrategy(RenderStrategy.REDIRECT_TO_RENDER);
 
         mountPage("/home", HomePage.class);
         mountPage("/myros", MyRosPage.class);
