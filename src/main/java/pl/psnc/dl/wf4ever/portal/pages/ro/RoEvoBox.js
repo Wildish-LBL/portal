@@ -15,6 +15,7 @@ function initRoEvo(instance) {
 	} ] ];
 
 };
+
 $(document).ready(function() {
 //	$('div[rel="popover"]').popover();
 });

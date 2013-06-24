@@ -20,6 +20,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
 import pl.psnc.dl.wf4ever.portal.components.LoadingCircle;
@@ -49,6 +50,10 @@ public class RoEvoBox extends Panel {
 
     private IModel<ResearchObject> researchObjectModel;
 
+    /** A JS file for this panel. */
+    private static final JavaScriptResourceReference JS_REFERENCE = new JavaScriptResourceReference(RoEvoBox.class,
+            "RoEvoBox.js");
+
     /** next unassigned index. */
     private static int nextIndex;
 
@@ -71,14 +76,6 @@ public class RoEvoBox extends Panel {
 
         setOutputMarkupPlaceholderTag(true);
         setVisible(false);
-    }
-
-
-    @Subscribe
-    public void onRoEvolutionInfoLoaded(RoEvolutionLoadedEvent event) {
-        setVisible(true);
-        event.getTarget().add(this);
-        init();
     }
 
 
@@ -159,6 +156,13 @@ public class RoEvoBox extends Panel {
                 response.renderOnLoadJavaScript(getDrawJavaScript());
             }
         });
+    }
+
+
+    @Override
+    public void renderHead(IHeaderResponse response) {
+        super.renderHead(response);
+        response.renderJavaScriptReference(JS_REFERENCE);
     }
 
 
@@ -281,6 +285,7 @@ public class RoEvoBox extends Panel {
 
     private String getDrawJavaScript() {
         final StringBuilder sb = new StringBuilder();
+        sb.append("function drawArrows() {");
         sb.append("jsPlumb.ready(function() {");
         sb.append("initRoEvo(jsPlumb);");
         sb.append("var instance = jsPlumb.getInstance();");
@@ -296,7 +301,11 @@ public class RoEvoBox extends Panel {
             }
         }
         sb.append("});");
+        sb.append("}");
+
+        sb.append("if ($(\"#history\").is(\":visible\")) { drawArrows(); } else {");
+        sb.append("$('a[data-toggle=\"tab\"][href=\"#history\"]').on('shown', function (e) { drawArrows(); $('a[data-toggle=\"tab\"][href=\"#history\"]').off('shown'); }); }");
+
         return sb.toString();
     }
-
 }
