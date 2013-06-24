@@ -20,12 +20,14 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
 import pl.psnc.dl.wf4ever.portal.components.LoadingCircle;
 import pl.psnc.dl.wf4ever.portal.events.RoEvolutionLoadedEvent;
 import pl.psnc.dl.wf4ever.portal.model.RoEvoNode;
 
+import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 /**
@@ -48,6 +50,10 @@ public class RoEvoBox extends Panel {
 
     private IModel<ResearchObject> researchObjectModel;
 
+    /** A JS file for this panel. */
+    private static final JavaScriptResourceReference JS_REFERENCE = new JavaScriptResourceReference(RoEvoBox.class,
+            "RoEvoBox.js");
+
     /** next unassigned index. */
     private static int nextIndex;
 
@@ -62,14 +68,13 @@ public class RoEvoBox extends Panel {
      * @param researchObjectURI
      *            RO URI
      */
-    public RoEvoBox(String id, IModel<ResearchObject> researchObjectModel) {
+    public RoEvoBox(String id, IModel<ResearchObject> researchObjectModel, IModel<EventBus> eventBusModel) {
         super(id);
         this.researchObjectModel = researchObjectModel;
+        eventBusModel.getObject().register(this);
 
         setOutputMarkupId(true);
         setOutputMarkupPlaceholderTag(true);
-
-        init();
     }
 
 
@@ -150,6 +155,13 @@ public class RoEvoBox extends Panel {
                 response.renderOnLoadJavaScript(getDrawJavaScript());
             }
         });
+    }
+
+
+    @Override
+    public void renderHead(IHeaderResponse response) {
+        super.renderHead(response);
+        response.renderJavaScriptReference(JS_REFERENCE);
     }
 
 

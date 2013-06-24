@@ -157,7 +157,7 @@ public class RoPage extends BasePage {
         add(new QualityBar("health-progress-bar", qualityModel, eventBusModel));
         add(new RoCommentsPanel("comments", researchObjectModel, eventBusModel));
         add(new RoContentPanel("content", researchObjectModel, eventBusModel));
-        add(new RoEvoBox("ro-evo-box", researchObjectModel));
+        add(new RoEvoBox("ro-evo-box", researchObjectModel, eventBusModel));
 
         add(new DownloadMetadataModal("download-metadata-modal", eventBusModel));
         add(new ImportAnnotationModal("import-annotation-modal", eventBusModel));
