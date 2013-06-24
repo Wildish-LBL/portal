@@ -15,12 +15,6 @@ function initRoEvo(instance) {
 	} ] ];
 
 };
-var arrows_drawn = false;
-var arrows_draw_script = "";
-
-function drawArrows() {
-	
-}
 
 $(document).ready(function() {
 //	$('div[rel="popover"]').popover();

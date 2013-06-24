@@ -284,6 +284,7 @@ public class RoEvoBox extends Panel {
 
     private String getDrawJavaScript() {
         final StringBuilder sb = new StringBuilder();
+        sb.append("function drawArrows() {");
         sb.append("jsPlumb.ready(function() {");
         sb.append("initRoEvo(jsPlumb);");
         sb.append("var instance = jsPlumb.getInstance();");
@@ -299,7 +300,11 @@ public class RoEvoBox extends Panel {
             }
         }
         sb.append("});");
+        sb.append("}");
+
+        sb.append("if ($(\"#history\").is(\":visible\")) { drawArrows(); } else {");
+        sb.append("$('a[data-toggle=\"tab\"][href=\"#history\"]').on('shown', function (e) { drawArrows(); $('a[data-toggle=\"tab\"][href=\"#history\"]').off('shown'); }); }");
+
         return sb.toString();
     }
-
 }
