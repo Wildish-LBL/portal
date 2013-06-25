@@ -2,3 +2,7 @@ td.resource-name > div {
 	width: 215px;
 	word-wrap: break-word;
 }
+
+.table-expandable tr {
+	cursor: pointer;
+}

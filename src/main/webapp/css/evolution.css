@@ -83,3 +83,7 @@
 	opacity: 1.0;
 	z-index: 30;
 }
+
+div.separated_top {
+	border-top: 1px dashed #BBBBBB;
+}

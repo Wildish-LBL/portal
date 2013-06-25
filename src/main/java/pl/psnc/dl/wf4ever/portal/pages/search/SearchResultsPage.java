@@ -12,6 +12,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
@@ -22,6 +23,7 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.CssResourceReference;
 import org.joda.time.format.DateTimeFormat;
 import org.purl.wf4ever.rosrs.client.exception.SearchException;
 import org.purl.wf4ever.rosrs.client.search.SearchServer;
@@ -57,6 +59,10 @@ public class SearchResultsPage extends BasePage implements SearchResultsListener
 
     /** Results per page. */
     public static final int RESULTS_PER_PAGE = 15;
+
+    /** CSS resource for this page. */
+    private static final CssResourceReference CSS_REFERENCE = new CssResourceReference(SearchResultsPage.class,
+            "SearchResultsPage.css");
 
     /** Facets to display. */
     private transient List<FacetEntry> facetsList;
@@ -166,6 +172,13 @@ public class SearchResultsPage extends BasePage implements SearchResultsListener
         add(new BootstrapPagingNavigator("pagination", searchResultsList));
         add(new SubmitFiltersButton("submitFilters"));
         add(new ClearFiltersButton("clearFilters"));
+    }
+
+
+    @Override
+    public void renderHead(IHeaderResponse response) {
+        super.renderHead(response);
+        response.renderCSSReference(CSS_REFERENCE);
     }
 
 

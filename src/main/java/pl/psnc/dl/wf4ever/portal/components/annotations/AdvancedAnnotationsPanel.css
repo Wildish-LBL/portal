@@ -9,3 +9,18 @@ table.advanced-annotations td.property {
 table.advanced-annotations td.annotation-triple-value > div {
 	word-wrap: break-word;
 }
+
+.buttons-hover-inside {
+	position: relative;
+}
+
+.buttons-hover div.btn-group {
+	display: none;
+}
+
+.buttons-hover tr:hover div.btn-group {
+	display: block;
+	position: absolute;
+	top: 0px;
+	right: 0px;
+}
