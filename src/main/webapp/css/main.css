@@ -281,6 +281,9 @@ table.resourceList td.link {
 	list-style-image: url("expanded.gif");
 }
 
+.text-inside {
+	padding: 14px 19px 14px;
+}
 
 /* footer
    ------ */
