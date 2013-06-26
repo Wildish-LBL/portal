@@ -56,6 +56,7 @@ import pl.psnc.dl.wf4ever.portal.pages.ro.behaviors.ChecklistEvaluateBehavior;
 import pl.psnc.dl.wf4ever.portal.pages.ro.behaviors.EvolutionInfoLoadBehavior;
 import pl.psnc.dl.wf4ever.portal.pages.ro.behaviors.JobStatusUpdatingBehaviour;
 import pl.psnc.dl.wf4ever.portal.pages.ro.behaviors.RoLoadBehavior;
+import pl.psnc.dl.wf4ever.portal.pages.ro.evo.RoEvoBox;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
 import com.google.common.collect.Multimap;
