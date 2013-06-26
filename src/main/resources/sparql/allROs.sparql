@@ -8,7 +8,7 @@ WHERE {
 	?ro a ro:ResearchObject ;
 		dcterms:created ?created1 ;
 		dcterms:creator ?creator .
-	?creator foaf:name ?creatorName .
+	OPTIONAL { ?creator foaf:name ?creatorName . }
 	?ro ore:aggregates ?resource .
 }
 GROUP BY ?ro
