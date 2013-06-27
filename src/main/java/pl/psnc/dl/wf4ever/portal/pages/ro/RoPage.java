@@ -223,8 +223,7 @@ public class RoPage extends BasePage {
     public void renderHead(IHeaderResponse response) {
         super.renderHead(response);
         try {
-            ClientResponse head = MySession.get().getRosrs()
-                    .getResourceHead(researchObject.getUri().resolve(".ro/manifest.rdf"));
+            ClientResponse head = MySession.get().getRosrs().getResourceHead(researchObject.getUri());
             List<String> headers = head.getHeaders().get("Link");
             if (headers != null && !headers.isEmpty()) {
                 Multimap<String, URI> links = Utils.getLinkHeaders(headers);

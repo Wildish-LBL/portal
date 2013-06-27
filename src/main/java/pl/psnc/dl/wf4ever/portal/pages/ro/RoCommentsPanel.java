@@ -8,11 +8,8 @@ import org.purl.wf4ever.rosrs.client.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.annotations.CommentsList;
 import pl.psnc.dl.wf4ever.portal.components.form.AnnotationEditAjaxEventButton;
-import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.RoLoadedEvent;
-import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotateEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.CommentAddClickedEvent;
-import pl.psnc.dl.wf4ever.portal.events.annotations.ImportAnnotationClickedEvent;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -57,9 +54,6 @@ public class RoCommentsPanel extends EventPanel {
         add(form);
         form.add(new AnnotationEditAjaxEventButton("add-comment", form, model, eventBusModel,
                 CommentAddClickedEvent.class));
-        form.add(new AnnotationEditAjaxEventButton("import-annotations", form, model, eventBusModel,
-                ImportAnnotationClickedEvent.class));
-        form.add(new AuthenticatedAjaxEventButton("annotate", form, eventBusModel, AnnotateEvent.class));
 
         commentsList = new CommentsList("comments-list", model, eventBusModel);
         add(commentsList);
@@ -77,10 +71,4 @@ public class RoCommentsPanel extends EventPanel {
         event.getTarget().add(commentsList);
     }
 
-
-    @Subscribe
-    public void onAnnotateClicked(AnnotateEvent event) {
-        //TODO
-        System.out.println("annotate");
-    }
 }

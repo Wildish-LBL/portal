@@ -2,11 +2,7 @@ package pl.psnc.dl.wf4ever.portal.components.form;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.MarkupContainer;
-import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.authorization.Action;
-import org.apache.wicket.authroles.authorization.strategies.role.Roles;
-import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeAction;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.AbstractTextComponent;
 import org.apache.wicket.markup.html.form.Form;
@@ -19,11 +15,13 @@ import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Annotable;
 
 import pl.psnc.dl.wf4ever.portal.components.EventPanel;
-import pl.psnc.dl.wf4ever.portal.events.AbstractAjaxEvent;
-import pl.psnc.dl.wf4ever.portal.events.AbstractClickAjaxEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationAddedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationCancelledEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationDeletedEvent;
+import pl.psnc.dl.wf4ever.portal.events.edit.ApplyEvent;
+import pl.psnc.dl.wf4ever.portal.events.edit.CancelEvent;
+import pl.psnc.dl.wf4ever.portal.events.edit.DeleteEvent;
+import pl.psnc.dl.wf4ever.portal.events.edit.EditEvent;
 import pl.psnc.dl.wf4ever.portal.model.AnnotationTripleModel;
 
 import com.google.common.eventbus.EventBus;
@@ -71,7 +69,6 @@ public class EditableTextPanel extends EventPanel {
     public EditableTextPanel(String id, AnnotationTripleModel model, final IModel<EventBus> eventBusModel,
             boolean multipleLines, boolean editMode) {
         super(id, model, eventBusModel);
-        setOutputMarkupId(true);
         setOutputMarkupPlaceholderTag(true);
         LoadableDetachableModel<EventBus> internalEventBusModel = new LoadableDetachableModel<EventBus>() {
 
@@ -253,8 +250,8 @@ public class EditableTextPanel extends EventPanel {
             add(form);
             notSetLabel = new NotSetLabel("text", model);
             form.add(notSetLabel);
-            form.add(new EditButton("edit", internalEventBusModel));
-            deleteButton = new DeleteButton("delete", internalEventBusModel);
+            form.add(new AuthenticatedAjaxEventButton("edit", form, internalEventBusModel, EditEvent.class));
+            deleteButton = new AuthenticatedAjaxEventButton("delete", form, internalEventBusModel, DeleteEvent.class);
             form.add(deleteButton);
         }
 
@@ -273,74 +270,6 @@ public class EditableTextPanel extends EventPanel {
             deleteButton.setVisible(canDelete);
         }
 
-
-        /**
-         * AJAX button. Needs a separate class because it calls an event that is a nested class.
-         * 
-         * @author piotrekhol
-         * 
-         */
-        //FIXME we might want to use a standard AuthenticatedAjaxButton once it can call nested events.
-        @AuthorizeAction(action = Action.ENABLE, roles = { Roles.USER })
-        private final class EditButton extends AjaxEventButton {
-
-            /** id. */
-            private static final long serialVersionUID = 6073205674452657839L;
-
-
-            /**
-             * Constructor.
-             * 
-             * @param id
-             *            wicket id
-             * @param internalEventBusModel
-             *            event bus model for clicks
-             */
-            private EditButton(String id, IModel<EventBus> internalEventBusModel) {
-                super(id, internalEventBusModel, EditEvent.class);
-            }
-
-
-            @Override
-            protected AbstractAjaxEvent newEvent(AjaxRequestTarget target) {
-                return new EditEvent(target);
-            }
-
-        }
-
-
-        /**
-         * AJAX button. Needs a separate class because it calls an event that is a nested class.
-         * 
-         * @author piotrekhol
-         * 
-         */
-        //FIXME we might want to use a standard AuthenticatedAjaxButton once it can call nested events.
-        @AuthorizeAction(action = Action.ENABLE, roles = { Roles.USER })
-        private final class DeleteButton extends AjaxEventButton {
-
-            /** id. */
-            private static final long serialVersionUID = 6073205674452657839L;
-
-
-            /**
-             * Constructor.
-             * 
-             * @param id
-             *            wicket id
-             * @param internalEventBusModel
-             *            event bus model for clicks
-             */
-            private DeleteButton(String id, IModel<EventBus> internalEventBusModel) {
-                super(id, internalEventBusModel, DeleteEvent.class);
-            }
-
-
-            @Override
-            protected AbstractAjaxEvent newEvent(AjaxRequestTarget target) {
-                return new DeleteEvent(target);
-            }
-        }
     }
 
 
@@ -446,8 +375,9 @@ public class EditableTextPanel extends EventPanel {
             add(form);
             textArea = multipleLines ? new TextArea<>("text", model) : new TextField<>("text", model);
             form.add(textArea);
-            form.add(new ApplyButton("apply", internalEventBusModel));
-            form.add(new CancelButton("cancel", internalEventBusModel));
+            form.add(new AuthenticatedAjaxEventButton("apply", form, internalEventBusModel, ApplyEvent.class));
+            form.add(new AuthenticatedAjaxEventButton("cancel", form, internalEventBusModel, CancelEvent.class)
+                    .setDefaultFormProcessing(false));
         }
 
 
@@ -455,140 +385,6 @@ public class EditableTextPanel extends EventPanel {
         public MarkupContainer setDefaultModel(IModel<?> model) {
             textArea.setDefaultModel(model);
             return super.setDefaultModel(model);
-        }
-
-
-        /**
-         * AJAX button. Needs a separate class because it calls an event that is a nested class.
-         * 
-         * @author piotrekhol
-         * 
-         */
-        //FIXME we might want to use a standard AuthenticatedAjaxButton once it can call nested events.
-        @AuthorizeAction(action = Action.ENABLE, roles = { Roles.USER })
-        private final class ApplyButton extends AjaxEventButton {
-
-            /** id. */
-            private static final long serialVersionUID = 6073205674452657839L;
-
-
-            /**
-             * Constructor.
-             * 
-             * @param id
-             *            wicket id
-             * @param internalEventBusModel
-             *            event bus model for clicks
-             */
-            private ApplyButton(String id, IModel<EventBus> internalEventBusModel) {
-                super(id, internalEventBusModel, ApplyEvent.class);
-            }
-
-
-            @Override
-            protected AbstractAjaxEvent newEvent(AjaxRequestTarget target) {
-                return new ApplyEvent(target);
-            }
-        }
-
-
-        /**
-         * AJAX button. Needs a separate class because it calls an event that is a nested class.
-         * 
-         * @author piotrekhol
-         * 
-         */
-        //FIXME we might want to use a standard AuthenticatedAjaxButton once it can call nested events.
-        @AuthorizeAction(action = Action.ENABLE, roles = { Roles.USER })
-        private final class CancelButton extends AjaxEventButton {
-
-            /** id. */
-            private static final long serialVersionUID = 6073205674452657839L;
-
-
-            /**
-             * Constructor.
-             * 
-             * @param id
-             *            wicket id
-             * @param internalEventBusModel
-             *            event bus model for clicks
-             */
-            private CancelButton(String id, IModel<EventBus> internalEventBusModel) {
-                super(id, internalEventBusModel, CancelEvent.class);
-                setDefaultFormProcessing(false);
-            }
-
-
-            @Override
-            protected AbstractAjaxEvent newEvent(AjaxRequestTarget target) {
-                return new CancelEvent(target);
-            }
-
-        }
-
-    }
-
-
-    /** A click event. */
-    class EditEvent extends AbstractAjaxEvent implements AbstractClickAjaxEvent {
-
-        /**
-         * Constructor.
-         * 
-         * @param target
-         *            AJAX target
-         */
-        public EditEvent(AjaxRequestTarget target) {
-            super(target);
-        }
-
-    }
-
-
-    /** A click event. */
-    class DeleteEvent extends AbstractAjaxEvent implements AbstractClickAjaxEvent {
-
-        /**
-         * Constructor.
-         * 
-         * @param target
-         *            AJAX target
-         */
-        public DeleteEvent(AjaxRequestTarget target) {
-            super(target);
-        }
-
-    }
-
-
-    /** A click event. */
-    class ApplyEvent extends AbstractAjaxEvent implements AbstractClickAjaxEvent {
-
-        /**
-         * Constructor.
-         * 
-         * @param target
-         *            AJAX target
-         */
-        public ApplyEvent(AjaxRequestTarget target) {
-            super(target);
-        }
-
-    }
-
-
-    /** A click event. */
-    class CancelEvent extends AbstractAjaxEvent implements AbstractClickAjaxEvent {
-
-        /**
-         * Constructor.
-         * 
-         * @param target
-         *            AJAX target
-         */
-        public CancelEvent(AjaxRequestTarget target) {
-            super(target);
         }
 
     }
