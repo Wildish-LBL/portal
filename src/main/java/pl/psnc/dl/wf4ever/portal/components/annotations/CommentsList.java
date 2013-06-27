@@ -9,7 +9,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.purl.wf4ever.rosrs.client.Annotable;
@@ -17,6 +16,7 @@ import org.purl.wf4ever.rosrs.client.Annotation;
 import org.purl.wf4ever.rosrs.client.AnnotationTriple;
 import org.purl.wf4ever.rosrs.client.AnnotationTripleByDateComparator;
 
+import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.EditableTextPanel;
 import pl.psnc.dl.wf4ever.portal.events.ResourceSelectedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AbstractAnnotationEditedEvent;
@@ -33,7 +33,7 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * @author piotrekhol
  * 
  */
-public class CommentsList extends Panel {
+public class CommentsList extends EventPanel {
 
     /**
      * The list of comments.
@@ -172,8 +172,7 @@ public class CommentsList extends Panel {
      */
     public CommentsList(String id, final IModel<? extends Annotable> annotableModel,
             final IModel<EventBus> eventBusModel) {
-        super(id, annotableModel);
-        eventBusModel.getObject().register(this);
+        super(id, annotableModel, eventBusModel);
         setOutputMarkupPlaceholderTag(true);
         IModel<List<AnnotationTriple>> listModel = new CommentsToListModel(annotableModel);
         noComments = new WebMarkupContainer("no-comments");

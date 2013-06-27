@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Folder;
@@ -15,6 +14,7 @@ import org.purl.wf4ever.rosrs.client.Resource;
 import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
+import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.FolderBreadcrumbsPanel;
 import pl.psnc.dl.wf4ever.portal.components.FolderContentsPanel;
 import pl.psnc.dl.wf4ever.portal.components.annotations.AdvancedAnnotationsPanel;
@@ -48,7 +48,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
  * @author Piotr Hołubowicz
  * 
  */
-public class RoContentPanel extends Panel {
+public class RoContentPanel extends EventPanel {
 
     /** id. */
     private static final long serialVersionUID = -3775797988389365540L;
@@ -62,9 +62,6 @@ public class RoContentPanel extends Panel {
 
     /** The currently selected resource (can be a folder). */
     private Resource currentResource;
-
-    /** Event bus model for changes to the RO coming out of this panel. */
-    private IModel<EventBus> eventBusModel;
 
     /** A list of visited folders. */
     private FolderHierarchyModel folderHierarchyModel;
@@ -81,11 +78,9 @@ public class RoContentPanel extends Panel {
      *            event bus model for changes to the RO coming out of this panel
      */
     public RoContentPanel(String id, final IModel<ResearchObject> model, IModel<EventBus> eventBusModel) {
-        super(id, model);
+        super(id, model, eventBusModel);
         setOutputMarkupId(true);
         setOutputMarkupPlaceholderTag(true);
-        this.eventBusModel = eventBusModel;
-        eventBusModel.getObject().register(this);
 
         IModel<Folder> folderModel = new PropertyModel<Folder>(this, "currentFolder");
         IModel<Resource> resourceModel = new PropertyModel<Resource>(this, "currentResource");

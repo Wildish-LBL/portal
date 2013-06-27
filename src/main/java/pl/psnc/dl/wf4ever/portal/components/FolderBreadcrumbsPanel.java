@@ -8,7 +8,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Folder;
@@ -25,7 +24,7 @@ import com.google.common.eventbus.Subscribe;
  * @author piotrekhol
  * 
  */
-public class FolderBreadcrumbsPanel extends Panel {
+public class FolderBreadcrumbsPanel extends EventPanel {
 
     /** id. */
     private static final long serialVersionUID = 6161074268125343983L;
@@ -45,8 +44,7 @@ public class FolderBreadcrumbsPanel extends Panel {
      */
     public FolderBreadcrumbsPanel(String id, final IModel<List<Folder>> model, final IModel<Folder> folderModel,
             final IModel<EventBus> eventBusModel) {
-        super(id, model);
-        eventBusModel.getObject().register(this);
+        super(id, model, eventBusModel);
         setOutputMarkupId(true);
         AjaxLink<String> home = new AjaxLink<String>("home-link") {
 

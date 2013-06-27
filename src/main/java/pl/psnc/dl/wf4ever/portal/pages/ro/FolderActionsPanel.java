@@ -2,10 +2,10 @@ package pl.psnc.dl.wf4ever.portal.pages.ro;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.purl.wf4ever.rosrs.client.Folder;
 
+import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.FolderChangeEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddClickedEvent;
@@ -20,7 +20,7 @@ import com.google.common.eventbus.Subscribe;
  * @author Piotr Hołubowicz
  * 
  */
-public class FolderActionsPanel extends Panel {
+public class FolderActionsPanel extends EventPanel {
 
     /** id. */
     private static final long serialVersionUID = -3775797988389365540L;
@@ -44,8 +44,7 @@ public class FolderActionsPanel extends Panel {
      *            event bus model for button clicks
      */
     public FolderActionsPanel(String id, final IModel<Folder> folderModel, final IModel<EventBus> eventBusModel) {
-        super(id);
-        eventBusModel.getObject().register(this);
+        super(id, folderModel, eventBusModel);
 
         setOutputMarkupId(true);
         form = new Form<Void>("form");

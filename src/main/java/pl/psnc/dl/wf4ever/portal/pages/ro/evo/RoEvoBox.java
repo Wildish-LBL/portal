@@ -17,12 +17,12 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
+import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.LoadingCircle;
 import pl.psnc.dl.wf4ever.portal.events.RoEvolutionLoadedEvent;
 import pl.psnc.dl.wf4ever.portal.model.RoEvoNode;
@@ -36,7 +36,7 @@ import com.google.common.eventbus.Subscribe;
  * @author Piotr Hołubowicz
  * 
  */
-public class RoEvoBox extends Panel {
+public class RoEvoBox extends EventPanel {
 
     /** id. */
     private static final long serialVersionUID = -3775797988389365540L;
@@ -70,9 +70,8 @@ public class RoEvoBox extends Panel {
      *            RO URI
      */
     public RoEvoBox(String id, IModel<ResearchObject> researchObjectModel, IModel<EventBus> eventBusModel) {
-        super(id, researchObjectModel);
+        super(id, researchObjectModel, eventBusModel);
         this.researchObjectModel = researchObjectModel;
-        eventBusModel.getObject().register(this);
 
         setOutputMarkupPlaceholderTag(true);
         setVisible(false);

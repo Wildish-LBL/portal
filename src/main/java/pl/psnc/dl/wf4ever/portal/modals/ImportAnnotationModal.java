@@ -4,12 +4,12 @@ import org.apache.log4j.Logger;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.util.lang.Bytes;
 import org.purl.wf4ever.rosrs.client.Annotable;
 
+import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
@@ -26,7 +26,7 @@ import com.google.common.eventbus.Subscribe;
  * @author piotrekhol
  * 
  */
-public class ImportAnnotationModal extends Panel {
+public class ImportAnnotationModal extends EventPanel {
 
     /** id. */
     private static final long serialVersionUID = 8709783939660653237L;
@@ -39,9 +39,6 @@ public class ImportAnnotationModal extends Panel {
 
     /** The resource that is being annotated. */
     private IModel<? extends Annotable> annotableModel;
-
-    /** Event bus for posting an event if OK. */
-    private IModel<EventBus> eventBusModel;
 
     /** Component for the uploaded file. */
     private FileUploadField fileUpload;
@@ -56,8 +53,7 @@ public class ImportAnnotationModal extends Panel {
      *            bus model
      */
     public ImportAnnotationModal(String id, final IModel<EventBus> eventBusModel) {
-        super(id);
-        eventBusModel.getObject().register(this);
+        super(id, null, eventBusModel);
 
         Form<?> form = new Form<Void>("form");
         add(form);

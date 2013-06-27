@@ -3,11 +3,11 @@ package pl.psnc.dl.wf4ever.portal.modals;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.RequiredTextField;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
 
+import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
@@ -25,16 +25,13 @@ import com.google.common.eventbus.Subscribe;
  * 
  */
 @SuppressWarnings("serial")
-public class AddFolderModal extends Panel {
+public class AddFolderModal extends EventPanel {
 
     /** Feedback panel. */
     private MyFeedbackPanel feedbackPanel;
 
     /** Folder name. */
     private String name;
-
-    /** Event bus for posting an event if OK. */
-    private IModel<EventBus> eventBusModel;
 
 
     /**
@@ -46,9 +43,7 @@ public class AddFolderModal extends Panel {
      *            event bus
      */
     public AddFolderModal(String id, final IModel<EventBus> eventBusModel) {
-        super(id);
-        this.eventBusModel = eventBusModel;
-        eventBusModel.getObject().register(this);
+        super(id, null, eventBusModel);
         Form<?> form = new Form<Void>("form");
         add(form);
 

@@ -13,7 +13,6 @@ import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
@@ -36,7 +35,7 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * @author piotrekhol
  * 
  */
-public class FolderContentsPanel extends Panel {
+public class FolderContentsPanel extends EventPanel {
 
     /**
      * Behavior for emphasizing graphically the resource if it's selected.
@@ -124,9 +123,6 @@ public class FolderContentsPanel extends Panel {
     /** Currently selected resource. */
     private IModel<Resource> resourceModel;
 
-    /** Event bus. */
-    private IModel<EventBus> eventBusModel;
-
 
     /**
      * Constructor.
@@ -147,11 +143,9 @@ public class FolderContentsPanel extends Panel {
     public FolderContentsPanel(String id, final IModel<Folder> model, final IModel<Resource> resourceModel,
             final IModel<List<Folder>> rootFolders, final IModel<List<Resource>> unrootedResourcesModel,
             final IModel<EventBus> eventBusModel) {
-        super(id, model);
+        super(id, model, eventBusModel);
         setOutputMarkupId(true);
         this.resourceModel = resourceModel;
-        this.eventBusModel = eventBusModel;
-        eventBusModel.getObject().register(this);
 
         IModel<List<Folder>> foldersModel = new AbstractReadOnlyModel<List<Folder>>() {
 
@@ -242,6 +236,7 @@ public class FolderContentsPanel extends Panel {
 
     @Override
     protected void onConfigure() {
+        super.onConfigure();
         try {
             if (this.getDefaultModelObject() != null) {
                 ((Folder) this.getDefaultModelObject()).load(false);

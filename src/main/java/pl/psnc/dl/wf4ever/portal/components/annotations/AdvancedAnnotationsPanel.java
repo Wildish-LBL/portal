@@ -12,13 +12,13 @@ import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.purl.wf4ever.rosrs.client.Annotable;
 import org.purl.wf4ever.rosrs.client.AnnotationTriple;
 
+import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AnnotationEditAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.ResourceSelectedEvent;
@@ -34,7 +34,7 @@ import com.google.common.eventbus.Subscribe;
  * @author Piotr Hołubowicz
  * 
  */
-public class AdvancedAnnotationsPanel extends Panel {
+public class AdvancedAnnotationsPanel extends EventPanel {
 
     /**
      * A list of annotation triples.
@@ -125,8 +125,7 @@ public class AdvancedAnnotationsPanel extends Panel {
      */
     public AdvancedAnnotationsPanel(String id, String basicPanelId, final IModel<? extends Annotable> model,
             final IModel<EventBus> eventBusModel) {
-        super(id, model);
-        eventBusModel.getObject().register(this);
+        super(id, model, eventBusModel);
         setOutputMarkupPlaceholderTag(true);
         form = new Form<Void>("form");
         add(form);
@@ -151,6 +150,7 @@ public class AdvancedAnnotationsPanel extends Panel {
 
     @Override
     protected void onConfigure() {
+        super.onConfigure();
         setEnabled(getDefaultModelObject() != null);
     }
 

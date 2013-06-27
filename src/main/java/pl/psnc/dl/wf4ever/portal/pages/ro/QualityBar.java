@@ -3,12 +3,12 @@ package pl.psnc.dl.wf4ever.portal.pages.ro;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.purl.wf4ever.checklist.client.ChecklistItem;
 import org.purl.wf4ever.checklist.client.EvaluationResult;
 
+import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.events.QualityEvaluatedEvent;
 
 import com.google.common.eventbus.EventBus;
@@ -20,7 +20,7 @@ import com.google.common.eventbus.Subscribe;
  * @author pejot
  * 
  */
-public class QualityBar extends Panel {
+public class QualityBar extends EventPanel {
 
     /** id. */
     private static final long serialVersionUID = -8244521183370538171L;
@@ -47,8 +47,7 @@ public class QualityBar extends Panel {
      *            event bus model
      */
     public QualityBar(String id, IModel<EvaluationResult> model, IModel<EventBus> eventBusModel) {
-        super(id, model);
-        eventBusModel.getObject().register(this);
+        super(id, model, eventBusModel);
         setOutputMarkupId(true);
         label = new WebMarkupContainer("initialLabel");
         add(label);

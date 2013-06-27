@@ -13,12 +13,12 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Annotable;
 
+import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.events.AbstractAjaxEvent;
 import pl.psnc.dl.wf4ever.portal.events.AbstractClickAjaxEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationAddedEvent;
@@ -35,7 +35,7 @@ import com.google.common.eventbus.Subscribe;
  * @author pejot
  * 
  */
-public class EditableTextPanel extends Panel {
+public class EditableTextPanel extends EventPanel {
 
     /** Logger. */
     @SuppressWarnings("unused")
@@ -46,9 +46,6 @@ public class EditableTextPanel extends Panel {
 
     /** should the delete button be visible. */
     private boolean canDelete = true;
-
-    /** event bus model for triple add/edit/delete events. */
-    private IModel<EventBus> eventBusModel;
 
     /** The read only view of the field. */
     private Fragment viewFragment;
@@ -73,10 +70,9 @@ public class EditableTextPanel extends Panel {
      */
     public EditableTextPanel(String id, AnnotationTripleModel model, final IModel<EventBus> eventBusModel,
             boolean multipleLines, boolean editMode) {
-        super(id, model);
+        super(id, model, eventBusModel);
         setOutputMarkupId(true);
         setOutputMarkupPlaceholderTag(true);
-        this.eventBusModel = eventBusModel;
         LoadableDetachableModel<EventBus> internalEventBusModel = new LoadableDetachableModel<EventBus>() {
 
             /** id. */

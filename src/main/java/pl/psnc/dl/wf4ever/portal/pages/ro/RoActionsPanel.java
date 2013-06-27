@@ -3,12 +3,12 @@ package pl.psnc.dl.wf4ever.portal.pages.ro;
 import org.apache.log4j.Logger;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.ExternalLink;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.evo.EvoType;
 
+import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.MetadataDownloadClickedEvent;
@@ -26,7 +26,7 @@ import com.google.common.eventbus.Subscribe;
  * @author Piotr Hołubowicz
  * 
  */
-public class RoActionsPanel extends Panel {
+public class RoActionsPanel extends EventPanel {
 
     /** id. */
     private static final long serialVersionUID = -3775797988389365540L;
@@ -37,9 +37,6 @@ public class RoActionsPanel extends Panel {
 
     /** The form aggregating the buttons. */
     private Form<Void> form;
-
-    /** Event bus model. */
-    private IModel<EventBus> eventBusModel;
 
     /** Make snapshot button. */
     private AjaxEventButton snapshotButton;
@@ -59,9 +56,7 @@ public class RoActionsPanel extends Panel {
      *            event bus model for button clicks
      */
     public RoActionsPanel(String id, final IModel<ResearchObject> model, final IModel<EventBus> eventBusModel) {
-        super(id, model);
-        this.eventBusModel = eventBusModel;
-        eventBusModel.getObject().register(this);
+        super(id, model, eventBusModel);
         setOutputMarkupId(true);
         form = new Form<Void>("form");
         add(form);

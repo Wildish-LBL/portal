@@ -4,11 +4,11 @@ import org.apache.log4j.Logger;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.ExternalLink;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Resource;
 
+import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AnnotationEditAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.AddLinkEvent;
@@ -28,7 +28,7 @@ import com.google.common.eventbus.Subscribe;
  * @author Piotr Hołubowicz
  * 
  */
-public class ResourceActionsPanel extends Panel {
+public class ResourceActionsPanel extends EventPanel {
 
     /** id. */
     private static final long serialVersionUID = -3775797988389365540L;
@@ -52,8 +52,7 @@ public class ResourceActionsPanel extends Panel {
      *            event bus model for the button clicks
      */
     public ResourceActionsPanel(String id, final IModel<Resource> model, final IModel<EventBus> eventBusModel) {
-        super(id, model);
-        eventBusModel.getObject().register(this);
+        super(id, model, eventBusModel);
         setOutputMarkupPlaceholderTag(true);
 
         form = new Form<Void>("form");
@@ -72,6 +71,7 @@ public class ResourceActionsPanel extends Panel {
 
     @Override
     protected void onConfigure() {
+        super.onConfigure();
         setEnabled(getDefaultModelObject() != null);
     }
 

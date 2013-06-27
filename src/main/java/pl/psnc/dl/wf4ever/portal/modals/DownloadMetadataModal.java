@@ -6,11 +6,11 @@ import java.util.List;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
 
+import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
@@ -29,16 +29,13 @@ import com.google.common.eventbus.Subscribe;
  * 
  */
 @SuppressWarnings("serial")
-public class DownloadMetadataModal extends Panel {
+public class DownloadMetadataModal extends EventPanel {
 
     /** RDF format selected by the user. */
     private RDFFormat format = RDFFormat.RDFXML;
 
     /** Modal window feedback panel. */
     private MyFeedbackPanel feedbackPanel;
-
-    /** Event bus for posting an event if OK. */
-    private IModel<EventBus> eventBusModel;
 
 
     /**
@@ -50,9 +47,7 @@ public class DownloadMetadataModal extends Panel {
      *            bus model
      */
     public DownloadMetadataModal(String id, final IModel<EventBus> eventBusModel) {
-        super(id);
-        this.eventBusModel = eventBusModel;
-        eventBusModel.getObject().register(this);
+        super(id, null, eventBusModel);
 
         Form<?> form = new Form<Void>("downloadMetadataForm");
         add(form);

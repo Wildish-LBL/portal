@@ -13,13 +13,13 @@ import org.apache.wicket.markup.html.form.RadioGroup;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.lang.Bytes;
 
+import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.components.form.RequiredURITextField;
@@ -40,7 +40,7 @@ import com.google.common.eventbus.Subscribe;
  * 
  */
 @SuppressWarnings("serial")
-public class UploadResourceModal extends Panel {
+public class UploadResourceModal extends EventPanel {
 
     /** Type of currently added resource. */
     private ResourceType resourceType = ResourceType.LOCAL;
@@ -60,9 +60,6 @@ public class UploadResourceModal extends Panel {
     /** Feedback panel. */
     private MyFeedbackPanel feedbackPanel;
 
-    /** Event bus for posting an event if OK. */
-    private IModel<EventBus> eventBusModel;
-
     /** Component for the uploaded file. */
     private FileUploadField fileUpload;
 
@@ -76,9 +73,7 @@ public class UploadResourceModal extends Panel {
      *            event bus
      */
     public UploadResourceModal(String id, final IModel<EventBus> eventBusModel) {
-        super(id);
-        this.eventBusModel = eventBusModel;
-        eventBusModel.getObject().register(this);
+        super(id, null, eventBusModel);
         Form<?> form = new Form<Void>("uploadResourceForm");
         add(form);
 
@@ -218,6 +213,7 @@ public class UploadResourceModal extends Panel {
 
     @Override
     protected void onConfigure() {
+        super.onConfigure();
         switch (resourceType) {
             case LOCAL:
                 resourceDiv.setVisible(false);

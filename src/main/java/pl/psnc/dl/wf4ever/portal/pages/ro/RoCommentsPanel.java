@@ -2,10 +2,10 @@ package pl.psnc.dl.wf4ever.portal.pages.ro;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
+import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.annotations.CommentsList;
 import pl.psnc.dl.wf4ever.portal.components.form.AnnotationEditAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
@@ -23,7 +23,7 @@ import com.google.common.eventbus.Subscribe;
  * @author Piotr Hołubowicz
  * 
  */
-public class RoCommentsPanel extends Panel {
+public class RoCommentsPanel extends EventPanel {
 
     /** id. */
     private static final long serialVersionUID = -3775797988389365540L;
@@ -50,9 +50,8 @@ public class RoCommentsPanel extends Panel {
      *            event bus model for button clicks
      */
     public RoCommentsPanel(String id, final IModel<ResearchObject> model, IModel<EventBus> eventBusModel) {
-        super(id, model);
+        super(id, model, eventBusModel);
         setOutputMarkupPlaceholderTag(true);
-        eventBusModel.getObject().register(this);
 
         form = new Form<Void>("form");
         add(form);
@@ -63,7 +62,6 @@ public class RoCommentsPanel extends Panel {
         form.add(new AuthenticatedAjaxEventButton("annotate", form, eventBusModel, AnnotateEvent.class));
 
         commentsList = new CommentsList("comments-list", model, eventBusModel);
-        eventBusModel.getObject().register(commentsList);
         add(commentsList);
     }
 
