@@ -9,6 +9,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Annotation;
 
 import pl.psnc.dl.wf4ever.portal.components.form.EditableTextPanel;
+import pl.psnc.dl.wf4ever.portal.model.AnnotationTimestampModel;
 import pl.psnc.dl.wf4ever.portal.model.AnnotationTripleModel;
 
 import com.google.common.eventbus.EventBus;
@@ -80,9 +81,8 @@ public class EditableCommentTextPanel extends EditableTextPanel {
         public CommentViewFragment(String id, String markupId, MarkupContainer markupProvider, IModel<String> model,
                 IModel<EventBus> internalEventBusModel) {
             super(id, markupId, markupProvider, model, internalEventBusModel);
-            Annotation ann = ((AnnotationTripleModel) model).getAnnotationTriple().getAnnotation();
-            form.add(new Label("author", new PropertyModel<String>(ann, "author.name")));
-            form.add(new Label("created", new PropertyModel<String>(ann, "createdFormatted")));
+            form.add(new Label("authorDate", new AnnotationTimestampModel(new PropertyModel<Annotation>(
+                    ((AnnotationTripleModel) model).getAnnotationTriple(), "annotation"))));
         }
 
     }
