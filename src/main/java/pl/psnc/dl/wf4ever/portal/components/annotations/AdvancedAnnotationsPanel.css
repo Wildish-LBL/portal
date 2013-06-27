@@ -6,7 +6,7 @@ table.advanced-annotations td.property {
 	width: 120px;
 }
 
-table.advanced-annotations td.annotation-triple-value > div {
+table.advanced-annotations td.annotation-triple-value>div {
 	word-wrap: break-word;
 }
 
@@ -14,13 +14,31 @@ table.advanced-annotations td.annotation-triple-value > div {
 	position: relative;
 }
 
-.buttons-hover div.btn-group {
+.buttons-hover .edit-btn-group {
 	display: none;
 }
 
-.buttons-hover tr:hover div.btn-group {
+.buttons-hover tr:hover .edit-btn-group {
 	display: block;
 	position: absolute;
 	top: 0px;
 	right: 0px;
+}
+
+.edit-block {
+	width: 100%;
+}
+
+.edit-block .property {
+	display: inline-block;
+	width: 30%;
+}
+
+.edit-block .value {
+	display: inline-block;
+	width: 45%;
+}
+
+.edit-block .btn-group {
+	display: inline-block;
 }

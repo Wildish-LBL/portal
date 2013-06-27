@@ -15,7 +15,7 @@
 			data-container="body"><div class="buttons-hover-inside"
 				data-original-title="">
 				<span wicket:id="value"></span>
-				<div class="btn-group">
+				<div class="btn-group edit-btn-group">
 					<button data-original-title="edit" data-toggle="tooltip"
 						data-placement="top" class="btn btn-mini my-tooltip"
 						data-container="body" type="submit" wicket:id="edit">
@@ -29,28 +29,27 @@
 				</div>
 			</div></td>
 	</wicket:fragment>
-	<!-- 	<wicket:fragment wicket:id="editSingle">
+	<wicket:fragment wicket:id="editSingle">
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$('.my-tooltip').tooltip();
 			})
 		</script>
-		<form wicket:id="form" style="margin-bottom: auto">
-			<div class="input-append">
-				<input class="span3" id="appendedInputButtons" type="text"
-					wicket:id="text">
-				<button data-original-title="apply" data-toggle="tooltip"
-					data-placement="top" class="btn my-tooltip" data-container="body"
-					type="submit" wicket:id="apply">
-					<i class="icon-ok"></i>
-				</button>
-				<button data-original-title="cancel" data-toggle="tooltip"
-					data-placement="top" class="btn my-tooltip" data-container="body"
-					type="submit" wicket:id="cancel">
-					<i class="icon-remove"></i>
-				</button>
-			</div>
-		</form>
+		<td colspan="2"><div class="edit-block">
+				<input class="property" type="text" wicket:id="property-name"></input>
+				<input class="value" type="text" wicket:id="value" />
+				<div class="btn-group">
+					<button data-original-title="apply" data-toggle="tooltip"
+						data-placement="top" class="btn my-tooltip" data-container="body"
+						type="submit" wicket:id="apply">
+						<i class="icon-ok"></i>
+					</button>
+					<button data-original-title="cancel" data-toggle="tooltip"
+						data-placement="top" class="btn my-tooltip" data-container="body"
+						type="submit" wicket:id="cancel">
+						<i class="icon-remove"></i>
+					</button>
+				</div>
+			</div></td>
 	</wicket:fragment>
- -->
 </wicket:panel>

@@ -63,7 +63,8 @@ public class AdvancedAnnotationsPanel extends EventPanel {
         @Override
         protected void populateItem(ListItem<AnnotationTriple> item) {
             item.add(new EditableAnnotationTextPanel("editable-annotation-triple", item.getModel(),
-                    internalEventBusModel).setRenderBodyOnly(true));
+                    internalEventBusModel));
+            item.setRenderBodyOnly(true);
         }
 
     }
