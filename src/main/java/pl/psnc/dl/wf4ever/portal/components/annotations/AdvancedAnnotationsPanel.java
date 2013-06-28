@@ -10,7 +10,6 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.purl.wf4ever.rosrs.client.Annotable;
@@ -64,7 +63,7 @@ public class AdvancedAnnotationsPanel extends EventPanel {
         @Override
         protected void populateItem(ListItem<AnnotationTriple> item) {
             item.add(new EditableAnnotationTextPanel("editable-annotation-triple", new AnnotationTripleModel(item
-                    .getModelObject()), internalEventBusModel));
+                    .getModelObject()), eventBusModel));
             item.setRenderBodyOnly(true);
         }
 
@@ -84,9 +83,6 @@ public class AdvancedAnnotationsPanel extends EventPanel {
 
     /** A form for the buttons. */
     private Form<Void> form;
-
-    /** Internal event bus for edit clicks. */
-    private IModel<EventBus> internalEventBusModel;
 
 
     /**
@@ -109,19 +105,6 @@ public class AdvancedAnnotationsPanel extends EventPanel {
         add(form);
         Button backButton = new Button("show-basic");
         backButton.add(AttributeAppender.replace("data-target", "#" + basicPanelId));
-
-        internalEventBusModel = new LoadableDetachableModel<EventBus>() {
-
-            /** id. */
-            private static final long serialVersionUID = 5225667860067218852L;
-
-
-            @Override
-            protected EventBus load() {
-                return new EventBus();
-            }
-        };
-        internalEventBusModel.getObject().register(this);
 
         form.add(backButton);
         form.add(new AnnotationEditAjaxEventButton("import-annotations", form, model, eventBusModel,

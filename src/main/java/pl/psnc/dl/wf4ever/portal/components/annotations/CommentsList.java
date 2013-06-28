@@ -60,7 +60,7 @@ public class CommentsList extends EventPanel {
         @Override
         protected void populateItem(ListItem<AnnotationTriple> item) {
             AnnotationTripleModel model = new AnnotationTripleModel(item.getModelObject());
-            item.add(new EditableCommentTextPanel("comment", model, internalEventBusModel));
+            item.add(new EditableCommentTextPanel("comment", model, eventBusModel));
         }
     }
 
@@ -147,9 +147,6 @@ public class CommentsList extends EventPanel {
     /** a field for adding a new comment. */
     private WebMarkupContainer addCommentPanel;
 
-    /** event bus model for button clicks. */
-    private LoadableDetachableModel<EventBus> internalEventBusModel;
-
     /** a panel with a message if there are no comments. */
     private WebMarkupContainer noComments;
 
@@ -174,19 +171,6 @@ public class CommentsList extends EventPanel {
         comments = new CommentsListView("list", listModel);
         add(comments);
 
-        internalEventBusModel = new LoadableDetachableModel<EventBus>() {
-
-            /** id. */
-            private static final long serialVersionUID = 5225667860067218852L;
-
-
-            @Override
-            protected EventBus load() {
-                return new EventBus();
-            }
-        };
-        internalEventBusModel.getObject().register(this);
-
         addCommentPanel = new WebMarkupContainer("add-comment");
         addCommentPanel.setOutputMarkupPlaceholderTag(true);
         addCommentPanel.setVisible(false);
@@ -206,7 +190,7 @@ public class CommentsList extends EventPanel {
             @SuppressWarnings("unchecked")
             AnnotationTripleModel model = new AnnotationTripleModel((IModel<Annotable>) this.getDefaultModel(),
                     RDFS.comment, false);
-            AddCommentPanel panel = new AddCommentPanel("add-comment", model, internalEventBusModel, event.getTarget());
+            AddCommentPanel panel = new AddCommentPanel("add-comment", model, eventBusModel, event.getTarget());
             panel.setVisible(true);
             addCommentPanel.replaceWith(panel);
             addCommentPanel = panel;
