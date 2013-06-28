@@ -29,19 +29,16 @@ public class AnnotationTripleModel implements IModel<AnnotationTriple> {
     /** Logger. */
     private static final Logger LOG = Logger.getLogger(AnnotationTripleModel.class);
 
-    /** If detached, the value will need to be loaded again. */
-    private transient boolean attached = false;
-
     /** The model for the quad subject. */
     private final IModel<? extends Annotable> annotableModel;
 
     /** The property. */
-    private final URI property;
+    private URI property;
 
     /** The annotation containing the triple. */
     private Annotation annotation;
 
-    /** The triple value. It's always a String, even if represents a URI resource. */
+    /** The triple value. It's always a String, even if it represents a URI resource. */
     private String value;
 
     /** Use any existing matching annotation triple. */
@@ -105,9 +102,6 @@ public class AnnotationTripleModel implements IModel<AnnotationTriple> {
 
     @Override
     public void detach() {
-        if (attached) {
-            attached = false;
-        }
     }
 
 
@@ -124,9 +118,21 @@ public class AnnotationTripleModel implements IModel<AnnotationTriple> {
 
 
     @Override
-    public void setObject(AnnotationTriple object) {
-        // TODO Auto-generated method stub
-
+    public void setObject(AnnotationTriple newTriple) {
+        if (newTriple.getProperty() == null || newTriple.getValue() == null) {
+            delete();
+        } else {
+            AnnotationTriple triple = getAnnotationTriple();
+            if (triple != null) {
+                try {
+                    triple.updatePropertyValue(newTriple.getProperty(), newTriple.getValue());
+                    property = newTriple.getProperty();
+                    value = newTriple.getValue();
+                } catch (ROSRSException e) {
+                    LOG.error("Can't update annotation " + annotation, e);
+                }
+            }
+        }
     }
 
 
@@ -153,7 +159,8 @@ public class AnnotationTripleModel implements IModel<AnnotationTriple> {
 
 
     /**
-     * A model for retrieving and updating only the triple value.
+     * A model for retrieving and updating only the triple value. Useful for simple components that allow to edit only
+     * the value.
      * 
      * @author piotrekhol
      * 
@@ -174,8 +181,7 @@ public class AnnotationTripleModel implements IModel<AnnotationTriple> {
             if (annotableModel.getObject() == null) {
                 return null;
             }
-            if (getAnnotationTriple() == null && anyExisting) {
-                //TODO cache?
+            if (value == null && anyExisting) {
                 List<AnnotationTriple> triples = annotableModel.getObject().getPropertyValues(property, true);
                 if (!triples.isEmpty()) {
                     annotation = triples.get(0).getAnnotation();
@@ -204,7 +210,7 @@ public class AnnotationTripleModel implements IModel<AnnotationTriple> {
                         }
                     } else {
                         try {
-                            triple.setValue(object);
+                            triple.updateValue(object);
                             value = object;
                         } catch (ROSRSException e) {
                             LOG.error("Can't update annotation " + annotation, e);

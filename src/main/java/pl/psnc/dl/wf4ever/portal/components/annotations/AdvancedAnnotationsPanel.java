@@ -23,6 +23,7 @@ import pl.psnc.dl.wf4ever.portal.events.ResourceSelectedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AbstractAnnotationEditedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotateEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.ImportAnnotationClickedEvent;
+import pl.psnc.dl.wf4ever.portal.model.AnnotationTripleModel;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -62,8 +63,8 @@ public class AdvancedAnnotationsPanel extends EventPanel {
 
         @Override
         protected void populateItem(ListItem<AnnotationTriple> item) {
-            item.add(new EditableAnnotationTextPanel("editable-annotation-triple", item.getModel(),
-                    internalEventBusModel));
+            item.add(new EditableAnnotationTextPanel("editable-annotation-triple", new AnnotationTripleModel(item
+                    .getModelObject()), internalEventBusModel));
             item.setRenderBodyOnly(true);
         }
 
