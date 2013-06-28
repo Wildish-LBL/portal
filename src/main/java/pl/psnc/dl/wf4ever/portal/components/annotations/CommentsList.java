@@ -1,9 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.components.annotations;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -12,7 +10,6 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.purl.wf4ever.rosrs.client.Annotable;
-import org.purl.wf4ever.rosrs.client.Annotation;
 import org.purl.wf4ever.rosrs.client.AnnotationTriple;
 import org.purl.wf4ever.rosrs.client.AnnotationTripleByDateComparator;
 
@@ -96,14 +93,11 @@ public class CommentsList extends EventPanel {
 
         @Override
         protected List<AnnotationTriple> load() {
-            List<AnnotationTriple> list = new ArrayList<>();
-            if (annotableModel.getObject() != null) {
-                for (Entry<Annotation, String> e : annotableModel.getObject().getPropertyValues(RDFS.comment)
-                        .entrySet()) {
-                    list.add(new AnnotationTriple(e.getKey(), annotableModel.getObject(), RDFS.comment, e.getValue()));
-                }
-                Collections.sort(list, new AnnotationTripleByDateComparator());
+            if (annotableModel.getObject() == null) {
+                return Collections.emptyList();
             }
+            List<AnnotationTriple> list = annotableModel.getObject().getPropertyValues(RDFS.comment, false);
+            Collections.sort(list, new AnnotationTripleByDateComparator());
             return list;
         }
     }
@@ -209,8 +203,9 @@ public class CommentsList extends EventPanel {
     @Subscribe
     public void onAddCommentClicked(CommentAddClickedEvent event) {
         if (event.getAnnotableModel().getObject() == this.getDefaultModelObject()) {
-            AnnotationTripleModel model = new AnnotationTripleModel(null, (Annotable) this.getDefaultModelObject(),
-                    RDFS.comment);
+            @SuppressWarnings("unchecked")
+            AnnotationTripleModel model = new AnnotationTripleModel((IModel<Annotable>) this.getDefaultModel(),
+                    RDFS.comment, false);
             AddCommentPanel panel = new AddCommentPanel("add-comment", model, internalEventBusModel, event.getTarget());
             panel.setVisible(true);
             addCommentPanel.replaceWith(panel);

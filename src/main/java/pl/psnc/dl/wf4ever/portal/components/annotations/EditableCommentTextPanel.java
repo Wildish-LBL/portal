@@ -46,7 +46,7 @@ public class EditableCommentTextPanel extends EditableTextPanel {
 
 
     @Override
-    protected Fragment newViewFragment(IModel<String> model, IModel<EventBus> internalEventBusModel) {
+    protected Fragment newViewFragment(AnnotationTripleModel model, IModel<EventBus> internalEventBusModel) {
         return new CommentViewFragment("content", "view", this, model, internalEventBusModel);
 
     }
@@ -78,11 +78,11 @@ public class EditableCommentTextPanel extends EditableTextPanel {
          * @param internalEventBusModel
          *            the event bus for the button clicks
          */
-        public CommentViewFragment(String id, String markupId, MarkupContainer markupProvider, IModel<String> model,
-                IModel<EventBus> internalEventBusModel) {
+        public CommentViewFragment(String id, String markupId, MarkupContainer markupProvider,
+                AnnotationTripleModel model, IModel<EventBus> internalEventBusModel) {
             super(id, markupId, markupProvider, model, internalEventBusModel);
-            form.add(new Label("authorDate", new AnnotationTimestampModel(new PropertyModel<Annotation>(
-                    ((AnnotationTripleModel) model).getAnnotationTriple(), "annotation"))));
+            form.add(new Label("authorDate", new AnnotationTimestampModel(new PropertyModel<Annotation>(model
+                    .getObject(), "annotation"))));
         }
 
     }

@@ -186,7 +186,7 @@ public class FolderContentsPanel extends EventPanel {
                 };
                 item.add(link);
                 link.add(new Label("name", new PropertyModel<String>(folder, "name")));
-                item.add(new Label("comments-cnt", "" + folder.getPropertyValues(RDFS.comment).size()));
+                item.add(new Label("comments-cnt", "" + folder.getPropertyValues(RDFS.comment, false).size()));
                 item.add(new ResourceClickedBehaviour(folder, "onclick"));
                 item.add(new ResourceSelectedBehaviour(folder));
             }
@@ -218,7 +218,7 @@ public class FolderContentsPanel extends EventPanel {
             protected void populateItem(ListItem<Resource> item) {
                 Resource resource = item.getModelObject();
                 item.add(new Label("name", new PropertyModel<String>(resource, "name")));
-                item.add(new Label("comments-cnt", "" + resource.getPropertyValues(RDFS.comment).size()));
+                item.add(new Label("comments-cnt", "" + resource.getPropertyValues(RDFS.comment, false).size()));
                 item.add(new ResourceClickedBehaviour(resource, "onclick"));
                 item.add(new ResourceSelectedBehaviour(resource));
             }

@@ -102,7 +102,7 @@ public class EditableTextPanel extends EventPanel {
      *            event bus for button clicks
      * @return a fragment
      */
-    protected Fragment newViewFragment(IModel<String> model, IModel<EventBus> internalEventBusModel) {
+    protected Fragment newViewFragment(AnnotationTripleModel model, IModel<EventBus> internalEventBusModel) {
         return new ViewFragment("content", "view", this, model, internalEventBusModel);
     }
 
@@ -155,10 +155,9 @@ public class EditableTextPanel extends EventPanel {
      * @param event
      *            click event
      */
-    @SuppressWarnings("unchecked")
     @Subscribe
     public void onDelete(DeleteEvent event) {
-        ((IModel<String>) this.getDefaultModel()).setObject(null);
+        ((AnnotationTripleModel) this.getDefaultModel()).delete();
         event.getTarget().appendJavaScript("$('.tooltip').remove();");
         event.getTarget().add(this);
         if (eventBusModel != null && eventBusModel.getObject() != null) {
@@ -242,13 +241,13 @@ public class EditableTextPanel extends EventPanel {
          * @param internalEventBusModel
          *            event bus model for button clicks
          */
-        public ViewFragment(String id, String markupId, MarkupContainer markupProvider, IModel<String> model,
+        public ViewFragment(String id, String markupId, MarkupContainer markupProvider, AnnotationTripleModel model,
                 final IModel<EventBus> internalEventBusModel) {
             super(id, markupId, markupProvider, model);
             setOutputMarkupPlaceholderTag(true);
             form = new Form<Void>("form");
             add(form);
-            notSetLabel = new NotSetLabel("text", model);
+            notSetLabel = new NotSetLabel("text", model.getValueModel());
             form.add(notSetLabel);
             form.add(new AuthenticatedAjaxEventButton("edit", form, internalEventBusModel, EditEvent.class));
             deleteButton = new AuthenticatedAjaxEventButton("delete", form, internalEventBusModel, DeleteEvent.class);
@@ -367,13 +366,14 @@ public class EditableTextPanel extends EventPanel {
          * @param multipleLines
          *            should the edit area have multiple lines
          */
-        public EditFragment(String id, String markupId, MarkupContainer markupProvider, IModel<String> model,
+        public EditFragment(String id, String markupId, MarkupContainer markupProvider, AnnotationTripleModel model,
                 final IModel<EventBus> internalEventBusModel, boolean multipleLines) {
             super(id, markupId, markupProvider, model);
             setOutputMarkupPlaceholderTag(true);
             Form<?> form = new Form<Void>("form");
             add(form);
-            textArea = multipleLines ? new TextArea<>("text", model) : new TextField<>("text", model);
+            textArea = multipleLines ? new TextArea<>("text", model.getValueModel()) : new TextField<>("text",
+                    model.getValueModel());
             form.add(textArea);
             form.add(new AuthenticatedAjaxEventButton("apply", form, internalEventBusModel, ApplyEvent.class));
             form.add(new AuthenticatedAjaxEventButton("cancel", form, internalEventBusModel, CancelEvent.class)

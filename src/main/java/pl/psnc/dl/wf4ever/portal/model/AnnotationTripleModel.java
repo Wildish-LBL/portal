@@ -1,9 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.model;
 
 import java.net.URI;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.model.IModel;
@@ -24,16 +22,12 @@ import com.hp.hpl.jena.rdf.model.Property;
  * @author piotrekhol
  * 
  */
-public class AnnotationTripleModel implements IModel<String> {
+public class AnnotationTripleModel implements IModel<AnnotationTriple> {
 
     /** id. */
     private static final long serialVersionUID = -3397270930648327359L;
     /** Logger. */
     private static final Logger LOG = Logger.getLogger(AnnotationTripleModel.class);
-
-    /** A fixed value indicating that the annotation is unknown, any any matching should be used if exists. */
-    public static final Annotation ANY_ANNOTATION = new Annotation(null, null, null, Collections.<URI> emptySet(),
-            null, null);
 
     /** If detached, the value will need to be loaded again. */
     private transient boolean attached = false;
@@ -47,77 +41,60 @@ public class AnnotationTripleModel implements IModel<String> {
     /** The annotation containing the triple. */
     private Annotation annotation;
 
-    /** The object = value of the model. */
-    private transient String value;
+    /** The triple value. It's always a String, even if represents a URI resource. */
+    private String value;
+
+    /** Use any existing matching annotation triple. */
+    private final boolean anyExisting;
+
+    /** Model for updating only the triple value. */
+    private final ValueModel valueModel = new ValueModel();
 
 
     /**
      * Constructor.
      * 
-     * @param annotation
-     *            the annotation containing the triple. Use {@link AnnotationTripleModel.ANY_ANNOTATION} if the
-     *            annotation is unknown and any existing value is ok.
-     * @param annotable
-     *            the annotated resource
-     * @param property
-     *            the property (predicate)
+     * @param triple
+     *            annotation triple
      */
-    public AnnotationTripleModel(Annotation annotation, Annotable annotable, URI property) {
-        this.annotation = annotation;
-        this.annotableModel = new Model<Annotable>(annotable);
-        this.property = property;
+    public AnnotationTripleModel(AnnotationTriple triple) {
+        this.annotableModel = new Model<>(triple.getSubject());
+        this.property = triple.getProperty();
+        this.annotation = triple.getAnnotation();
+        this.value = triple.getValue();
+        this.anyExisting = false;
     }
 
 
     /**
      * Constructor.
      * 
-     * @param annotation
-     *            the annotation containing the triple. Use {@link AnnotationTripleModel.ANY_ANNOTATION} if the
-     *            annotation is unknown and any existing value is ok.
      * @param annotableModel
      *            the annotated resource
      * @param property
-     *            the property (predicate)
+     *            the immutable property
+     * @param anyExisting
+     *            should any existing value be searched
      */
-    public AnnotationTripleModel(Annotation annotation, IModel<? extends Annotable> annotableModel, URI property) {
-        this.annotation = annotation;
+    public AnnotationTripleModel(IModel<? extends Annotable> annotableModel, URI property, boolean anyExisting) {
         this.annotableModel = annotableModel;
         this.property = property;
+        this.anyExisting = anyExisting;
     }
 
 
     /**
      * Constructor.
      * 
-     * @param annotation
-     *            the annotation containing the triple. Use {@link AnnotationTripleModel.ANY_ANNOTATION} if the
-     *            annotation is unknown and any existing value is ok.
-     * @param annotable
+     * @param annotableModel
      *            the annotated resource
      * @param property
-     *            the property (predicate) as a Jena object
+     *            the immutable property
+     * @param anyExisting
+     *            should any existing value be searched
      */
-    public AnnotationTripleModel(Annotation annotation, Annotable annotable, Property property) {
-        this(annotation, annotable, URI.create(property.getURI()));
-    }
-
-
-    /**
-     * Constructor.
-     * 
-     * @param annotationTriple
-     *            the annotation triple
-     */
-    public AnnotationTripleModel(AnnotationTriple annotationTriple) {
-        this.annotation = annotationTriple.getAnnotation();
-        this.annotableModel = new Model<Annotable>(annotationTriple.getSubject());
-        this.property = annotationTriple.getProperty();
-    }
-
-
-    public AnnotationTriple getAnnotationTriple() {
-        return new AnnotationTriple(annotation, annotableModel.getObject(), property, value);
+    public AnnotationTripleModel(IModel<? extends Annotable> annotableModel, Property property, boolean anyExisting) {
+        this(annotableModel, URI.create(property.getURI()), anyExisting);
     }
 
 
@@ -130,80 +107,120 @@ public class AnnotationTripleModel implements IModel<String> {
     public void detach() {
         if (attached) {
             attached = false;
-            value = null;
         }
     }
 
 
     @Override
-    public String getObject() {
-        if (!attached && annotableModel.getObject() != null && annotableModel.getObject().isLoaded()) {
-            attached = true;
-            value = load();
-        }
-        return value;
+    public AnnotationTriple getObject() {
+        return getAnnotationTriple();
+    }
+
+
+    private AnnotationTriple getAnnotationTriple() {
+        return annotation != null ? new AnnotationTriple(annotation, annotableModel.getObject(), property, value,
+                anyExisting) : null;
     }
 
 
     @Override
-    public void setObject(String object) {
-        if (annotableModel.getObject() == null) {
-            throw new IllegalStateException("Annotable object cannot be null to set a value");
-        }
-        if (object != null) {
-            if (!object.equals(value)) {
-                if (annotation == null || annotation == ANY_ANNOTATION) {
-                    try {
-                        annotation = annotableModel.getObject().createPropertyValue(property, object);
-                        value = object;
-                    } catch (ROSRSException | ROException e) {
-                        LOG.error("Can't create an annotation", e);
-                    }
-                } else {
-                    try {
-                        annotableModel.getObject().updatePropertyValue(annotation, property, object);
-                        value = object;
-                    } catch (ROSRSException e) {
-                        LOG.error("Can't update annotation " + annotation, e);
-                    }
-                }
-                value = object;
-            }
-        } else if (annotation != null) {
+    public void setObject(AnnotationTriple object) {
+        // TODO Auto-generated method stub
+
+    }
+
+
+    /**
+     * Delete this annotation triple.
+     */
+    public void delete() {
+        AnnotationTriple triple = getAnnotationTriple();
+        if (triple != null) {
             try {
-                annotableModel.getObject().deletePropertyValue(annotation, property);
+                triple.delete();
                 value = null;
                 annotation = null;
             } catch (ROSRSException e) {
                 LOG.error("Can't delete/update annotation " + annotation, e);
             }
         }
-        attached = true;
+    }
+
+
+    public ValueModel getValueModel() {
+        return valueModel;
     }
 
 
     /**
-     * Load the value from the selected annotation or all annotations of the resource.
+     * A model for retrieving and updating only the triple value.
      * 
-     * @return the object as String or null of none found
+     * @author piotrekhol
+     * 
      */
-    private String load() {
-        if (annotableModel.getObject() == null) {
-            return null;
+    class ValueModel implements IModel<String> {
+
+        /** id. */
+        private static final long serialVersionUID = -7572730556806614174L;
+
+
+        @Override
+        public void detach() {
         }
-        Map<Annotation, String> values = annotableModel.getObject().getPropertyValues(property);
-        if (annotation == null) {
-            return null;
-        } else if (annotation == ANY_ANNOTATION) {
-            if (!values.isEmpty()) {
-                Entry<Annotation, String> e = values.entrySet().iterator().next();
-                annotation = e.getKey();
-                return e.getValue();
-            } else {
+
+
+        @Override
+        public String getObject() {
+            if (annotableModel.getObject() == null) {
                 return null;
             }
-        } else {
-            return values.get(annotation);
+            if (getAnnotationTriple() == null && anyExisting) {
+                //TODO cache?
+                List<AnnotationTriple> triples = annotableModel.getObject().getPropertyValues(property, true);
+                if (!triples.isEmpty()) {
+                    annotation = triples.get(0).getAnnotation();
+                    value = triples.get(0).getValue();
+                }
+            }
+            return value;
+        }
+
+
+        @Override
+        public void setObject(String object) {
+            if (annotableModel.getObject() == null) {
+                throw new IllegalStateException("Annotable object cannot be null to set a value");
+            }
+            AnnotationTriple triple = getAnnotationTriple();
+            if (object != null) {
+                if (!object.equals(value)) {
+                    if (triple == null) {
+                        try {
+                            triple = annotableModel.getObject().createPropertyValue(property, object);
+                            annotation = triple.getAnnotation();
+                            value = object;
+                        } catch (ROSRSException | ROException e) {
+                            LOG.error("Can't create an annotation", e);
+                        }
+                    } else {
+                        try {
+                            triple.setValue(object);
+                            value = object;
+                        } catch (ROSRSException e) {
+                            LOG.error("Can't update annotation " + annotation, e);
+                        }
+                    }
+                    value = object;
+                }
+            } else if (triple != null) {
+                try {
+                    triple.delete();
+                    value = null;
+                    annotation = null;
+                } catch (ROSRSException e) {
+                    LOG.error("Can't delete/update annotation " + annotation, e);
+                }
+            }
         }
     }
 
