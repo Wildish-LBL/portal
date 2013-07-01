@@ -55,11 +55,11 @@ public class EditableAnnotationTextPanel extends EventPanel {
     /** The fragment that allows to edit the property and the value. */
     private EditFragment editFragment;
 
-    /**
-     * A copy of the annotation triple. Used to make sure that the property and value are first both updated before it
-     * is propagated to the {@link AnnotationTripleModel}.
-     */
-    private AnnotationTriple tripleCopy;
+    /** The property that the user can edit. */
+    private URI newProperty;
+
+    /** The value that the user can edit. */
+    private String newValue;
 
 
     /**
@@ -71,8 +71,11 @@ public class EditableAnnotationTextPanel extends EventPanel {
      *            the model for the quad
      * @param eventBusModel
      *            event bus model for when a comment is added, deleted or edited
+     * @param editMode
+     *            should the field start in an edit mode
      */
-    public EditableAnnotationTextPanel(String id, AnnotationTripleModel model, final IModel<EventBus> eventBusModel) {
+    public EditableAnnotationTextPanel(String id, AnnotationTripleModel model, final IModel<EventBus> eventBusModel,
+            boolean editMode) {
         super(id, model, eventBusModel);
         setOutputMarkupPlaceholderTag(true);
         LoadableDetachableModel<EventBus> internalEventBusModel = new LoadableDetachableModel<EventBus>() {
@@ -87,11 +90,27 @@ public class EditableAnnotationTextPanel extends EventPanel {
             }
         };
         internalEventBusModel.getObject().register(this);
-        tripleCopy = model.getObject();
-        IModel<AnnotationTriple> copyModel = new Model<>(tripleCopy);
-        viewFragment = new ViewFragment("content", "view", this, copyModel, internalEventBusModel);
-        editFragment = new EditFragment("content", "editSingle", this, copyModel, internalEventBusModel);
-        add(viewFragment);
+        newProperty = model.getObject().getProperty();
+        newValue = model.getObject().getValue();
+        viewFragment = new ViewFragment("content", "view", this, model, internalEventBusModel);
+        editFragment = new EditFragment("content", "editSingle", this, new PropertyModel<URI>(this, "newProperty"),
+                new PropertyModel<String>(this, "newValue"), internalEventBusModel);
+        add(editMode ? editFragment : viewFragment);
+    }
+
+
+    /**
+     * Constructor for a version that is not associated with any particular annotation triple (for adding new ones).
+     * 
+     * @param id
+     *            wicket id
+     * @param annotable
+     *            the resource that will be annotated
+     * @param eventBusModel
+     *            event bus model for when a comment is added, deleted or edited
+     */
+    public EditableAnnotationTextPanel(String id, Annotable annotable, final IModel<EventBus> eventBusModel) {
+        this(id, new AnnotationTripleModel(new Model<>(annotable), (URI) null, false), eventBusModel, true);
     }
 
 
@@ -140,7 +159,7 @@ public class EditableAnnotationTextPanel extends EventPanel {
         event.getTarget().appendJavaScript("$('.tooltip').remove();");
         event.getTarget().add(this);
         //the tripleCopy now holds the updated property and value
-        ((AnnotationTripleModel) this.getDefaultModel()).setObject(tripleCopy);
+        ((AnnotationTripleModel) this.getDefaultModel()).setPropertyAndValue(newProperty, newValue);
         //post event
         if (eventBusModel != null && eventBusModel.getObject() != null) {
             IModel<? extends Annotable> annotable = ((AnnotationTripleModel) this.getDefaultModel())
@@ -238,17 +257,19 @@ public class EditableAnnotationTextPanel extends EventPanel {
          *            fragment wicket id
          * @param markupProvider
          *            container defining the fragment
-         * @param model
-         *            value model
+         * @param propertyModel
+         *            the property to edit
+         * @param valueModel
+         *            the value to edit
          * @param internalEventBusModel
          *            event bus model for button clicks
          */
-        public EditFragment(String id, String markupId, MarkupContainer markupProvider, IModel<AnnotationTriple> model,
-                final IModel<EventBus> internalEventBusModel) {
-            super(id, markupId, markupProvider, model);
+        public EditFragment(String id, String markupId, MarkupContainer markupProvider, IModel<URI> propertyModel,
+                IModel<String> valueModel, final IModel<EventBus> internalEventBusModel) {
+            super(id, markupId, markupProvider);
             setOutputMarkupPlaceholderTag(true);
-            add(new RequiredURITextField("property-name", new PropertyModel<URI>(model, "property")));
-            add(new TextField<>("value", new PropertyModel<String>(model, "value")));
+            add(new RequiredURITextField("property-name", propertyModel));
+            add(new TextField<>("value", valueModel));
             add(new AuthenticatedAjaxEventButton("apply", null, internalEventBusModel, ApplyEvent.class));
             add(new AuthenticatedAjaxEventButton("cancel", null, internalEventBusModel, CancelEvent.class)
                     .setDefaultFormProcessing(false));

@@ -3,8 +3,10 @@ package pl.psnc.dl.wf4ever.portal.components.annotations;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -17,10 +19,9 @@ import org.purl.wf4ever.rosrs.client.AnnotationTriple;
 
 import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AnnotationEditAjaxEventButton;
-import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.ResourceSelectedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AbstractAnnotationEditedEvent;
-import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotateEvent;
+import pl.psnc.dl.wf4ever.portal.events.annotations.AddAnnotationClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.ImportAnnotationClickedEvent;
 import pl.psnc.dl.wf4ever.portal.model.AnnotationTripleModel;
 
@@ -63,7 +64,7 @@ public class AdvancedAnnotationsPanel extends EventPanel {
         @Override
         protected void populateItem(ListItem<AnnotationTriple> item) {
             item.add(new EditableAnnotationTextPanel("editable-annotation-triple", new AnnotationTripleModel(item
-                    .getModelObject()), eventBusModel));
+                    .getModelObject()), eventBusModel, false));
             item.setRenderBodyOnly(true);
         }
 
@@ -83,6 +84,9 @@ public class AdvancedAnnotationsPanel extends EventPanel {
 
     /** A form for the buttons. */
     private Form<Void> form;
+
+    /** The new annotation row. */
+    private Component addAnnotationPanel;
 
 
     /**
@@ -109,10 +113,17 @@ public class AdvancedAnnotationsPanel extends EventPanel {
         form.add(backButton);
         form.add(new AnnotationEditAjaxEventButton("import-annotations", form, model, eventBusModel,
                 ImportAnnotationClickedEvent.class));
-        form.add(new AuthenticatedAjaxEventButton("annotate", form, eventBusModel, AnnotateEvent.class));
+        form.add(new AnnotationEditAjaxEventButton("annotate", form, model, eventBusModel,
+                AddAnnotationClickedEvent.class));
 
         form.add(new AnnotationTripleList("annotation-triple", new PropertyModel<List<AnnotationTriple>>(model,
                 "annotationTriples")));
+
+        addAnnotationPanel = new WebMarkupContainer("new-annotation");
+        addAnnotationPanel.setOutputMarkupPlaceholderTag(true);
+        addAnnotationPanel.setVisible(false);
+        form.add(addAnnotationPanel);
+
     }
 
 
@@ -150,14 +161,20 @@ public class AdvancedAnnotationsPanel extends EventPanel {
      */
     @Subscribe
     public void onAnnotationEdited(AbstractAnnotationEditedEvent event) {
+        addAnnotationPanel.setVisible(false);
         event.getTarget().add(this);
     }
 
 
     @Subscribe
-    public void onAnnotateClicked(AnnotateEvent event) {
-        //TODO
-        System.out.println("annotate");
+    public void onAnnotateClicked(AddAnnotationClickedEvent event) {
+        if (event.getAnnotableModel().getObject() == this.getDefaultModelObject()) {
+            EditableAnnotationTextPanel panel = new EditableAnnotationTextPanel("new-annotation",
+                    (Annotable) this.getDefaultModelObject(), eventBusModel);
+            addAnnotationPanel.replaceWith(panel);
+            addAnnotationPanel = panel;
+            event.getTarget().add(addAnnotationPanel);
+        }
     }
 
 }
