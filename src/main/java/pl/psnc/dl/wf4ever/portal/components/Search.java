@@ -10,6 +10,12 @@ import org.purl.wf4ever.rosrs.client.search.utils.SolrQueryBuilder;
 
 import pl.psnc.dl.wf4ever.portal.pages.search.SearchResultsPage;
 
+/**
+ * The search input field.
+ * 
+ * @author piotrekhol
+ * 
+ */
 public class Search extends Panel {
 
     /** id. */
@@ -23,6 +29,12 @@ public class Search extends Panel {
     private String searchKeywords;
 
 
+    /**
+     * Constructor.
+     * 
+     * @param id
+     *            wicket id
+     */
     public Search(String id) {
         super(id);
         Form<?> searchForm = new Form<Void>("searchFormBar") {

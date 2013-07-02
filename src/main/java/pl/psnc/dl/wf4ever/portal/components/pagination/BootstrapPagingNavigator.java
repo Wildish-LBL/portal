@@ -11,12 +11,27 @@ import org.apache.wicket.markup.html.navigation.paging.IPageable;
 import org.apache.wicket.markup.html.navigation.paging.IPagingLabelProvider;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigation;
 
+/**
+ * A paging navigator that returns components wrapped in other components (wrappers) so that the bootstrap styling can
+ * be properly applied. This in particular applies to setting the 'disabled' state.
+ * 
+ * @author piotrekhol
+ * 
+ */
 public class BootstrapPagingNavigator extends AjaxPagingNavigator {
 
     /** id. */
     private static final long serialVersionUID = -5495224054362925121L;
 
 
+    /**
+     * Constructor.
+     * 
+     * @param id
+     *            See Component
+     * @param pageable
+     *            The pageable component the page links are referring to.
+     */
     public BootstrapPagingNavigator(String id, IPageable pageable) {
         super(id, pageable);
     }
@@ -41,14 +56,31 @@ public class BootstrapPagingNavigator extends AjaxPagingNavigator {
     }
 
 
+    /**
+     * A wrapper around the real {@link AjaxPagingNavigationLink}.
+     * 
+     * @author piotrekhol
+     * 
+     */
     class Wrapper extends Link<Void> implements IAjaxLink {
 
         /** id. */
         private static final long serialVersionUID = -527364568167079132L;
 
+        /** The real link. */
         private AjaxPagingNavigationLink link;
 
 
+        /**
+         * Constructor.
+         * 
+         * @param id
+         *            wicket id
+         * @param link
+         *            the real link
+         * @param pageable
+         *            The pageable component the page links are referring to.
+         */
         public Wrapper(String id, AjaxPagingNavigationLink link, IPageable pageable) {
             super(id);
             this.link = link;
@@ -79,14 +111,31 @@ public class BootstrapPagingNavigator extends AjaxPagingNavigator {
     }
 
 
+    /**
+     * A wrapper around the real {@link AjaxPagingNavigationIncrementLink}.
+     * 
+     * @author piotrekhol
+     * 
+     */
     class WrapperIncrement extends Link<Void> implements IAjaxLink {
 
         /** id. */
         private static final long serialVersionUID = -527364568167079132L;
 
+        /** The real link. */
         private AjaxPagingNavigationIncrementLink link;
 
 
+        /**
+         * Constructor.
+         * 
+         * @param id
+         *            wicket id
+         * @param link
+         *            the real link
+         * @param pageable
+         *            The pageable component the page links are referring to.
+         */
         public WrapperIncrement(String id, AjaxPagingNavigationIncrementLink link, IPageable pageable) {
             super(id);
             this.link = link;

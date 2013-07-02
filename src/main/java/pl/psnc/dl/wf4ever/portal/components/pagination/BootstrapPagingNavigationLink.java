@@ -4,12 +4,29 @@ import org.apache.wicket.ajax.markup.html.navigation.paging.AjaxPagingNavigation
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.navigation.paging.IPageable;
 
+/**
+ * An {@link AjaxPagingNavigationLink} compatible with the Bootstrap styling.
+ * 
+ * @author piotrekhol
+ * 
+ */
 public class BootstrapPagingNavigationLink extends AjaxPagingNavigationLink {
 
     /** id. */
     private static final long serialVersionUID = -6475077411075979233L;
 
 
+    /**
+     * Constructor.
+     * 
+     * @param id
+     *            See Component
+     * @param pageable
+     *            The pageable component for this page link
+     * @param pageNumber
+     *            The page number in the PageableListView that this link links to. Negative pageNumbers are relative to
+     *            the end of the list.
+     */
     public BootstrapPagingNavigationLink(String id, IPageable pageable, int pageNumber) {
         super(id, pageable, pageNumber);
     }

@@ -9,12 +9,24 @@ import org.apache.wicket.model.PropertyModel;
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 
+/**
+ * A component that allows to sign in and out.
+ * 
+ * @author piotrekhol
+ * 
+ */
 public class Login extends Panel {
 
     /** id. */
     private static final long serialVersionUID = 2324973592678492491L;
 
 
+    /**
+     * Constructor.
+     * 
+     * @param id
+     *            wicket id
+     */
     public Login(String id) {
         super(id);
         Label userNameLabel = new Label("username-text", new PropertyModel<String>(this, "usernameText"));

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package pl.psnc.dl.wf4ever.portal.model;
 
 import java.io.Serializable;
@@ -46,8 +43,8 @@ public class RoEvoNode implements Serializable {
     /**
      * Constructor.
      * 
-     * @param uri
-     *            resource URI
+     * @param researchObject
+     *            the RO represented by this node
      */
     public RoEvoNode(ResearchObject researchObject) {
         setResearchObject(researchObject);

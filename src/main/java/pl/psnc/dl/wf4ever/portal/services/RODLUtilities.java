@@ -41,16 +41,12 @@ public final class RODLUtilities {
     /**
      * Get most recent Research Objects.
      * 
-     * @param ums
-     *            user management service
      * @param cnt
      *            number of ROs to get
      * @param sparqlEndpoint
      *            sparql endpoint URI
      * @param rodlURI
      *            RODL URI for resolving author names
-     * @param usernames
-     *            usernames cache
      * @return list of research objects
      * @throws IOException
      *             when cannot connect to SPARQL endpoint

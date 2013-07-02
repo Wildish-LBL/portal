@@ -74,14 +74,12 @@ public final class MyExpImportService {
      * 
      * @param model
      *            model with all import settings
-     * @param rodlURI
-     *            RODL URI
+     * @param rosrs
+     *            the ROSRS client
      * @param wf2ROService
      *            Wf-RO transformation service URI
      * @param myExpAccessToken
      *            myExp access token
-     * @param dLibraAccessToken
-     *            RODL access token
      * @param consumerKey
      *            myExp consumer key
      * @param consumerSecret
@@ -186,14 +184,14 @@ public final class MyExpImportService {
          * 
          * @param importModel
          *            Import model with all the settings
+         * @param rosrs
+         *            the ROSRS client
          * @param rodlURI
          *            RODL URI
          * @param wf2ROService
          *            Wf-RO transformation service URI
          * @param myExpAccessToken
          *            myExperiment OAuth access token
-         * @param dLibraToken
-         *            RODL OAuth access token
          * @param consumerKey
          *            myExp consumer key
          * @param consumerSecret

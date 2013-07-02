@@ -166,6 +166,12 @@ public class AdvancedAnnotationsPanel extends EventPanel {
     }
 
 
+    /**
+     * Show the new annotation panel.
+     * 
+     * @param event
+     *            the event that triggers this action
+     */
     @Subscribe
     public void onAnnotateClicked(AddAnnotationClickedEvent event) {
         if (event.getAnnotableModel().getObject() == this.getDefaultModelObject()) {

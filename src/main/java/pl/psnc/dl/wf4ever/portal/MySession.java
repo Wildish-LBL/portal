@@ -105,6 +105,12 @@ public class MySession extends AbstractAuthenticatedWebSession {
     }
 
 
+    /**
+     * Sign in the user.
+     * 
+     * @param userToken
+     *            the access token
+     */
     public void signIn(String userToken) {
         try {
             PortalApplication app = (PortalApplication) getApplication();

@@ -9,9 +9,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.link.ExternalLink;
@@ -44,10 +42,14 @@ public class RoEvoBox extends EventPanel {
     /** Logger. */
     @SuppressWarnings("unused")
     private static final Logger LOG = Logger.getLogger(RoEvoBox.class);
+
+    /** a temporary panel shown while the evolution info is loaded. */
     private WebMarkupContainer tmp;
 
+    /** All nodes in the visualization mapped to research objects they represent. */
     private Map<ResearchObject, RoEvoNode> allNodes;
 
+    /** The RO for which the visualization is drawn. */
     private IModel<ResearchObject> researchObjectModel;
 
     /** A JS file for this panel. */
@@ -63,21 +65,21 @@ public class RoEvoBox extends EventPanel {
      * 
      * @param id
      *            wicket id
+     * @param researchObjectModel
+     *            The RO for which the visualization is drawn
      * @param eventBusModel
-     * @param sparqlEndpointURI
-     *            RODL SPARQL endpoint URI
-     * @param researchObjectURI
-     *            RO URI
+     *            event bus model
      */
     public RoEvoBox(String id, IModel<ResearchObject> researchObjectModel, IModel<EventBus> eventBusModel) {
         super(id, researchObjectModel, eventBusModel);
         this.researchObjectModel = researchObjectModel;
-
         setOutputMarkupPlaceholderTag(true);
-        setVisible(false);
     }
 
 
+    /**
+     * Reconstruct this panel.
+     */
     protected void init() {
         this.removeAll();
         WebMarkupContainer live = new WebMarkupContainer("live");
@@ -92,51 +94,17 @@ public class RoEvoBox extends EventPanel {
         List<RoEvoNode> archivedNodes = new ArrayList<>();
         allNodes = new HashMap<>();
 
-        List<ResearchObject> preorder = new ArrayList<>();
-        List<ResearchObject> postorder = new ArrayList<>();
-
         if (!researchObjectModel.getObject().isEvolutionInformationLoaded()) {
             researchObjectModel.getObject().loadEvolutionInformation();
         }
         nextIndex = 0;
         switch (researchObjectModel.getObject().getEvoType()) {
-            case LIVE: {
-                Set<ResearchObject> snapshotsAndArchives = new HashSet<>();
-                snapshotsAndArchives.addAll(researchObjectModel.getObject().getSnapshots());
-                snapshotsAndArchives.addAll(researchObjectModel.getObject().getArchives());
-                for (ResearchObject ro : snapshotsAndArchives) {
-                    if (!preorder.contains(ro)) {
-                        visit(ro, preorder, postorder);
-                    }
-                }
-                addNode(liveNodes, researchObjectModel.getObject());
-                for (ResearchObject ro : postorder) {
-                    switch (ro.getEvoType()) {
-                        case SNAPSHOT:
-                            addNode(snapshotNodes, ro);
-                            break;
-                        case ARCHIVE:
-                            addNode(archivedNodes, ro);
-                        default:
-                    }
-                }
-            }
+            case LIVE:
+                drawForALiveRO(liveNodes, snapshotNodes, archivedNodes);
                 break;
             case SNAPSHOT:
-            case ARCHIVE: {
-                addNode(liveNodes, researchObjectModel.getObject().getLiveRO());
-                visit(researchObjectModel.getObject(), preorder, postorder);
-                for (ResearchObject ro : postorder) {
-                    switch (ro.getEvoType()) {
-                        case SNAPSHOT:
-                            addNode(snapshotNodes, ro);
-                            break;
-                        case ARCHIVE:
-                            addNode(archivedNodes, ro);
-                        default:
-                    }
-                }
-            }
+            case ARCHIVE:
+                drawForASnapshot(liveNodes, snapshotNodes, archivedNodes);
                 break;
             default:
                 break;
@@ -146,15 +114,69 @@ public class RoEvoBox extends EventPanel {
         fillLayer(live, "liveNodes", liveNodes, dx, ox);
         fillLayer(snapshots, "snapshotNodes", snapshotNodes, dx, ox);
         fillLayer(archived, "archivedNodes", archivedNodes, dx, ox);
+    }
 
-        add(new Behavior() {
 
-            @Override
-            public void renderHead(Component component, IHeaderResponse response) {
-                super.renderHead(component, response);
-                response.renderOnLoadJavaScript(getDrawJavaScript());
+    /**
+     * Draw the visualization for a snapshot or archive.
+     * 
+     * @param liveNodes
+     *            nodes representing live ROs
+     * @param snapshotNodes
+     *            nodes representing snapshots
+     * @param archivedNodes
+     *            nodes representing archives
+     */
+    void drawForASnapshot(List<RoEvoNode> liveNodes, List<RoEvoNode> snapshotNodes, List<RoEvoNode> archivedNodes) {
+        List<ResearchObject> preorder = new ArrayList<>();
+        List<ResearchObject> postorder = new ArrayList<>();
+        liveNodes.add(findOrCreateNode(researchObjectModel.getObject().getLiveRO()));
+        visit(researchObjectModel.getObject(), preorder, postorder);
+        for (ResearchObject ro : postorder) {
+            switch (ro.getEvoType()) {
+                case SNAPSHOT:
+                    snapshotNodes.add(findOrCreateNode(ro));
+                    break;
+                case ARCHIVE:
+                    archivedNodes.add(findOrCreateNode(ro));
+                default:
             }
-        });
+        }
+    }
+
+
+    /**
+     * Draw the visualization for a live RO.
+     * 
+     * @param liveNodes
+     *            nodes representing live ROs
+     * @param snapshotNodes
+     *            nodes representing snapshots
+     * @param archivedNodes
+     *            nodes representing archives
+     */
+    void drawForALiveRO(List<RoEvoNode> liveNodes, List<RoEvoNode> snapshotNodes, List<RoEvoNode> archivedNodes) {
+        List<ResearchObject> preorder = new ArrayList<>();
+        List<ResearchObject> postorder = new ArrayList<>();
+        Set<ResearchObject> snapshotsAndArchives = new HashSet<>();
+        snapshotsAndArchives.addAll(researchObjectModel.getObject().getSnapshots());
+        snapshotsAndArchives.addAll(researchObjectModel.getObject().getArchives());
+        for (ResearchObject ro : snapshotsAndArchives) {
+            if (!preorder.contains(ro)) {
+                visit(ro, preorder, postorder);
+            }
+        }
+        liveNodes.add(findOrCreateNode(researchObjectModel.getObject()));
+        for (ResearchObject ro : postorder) {
+            switch (ro.getEvoType()) {
+                case SNAPSHOT:
+                    snapshotNodes.add(findOrCreateNode(ro));
+                    break;
+                case ARCHIVE:
+                    archivedNodes.add(findOrCreateNode(ro));
+                default:
+            }
+        }
     }
 
 
@@ -175,6 +197,12 @@ public class RoEvoBox extends EventPanel {
     }
 
 
+    /**
+     * Replace the temporary panel with this one and redraw it.
+     * 
+     * @param event
+     *            the trigger
+     */
     @Subscribe
     public void onRoEvolutionLoaded(RoEvolutionLoadedEvent event) {
         if (tmp != null) {
@@ -182,10 +210,25 @@ public class RoEvoBox extends EventPanel {
             tmp = null;
         }
         init();
+        event.getTarget().appendJavaScript(getDrawJavaScript());
         event.getTarget().add(this);
     }
 
 
+    /**
+     * Put the nodes on a layer.
+     * 
+     * @param layer
+     *            the layer
+     * @param id
+     *            wicket id of the node prototype
+     * @param nodes
+     *            list of nodes to put
+     * @param dx
+     *            distance between node centers
+     * @param ox
+     *            offset of the first node
+     */
     @SuppressWarnings("serial")
     private void fillLayer(WebMarkupContainer layer, String id, List<RoEvoNode> nodes, final int dx, final int ox) {
         if (!nodes.isEmpty()) {
@@ -203,14 +246,31 @@ public class RoEvoBox extends EventPanel {
     }
 
 
-    private void addNode(List<RoEvoNode> nodes, ResearchObject ro) {
+    /**
+     * Find a node for the RO or create a new one.
+     * 
+     * @param ro
+     *            the RO
+     * @return a node
+     */
+    private RoEvoNode findOrCreateNode(ResearchObject ro) {
         RoEvoNode node = allNodes.containsKey(ro) ? allNodes.get(ro) : new RoEvoNode(ro);
         allNodes.put(ro, node);
-        nodes.add(node);
         node.setIndex(nextIndex++);
+        return node;
     }
 
 
+    /**
+     * Visit the evolution history tree.
+     * 
+     * @param ro
+     *            the RO
+     * @param preorder
+     *            the preorder numbering of ROs
+     * @param postorder
+     *            the postorder numbering of ROs
+     */
     private void visit(ResearchObject ro, List<ResearchObject> preorder, List<ResearchObject> postorder) {
         preorder.add(ro);
         if (!ro.isEvolutionInformationLoaded()) {
@@ -228,8 +288,6 @@ public class RoEvoBox extends EventPanel {
      * 
      * @param item
      *            list item containing the node
-     * @param researchObjectURI
-     *            RO URI
      * @param x
      *            the horizontal position of the node, in px
      */
@@ -282,6 +340,11 @@ public class RoEvoBox extends EventPanel {
     }
 
 
+    /**
+     * Generate the JavaScript code that will draw the arrows between the nodes.
+     * 
+     * @return the JavaScript code
+     */
     private String getDrawJavaScript() {
         final StringBuilder sb = new StringBuilder();
         sb.append("function drawArrows() {");

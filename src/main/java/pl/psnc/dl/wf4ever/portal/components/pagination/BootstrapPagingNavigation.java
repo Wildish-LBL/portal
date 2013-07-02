@@ -7,12 +7,28 @@ import org.apache.wicket.markup.html.list.LoopItem;
 import org.apache.wicket.markup.html.navigation.paging.IPageable;
 import org.apache.wicket.markup.html.navigation.paging.IPagingLabelProvider;
 
+/**
+ * An {@link AjaxPagingNavigation} compatible with the Bootstrap styling.
+ * 
+ * @author piotrekhol
+ * 
+ */
 public class BootstrapPagingNavigation extends AjaxPagingNavigation {
 
     /** id. */
     private static final long serialVersionUID = -5495224054362925121L;
 
 
+    /**
+     * Constructor.
+     * 
+     * @param id
+     *            See Component
+     * @param pageable
+     *            The underlying pageable component to navigate
+     * @param labelProvider
+     *            The label provider for the text that the links should be displaying.
+     */
     public BootstrapPagingNavigation(String id, IPageable pageable, IPagingLabelProvider labelProvider) {
         super(id, pageable, labelProvider);
     }
@@ -30,12 +46,24 @@ public class BootstrapPagingNavigation extends AjaxPagingNavigation {
     }
 
 
+    /**
+     * A {@link LoopItem} compatible with Bootstrap styling.
+     * 
+     * @author piotrekhol
+     * 
+     */
     class BootstrapLoopItem extends LoopItem {
 
         /** id. */
         private static final long serialVersionUID = 7332178569152953133L;
 
 
+        /**
+         * Constructor.
+         * 
+         * @param index
+         *            The index of the item
+         */
         public BootstrapLoopItem(int index) {
             super(index);
         }
