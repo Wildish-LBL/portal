@@ -3,12 +3,14 @@ package pl.psnc.dl.wf4ever.portal.components.annotations;
 import java.net.URI;
 
 import org.apache.log4j.Logger;
+import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -18,6 +20,7 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.purl.wf4ever.rosrs.client.Annotable;
 import org.purl.wf4ever.rosrs.client.Annotation;
 import org.purl.wf4ever.rosrs.client.AnnotationTriple;
+import org.purl.wf4ever.rosrs.client.Utils;
 
 import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
@@ -209,8 +212,38 @@ public class EditableAnnotationTextPanel extends EventPanel {
      */
     protected class ViewFragment extends Fragment {
 
+        /**
+         * External link for values that are URIs.
+         * 
+         * @author piotrekhol
+         * 
+         */
+        private class LinkFragment extends Fragment {
+
+            /** id. */
+            private static final long serialVersionUID = -7246837915674720631L;
+
+
+            /**
+             * Constructor.
+             * 
+             * @param id
+             *            wicket id where to place this fragment
+             * @param model
+             *            String model of the value/href
+             */
+            public LinkFragment(String id, IModel<String> model) {
+                super(id, "link", ViewFragment.this, model);
+                add(new ExternalLink("anchor", model, model));
+            }
+        }
+
+
         /** id. */
         private static final long serialVersionUID = -4169842101720666349L;
+
+        /** The value. It may be a simple label of the {@link LinkFragment}. */
+        private Component value;
 
 
         /**
@@ -240,12 +273,30 @@ public class EditableAnnotationTextPanel extends EventPanel {
             WebMarkupContainer valueColumn = new WebMarkupContainer("value");
             valueColumn.add(AttributeAppender.replace("data-original-title", new AnnotationTimestampModel(
                     new PropertyModel<Annotation>(model, "annotation"))));
-            valueColumn.add(new Label("value", new PropertyModel<String>(model, "value")));
+            value = new Label("value", new PropertyModel<String>(model, "value"));
+            valueColumn.add(value);
             valueColumn.add(new AuthenticatedAjaxEventButton("edit", null, internalEventBusModel, EditEvent.class));
             valueColumn.add(new AuthenticatedAjaxEventButton("delete", null, internalEventBusModel, DeleteEvent.class));
             add(valueColumn);
         }
 
+
+        @SuppressWarnings("unchecked")
+        @Override
+        protected void onConfigure() {
+            String text = value.getDefaultModelObjectAsString();
+            Component replacementValue = null;
+            if (Utils.isAbsoluteURI(text) && value instanceof Label) {
+                replacementValue = new LinkFragment(value.getId(), (IModel<String>) value.getDefaultModel());
+            } else if (value instanceof LinkFragment) {
+                replacementValue = new Label(value.getId(), value.getDefaultModel());
+            }
+            if (replacementValue != null) {
+                value.replaceWith(replacementValue);
+                value = replacementValue;
+            }
+            super.onConfigure();
+        }
     }
 
 

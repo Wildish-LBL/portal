@@ -2,6 +2,9 @@
 <wicket:panel xmlns:wicket="http://wicket.apache.org">
 	<div wicket:id="content"></div>
 	<wicket:fragment wicket:id="view">
+		<wicket:fragment wicket:id="link">
+			<a href="#" wicket:id="anchor"></a>
+		</wicket:fragment>
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$('.my-tooltip').tooltip();
@@ -37,8 +40,10 @@
 			})
 		</script>
 		<td colspan="2"><div class="edit-block">
-				<input class="property property-edit" autocomplete="off" type="text" placeholder="property (type to see hints)" wicket:id="property-name"></input>
-				<input class="value" type="text" placeholder="value" wicket:id="value" />
+				<input class="property property-edit" autocomplete="off" type="text"
+					placeholder="property (type to see hints)"
+					wicket:id="property-name"></input> <input class="value" type="text"
+					placeholder="value" wicket:id="value" />
 				<div class="btn-group">
 					<button data-original-title="apply" data-toggle="tooltip"
 						data-placement="top" class="btn my-tooltip" data-container="body"
