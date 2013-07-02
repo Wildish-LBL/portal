@@ -120,6 +120,13 @@ public class EditableAnnotationTextPanel extends EventPanel {
     }
 
 
+    @Override
+    public void renderHead(IHeaderResponse response) {
+        response.renderJavaScriptReference(JS_REFERENCE);
+        super.renderHead(response);
+    }
+
+
     /**
      * Called when the edit button is clicked. Replace the view fragment with edit.
      * 
@@ -279,13 +286,6 @@ public class EditableAnnotationTextPanel extends EventPanel {
             add(new AuthenticatedAjaxEventButton("apply", null, internalEventBusModel, ApplyEvent.class));
             add(new AuthenticatedAjaxEventButton("cancel", null, internalEventBusModel, CancelEvent.class)
                     .setDefaultFormProcessing(false));
-        }
-
-
-        @Override
-        public void renderHead(IHeaderResponse response) {
-            response.renderJavaScriptReference(JS_REFERENCE);
-            super.renderHead(response);
         }
     }
 
