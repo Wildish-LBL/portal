@@ -33,10 +33,11 @@
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$('.my-tooltip').tooltip();
+				$('.property-edit').typeahead(options);
 			})
 		</script>
 		<td colspan="2"><div class="edit-block">
-				<input class="property" type="text" placeholder="property (type to see hints)" wicket:id="property-name"></input>
+				<input class="property property-edit" autocomplete="off" type="text" placeholder="property (type to see hints)" wicket:id="property-name"></input>
 				<input class="value" type="text" placeholder="value" wicket:id="value" />
 				<div class="btn-group">
 					<button data-original-title="apply" data-toggle="tooltip"

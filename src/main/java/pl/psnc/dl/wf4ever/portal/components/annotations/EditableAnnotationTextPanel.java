@@ -5,6 +5,7 @@ import java.net.URI;
 import org.apache.log4j.Logger;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
@@ -13,6 +14,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.purl.wf4ever.rosrs.client.Annotable;
 import org.purl.wf4ever.rosrs.client.Annotation;
 import org.purl.wf4ever.rosrs.client.AnnotationTriple;
@@ -48,6 +50,10 @@ public class EditableAnnotationTextPanel extends EventPanel {
 
     /** id. */
     private static final long serialVersionUID = 1L;
+
+    /** A CSS file for this panel. */
+    private static final JavaScriptResourceReference JS_REFERENCE = new JavaScriptResourceReference(
+            AdvancedAnnotationsPanel.class, "EditableAnnotationTextPanel.js");
 
     /** The read only view of the field. */
     private Fragment viewFragment;
@@ -275,6 +281,12 @@ public class EditableAnnotationTextPanel extends EventPanel {
                     .setDefaultFormProcessing(false));
         }
 
+
+        @Override
+        public void renderHead(IHeaderResponse response) {
+            response.renderJavaScriptReference(JS_REFERENCE);
+            super.renderHead(response);
+        }
     }
 
 }
