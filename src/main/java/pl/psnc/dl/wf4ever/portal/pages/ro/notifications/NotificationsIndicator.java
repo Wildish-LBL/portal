@@ -1,4 +1,4 @@
-package pl.psnc.dl.wf4ever.portal.components;
+package pl.psnc.dl.wf4ever.portal.pages.ro.notifications;
 
 import java.util.List;
 
@@ -6,23 +6,19 @@ import org.apache.log4j.Logger;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.ExternalLink;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.protocol.http.WebApplication;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.notifications.Notification;
-import org.purl.wf4ever.rosrs.client.notifications.NotificationService;
 
-import pl.psnc.dl.wf4ever.portal.PortalApplication;
-import pl.psnc.dl.wf4ever.portal.components.form.AjaxRedirectButton;
-import pl.psnc.dl.wf4ever.portal.pages.notifications.NotificationsPage;
+import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 
 import com.google.common.eventbus.EventBus;
 
@@ -32,7 +28,7 @@ import com.google.common.eventbus.EventBus;
  * @author pejot
  * 
  */
-public class NotificationsIndicator extends Panel {
+public class NotificationsIndicator extends EventPanel {
 
     /** Logger. */
     @SuppressWarnings("unused")
@@ -62,10 +58,13 @@ public class NotificationsIndicator extends Panel {
     private RecentStatus recentStatus = RecentStatus.DEFAULT;
 
     /** The main component of the indicator. */
-    private AjaxRedirectButton button;
+    private Button button;
 
     /** The timestamp of the most recent notification. */
     private DateTime latest;
+
+    /** Id of the tab which will be shown when user clicks on the indicator. */
+    private String tabId;
 
 
     /**
@@ -79,16 +78,20 @@ public class NotificationsIndicator extends Panel {
      *            the model of the list of notifications of the RO
      * @param eventBusModel
      *            event bus model
+     * @param rssLink
+     *            URL of the notifications RSS
+     * @param tabId
+     *            Id of the tab which will be shown when user clicks on the indicator.
      */
     public NotificationsIndicator(String id, IModel<ResearchObject> researchObjectModel,
-            IModel<List<Notification>> notificationsModel, final IModel<EventBus> eventBusModel) {
-        super(id, notificationsModel);
+            IModel<List<Notification>> notificationsModel, final IModel<EventBus> eventBusModel, String rssLink,
+            String tabId) {
+        super(id, notificationsModel, eventBusModel);
+        this.tabId = tabId;
         Form<Void> form = new Form<Void>("form");
         add(form);
 
-        PageParameters params = new PageParameters();
-        params.add("ro", researchObjectModel.getObject().getUri());
-        button = new AjaxRedirectButton("button", form, NotificationsPage.class, params);
+        button = new Button("button");
         button.add(new Label("text", new PropertyModel<>(notificationsModel, "size")));
         button.add(new Behavior() {
 
@@ -120,10 +123,7 @@ public class NotificationsIndicator extends Panel {
             }
         });
         form.add(button);
-        NotificationService notificationService = new NotificationService(
-                ((PortalApplication) WebApplication.get()).getRodlURI(), null);
-        form.add(new ExternalLink("rss", notificationService.getNotificationsUri(
-            researchObjectModel.getObject().getUri(), null, null).toString()));
+        form.add(new ExternalLink("rss", rssLink));
     }
 
 
@@ -144,6 +144,13 @@ public class NotificationsIndicator extends Panel {
         }
         button.setEnabled(!notifications.isEmpty());
         super.onConfigure();
+    }
+
+
+    @Override
+    public void renderHead(IHeaderResponse response) {
+        response.renderJavaScript("var notificationsTab='" + tabId + "';", "tabId");
+        super.renderHead(response);
     }
 
 }

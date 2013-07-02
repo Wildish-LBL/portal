@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<wicket:panel xmlns:wicket="http://wicket.apache.org">
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$('#notifications-button').click(function() {
+				$('a[href="#' + notificationsTab + '"]').tab('show');
+			});
+		});
+	</script>
+	<form class="form-inline" wicket:id="form">
+		<div class="btn-toolbar">
+			<a class="btn btn-warning my-tooltip" wicket:id="button"
+				data-toggle="tooltip" data-container="body"
+				id="notifications-button"> <i class="icon-envelope"></i> <span
+				wicket:id="text">0</span>
+			</a> <a wicket:id="rss"
+				href="http://sandbox.wf4ever-project.org/rodl/notifications/?ro=http%3A%2F%2Fsandbox.wf4ever-project.org%2Frodl%2FROs%2F150%2F"><img
+				alt="atom10" src="images/Feed-icon.svg.png"
+				style="height: 30px; margin-left: 20px;"></a>
+		</div>
+	</form>
+</wicket:panel>

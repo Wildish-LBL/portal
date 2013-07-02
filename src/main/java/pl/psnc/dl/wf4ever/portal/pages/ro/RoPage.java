@@ -35,7 +35,6 @@ import org.purl.wf4ever.rosrs.client.notifications.NotificationService;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
-import pl.psnc.dl.wf4ever.portal.components.NotificationsIndicator;
 import pl.psnc.dl.wf4ever.portal.components.annotations.AdvancedAnnotationsPanel;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.events.MetadataDownloadEvent;
@@ -57,6 +56,9 @@ import pl.psnc.dl.wf4ever.portal.pages.ro.behaviors.EvolutionInfoLoadBehavior;
 import pl.psnc.dl.wf4ever.portal.pages.ro.behaviors.JobStatusUpdatingBehaviour;
 import pl.psnc.dl.wf4ever.portal.pages.ro.behaviors.RoLoadBehavior;
 import pl.psnc.dl.wf4ever.portal.pages.ro.evo.RoEvoBox;
+import pl.psnc.dl.wf4ever.portal.pages.ro.notifications.NotificationPreviewPanel;
+import pl.psnc.dl.wf4ever.portal.pages.ro.notifications.NotificationsIndicator;
+import pl.psnc.dl.wf4ever.portal.pages.ro.notifications.NotificationsList;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
 import com.google.common.collect.Multimap;
@@ -140,6 +142,8 @@ public class RoPage extends BasePage {
         this.setDefaultModel(researchObjectModel);
         IModel<List<Notification>> notificationsModel = new PropertyModel<List<Notification>>(this, "notifications");
         IModel<EvaluationResult> qualityModel = new PropertyModel<EvaluationResult>(this, "qualityEvaluation");
+        String rssLink = notificationService.getNotificationsUri(researchObjectModel.getObject().getUri(), null, null)
+                .toString();
         eventBusModel = new LoadableDetachableModel<EventBus>() {
 
             /** id. */
@@ -155,12 +159,18 @@ public class RoPage extends BasePage {
 
         add(new RoSummaryPanel("ro-summary", researchObjectModel, eventBusModel));
         add(new RoActionsPanel("ro-actions", researchObjectModel, eventBusModel));
-        add(new NotificationsIndicator("notifications", researchObjectModel, notificationsModel, eventBusModel));
+        add(new NotificationsIndicator("notifications", researchObjectModel, notificationsModel, eventBusModel,
+                rssLink, "notifications"));
         add(new QualityBar("health-progress-bar", qualityModel, eventBusModel));
         add(new RoCommentsPanel("comments", researchObjectModel, eventBusModel));
         add(new AdvancedAnnotationsPanel("advanced-annotations", "ro-basic-view", researchObjectModel, eventBusModel));
         add(new RoContentPanel("content", researchObjectModel, eventBusModel));
         add(new RoEvoBox("ro-evo-box", researchObjectModel, eventBusModel));
+
+        CompoundPropertyModel<Notification> selectedNotification = new CompoundPropertyModel<Notification>(
+                (Notification) null);
+        add(new NotificationsList("notificationsList", notifications, selectedNotification, eventBusModel));
+        add(new NotificationPreviewPanel("notificationPanel", selectedNotification, eventBusModel));
 
         add(new DownloadMetadataModal("download-metadata-modal", eventBusModel));
         add(new ImportAnnotationModal("import-annotation-modal", eventBusModel));

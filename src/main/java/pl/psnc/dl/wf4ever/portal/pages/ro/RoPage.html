@@ -72,7 +72,10 @@
 		</div>
 		<div class="tab-pane" id="notifications">
 			<div class="row">
-				<div class="span12"></div>
+				<div class="span6">
+					<div wicket:id="notificationsList"></div>
+				</div>
+				<div wicket:id="notificationPanel" class="span6"></div>
 			</div>
 		</div>
 		<div class="tab-pane" id="history">
@@ -85,29 +88,4 @@
 	</div>
 	<div wicket:id="download-metadata-modal"></div>
 	<div wicket:id="import-annotation-modal"></div>
-
-
-	<!-- 	<div wicket:id="statementEditModal"></div>
-	<div wicket:id="relationEditModal"></div>
-	<div wicket:id="downloadMetadataModal"></div>
-	<div wicket:id="uploadResourceModal"></div>
-	<div wicket:id="importAnnotationModal"></div>
-
-	<wicket:fragment wicket:id="externalLinkFragment">
-		<a wicket:id="link"></a>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="internalLinkFragment">
-		<a wicket:id="link"><span wicket:id="name">[internal]</span></a>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="editLinkFragment">
-		<a wicket:id="link">Edit</a>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="loadingROFragment">
-		<img src="images/loading.gif"
-			style="display: block; margin: 30px auto 30px auto;" />
-		<p style="text-align: center;">
-			Loading Research Object metadata.<br />Please wait...
-		</p>
-	</wicket:fragment>
- -->
 </wicket:extend>

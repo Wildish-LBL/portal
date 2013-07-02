@@ -1,4 +1,4 @@
-package pl.psnc.dl.wf4ever.portal.pages.notifications;
+package pl.psnc.dl.wf4ever.portal.pages.ro.notifications;
 
 import java.util.List;
 
@@ -10,7 +10,6 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PropertyListView;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -18,29 +17,52 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
 import org.purl.wf4ever.rosrs.client.notifications.Notification;
 
+import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.events.ResourceSelectedEvent;
 
 import com.google.common.eventbus.EventBus;
 
-final class NotificationsList extends Panel {
+/**
+ * A list of notification headers.
+ * 
+ * @author piotrekhol
+ * 
+ */
+public class NotificationsList extends EventPanel {
 
     /** id. */
     private static final long serialVersionUID = -2527527943968289889L;
+
+    /** formatter for showing only the hour. */
     private transient DateTimeFormatter hourFormatter = new DateTimeFormatterBuilder().appendHourOfDay(2)
             .appendLiteral(":").appendMinuteOfHour(2).toFormatter();
+
+    /** formatter for showing the full date. */
     private transient DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendDayOfMonth(1)
             .appendLiteral("/").appendMonthOfYear(1).appendLiteral("/").appendYear(2, 2).toFormatter();
 
+    /** The list of headers. */
     private PropertyListView<Notification> list;
 
+    /** The selected notification. */
     private IModel<Notification> selectedNotificationModel;
-    private IModel<EventBus> eventBusModel;
 
 
+    /**
+     * Constructor.
+     * 
+     * @param id
+     *            wicket id
+     * @param notifications
+     *            list of notifications
+     * @param selectedNotificationModel
+     *            the model for setting the selected notification
+     * @param eventBusModel
+     *            event bus for posting the user clicks
+     */
     public NotificationsList(String id, List<? extends Notification> notifications,
             IModel<Notification> selectedNotificationModel, IModel<EventBus> eventBusModel) {
-        super(id);
-        this.eventBusModel = eventBusModel;
+        super(id, selectedNotificationModel, eventBusModel);
         this.selectedNotificationModel = selectedNotificationModel;
         list = new NotificationsPropertyListView("list", notifications);
         list.setReuseItems(true);
@@ -49,12 +71,42 @@ final class NotificationsList extends Panel {
     }
 
 
+    /**
+     * Return the formatted date time, the hour if today, the date if earlier.
+     * 
+     * @param dateTime
+     *            the date time to format
+     * @return the formatted date time
+     */
+    private String formatDateTime(DateTime dateTime) {
+        if ((new LocalDate(dateTime)).equals(new LocalDate())) {
+            return hourFormatter.print(dateTime);
+        } else {
+            return dateFormatter.print(dateTime);
+        }
+    }
+
+
+    /**
+     * The notifications header list. This is an internal class because the parent panel contains additional HTML.
+     * 
+     * @author piotrekhol
+     * 
+     */
     private final class NotificationsPropertyListView extends PropertyListView<Notification> {
 
         /** id. */
         private static final long serialVersionUID = 3207517289844703505L;
 
 
+        /**
+         * Constructor.
+         * 
+         * @param id
+         *            wicket id
+         * @param list
+         *            notifications list
+         */
         private NotificationsPropertyListView(String id, List<? extends Notification> list) {
             super(id, list);
         }
@@ -95,15 +147,6 @@ final class NotificationsList extends Panel {
                     }
                 }
             });
-        }
-    }
-
-
-    private String formatDateTime(DateTime dateTime) {
-        if ((new LocalDate(dateTime)).equals(new LocalDate())) {
-            return hourFormatter.print(dateTime);
-        } else {
-            return dateFormatter.print(dateTime);
         }
     }
 
