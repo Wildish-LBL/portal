@@ -262,7 +262,6 @@ public class SearchResultsPage extends BasePage implements SearchResultsListener
         link.getPageParameters().add("ro", result.getResearchObject().getUri().toString());
         link.add(new Label("researchObject.name", new PropertyModel<String>(result, "researchObject.name")));
         item.add(link);
-        item.add(new Label("researchObject.title", new PropertyModel<String>(result, "researchObject.title")));
         item.add(new Label("creators", StringUtils.join(result.getCreators(), ", ")));
         item.add(new Label("created", DateTimeFormat.shortDate().print(result.getCreated())));
         item.add(new Label("numberOfResources", new PropertyModel<String>(result, "numberOfResources")));
