@@ -3,15 +3,12 @@ package pl.psnc.dl.wf4ever.portal.components.form;
 import org.apache.log4j.Logger;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.AbstractTextComponent;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Annotable;
 
 import pl.psnc.dl.wf4ever.portal.components.EventPanel;
@@ -130,8 +127,16 @@ public class EditableTextPanel extends EventPanel {
     }
 
 
-    public void setCanDelete(boolean canDelete) {
+    /**
+     * Set if delete is available.
+     * 
+     * @param canDelete
+     *            is delete available
+     * @return this, for chaining
+     */
+    public EditableTextPanel setCanDelete(boolean canDelete) {
         this.canDelete = canDelete;
+        return this;
     }
 
 
@@ -255,81 +260,10 @@ public class EditableTextPanel extends EventPanel {
         }
 
 
-        @SuppressWarnings("unchecked")
-        @Override
-        public MarkupContainer setDefaultModel(IModel<?> model) {
-            notSetLabel.setOriginalModel((IModel<String>) model);
-            return super.setDefaultModel(model);
-        }
-
-
         @Override
         protected void onConfigure() {
             super.onConfigure();
             deleteButton.setVisible(canDelete);
-        }
-
-    }
-
-
-    /**
-     * A label that displays "Not set" when the value is null.
-     * 
-     * @author piotrekhol
-     * 
-     */
-    class NotSetLabel extends Label {
-
-        /** id. */
-        private static final long serialVersionUID = 5810881670929377406L;
-
-        /** The model for the value, can have a null value. */
-        private IModel<String> originalModel;
-
-
-        /**
-         * Constructor.
-         * 
-         * @param id
-         *            wicket id
-         * @param model
-         *            the model for the value, can have a null value
-         */
-        public NotSetLabel(String id, IModel<String> model) {
-            super(id);
-            setDefaultModel(new PropertyModel<String>(this, "valueOrNotSet"));
-            originalModel = model;
-        }
-
-
-        public IModel<String> getOriginalModel() {
-            return originalModel;
-        }
-
-
-        public void setOriginalModel(IModel<String> originalModel) {
-            this.originalModel = originalModel;
-        }
-
-
-        @Override
-        protected void onConfigure() {
-            super.onConfigure();
-            setEscapeModelStrings(originalModel.getObject() != null);
-        }
-
-
-        /**
-         * If the original value is not null, return it, otherwise return "<em>Not set</em>".
-         * 
-         * @return the original value or a replacement text
-         */
-        public String getValueOrNotSet() {
-            if (originalModel.getObject() != null) {
-                return originalModel.getObject();
-            } else {
-                return "<em>Not set</em>";
-            }
         }
 
     }
@@ -345,9 +279,6 @@ public class EditableTextPanel extends EventPanel {
 
         /** id. */
         private static final long serialVersionUID = -4169842101720666349L;
-
-        /** the input area (can be a text field or a text area). */
-        private AbstractTextComponent<String> textArea;
 
 
         /**
@@ -372,19 +303,11 @@ public class EditableTextPanel extends EventPanel {
             setOutputMarkupPlaceholderTag(true);
             Form<?> form = new Form<Void>("form");
             add(form);
-            textArea = multipleLines ? new TextArea<>("text", model.getValueModel()) : new TextField<>("text",
-                    model.getValueModel());
-            form.add(textArea);
+            form.add(multipleLines ? new TextArea<>("text", model.getValueModel()) : new TextField<>("text", model
+                    .getValueModel()));
             form.add(new AuthenticatedAjaxEventButton("apply", form, internalEventBusModel, ApplyEvent.class));
             form.add(new AuthenticatedAjaxEventButton("cancel", form, internalEventBusModel, CancelEvent.class)
                     .setDefaultFormProcessing(false));
-        }
-
-
-        @Override
-        public MarkupContainer setDefaultModel(IModel<?> model) {
-            textArea.setDefaultModel(model);
-            return super.setDefaultModel(model);
         }
 
     }

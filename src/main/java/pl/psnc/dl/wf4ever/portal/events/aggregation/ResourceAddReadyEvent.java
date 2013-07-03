@@ -6,7 +6,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 
 import pl.psnc.dl.wf4ever.portal.events.AbstractAjaxEvent;
-import pl.psnc.dl.wf4ever.portal.model.ResourceClass;
+import pl.psnc.dl.wf4ever.portal.model.ResourceType;
 
 /**
  * User wants to add a new resource.
@@ -20,7 +20,7 @@ public class ResourceAddReadyEvent extends AbstractAjaxEvent {
     private final FileUpload uploadedFile;
 
     /** The RDF class of the resource. */
-    private final ResourceClass resourceClass;
+    private final ResourceType resourceClass;
 
     /** Resource URI, used only if the resources is added by reference. */
     private final URI resourceUri;
@@ -36,7 +36,7 @@ public class ResourceAddReadyEvent extends AbstractAjaxEvent {
      * @param resourceClass
      *            resource class, if any
      */
-    public ResourceAddReadyEvent(AjaxRequestTarget target, FileUpload uploadedFile, ResourceClass resourceClass) {
+    public ResourceAddReadyEvent(AjaxRequestTarget target, FileUpload uploadedFile, ResourceType resourceClass) {
         super(target);
         this.uploadedFile = uploadedFile;
         this.resourceClass = resourceClass;
@@ -54,7 +54,7 @@ public class ResourceAddReadyEvent extends AbstractAjaxEvent {
      * @param resourceClass
      *            resource class, if any
      */
-    public ResourceAddReadyEvent(AjaxRequestTarget target, URI resourceURI, ResourceClass resourceClass) {
+    public ResourceAddReadyEvent(AjaxRequestTarget target, URI resourceURI, ResourceType resourceClass) {
         super(target);
         this.uploadedFile = null;
         this.resourceClass = resourceClass;
@@ -67,7 +67,7 @@ public class ResourceAddReadyEvent extends AbstractAjaxEvent {
     }
 
 
-    public ResourceClass getResourceClass() {
+    public ResourceType getResourceClass() {
         return resourceClass;
     }
 

@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<wicket:panel xmlns:wicket="http://wicket.apache.org">
+	<div wicket:id="content"></div>
+	<wicket:fragment wicket:id="view">
+		<form wicket:id="form" class="form-inline" style="margin-bottom: auto">
+			<script type="text/javascript">
+				$(document).ready(function() {
+					$('.my-tooltip').tooltip();
+				})
+			</script>
+			<span wicket:id="text"></span>
+			<div class="btn-group">
+				<button data-original-title="edit" data-toggle="tooltip"
+					data-placement="top" class="btn btn-mini my-tooltip"
+					data-container="body" type="submit" wicket:id="edit">
+					<i class="icon-edit"></i>
+				</button>
+			</div>
+		</form>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="edit">
+		<script type="text/javascript">
+			$(document).ready(function() {
+				$('.my-tooltip').tooltip();
+			})
+		</script>
+		<form wicket:id="form" class="form-inline" style="margin-bottom: auto">
+			<select class="span3" id="type" wicket:id="typeList">
+			</select>
+			<div class="btn-group">
+				<button data-original-title="apply" data-toggle="tooltip"
+					data-placement="top" class="btn my-tooltip" data-container="body"
+					type="submit" wicket:id="apply">
+					<i class="icon-ok"></i>
+				</button>
+				<button data-original-title="cancel" data-toggle="tooltip"
+					data-placement="top" class="btn my-tooltip" data-container="body"
+					type="submit" wicket:id="cancel">
+					<i class="icon-remove"></i>
+				</button>
+			</div>
+		</form>
+	</wicket:fragment>
+</wicket:panel>

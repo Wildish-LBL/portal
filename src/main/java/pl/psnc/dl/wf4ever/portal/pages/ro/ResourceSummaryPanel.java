@@ -10,10 +10,12 @@ import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Resource;
 
 import pl.psnc.dl.wf4ever.portal.components.EventPanel;
+import pl.psnc.dl.wf4ever.portal.components.annotations.ResourceTypePanel;
 import pl.psnc.dl.wf4ever.portal.components.form.EditableTextPanel;
 import pl.psnc.dl.wf4ever.portal.events.ResourceSelectedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AbstractAnnotationEditedEvent;
 import pl.psnc.dl.wf4ever.portal.model.AnnotationTripleModel;
+import pl.psnc.dl.wf4ever.portal.model.ResourceTypeModel;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -49,20 +51,16 @@ public class ResourceSummaryPanel extends EventPanel {
         super(id, model, eventBusModel);
         setOutputMarkupPlaceholderTag(true);
 
-        EditableTextPanel titlePanel = new EditableTextPanel("titlePanel", new AnnotationTripleModel(model,
-                URI.create(DCTerms.title.getURI()), true), eventBusModel, false);
-        titlePanel.setCanDelete(false);
-        EditableTextPanel descriptionPanel = new EditableTextPanel("descriptionPanel", new AnnotationTripleModel(
-                model, URI.create(DCTerms.description.getURI()), true), eventBusModel, true);
-        descriptionPanel.setCanDelete(false);
-
         add(new ExternalLink("uri", new PropertyModel<String>(model, "uri.toString"), new PropertyModel<URI>(model,
                 "uri")));
-        add(titlePanel);
+        add(new EditableTextPanel("titlePanel", new AnnotationTripleModel(model, URI.create(DCTerms.title.getURI()),
+                true), eventBusModel, false).setCanDelete(false));
+        add(new ResourceTypePanel("resource-type", new ResourceTypeModel(model), eventBusModel));
         add(new Label("author", new PropertyModel<String>(model, "author.name")));
         add(new Label("createdFormatted", new PropertyModel<String>(model, "createdFormatted")));
         add(new Label("annotations", new PropertyModel<Integer>(model, "annotations.size")));
-        add(descriptionPanel);
+        add(new EditableTextPanel("descriptionPanel", new AnnotationTripleModel(model, URI.create(DCTerms.description
+                .getURI()), true), eventBusModel, true).setCanDelete(false));
     }
 
 

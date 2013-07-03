@@ -5,8 +5,6 @@ import java.net.URI;
 import org.apache.wicket.ajax.AjaxEventBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.form.ChoiceRenderer;
-import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.Radio;
 import org.apache.wicket.markup.html.form.RadioGroup;
@@ -20,6 +18,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.lang.Bytes;
 
 import pl.psnc.dl.wf4ever.portal.components.EventPanel;
+import pl.psnc.dl.wf4ever.portal.components.annotations.ResourceTypeDropDownChoice;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.components.form.RequiredURITextField;
@@ -27,7 +26,7 @@ import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.OkClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceAddClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceAddReadyEvent;
-import pl.psnc.dl.wf4ever.portal.model.ResourceClass;
+import pl.psnc.dl.wf4ever.portal.model.ResourceLocalRemote;
 import pl.psnc.dl.wf4ever.portal.model.ResourceType;
 
 import com.google.common.eventbus.EventBus;
@@ -39,14 +38,16 @@ import com.google.common.eventbus.Subscribe;
  * @author piotrekhol
  * 
  */
-@SuppressWarnings("serial")
 public class UploadResourceModal extends EventPanel {
 
+    /** id. */
+    private static final long serialVersionUID = -7754788822535330561L;
+
     /** Type of currently added resource. */
-    private ResourceType resourceType = ResourceType.LOCAL;
+    private ResourceLocalRemote resourceType = ResourceLocalRemote.LOCAL;
 
     /** Resource class. */
-    private ResourceClass resourceClass = null;
+    private ResourceType resourceClass = null;
 
     /** Resource URI. */
     private URI resourceURI;
@@ -105,18 +106,18 @@ public class UploadResourceModal extends EventPanel {
         fileDiv.setOutputMarkupId(true);
         fileDiv.setOutputMarkupPlaceholderTag(true);
         form.add(fileDiv);
+        form.add(new ResourceTypeDropDownChoice("typeList", new PropertyModel<ResourceType>(this, "resourceClass")));
 
-        DropDownChoice<ResourceClass> resourceClassDropDown = new DropDownChoice<>("typeList",
-                new PropertyModel<ResourceClass>(this, "resourceClass"), ResourceClass.RESOURCE_CLASSES,
-                new ChoiceRenderer<ResourceClass>("name", "uri"));
-        resourceClassDropDown.setNullValid(true);
-        form.add(resourceClassDropDown);
-
-        RadioGroup<ResourceType> radioGroup = new RadioGroup<ResourceType>("radioGroup",
-                new PropertyModel<ResourceType>(this, "resourceType"));
+        RadioGroup<ResourceLocalRemote> radioGroup = new RadioGroup<ResourceLocalRemote>("radioGroup",
+                new PropertyModel<ResourceLocalRemote>(this, "resourceType"));
         form.add(radioGroup);
-        Radio<ResourceType> local = new Radio<ResourceType>("local", new Model<ResourceType>(ResourceType.LOCAL));
+        Radio<ResourceLocalRemote> local = new Radio<ResourceLocalRemote>("local", new Model<ResourceLocalRemote>(
+                ResourceLocalRemote.LOCAL));
         local.add(new AjaxEventBehavior("onclick") {
+
+            /** id. */
+            private static final long serialVersionUID = -1653173329010286091L;
+
 
             @Override
             protected void onEvent(AjaxRequestTarget target) {
@@ -128,8 +129,13 @@ public class UploadResourceModal extends EventPanel {
 
         });
         radioGroup.add(local);
-        Radio<ResourceType> remote = new Radio<ResourceType>("remote", new Model<ResourceType>(ResourceType.REMOTE));
+        Radio<ResourceLocalRemote> remote = new Radio<ResourceLocalRemote>("remote", new Model<ResourceLocalRemote>(
+                ResourceLocalRemote.REMOTE));
         remote.add(new AjaxEventBehavior("onclick") {
+
+            /** id. */
+            private static final long serialVersionUID = -1689888759359590693L;
+
 
             @Override
             protected void onEvent(AjaxRequestTarget target) {
@@ -239,22 +245,22 @@ public class UploadResourceModal extends EventPanel {
     }
 
 
-    public ResourceType getResourceType() {
+    public ResourceLocalRemote getResourceType() {
         return resourceType;
     }
 
 
-    public void setResourceType(ResourceType resourceType) {
+    public void setResourceType(ResourceLocalRemote resourceType) {
         this.resourceType = resourceType;
     }
 
 
-    public ResourceClass getResourceClass() {
+    public ResourceType getResourceClass() {
         return resourceClass;
     }
 
 
-    public void setResourceClass(ResourceClass resourceClass) {
+    public void setResourceClass(ResourceType resourceClass) {
         this.resourceClass = resourceClass;
     }
 }
