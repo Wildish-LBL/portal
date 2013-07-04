@@ -9,6 +9,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Folder;
+import org.purl.wf4ever.rosrs.client.FolderEntry;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.Resource;
 import org.purl.wf4ever.rosrs.client.exception.ROException;
@@ -25,13 +26,15 @@ import pl.psnc.dl.wf4ever.portal.events.RoLoadedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.DuplicateEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddReadyEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddedEvent;
-import pl.psnc.dl.wf4ever.portal.events.aggregation.MoveEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceAddReadyEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceAddedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceDeleteClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceDeletedEvent;
+import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceMoveEvent;
+import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceMovedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.UpdateClickedEvent;
 import pl.psnc.dl.wf4ever.portal.modals.AddFolderModal;
+import pl.psnc.dl.wf4ever.portal.modals.MoveResourceModal;
 import pl.psnc.dl.wf4ever.portal.modals.UploadResourceModal;
 import pl.psnc.dl.wf4ever.portal.model.FolderHierarchyModel;
 
@@ -87,6 +90,7 @@ public class RoContentPanel extends EventPanel {
         IModel<List<Resource>> unrootedResourcesModel = new PropertyModel<List<Resource>>(getDefaultModel(),
                 "resourcesWithoutFolders");
         IModel<List<Folder>> rootFolders = new PropertyModel<List<Folder>>(getDefaultModel(), "rootFolders");
+        IModel<List<Folder>> allFolders = new PropertyModel<List<Folder>>(getDefaultModel(), "allFolders");
         folderHierarchyModel = new FolderHierarchyModel(folderModel);
 
         add(new FolderBreadcrumbsPanel("folder-breadcrumbs", folderHierarchyModel, folderModel, eventBusModel));
@@ -99,6 +103,7 @@ public class RoContentPanel extends EventPanel {
         add(new AdvancedAnnotationsPanel("advanced-annotations", "resource-basic-view", resourceModel, eventBusModel));
         add(new UploadResourceModal("upload-resource-modal", eventBusModel));
         add(new AddFolderModal("add-folder-modal", eventBusModel));
+        add(new MoveResourceModal("move-resource-modal", allFolders, eventBusModel));
     }
 
 
@@ -162,9 +167,36 @@ public class RoContentPanel extends EventPanel {
     }
 
 
+    /**
+     * Move a resource to a folder.
+     * 
+     * @param event
+     *            trigger, with the destination folder
+     * @throws ROSRSException
+     *             deleting and adding the folder entry caused an unexpected response
+     * @throws ROException
+     *             when the data returned by ROSRS are incorrect
+     */
     @Subscribe
-    public void onResourceMove(MoveEvent event) {
-        //TODO
+    public void onResourceMove(ResourceMoveEvent event)
+            throws ROSRSException, ROException {
+        if (currentFolder != null) {
+            FolderEntry entry = null;
+            for (FolderEntry e : currentFolder.getFolderEntries().values()) {
+                if (e.getResource().equals(currentResource)) {
+                    entry = e;
+                    break;
+                }
+            }
+            if (entry != null) {
+                entry.delete();
+            }
+        }
+        if (!event.getFolder().isLoaded()) {
+            event.getFolder().load(false);
+        }
+        event.getFolder().addEntry(currentResource, null);
+        eventBusModel.getObject().post(new ResourceMovedEvent(event.getTarget()));
     }
 
 
@@ -233,8 +265,7 @@ public class RoContentPanel extends EventPanel {
         } else {
             ((ResearchObject) this.getDefaultModelObject()).createFolder(event.getFolderName());
         }
-        FolderAddedEvent event2 = new FolderAddedEvent(event.getTarget());
-        eventBusModel.getObject().post(event2);
+        eventBusModel.getObject().post(new FolderAddedEvent(event.getTarget()));
     }
 
 

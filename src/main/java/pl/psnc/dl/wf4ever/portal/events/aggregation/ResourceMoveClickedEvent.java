@@ -6,12 +6,12 @@ import pl.psnc.dl.wf4ever.portal.events.AbstractAjaxEvent;
 import pl.psnc.dl.wf4ever.portal.events.AbstractClickAjaxEvent;
 
 /**
- * User wants to move a resource between folders.
+ * User wants to move a resource.
  * 
  * @author piotrekhol
  * 
  */
-public class MoveEvent extends AbstractAjaxEvent implements AbstractClickAjaxEvent {
+public class ResourceMoveClickedEvent extends AbstractAjaxEvent implements AbstractClickAjaxEvent {
 
     /**
      * Constructor.
@@ -19,7 +19,7 @@ public class MoveEvent extends AbstractAjaxEvent implements AbstractClickAjaxEve
      * @param target
      *            AJAX request target
      */
-    public MoveEvent(AjaxRequestTarget target) {
+    public ResourceMoveClickedEvent(AjaxRequestTarget target) {
         super(target);
     }
 
