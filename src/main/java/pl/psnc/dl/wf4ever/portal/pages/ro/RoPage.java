@@ -1,12 +1,14 @@
 package pl.psnc.dl.wf4ever.portal.pages.ro;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.RestartResponseException;
@@ -18,16 +20,13 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.util.time.Duration;
 import org.purl.wf4ever.checklist.client.ChecklistEvaluationService;
 import org.purl.wf4ever.checklist.client.EvaluationResult;
 import org.purl.wf4ever.rosrs.client.Annotable;
-import org.purl.wf4ever.rosrs.client.Annotation;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
-import org.purl.wf4ever.rosrs.client.Statement;
-import org.purl.wf4ever.rosrs.client.Thing;
 import org.purl.wf4ever.rosrs.client.Utils;
 import org.purl.wf4ever.rosrs.client.evo.JobStatus;
-import org.purl.wf4ever.rosrs.client.exception.NotificationsException;
 import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 import org.purl.wf4ever.rosrs.client.notifications.Notification;
@@ -35,9 +34,15 @@ import org.purl.wf4ever.rosrs.client.notifications.NotificationService;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
+import pl.psnc.dl.wf4ever.portal.behaviors.EvolutionInfoLoadBehavior;
+import pl.psnc.dl.wf4ever.portal.behaviors.FutureUpdateBehavior;
+import pl.psnc.dl.wf4ever.portal.behaviors.JobStatusUpdatingBehaviour;
+import pl.psnc.dl.wf4ever.portal.behaviors.RoLoadBehavior;
 import pl.psnc.dl.wf4ever.portal.components.annotations.AdvancedAnnotationsPanel;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.events.MetadataDownloadEvent;
+import pl.psnc.dl.wf4ever.portal.events.NotificationsLoadedEvent;
+import pl.psnc.dl.wf4ever.portal.events.QualityEvaluatedEvent;
 import pl.psnc.dl.wf4ever.portal.events.RoEvolutionLoadedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.AggregationChangedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationAddedEvent;
@@ -51,10 +56,6 @@ import pl.psnc.dl.wf4ever.portal.modals.DownloadMetadataModal;
 import pl.psnc.dl.wf4ever.portal.modals.ImportAnnotationModal;
 import pl.psnc.dl.wf4ever.portal.pages.BasePage;
 import pl.psnc.dl.wf4ever.portal.pages.Error404Page;
-import pl.psnc.dl.wf4ever.portal.pages.ro.behaviors.ChecklistEvaluateBehavior;
-import pl.psnc.dl.wf4ever.portal.pages.ro.behaviors.EvolutionInfoLoadBehavior;
-import pl.psnc.dl.wf4ever.portal.pages.ro.behaviors.JobStatusUpdatingBehaviour;
-import pl.psnc.dl.wf4ever.portal.pages.ro.behaviors.RoLoadBehavior;
 import pl.psnc.dl.wf4ever.portal.pages.ro.evo.RoEvoBox;
 import pl.psnc.dl.wf4ever.portal.pages.ro.notifications.NotificationPreviewPanel;
 import pl.psnc.dl.wf4ever.portal.pages.ro.notifications.NotificationsIndicator;
@@ -92,9 +93,6 @@ public class RoPage extends BasePage {
     /** Template for HTML Link Headers. */
     private static final String HTML_LINK_TEMPLATE = "<link rel=\"%s\" href=\"%s\"/>";
 
-    /** Selected resource model. */
-    private CompoundPropertyModel<Thing> itemModel;
-
     /** Notifications about this RO. */
     private List<Notification> notifications;
 
@@ -128,15 +126,8 @@ public class RoPage extends BasePage {
             info("<b>Sign in</b> to edit this research object.");
         }
 
-        itemModel = new CompoundPropertyModel<Thing>((Thing) null);
-
         NotificationService notificationService = new NotificationService(getRodlURI(), null);
-        try {
-            notifications = notificationService.getNotifications(researchObject.getUri(), null, null);
-        } catch (NotificationsException e) {
-            LOG.error("Can't load notifications", e);
-            error("Can't load notifications: " + e.getMessage());
-        }
+        ChecklistEvaluationService checklistService = ((PortalApplication) getApplication()).getChecklistService();
 
         IModel<ResearchObject> researchObjectModel = new Model<ResearchObject>(researchObject);
         this.setDefaultModel(researchObjectModel);
@@ -169,16 +160,67 @@ public class RoPage extends BasePage {
 
         CompoundPropertyModel<Notification> selectedNotification = new CompoundPropertyModel<Notification>(
                 (Notification) null);
-        add(new NotificationsList("notificationsList", notifications, selectedNotification, eventBusModel));
+        add(new NotificationsList("notificationsList", notificationsModel, selectedNotification, eventBusModel));
         add(new NotificationPreviewPanel("notificationPanel", selectedNotification, eventBusModel));
 
         add(new DownloadMetadataModal("download-metadata-modal", eventBusModel));
         add(new ImportAnnotationModal("import-annotation-modal", eventBusModel));
 
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+        Future<EvaluationResult> evaluateFuture = executor.submit(createChecklistEvaluationCallable(checklistService,
+            researchObjectModel));
+        Future<List<Notification>> notificationsFuture = executor.submit(createNotificationsCallable(
+            notificationService, researchObjectModel));
+        add(new FutureUpdateBehavior<>(Duration.seconds(1), evaluateFuture, qualityModel, eventBusModel,
+                QualityEvaluatedEvent.class));
+        add(new FutureUpdateBehavior<>(Duration.seconds(1), notificationsFuture, notificationsModel, eventBusModel,
+                NotificationsLoadedEvent.class));
         add(new RoLoadBehavior(feedbackPanel, researchObjectModel, eventBusModel));
-        add(new ChecklistEvaluateBehavior(feedbackPanel, researchObjectModel, eventBusModel,
-                ((PortalApplication) getApplication()).getChecklistService(), qualityModel));
         add(new EvolutionInfoLoadBehavior(feedbackPanel, researchObjectModel, eventBusModel));
+    }
+
+
+    /**
+     * Create a new task of calculating the RO quality that can be scheduled for later.
+     * 
+     * @param service
+     *            checklist evaluation service
+     * @param model
+     *            RO model
+     * @return a new {@link Callable}
+     */
+    private Callable<EvaluationResult> createChecklistEvaluationCallable(final ChecklistEvaluationService service,
+            final IModel<ResearchObject> model) {
+        return new Callable<EvaluationResult>() {
+
+            @Override
+            public EvaluationResult call()
+                    throws Exception {
+                return service.evaluate(model.getObject().getUri(), "ready-to-release");
+            }
+        };
+    }
+
+
+    /**
+     * Create a new task of loading the notifications that can be scheduled for later.
+     * 
+     * @param notificationService
+     *            notification service
+     * @param model
+     *            RO model
+     * @return a new {@link Callable}
+     */
+    private Callable<List<Notification>> createNotificationsCallable(final NotificationService notificationService,
+            final IModel<ResearchObject> model) {
+        return new Callable<List<Notification>>() {
+
+            @Override
+            public List<Notification> call()
+                    throws Exception {
+                return notificationService.getNotifications(model.getObject().getUri(), null, null);
+            }
+        };
     }
 
 
@@ -282,46 +324,14 @@ public class RoPage extends BasePage {
     public void onAggregationChanged(AggregationChangedEvent event) {
         ChecklistEvaluationService service = ((PortalApplication) getApplication()).getChecklistService();
         IModel<EvaluationResult> qualityModel = new PropertyModel<EvaluationResult>(this, "qualityEvaluation");
+        ExecutorService executor = Executors.newFixedThreadPool(10);
         @SuppressWarnings("unchecked")
-        ChecklistEvaluateBehavior behavior = new ChecklistEvaluateBehavior(feedbackPanel,
-                (IModel<ResearchObject>) this.getDefaultModel(), eventBusModel, service, qualityModel);
+        Future<EvaluationResult> evaluateFuture = executor.submit(createChecklistEvaluationCallable(service,
+            (IModel<ResearchObject>) this.getDefaultModel()));
+        FutureUpdateBehavior<EvaluationResult> behavior = new FutureUpdateBehavior<>(Duration.seconds(1),
+                evaluateFuture, qualityModel, eventBusModel, QualityEvaluatedEvent.class);
         this.add(behavior);
         event.getTarget().appendJavaScript(behavior.getCallbackScript());
-    }
-
-
-    /**
-     * Called when the user wants to create a new annotation.
-     * 
-     * @param statements
-     *            a list of statements to be put in the annotation
-     * @throws URISyntaxException
-     *             URIs retrieved from RODL are incorrect
-     * @throws ROSRSException
-     *             requests to RODL returned incorrect responses
-     * @throws ROException .
-     */
-    @Deprecated
-    void onStatementAdd(List<Statement> statements)
-            throws URISyntaxException, ROSRSException, ROException {
-        InputStream in = Annotation.wrapAnnotationBody(statements);
-        ((Annotable) itemModel.getObject()).annotate(".ro/" + UUID.randomUUID().toString(), in,
-            RDFFormat.RDFXML.getDefaultMIMEType());
-    }
-
-
-    /**
-     * User has edited a statement of an annotation.
-     * 
-     * @param statement
-     *            the statement
-     * @throws ROSRSException
-     *             requests to RODL returned incorrect responses
-     */
-    @Deprecated
-    void onStatementEdit(Statement statement)
-            throws ROSRSException {
-        statement.getAnnotation().update();
     }
 
 

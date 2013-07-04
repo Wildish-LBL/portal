@@ -1,4 +1,4 @@
-package pl.psnc.dl.wf4ever.portal.pages.ro.behaviors;
+package pl.psnc.dl.wf4ever.portal.behaviors;
 
 import java.lang.reflect.InvocationTargetException;
 

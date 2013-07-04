@@ -19,8 +19,10 @@ import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.notifications.Notification;
 
 import pl.psnc.dl.wf4ever.portal.components.EventPanel;
+import pl.psnc.dl.wf4ever.portal.events.NotificationsLoadedEvent;
 
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 
 /**
  * An indicator of a number of notifications for this RO.
@@ -87,6 +89,7 @@ public class NotificationsIndicator extends EventPanel {
             IModel<List<Notification>> notificationsModel, final IModel<EventBus> eventBusModel, String rssLink,
             String tabId) {
         super(id, notificationsModel, eventBusModel);
+        setOutputMarkupId(true);
         this.tabId = tabId;
         Form<Void> form = new Form<Void>("form");
         add(form);
@@ -131,18 +134,20 @@ public class NotificationsIndicator extends EventPanel {
     protected void onConfigure() {
         @SuppressWarnings("unchecked")
         List<Notification> notifications = (List<Notification>) getDefaultModelObject();
-        if (!notifications.isEmpty()) {
-            latest = notifications.get(notifications.size() - 1).getPublished();
-            DateTime now = DateTime.now();
-            if (now.minusHours(24).isBefore(latest)) {
-                recentStatus = RecentStatus.TODAY;
-            } else if (now.minusDays(7).isBefore(latest)) {
-                recentStatus = RecentStatus.THIS_WEEK;
-            } else {
-                recentStatus = RecentStatus.DEFAULT;
+        if (notifications != null) {
+            if (!notifications.isEmpty()) {
+                latest = notifications.get(notifications.size() - 1).getPublished();
+                DateTime now = DateTime.now();
+                if (now.minusHours(24).isBefore(latest)) {
+                    recentStatus = RecentStatus.TODAY;
+                } else if (now.minusDays(7).isBefore(latest)) {
+                    recentStatus = RecentStatus.THIS_WEEK;
+                } else {
+                    recentStatus = RecentStatus.DEFAULT;
+                }
             }
+            button.setEnabled(!notifications.isEmpty());
         }
-        button.setEnabled(!notifications.isEmpty());
         super.onConfigure();
     }
 
@@ -151,6 +156,18 @@ public class NotificationsIndicator extends EventPanel {
     public void renderHead(IHeaderResponse response) {
         response.renderJavaScript("var notificationsTab='" + tabId + "';", "tabId");
         super.renderHead(response);
+    }
+
+
+    /**
+     * Refresh when the notifications are loaded.
+     * 
+     * @param event
+     *            the trigger
+     */
+    @Subscribe
+    public void onNotificationsLoaded(NotificationsLoadedEvent event) {
+        event.getTarget().add(this);
     }
 
 }

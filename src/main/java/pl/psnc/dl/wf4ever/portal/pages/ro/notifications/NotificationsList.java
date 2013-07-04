@@ -18,9 +18,11 @@ import org.joda.time.format.DateTimeFormatterBuilder;
 import org.purl.wf4ever.rosrs.client.notifications.Notification;
 
 import pl.psnc.dl.wf4ever.portal.components.EventPanel;
+import pl.psnc.dl.wf4ever.portal.events.NotificationsLoadedEvent;
 import pl.psnc.dl.wf4ever.portal.events.ResourceSelectedEvent;
 
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 
 /**
  * A list of notification headers.
@@ -53,18 +55,18 @@ public class NotificationsList extends EventPanel {
      * 
      * @param id
      *            wicket id
-     * @param notifications
+     * @param notificationsModel
      *            list of notifications
      * @param selectedNotificationModel
      *            the model for setting the selected notification
      * @param eventBusModel
      *            event bus for posting the user clicks
      */
-    public NotificationsList(String id, List<? extends Notification> notifications,
+    public NotificationsList(String id, IModel<List<Notification>> notificationsModel,
             IModel<Notification> selectedNotificationModel, IModel<EventBus> eventBusModel) {
         super(id, selectedNotificationModel, eventBusModel);
         this.selectedNotificationModel = selectedNotificationModel;
-        list = new NotificationsPropertyListView("list", notifications);
+        list = new NotificationsPropertyListView("list", notificationsModel);
         list.setReuseItems(true);
         add(list);
         setOutputMarkupId(true);
@@ -88,6 +90,18 @@ public class NotificationsList extends EventPanel {
 
 
     /**
+     * Refresh when the notifications are loaded.
+     * 
+     * @param event
+     *            the trigger
+     */
+    @Subscribe
+    public void onNotificationsLoaded(NotificationsLoadedEvent event) {
+        event.getTarget().add(this);
+    }
+
+
+    /**
      * The notifications header list. This is an internal class because the parent panel contains additional HTML.
      * 
      * @author piotrekhol
@@ -104,11 +118,11 @@ public class NotificationsList extends EventPanel {
          * 
          * @param id
          *            wicket id
-         * @param list
+         * @param notificationsModel
          *            notifications list
          */
-        private NotificationsPropertyListView(String id, List<? extends Notification> list) {
-            super(id, list);
+        private NotificationsPropertyListView(String id, IModel<List<Notification>> notificationsModel) {
+            super(id, notificationsModel);
         }
 
 
