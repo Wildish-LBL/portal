@@ -105,7 +105,7 @@ public class AnnotationTripleModel implements IModel<AnnotationTriple> {
     private void checkAnnotableModel() {
         if (triple.getSubject() == null || !triple.getSubject().equals(annotableModel.getObject())) {
             triple = new AnnotationTriple(triple.getAnnotation(), annotableModel.getObject(), triple.getProperty(),
-                    triple.getValue(), triple.isMerge());
+                    null, triple.isMerge());
         }
     }
 
