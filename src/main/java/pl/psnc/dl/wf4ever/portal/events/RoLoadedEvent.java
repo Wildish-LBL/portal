@@ -11,6 +11,7 @@ import org.purl.wf4ever.rosrs.client.ResearchObject;
  */
 public class RoLoadedEvent extends AbstractAjaxEvent {
 
+    /** The research object that has been loaded. */
     private final ResearchObject researchObject;
 
 
@@ -20,6 +21,7 @@ public class RoLoadedEvent extends AbstractAjaxEvent {
      * @param target
      *            AJAX request target
      * @param researchObject
+     *            The research object that has been loaded
      */
     public RoLoadedEvent(AjaxRequestTarget target, ResearchObject researchObject) {
         super(target);

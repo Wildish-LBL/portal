@@ -1,11 +1,13 @@
 package pl.psnc.dl.wf4ever.portal.modals;
 
 import org.apache.log4j.Logger;
+import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.util.lang.Bytes;
 import org.purl.wf4ever.rosrs.client.Annotable;
 
@@ -88,6 +90,13 @@ public class ImportAnnotationModal extends EventPanel {
                 .setDefaultFormProcessing(false));
         form.add(new AjaxEventButton("close", form, internalEventBusModel, CancelClickedEvent.class)
                 .setDefaultFormProcessing(false));
+    }
+
+
+    @Override
+    public void renderHead(IHeaderResponse response) {
+        super.renderHead(response);
+        response.renderJavaScriptReference(new JavaScriptResourceReference(getClass(), "ImportAnnotationModal.js"));
     }
 
 

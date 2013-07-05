@@ -2,12 +2,14 @@ package pl.psnc.dl.wf4ever.portal.modals;
 
 import java.util.List;
 
+import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.form.ChoiceRenderer;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.purl.wf4ever.rosrs.client.Folder;
 
 import pl.psnc.dl.wf4ever.portal.components.EventPanel;
@@ -77,6 +79,13 @@ public class MoveResourceModal extends EventPanel {
                 .setDefaultFormProcessing(false));
         form.add(new AjaxEventButton("close", form, internalEventBusModel, CancelClickedEvent.class)
                 .setDefaultFormProcessing(false));
+    }
+
+
+    @Override
+    public void renderHead(IHeaderResponse response) {
+        super.renderHead(response);
+        response.renderJavaScriptReference(new JavaScriptResourceReference(getClass(), "MoveResourceModal.js"));
     }
 
 
