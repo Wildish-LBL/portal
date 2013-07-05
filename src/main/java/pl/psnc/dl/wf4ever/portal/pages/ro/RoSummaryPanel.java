@@ -56,8 +56,8 @@ public class RoSummaryPanel extends EventPanel {
         EditableTextPanel titlePanel = new EditableTextPanel("titlePanel", new AnnotationTripleModel(model,
                 URI.create(DCTerms.title.getURI()), true), eventBusModel, false);
         titlePanel.setCanDelete(false);
-        EditableTextPanel descriptionPanel = new EditableTextPanel("descriptionPanel", new AnnotationTripleModel(
-                model, URI.create(DCTerms.description.getURI()), true), eventBusModel, true);
+        EditableTextPanel descriptionPanel = new EditableTextPanel("descriptionPanel", new AnnotationTripleModel(model,
+                URI.create(DCTerms.description.getURI()), true), eventBusModel, true);
         descriptionPanel.setCanDelete(false);
 
         add(new ExternalLink("uri", new PropertyModel<String>(model, "uri.toString"), new PropertyModel<URI>(model,
@@ -91,6 +91,8 @@ public class RoSummaryPanel extends EventPanel {
     @Subscribe
     public void onRoLoaded(RoLoadedEvent event) {
         if (tmp != null) {
+            // sometimes it may happen that this panel has a stale version of RO. I don't know why :(
+            this.setDefaultModelObject(event.getResearchObject());
             tmp.replaceWith(this);
             tmp = null;
         }

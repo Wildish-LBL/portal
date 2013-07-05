@@ -16,7 +16,6 @@ import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -122,6 +121,7 @@ public class RoPage extends BasePage {
         feedbackPanel = new MyFeedbackPanel("feedbackPanel");
         feedbackPanel.setOutputMarkupId(true);
         add(feedbackPanel);
+        MySession session = MySession.get();
         if (!MySession.get().getRoles().contains(Roles.USER)) {
             info("<b>Sign in</b> to edit this research object.");
         }
@@ -135,17 +135,7 @@ public class RoPage extends BasePage {
         IModel<EvaluationResult> qualityModel = new PropertyModel<EvaluationResult>(this, "qualityEvaluation");
         String rssLink = notificationService.getNotificationsUri(researchObjectModel.getObject().getUri(), null, null)
                 .toString();
-        eventBusModel = new LoadableDetachableModel<EventBus>() {
-
-            /** id. */
-            private static final long serialVersionUID = 5225667860067218852L;
-
-
-            @Override
-            protected EventBus load() {
-                return new EventBus();
-            }
-        };
+        eventBusModel = session.addEventBus(new EventBus());
         eventBusModel.getObject().register(this);
 
         add(new RoSummaryPanel("ro-summary", researchObjectModel, eventBusModel));
@@ -171,10 +161,10 @@ public class RoPage extends BasePage {
             researchObjectModel));
         Future<List<Notification>> notificationsFuture = executor.submit(createNotificationsCallable(
             notificationService, researchObjectModel));
-        add(new FutureUpdateBehavior<>(Duration.seconds(1), evaluateFuture, qualityModel, eventBusModel,
-                QualityEvaluatedEvent.class));
-        add(new FutureUpdateBehavior<>(Duration.seconds(1), notificationsFuture, notificationsModel, eventBusModel,
-                NotificationsLoadedEvent.class));
+        add(new FutureUpdateBehavior<>(Duration.seconds(1), session.addFuture(evaluateFuture), qualityModel,
+                eventBusModel, QualityEvaluatedEvent.class));
+        add(new FutureUpdateBehavior<>(Duration.seconds(1), session.addFuture(notificationsFuture), notificationsModel,
+                eventBusModel, NotificationsLoadedEvent.class));
         add(new RoLoadBehavior(feedbackPanel, researchObjectModel, eventBusModel));
         add(new EvolutionInfoLoadBehavior(feedbackPanel, researchObjectModel, eventBusModel));
     }
@@ -328,8 +318,8 @@ public class RoPage extends BasePage {
         @SuppressWarnings("unchecked")
         Future<EvaluationResult> evaluateFuture = executor.submit(createChecklistEvaluationCallable(service,
             (IModel<ResearchObject>) this.getDefaultModel()));
-        FutureUpdateBehavior<EvaluationResult> behavior = new FutureUpdateBehavior<>(Duration.seconds(1),
-                evaluateFuture, qualityModel, eventBusModel, QualityEvaluatedEvent.class);
+        FutureUpdateBehavior<EvaluationResult> behavior = new FutureUpdateBehavior<>(Duration.seconds(1), MySession
+                .get().addFuture(evaluateFuture), qualityModel, eventBusModel, QualityEvaluatedEvent.class);
         this.add(behavior);
         event.getTarget().appendJavaScript(behavior.getCallbackScript());
     }

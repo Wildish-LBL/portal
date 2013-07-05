@@ -32,7 +32,7 @@ public class FutureUpdateBehavior<T> extends AbstractAjaxTimerBehavior {
     private static final Logger LOGGER = Logger.getLogger(FutureUpdateBehavior.class);
 
     /** The job that will finish in some time. */
-    private transient Future<T> future;
+    private IModel<Future<T>> future;
 
     /** The model to save the job result to. */
     private IModel<T> model;
@@ -58,7 +58,7 @@ public class FutureUpdateBehavior<T> extends AbstractAjaxTimerBehavior {
      * @param eventClass
      *            The class of the event to post after success
      */
-    public FutureUpdateBehavior(Duration updateInterval, Future<T> future, IModel<T> model,
+    public FutureUpdateBehavior(Duration updateInterval, IModel<Future<T>> future, IModel<T> model,
             IModel<EventBus> eventBusModel, Class<? extends AbstractAjaxEvent> eventClass) {
         super(updateInterval);
         this.model = model;
@@ -97,9 +97,9 @@ public class FutureUpdateBehavior<T> extends AbstractAjaxTimerBehavior {
 
     @Override
     protected void onTimer(final AjaxRequestTarget target) {
-        if (future.isDone()) {
+        if (future.getObject().isDone()) {
             try {
-                T data = future.get();
+                T data = future.getObject().get();
                 if (model != null) {
                     model.setObject(data);
                 }

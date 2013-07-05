@@ -58,7 +58,7 @@ public class RoLoadBehavior extends OnDomReadyAjaxBehaviour {
         if (!model.getObject().isLoaded()) {
             try {
                 model.getObject().load();
-                eventBusModel.getObject().post(new RoLoadedEvent(target));
+                eventBusModel.getObject().post(new RoLoadedEvent(target, model.getObject()));
             } catch (Exception e) {
                 Session.get().error("Research object cannot be loaded: " + e.getMessage());
                 LOG.error("Research object cannot be loaded", e);

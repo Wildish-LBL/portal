@@ -68,6 +68,8 @@ public class RoCommentsPanel extends EventPanel {
      */
     @Subscribe
     public void onRoLoaded(RoLoadedEvent event) {
+        // sometimes it may happen that this panel has a stale version of RO. I don't know why :(
+        this.setDefaultModelObject(event.getResearchObject());
         event.getTarget().add(commentsList);
     }
 

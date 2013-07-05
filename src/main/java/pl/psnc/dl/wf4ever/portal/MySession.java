@@ -3,12 +3,19 @@
  */
 package pl.psnc.dl.wf4ever.portal;
 
+import java.lang.ref.SoftReference;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.Future;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.Session;
 import org.apache.wicket.authroles.authentication.AbstractAuthenticatedWebSession;
 import org.apache.wicket.authroles.authorization.strategies.role.Roles;
+import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.util.cookies.CookieUtils;
 import org.openid4java.discovery.DiscoveryInformation;
@@ -17,6 +24,8 @@ import org.purl.wf4ever.rosrs.client.users.User;
 import org.purl.wf4ever.rosrs.client.users.UserManagementService;
 import org.scribe.model.Token;
 
+import com.google.common.eventbus.EventBus;
+
 /**
  * Custom app session.
  * 
@@ -24,6 +33,78 @@ import org.scribe.model.Token;
  * 
  */
 public class MySession extends AbstractAuthenticatedWebSession {
+
+    /**
+     * A simple model that searches for the event bus of a given key. The returned value will be the same even if the
+     * calling page is serialized/deserialized.
+     * 
+     * This class is static so that there is no reference to MySession, to prevent the session from being serialized.
+     * 
+     * @author piotrekhol
+     * 
+     */
+    private static class EventBusModel extends AbstractReadOnlyModel<EventBus> {
+
+        /** id. */
+        private static final long serialVersionUID = 5225667860067218852L;
+
+        /** key. */
+        private int key;
+
+
+        /**
+         * Constructor.
+         * 
+         * @param key
+         *            key
+         */
+        public EventBusModel(int key) {
+            this.key = key;
+        }
+
+
+        @Override
+        public EventBus getObject() {
+            return MySession.get().getEventBus(key);
+        }
+    }
+
+
+    /**
+     * A simple model that searches for the background job of a given key. The returned value will be the same even if
+     * the calling page is serialized/deserialized.
+     * 
+     * @author piotrekhol
+     * 
+     */
+    private static class FutureModel<T> extends AbstractReadOnlyModel<Future<T>> {
+
+        /** id. */
+        private static final long serialVersionUID = 8741109057544006402L;
+
+        /** key. */
+        private int key;
+
+
+        /**
+         * Constructor.
+         * 
+         * @param key
+         *            key
+         */
+        public FutureModel(int key) {
+            this.key = key;
+        }
+
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Future<T> getObject() {
+            return (Future<T>) MySession.get().getFuture(key);
+        }
+
+    }
+
 
     /** Id. */
     private static final long serialVersionUID = -4113134277706549806L;
@@ -72,6 +153,12 @@ public class MySession extends AbstractAuthenticatedWebSession {
 
     /** UMS client. */
     private UserManagementService ums;
+
+    /** Keep futures here so that they are not dropped between subsequent page refreshes. */
+    private transient Map<Integer, SoftReference<Future<?>>> futures;
+
+    /** Keep event buses here so that they are not dropped between subsequent page refreshes. */
+    private transient Map<Integer, SoftReference<EventBus>> eventBuses;
 
 
     /**
@@ -255,4 +342,93 @@ public class MySession extends AbstractAuthenticatedWebSession {
     public UserManagementService getUms() {
         return ums;
     }
+
+
+    /**
+     * Get or create the transient store.
+     * 
+     * @return a map
+     */
+    private synchronized Map<Integer, SoftReference<Future<?>>> getFutures() {
+        if (futures == null) {
+            futures = new HashMap<>();
+        }
+        return futures;
+    }
+
+
+    /**
+     * Store a background job.
+     * 
+     * @param future
+     *            the job
+     * @param <T>
+     *            type of job result
+     * @return a read only model to retrieve the job
+     */
+    public <T> IModel<Future<T>> addFuture(Future<T> future) {
+        int key;
+        do {
+            key = new Random().nextInt();
+        } while (getFutures().containsKey(key));
+        getFutures().put(key, new SoftReference<Future<?>>(future));
+        return new FutureModel<T>(key);
+    }
+
+
+    /**
+     * Return the value. SoftReference is used so that the values can be deleted if they take too much memory.
+     * 
+     * @param key
+     *            key
+     * @return value or null
+     */
+    private Future<?> getFuture(int key) {
+        SoftReference<Future<?>> value = getFutures().get(key);
+        return value != null ? value.get() : null;
+    }
+
+
+    /**
+     * Get or create the transient store.
+     * 
+     * @return a map
+     */
+    private synchronized Map<Integer, SoftReference<EventBus>> getEventBuses() {
+        if (eventBuses == null) {
+            eventBuses = new HashMap<>();
+        }
+        return eventBuses;
+    }
+
+
+    /**
+     * Store an event bus.
+     * 
+     * @param eventBus
+     *            event bus
+     * @return a read only model to retrieve the event bus
+     */
+    public IModel<EventBus> addEventBus(EventBus eventBus) {
+        int key;
+        do {
+            key = new Random().nextInt();
+        } while (getEventBuses().containsKey(key));
+        getEventBuses().put(key, new SoftReference<EventBus>(eventBus));
+        return new EventBusModel(key);
+    }
+
+
+    /**
+     * Return the value. SoftReference is used so that the values can be deleted if they take too much memory.
+     * 
+     * @param key
+     *            key
+     * @return value or null
+     */
+    private synchronized EventBus getEventBus(int key) {
+        SoftReference<EventBus> value = getEventBuses().get(key);
+        return value != null ? value.get() : null;
+    }
+
 }
