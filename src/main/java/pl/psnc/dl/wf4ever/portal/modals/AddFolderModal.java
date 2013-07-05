@@ -105,7 +105,7 @@ public class AddFolderModal extends EventPanel {
     @Subscribe
     public void onOk(OkClickedEvent event) {
         eventBusModel.getObject().post(new FolderAddReadyEvent(event.getTarget(), name));
-        event.getTarget().appendJavaScript("$('#add-folder-modal').modal('hide')");
+        event.getTarget().prependJavaScript("$('#add-folder-modal').modal('hide')");
         event.getTarget().add(feedbackPanel);
     }
 

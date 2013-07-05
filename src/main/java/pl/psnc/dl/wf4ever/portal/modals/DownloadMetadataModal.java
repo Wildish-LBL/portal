@@ -124,7 +124,7 @@ public class DownloadMetadataModal extends EventPanel {
     @Subscribe
     public void onOk(OkClickedEvent event) {
         eventBusModel.getObject().post(new MetadataDownloadEvent(event.getTarget(), format));
-        event.getTarget().appendJavaScript("$('#download-metadata-modal').modal('hide');");
+        event.getTarget().prependJavaScript("$('#download-metadata-modal').modal('hide');");
     }
 
 

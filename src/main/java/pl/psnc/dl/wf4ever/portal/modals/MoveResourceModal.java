@@ -112,7 +112,7 @@ public class MoveResourceModal extends EventPanel {
         if (folder != null) {
             eventBusModel.getObject().post(new ResourceMoveEvent(event.getTarget(), folder));
         }
-        event.getTarget().appendJavaScript("$('#move-resource-modal').modal('hide');");
+        event.getTarget().prependJavaScript("$('#move-resource-modal').modal('hide');");
     }
 
 

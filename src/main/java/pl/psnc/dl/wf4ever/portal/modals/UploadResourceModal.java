@@ -201,13 +201,13 @@ public class UploadResourceModal extends EventPanel {
                 if (uploadedFile != null) {
                     eventBusModel.getObject().post(
                         new ResourceAddReadyEvent(event.getTarget(), uploadedFile, resourceClass));
-                    event.getTarget().appendJavaScript("$('#upload-resource-modal').modal('hide')");
+                    event.getTarget().prependJavaScript("$('#upload-resource-modal').modal('hide')");
                 }
                 break;
             case REMOTE:
                 eventBusModel.getObject()
                         .post(new ResourceAddReadyEvent(event.getTarget(), resourceURI, resourceClass));
-                event.getTarget().appendJavaScript("$('#upload-resource-modal').modal('hide')");
+                event.getTarget().prependJavaScript("$('#upload-resource-modal').modal('hide')");
                 break;
         }
         event.getTarget().add(feedbackPanel);

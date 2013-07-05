@@ -126,7 +126,7 @@ public class ImportAnnotationModal extends EventPanel {
             try {
                 eventBusModel.getObject().post(
                     new ImportAnnotationReadyEvent(event.getTarget(), annotableModel, uploadedFile));
-                event.getTarget().appendJavaScript("$('#import-annotation-modal').modal('hide')");
+                event.getTarget().prependJavaScript("$('#import-annotation-modal').modal('hide')");
             } catch (Exception e) {
                 LOG.error("Error when importing annotation", e);
                 error(e);
