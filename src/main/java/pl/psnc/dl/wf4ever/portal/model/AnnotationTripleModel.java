@@ -159,6 +159,8 @@ public class AnnotationTripleModel implements IModel<AnnotationTriple> {
         if (triple.getAnnotation() != null) {
             try {
                 triple.delete();
+                this.triple = new AnnotationTriple(null, annotableModel.getObject(), triple.getProperty(), null,
+                        triple.isMerge());
             } catch (ROSRSException e) {
                 LOG.error("Can't delete/update annotation " + triple.getAnnotation(), e);
             }
@@ -206,7 +208,7 @@ public class AnnotationTripleModel implements IModel<AnnotationTriple> {
         @Override
         public void setObject(String object) {
             checkAnnotableModel();
-            if (triple.getAnnotation() == null) {
+            if (triple.getSubject() == null) {
                 throw new IllegalStateException("Annotable object cannot be null to set a value");
             }
             if (object != null) {
@@ -225,12 +227,8 @@ public class AnnotationTripleModel implements IModel<AnnotationTriple> {
                         }
                     }
                 }
-            } else if (triple.getAnnotation() != null) {
-                try {
-                    triple.delete();
-                } catch (ROSRSException e) {
-                    LOG.error("Can't delete/update annotation " + triple.getValue(), e);
-                }
+            } else {
+                delete();
             }
         }
     }
