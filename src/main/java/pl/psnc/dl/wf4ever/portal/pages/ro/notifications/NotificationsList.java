@@ -62,7 +62,7 @@ public class NotificationsList extends EventPanel {
      * @param eventBusModel
      *            event bus for posting the user clicks
      */
-    public NotificationsList(String id, IModel<List<Notification>> notificationsModel,
+    public NotificationsList(String id, IModel<? extends List<Notification>> notificationsModel,
             IModel<Notification> selectedNotificationModel, IModel<EventBus> eventBusModel) {
         super(id, selectedNotificationModel, eventBusModel);
         this.selectedNotificationModel = selectedNotificationModel;
@@ -121,7 +121,7 @@ public class NotificationsList extends EventPanel {
          * @param notificationsModel
          *            notifications list
          */
-        private NotificationsPropertyListView(String id, IModel<List<Notification>> notificationsModel) {
+        private NotificationsPropertyListView(String id, IModel<?extends List<Notification>> notificationsModel) {
             super(id, notificationsModel);
         }
 

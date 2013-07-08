@@ -86,8 +86,8 @@ public class NotificationsIndicator extends EventPanel {
      *            Id of the tab which will be shown when user clicks on the indicator.
      */
     public NotificationsIndicator(String id, IModel<ResearchObject> researchObjectModel,
-            IModel<List<Notification>> notificationsModel, final IModel<EventBus> eventBusModel, String rssLink,
-            String tabId) {
+            IModel<? extends List<Notification>> notificationsModel, final IModel<EventBus> eventBusModel,
+            String rssLink, String tabId) {
         super(id, notificationsModel, eventBusModel);
         setOutputMarkupId(true);
         this.tabId = tabId;

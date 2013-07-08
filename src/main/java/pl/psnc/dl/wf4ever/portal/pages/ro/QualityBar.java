@@ -1,15 +1,26 @@
 package pl.psnc.dl.wf4ever.portal.pages.ro;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.apache.wicket.util.time.Duration;
+import org.purl.wf4ever.checklist.client.ChecklistEvaluationService;
 import org.purl.wf4ever.checklist.client.ChecklistItem;
 import org.purl.wf4ever.checklist.client.EvaluationResult;
+import org.purl.wf4ever.rosrs.client.ResearchObject;
 
+import pl.psnc.dl.wf4ever.portal.MySession;
+import pl.psnc.dl.wf4ever.portal.PortalApplication;
+import pl.psnc.dl.wf4ever.portal.behaviors.FutureUpdateBehavior;
 import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.events.QualityEvaluatedEvent;
+import pl.psnc.dl.wf4ever.portal.events.aggregation.AggregationChangedEvent;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -67,14 +78,9 @@ public class QualityBar extends EventPanel {
     }
 
 
-    /**
-     * Draw the progress bar once the quality has been calculated.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @Subscribe
-    public void onQualityEvaluated(QualityEvaluatedEvent event) {
+    @Override
+    protected void onConfigure() {
+        super.onConfigure();
         if (getDefaultModelObject() != null) {
             EvaluationResult result = (EvaluationResult) getDefaultModelObject();
             label.setVisible(false);
@@ -83,6 +89,17 @@ public class QualityBar extends EventPanel {
             String details = getDetailsHtml(result);
             bar.add(new AttributeModifier("data-content", details));
         }
+    }
+
+
+    /**
+     * Draw the progress bar once the quality has been calculated.
+     * 
+     * @param event
+     *            AJAX event
+     */
+    @Subscribe
+    public void onQualityEvaluated(QualityEvaluatedEvent event) {
         event.getTarget().add(this);
     }
 
@@ -108,4 +125,26 @@ public class QualityBar extends EventPanel {
         }
         return sb.toString();
     }
+
+
+    /**
+     * When the aggregation has changed, recalculate the quality.
+     * 
+     * @param event
+     *            AJAX event
+     */
+    @SuppressWarnings("unchecked")
+    @Subscribe
+    public void onAggregationChanged(AggregationChangedEvent event) {
+        ChecklistEvaluationService service = ((PortalApplication) getApplication()).getChecklistService();
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+        Future<EvaluationResult> evaluateFuture = executor.submit(RoPage.createChecklistEvaluationCallable(service,
+            (IModel<ResearchObject>) this.getDefaultModel()));
+        FutureUpdateBehavior<EvaluationResult> behavior = new FutureUpdateBehavior<EvaluationResult>(
+                Duration.seconds(1), MySession.get().addFuture(evaluateFuture),
+                (IModel<EvaluationResult>) getDefaultModel(), this);
+        this.add(behavior);
+        event.getTarget().appendJavaScript(behavior.getCallbackScript());
+    }
+
 }

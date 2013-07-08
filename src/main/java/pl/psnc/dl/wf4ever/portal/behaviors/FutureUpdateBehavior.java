@@ -1,18 +1,14 @@
 package pl.psnc.dl.wf4ever.portal.behaviors;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.apache.log4j.Logger;
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractAjaxTimerBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.time.Duration;
-
-import pl.psnc.dl.wf4ever.portal.events.AbstractAjaxEvent;
-
-import com.google.common.eventbus.EventBus;
 
 /**
  * An Ajax timer behavior that polls a future waiting for it to be done and once it is updates the component model,
@@ -36,12 +32,7 @@ public class FutureUpdateBehavior<T> extends AbstractAjaxTimerBehavior {
 
     /** The model to save the job result to. */
     private IModel<T> model;
-
-    /** The class of the event to post after success. */
-    private Class<? extends AbstractAjaxEvent> eventClass;
-
-    /** Event bus model to post the event after success. */
-    private IModel<EventBus> eventBusModel;
+    private Component[] components;
 
 
     /**
@@ -53,18 +44,13 @@ public class FutureUpdateBehavior<T> extends AbstractAjaxTimerBehavior {
      *            The job that will finish in some time
      * @param model
      *            The model to save the job result to
-     * @param eventBusModel
-     *            Event bus model to post the event after success
-     * @param eventClass
-     *            The class of the event to post after success
      */
     public FutureUpdateBehavior(Duration updateInterval, IModel<Future<T>> future, IModel<T> model,
-            IModel<EventBus> eventBusModel, Class<? extends AbstractAjaxEvent> eventClass) {
+            Component... components) {
         super(updateInterval);
         this.model = model;
         this.future = future;
-        this.eventBusModel = eventBusModel;
-        this.eventClass = eventClass;
+        this.components = components;
     }
 
 
@@ -75,7 +61,9 @@ public class FutureUpdateBehavior<T> extends AbstractAjaxTimerBehavior {
      *            AJAX target
      */
     protected void onPostSuccess(AjaxRequestTarget target) {
-        eventBusModel.getObject().post(newEvent(target));
+        for (Component component : components) {
+            target.add(component);
+        }
     }
 
 
@@ -111,24 +99,6 @@ public class FutureUpdateBehavior<T> extends AbstractAjaxTimerBehavior {
                 LOGGER.error(message, e);
                 onUpdateError(target, e);
             }
-        }
-    }
-
-
-    /**
-     * Create a new event.
-     * 
-     * @param target
-     *            AJAX request target
-     * @return an event or null
-     */
-    protected AbstractAjaxEvent newEvent(AjaxRequestTarget target) {
-        try {
-            return (AbstractAjaxEvent) eventClass.getConstructor(AjaxRequestTarget.class).newInstance(target);
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-                | NoSuchMethodException | SecurityException e) {
-            LOGGER.error("Can't create the default event", e);
-            return null;
         }
     }
 

@@ -3,6 +3,7 @@ package pl.psnc.dl.wf4ever.portal.pages.ro;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
@@ -17,7 +18,6 @@ import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.time.Duration;
 import org.purl.wf4ever.checklist.client.ChecklistEvaluationService;
@@ -40,10 +40,7 @@ import pl.psnc.dl.wf4ever.portal.behaviors.RoLoadBehavior;
 import pl.psnc.dl.wf4ever.portal.components.annotations.AdvancedAnnotationsPanel;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.events.MetadataDownloadEvent;
-import pl.psnc.dl.wf4ever.portal.events.NotificationsLoadedEvent;
-import pl.psnc.dl.wf4ever.portal.events.QualityEvaluatedEvent;
 import pl.psnc.dl.wf4ever.portal.events.RoEvolutionLoadedEvent;
-import pl.psnc.dl.wf4ever.portal.events.aggregation.AggregationChangedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationAddedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.ImportAnnotationReadyEvent;
 import pl.psnc.dl.wf4ever.portal.events.evo.JobFinishedEvent;
@@ -83,17 +80,8 @@ public class RoPage extends BasePage {
     /** The feedback panel. */
     private MyFeedbackPanel feedbackPanel;
 
-    /** The research object. */
-    protected ResearchObject researchObject;
-
-    /** Checklist quality evaluation of this RO. */
-    protected EvaluationResult qualityEvaluation;
-
     /** Template for HTML Link Headers. */
     private static final String HTML_LINK_TEMPLATE = "<link rel=\"%s\" href=\"%s\"/>";
-
-    /** Notifications about this RO. */
-    private List<Notification> notifications;
 
     /** Loadable event bus model. */
     private IModel<EventBus> eventBusModel;
@@ -110,9 +98,11 @@ public class RoPage extends BasePage {
     public RoPage(final PageParameters parameters)
             throws URISyntaxException {
         super(parameters);
+        IModel<ResearchObject> researchObjectModel;
         if (!parameters.get("ro").isEmpty()) {
             URI roURI = new URI(parameters.get("ro").toString());
-            researchObject = new ResearchObject(roURI, MySession.get().getRosrs());
+            researchObjectModel = new Model<ResearchObject>(new ResearchObject(roURI, MySession.get().getRosrs()));
+            this.setDefaultModel(researchObjectModel);
         } else {
             throw new RestartResponseException(Error404Page.class, new PageParameters().add("message",
                 "The RO URI is missing."));
@@ -129,10 +119,8 @@ public class RoPage extends BasePage {
         NotificationService notificationService = new NotificationService(getRodlURI(), null);
         ChecklistEvaluationService checklistService = ((PortalApplication) getApplication()).getChecklistService();
 
-        IModel<ResearchObject> researchObjectModel = new Model<ResearchObject>(researchObject);
-        this.setDefaultModel(researchObjectModel);
-        IModel<List<Notification>> notificationsModel = new PropertyModel<List<Notification>>(this, "notifications");
-        IModel<EvaluationResult> qualityModel = new PropertyModel<EvaluationResult>(this, "qualityEvaluation");
+        IModel<ArrayList<Notification>> notificationsModel = new Model<ArrayList<Notification>>();
+        IModel<EvaluationResult> qualityModel = new Model<EvaluationResult>();
         String rssLink = notificationService.getNotificationsUri(researchObjectModel.getObject().getUri(), null, null)
                 .toString();
         eventBusModel = session.addEventBus(new EventBus());
@@ -140,9 +128,11 @@ public class RoPage extends BasePage {
 
         add(new RoSummaryPanel("ro-summary", researchObjectModel, eventBusModel));
         add(new RoActionsPanel("ro-actions", researchObjectModel, eventBusModel));
-        add(new NotificationsIndicator("notifications", researchObjectModel, notificationsModel, eventBusModel,
-                rssLink, "notifications"));
-        add(new QualityBar("health-progress-bar", qualityModel, eventBusModel));
+        NotificationsIndicator notificationsIndicator = new NotificationsIndicator("notifications",
+                researchObjectModel, notificationsModel, eventBusModel, rssLink, "notifications");
+        add(notificationsIndicator);
+        QualityBar qualityBar = new QualityBar("health-progress-bar", qualityModel, eventBusModel);
+        add(qualityBar);
         add(new RoCommentsPanel("comments", researchObjectModel, eventBusModel));
         add(new AdvancedAnnotationsPanel("advanced-annotations", "ro-basic-view", researchObjectModel, eventBusModel));
         add(new RoContentPanel("content", researchObjectModel, eventBusModel));
@@ -150,7 +140,9 @@ public class RoPage extends BasePage {
 
         CompoundPropertyModel<Notification> selectedNotification = new CompoundPropertyModel<Notification>(
                 (Notification) null);
-        add(new NotificationsList("notificationsList", notificationsModel, selectedNotification, eventBusModel));
+        NotificationsList notificationsList = new NotificationsList("notificationsList", notificationsModel,
+                selectedNotification, eventBusModel);
+        add(notificationsList);
         add(new NotificationPreviewPanel("notificationPanel", selectedNotification, eventBusModel));
 
         add(new DownloadMetadataModal("download-metadata-modal", eventBusModel));
@@ -159,12 +151,11 @@ public class RoPage extends BasePage {
         ExecutorService executor = Executors.newFixedThreadPool(10);
         Future<EvaluationResult> evaluateFuture = executor.submit(createChecklistEvaluationCallable(checklistService,
             researchObjectModel));
-        Future<List<Notification>> notificationsFuture = executor.submit(createNotificationsCallable(
+        Future<ArrayList<Notification>> notificationsFuture = executor.submit(createNotificationsCallable(
             notificationService, researchObjectModel));
-        add(new FutureUpdateBehavior<>(Duration.seconds(1), session.addFuture(evaluateFuture), qualityModel,
-                eventBusModel, QualityEvaluatedEvent.class));
-        add(new FutureUpdateBehavior<>(Duration.seconds(1), session.addFuture(notificationsFuture), notificationsModel,
-                eventBusModel, NotificationsLoadedEvent.class));
+        add(new FutureUpdateBehavior<>(Duration.seconds(1), session.addFuture(evaluateFuture), qualityModel, qualityBar));
+        add(new FutureUpdateBehavior<ArrayList<Notification>>(Duration.seconds(1),
+                session.addFuture(notificationsFuture), notificationsModel, notificationsIndicator, notificationsList));
         add(new RoLoadBehavior(feedbackPanel, researchObjectModel, eventBusModel));
         add(new EvolutionInfoLoadBehavior(feedbackPanel, researchObjectModel, eventBusModel));
     }
@@ -179,7 +170,7 @@ public class RoPage extends BasePage {
      *            RO model
      * @return a new {@link Callable}
      */
-    private Callable<EvaluationResult> createChecklistEvaluationCallable(final ChecklistEvaluationService service,
+    static Callable<EvaluationResult> createChecklistEvaluationCallable(final ChecklistEvaluationService service,
             final IModel<ResearchObject> model) {
         return new Callable<EvaluationResult>() {
 
@@ -201,12 +192,12 @@ public class RoPage extends BasePage {
      *            RO model
      * @return a new {@link Callable}
      */
-    private Callable<List<Notification>> createNotificationsCallable(final NotificationService notificationService,
+    static Callable<ArrayList<Notification>> createNotificationsCallable(final NotificationService notificationService,
             final IModel<ResearchObject> model) {
-        return new Callable<List<Notification>>() {
+        return new Callable<ArrayList<Notification>>() {
 
             @Override
-            public List<Notification> call()
+            public ArrayList<Notification> call()
                     throws Exception {
                 return notificationService.getNotifications(model.getObject().getUri(), null, null);
             }
@@ -222,6 +213,7 @@ public class RoPage extends BasePage {
      */
     @Subscribe
     public void createSnapshot(SnapshotCreateEvent event) {
+        ResearchObject researchObject = (ResearchObject) getDefaultModelObject();
         final JobStatus status = researchObject.snapshot(researchObject.getName().substring(0,
             researchObject.getName().length() - 1)
                 + "-snapshot");
@@ -239,6 +231,7 @@ public class RoPage extends BasePage {
      */
     @Subscribe
     public void createArchive(ReleaseCreateEvent event) {
+        ResearchObject researchObject = (ResearchObject) getDefaultModelObject();
         final JobStatus status = researchObject.archive(researchObject.getName().substring(0,
             researchObject.getName().length() - 1)
                 + "-release");
@@ -256,6 +249,7 @@ public class RoPage extends BasePage {
      */
     @Subscribe
     public void onJobFinished(JobFinishedEvent event) {
+        ResearchObject researchObject = (ResearchObject) getDefaultModelObject();
         researchObject.loadEvolutionInformation();
         eventBusModel.getObject().post(new RoEvolutionLoadedEvent(event.getTarget()));
     }
@@ -264,6 +258,7 @@ public class RoPage extends BasePage {
     @Override
     public void renderHead(IHeaderResponse response) {
         super.renderHead(response);
+        ResearchObject researchObject = (ResearchObject) getDefaultModelObject();
         try {
             ClientResponse head = MySession.get().getRosrs().getResourceHead(researchObject.getUri());
             List<String> headers = head.getHeaders().get("Link");
@@ -282,16 +277,6 @@ public class RoPage extends BasePage {
     }
 
 
-    public EvaluationResult getQualityEvaluation() {
-        return qualityEvaluation;
-    }
-
-
-    public List<Notification> getNotifications() {
-        return notifications;
-    }
-
-
     /**
      * Redirect to the metadata file.
      * 
@@ -301,27 +286,6 @@ public class RoPage extends BasePage {
     @Subscribe
     public void onMetadataDownload(MetadataDownloadEvent event) {
         event.getTarget().appendJavaScript("window.location.href='" + getROMetadataLink(event.getFormat()) + "'");
-    }
-
-
-    /**
-     * When the aggregation has changed, recalculate the quality.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @Subscribe
-    public void onAggregationChanged(AggregationChangedEvent event) {
-        ChecklistEvaluationService service = ((PortalApplication) getApplication()).getChecklistService();
-        IModel<EvaluationResult> qualityModel = new PropertyModel<EvaluationResult>(this, "qualityEvaluation");
-        ExecutorService executor = Executors.newFixedThreadPool(10);
-        @SuppressWarnings("unchecked")
-        Future<EvaluationResult> evaluateFuture = executor.submit(createChecklistEvaluationCallable(service,
-            (IModel<ResearchObject>) this.getDefaultModel()));
-        FutureUpdateBehavior<EvaluationResult> behavior = new FutureUpdateBehavior<>(Duration.seconds(1), MySession
-                .get().addFuture(evaluateFuture), qualityModel, eventBusModel, QualityEvaluatedEvent.class);
-        this.add(behavior);
-        event.getTarget().appendJavaScript(behavior.getCallbackScript());
     }
 
 
@@ -347,7 +311,13 @@ public class RoPage extends BasePage {
     }
 
 
+    /**
+     * Return the link to the ZIP archive.
+     * 
+     * @return URI of the ZIP archive
+     */
     public String getROZipLink() {
+        ResearchObject researchObject = (ResearchObject) getDefaultModelObject();
         return researchObject.getUri().toString().replaceFirst("/ROs/", "/zippedROs/");
     }
 
@@ -360,6 +330,7 @@ public class RoPage extends BasePage {
      * @return a URI as string of the resource
      */
     public String getROMetadataLink(RDFFormat format) {
+        ResearchObject researchObject = (ResearchObject) getDefaultModelObject();
         return researchObject.getUri()
                 .resolve(".ro/manifest." + format.getDefaultFileExtension() + "?original=manifest.rdf").toString();
     }
