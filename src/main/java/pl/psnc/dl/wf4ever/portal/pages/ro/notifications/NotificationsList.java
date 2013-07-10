@@ -36,12 +36,10 @@ public class NotificationsList extends EventPanel {
     private static final long serialVersionUID = -2527527943968289889L;
 
     /** formatter for showing only the hour. */
-    private transient DateTimeFormatter hourFormatter = new DateTimeFormatterBuilder().appendHourOfDay(2)
-            .appendLiteral(":").appendMinuteOfHour(2).toFormatter();
+    private transient DateTimeFormatter hourFormatter;
 
     /** formatter for showing the full date. */
-    private transient DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendDayOfMonth(1)
-            .appendLiteral("/").appendMonthOfYear(1).appendLiteral("/").appendYear(2, 2).toFormatter();
+    private transient DateTimeFormatter dateFormatter;
 
     /** The list of headers. */
     private PropertyListView<Notification> list;
@@ -82,8 +80,16 @@ public class NotificationsList extends EventPanel {
      */
     private String formatDateTime(DateTime dateTime) {
         if ((new LocalDate(dateTime)).equals(new LocalDate())) {
+            if (hourFormatter == null) {
+                hourFormatter = new DateTimeFormatterBuilder().appendHourOfDay(2).appendLiteral(":")
+                        .appendMinuteOfHour(2).toFormatter();
+            }
             return hourFormatter.print(dateTime);
         } else {
+            if (dateFormatter == null) {
+                dateFormatter = new DateTimeFormatterBuilder().appendDayOfMonth(1).appendLiteral("/")
+                        .appendMonthOfYear(1).appendLiteral("/").appendYear(2, 2).toFormatter();
+            }
             return dateFormatter.print(dateTime);
         }
     }
@@ -121,7 +127,7 @@ public class NotificationsList extends EventPanel {
          * @param notificationsModel
          *            notifications list
          */
-        private NotificationsPropertyListView(String id, IModel<?extends List<Notification>> notificationsModel) {
+        private NotificationsPropertyListView(String id, IModel<? extends List<Notification>> notificationsModel) {
             super(id, notificationsModel);
         }
 
