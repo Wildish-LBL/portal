@@ -32,6 +32,8 @@ public class FutureUpdateBehavior<T> extends AbstractAjaxTimerBehavior {
 
     /** The model to save the job result to. */
     private IModel<T> model;
+
+    /** Components that will be updated. */
     private Component[] components;
 
 
@@ -44,6 +46,8 @@ public class FutureUpdateBehavior<T> extends AbstractAjaxTimerBehavior {
      *            The job that will finish in some time
      * @param model
      *            The model to save the job result to
+     * @param components
+     *            components that will be updated
      */
     public FutureUpdateBehavior(Duration updateInterval, IModel<Future<T>> future, IModel<T> model,
             Component... components) {
@@ -79,7 +83,6 @@ public class FutureUpdateBehavior<T> extends AbstractAjaxTimerBehavior {
         getComponent().error("Could not finish the task: " + e.getLocalizedMessage());
         target.add(getComponent());
         LOGGER.error("Could not finish the task", e);
-
     }
 
 

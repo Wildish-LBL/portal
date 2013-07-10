@@ -420,15 +420,20 @@ public class MySession extends AbstractAuthenticatedWebSession {
 
 
     /**
-     * Return the value. SoftReference is used so that the values can be deleted if they take too much memory.
+     * Return the value. If there is no value, create a new event bus. SoftReference is used so that the values can be
+     * deleted if they take too much memory.
      * 
      * @param key
      *            key
-     * @return value or null
+     * @return value
      */
     private synchronized EventBus getEventBus(int key) {
         SoftReference<EventBus> value = getEventBuses().get(key);
-        return value != null ? value.get() : null;
+        if (value == null || value.get() == null) {
+            LOG.warn("Need to create a new event bus because the old one expired.");
+            getEventBuses().put(key, new SoftReference<>(new EventBus()));
+        }
+        return value.get();
     }
 
 }
