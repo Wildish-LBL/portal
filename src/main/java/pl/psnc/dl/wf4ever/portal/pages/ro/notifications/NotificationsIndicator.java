@@ -19,10 +19,8 @@ import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.notifications.Notification;
 
 import pl.psnc.dl.wf4ever.portal.components.EventPanel;
-import pl.psnc.dl.wf4ever.portal.events.NotificationsLoadedEvent;
 
 import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 
 /**
  * An indicator of a number of notifications for this RO.
@@ -156,18 +154,6 @@ public class NotificationsIndicator extends EventPanel {
     public void renderHead(IHeaderResponse response) {
         response.renderJavaScript("var notificationsTab='" + tabId + "';", "tabId");
         super.renderHead(response);
-    }
-
-
-    /**
-     * Refresh when the notifications are loaded.
-     * 
-     * @param event
-     *            the trigger
-     */
-    @Subscribe
-    public void onNotificationsLoaded(NotificationsLoadedEvent event) {
-        event.getTarget().add(this);
     }
 
 }

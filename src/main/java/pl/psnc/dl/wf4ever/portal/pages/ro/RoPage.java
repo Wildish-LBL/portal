@@ -20,7 +20,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.time.Duration;
-import org.purl.wf4ever.checklist.client.ChecklistEvaluationService;
 import org.purl.wf4ever.checklist.client.EvaluationResult;
 import org.purl.wf4ever.rosrs.client.Annotable;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
@@ -32,7 +31,6 @@ import org.purl.wf4ever.rosrs.client.notifications.Notification;
 import org.purl.wf4ever.rosrs.client.notifications.NotificationService;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
-import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.behaviors.EvolutionInfoLoadBehavior;
 import pl.psnc.dl.wf4ever.portal.behaviors.FutureUpdateBehavior;
 import pl.psnc.dl.wf4ever.portal.behaviors.JobStatusUpdatingBehaviour;
@@ -117,13 +115,12 @@ public class RoPage extends BasePage {
         }
 
         NotificationService notificationService = new NotificationService(getRodlURI(), null);
-        ChecklistEvaluationService checklistService = ((PortalApplication) getApplication()).getChecklistService();
 
         IModel<ArrayList<Notification>> notificationsModel = new Model<ArrayList<Notification>>();
         IModel<EvaluationResult> qualityModel = new Model<EvaluationResult>();
         String rssLink = notificationService.getNotificationsUri(researchObjectModel.getObject().getUri(), null, null)
                 .toString();
-        eventBusModel = session.addEventBus(new EventBus());
+        eventBusModel = session.addEventBus();
         eventBusModel.getObject().register(this);
 
         add(new RoSummaryPanel("ro-summary", researchObjectModel, eventBusModel));
@@ -131,7 +128,7 @@ public class RoPage extends BasePage {
         NotificationsIndicator notificationsIndicator = new NotificationsIndicator("notifications",
                 researchObjectModel, notificationsModel, eventBusModel, rssLink, "notifications");
         add(notificationsIndicator);
-        QualityBar qualityBar = new QualityBar("health-progress-bar", qualityModel, eventBusModel);
+        QualityBar qualityBar = new QualityBar("health-progress-bar", qualityModel, researchObjectModel, eventBusModel);
         add(qualityBar);
         add(new RoCommentsPanel("comments", researchObjectModel, eventBusModel));
         add(new AdvancedAnnotationsPanel("advanced-annotations", "ro-basic-view", researchObjectModel, eventBusModel));
@@ -149,37 +146,12 @@ public class RoPage extends BasePage {
         add(new ImportAnnotationModal("import-annotation-modal", eventBusModel));
 
         ExecutorService executor = Executors.newFixedThreadPool(10);
-        Future<EvaluationResult> evaluateFuture = executor.submit(createChecklistEvaluationCallable(checklistService,
-            researchObjectModel));
         Future<ArrayList<Notification>> notificationsFuture = executor.submit(createNotificationsCallable(
             notificationService, researchObjectModel));
-        add(new FutureUpdateBehavior<>(Duration.seconds(1), session.addFuture(evaluateFuture), qualityModel, qualityBar));
         add(new FutureUpdateBehavior<ArrayList<Notification>>(Duration.seconds(1),
                 session.addFuture(notificationsFuture), notificationsModel, notificationsIndicator, notificationsList));
         add(new RoLoadBehavior(feedbackPanel, researchObjectModel, eventBusModel));
         add(new EvolutionInfoLoadBehavior(feedbackPanel, researchObjectModel, eventBusModel));
-    }
-
-
-    /**
-     * Create a new task of calculating the RO quality that can be scheduled for later.
-     * 
-     * @param service
-     *            checklist evaluation service
-     * @param model
-     *            RO model
-     * @return a new {@link Callable}
-     */
-    static Callable<EvaluationResult> createChecklistEvaluationCallable(final ChecklistEvaluationService service,
-            final IModel<ResearchObject> model) {
-        return new Callable<EvaluationResult>() {
-
-            @Override
-            public EvaluationResult call()
-                    throws Exception {
-                return service.evaluate(model.getObject().getUri(), "ready-to-release");
-            }
-        };
     }
 
 

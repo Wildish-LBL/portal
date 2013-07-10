@@ -3,6 +3,7 @@
  */
 package pl.psnc.dl.wf4ever.portal;
 
+import java.io.Serializable;
 import java.lang.ref.SoftReference;
 import java.net.URI;
 import java.util.HashMap;
@@ -67,6 +68,20 @@ public class MySession extends AbstractAuthenticatedWebSession {
         public EventBus getObject() {
             return MySession.get().getEventBus(key);
         }
+    }
+
+
+    /**
+     * An event bus that is serializable.
+     * 
+     * @author piotrekhol
+     * 
+     */
+    private static class SerializableEventBus extends EventBus implements Serializable {
+
+        /** id. */
+        private static final long serialVersionUID = -848280536883820491L;
+
     }
 
 
@@ -158,7 +173,7 @@ public class MySession extends AbstractAuthenticatedWebSession {
     private transient Map<Integer, SoftReference<Future<?>>> futures;
 
     /** Keep event buses here so that they are not dropped between subsequent page refreshes. */
-    private transient Map<Integer, SoftReference<EventBus>> eventBuses;
+    private Map<Integer, SoftReference<? extends EventBus>> eventBuses;
 
 
     /**
@@ -394,7 +409,7 @@ public class MySession extends AbstractAuthenticatedWebSession {
      * 
      * @return a map
      */
-    private synchronized Map<Integer, SoftReference<EventBus>> getEventBuses() {
+    private synchronized Map<Integer, SoftReference<? extends EventBus>> getEventBuses() {
         if (eventBuses == null) {
             eventBuses = new HashMap<>();
         }
@@ -405,16 +420,14 @@ public class MySession extends AbstractAuthenticatedWebSession {
     /**
      * Store an event bus.
      * 
-     * @param eventBus
-     *            event bus
      * @return a read only model to retrieve the event bus
      */
-    public IModel<EventBus> addEventBus(EventBus eventBus) {
+    public IModel<EventBus> addEventBus() {
         int key;
         do {
             key = new Random().nextInt();
         } while (getEventBuses().containsKey(key));
-        getEventBuses().put(key, new SoftReference<EventBus>(eventBus));
+        getEventBuses().put(key, new SoftReference<EventBus>(new SerializableEventBus()));
         return new EventBusModel(key);
     }
 
@@ -428,10 +441,10 @@ public class MySession extends AbstractAuthenticatedWebSession {
      * @return value
      */
     private synchronized EventBus getEventBus(int key) {
-        SoftReference<EventBus> value = getEventBuses().get(key);
+        SoftReference<? extends EventBus> value = getEventBuses().get(key);
         if (value == null || value.get() == null) {
             LOG.warn("Need to create a new event bus because the old one expired.");
-            getEventBuses().put(key, new SoftReference<>(new EventBus()));
+            getEventBuses().put(key, new SoftReference<>(new SerializableEventBus()));
         }
         return value.get();
     }

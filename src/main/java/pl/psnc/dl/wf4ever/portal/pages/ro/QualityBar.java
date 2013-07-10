@@ -1,5 +1,6 @@
 package pl.psnc.dl.wf4ever.portal.pages.ro;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -19,7 +20,6 @@ import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.behaviors.FutureUpdateBehavior;
 import pl.psnc.dl.wf4ever.portal.components.EventPanel;
-import pl.psnc.dl.wf4ever.portal.events.QualityEvaluatedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.AggregationChangedEvent;
 
 import com.google.common.eventbus.EventBus;
@@ -46,6 +46,9 @@ public class QualityBar extends EventPanel {
     /** The progress bar. */
     private WebMarkupContainer bar;
 
+    /** RO model for quality calculation. */
+    private IModel<ResearchObject> researchObjectModel;
+
 
     /**
      * Constructor.
@@ -56,15 +59,20 @@ public class QualityBar extends EventPanel {
      *            RO health (0-100)
      * @param eventBusModel
      *            event bus model
+     * @param researchObjectModel
+     *            RO model for quality calculation
      */
-    public QualityBar(String id, IModel<EvaluationResult> model, IModel<EventBus> eventBusModel) {
+    public QualityBar(String id, IModel<EvaluationResult> model, IModel<ResearchObject> researchObjectModel,
+            IModel<EventBus> eventBusModel) {
         super(id, model, eventBusModel);
+        this.researchObjectModel = researchObjectModel;
         setOutputMarkupId(true);
         label = new WebMarkupContainer("initialLabel");
         add(label);
         bar = new WebMarkupContainer("progressBar");
         add(bar);
         bar.setVisible(false);
+        add(getRecalculationBehavior());
     }
 
 
@@ -93,18 +101,6 @@ public class QualityBar extends EventPanel {
 
 
     /**
-     * Draw the progress bar once the quality has been calculated.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @Subscribe
-    public void onQualityEvaluated(QualityEvaluatedEvent event) {
-        event.getTarget().add(this);
-    }
-
-
-    /**
      * Calculate a summary of checklist results as HTML.
      * 
      * @param result
@@ -128,23 +124,56 @@ public class QualityBar extends EventPanel {
 
 
     /**
+     * Create a new task of calculating the RO quality that can be scheduled for later.
+     * 
+     * @param service
+     *            checklist evaluation service
+     * @param model
+     *            RO model
+     * @return a new {@link Callable}
+     */
+    private Callable<EvaluationResult> createChecklistEvaluationCallable(final ChecklistEvaluationService service,
+            final IModel<ResearchObject> model) {
+        return new Callable<EvaluationResult>() {
+
+            @Override
+            public EvaluationResult call()
+                    throws Exception {
+                return service.evaluate(model.getObject().getUri(), "ready-to-release");
+            }
+        };
+    }
+
+
+    /**
      * When the aggregation has changed, recalculate the quality.
      * 
      * @param event
      *            AJAX event
      */
-    @SuppressWarnings("unchecked")
     @Subscribe
     public void onAggregationChanged(AggregationChangedEvent event) {
+        FutureUpdateBehavior<EvaluationResult> behavior = getRecalculationBehavior();
+        this.add(behavior);
+        event.getTarget().appendJavaScript(behavior.getCallbackScript());
+    }
+
+
+    /**
+     * Create a behavior that will (re)calculate the RO quality.
+     * 
+     * @return a {@link FutureUpdateBehavior}
+     */
+    @SuppressWarnings("unchecked")
+    private FutureUpdateBehavior<EvaluationResult> getRecalculationBehavior() {
         ChecklistEvaluationService service = ((PortalApplication) getApplication()).getChecklistService();
         ExecutorService executor = Executors.newFixedThreadPool(10);
-        Future<EvaluationResult> evaluateFuture = executor.submit(RoPage.createChecklistEvaluationCallable(service,
-            (IModel<ResearchObject>) this.getDefaultModel()));
+        Future<EvaluationResult> evaluateFuture = executor.submit(createChecklistEvaluationCallable(service,
+            researchObjectModel));
         FutureUpdateBehavior<EvaluationResult> behavior = new FutureUpdateBehavior<EvaluationResult>(
                 Duration.seconds(1), MySession.get().addFuture(evaluateFuture),
                 (IModel<EvaluationResult>) getDefaultModel(), this);
-        this.add(behavior);
-        event.getTarget().appendJavaScript(behavior.getCallbackScript());
+        return behavior;
     }
 
 }

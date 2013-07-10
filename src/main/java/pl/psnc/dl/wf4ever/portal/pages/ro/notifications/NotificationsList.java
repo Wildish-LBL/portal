@@ -18,11 +18,9 @@ import org.joda.time.format.DateTimeFormatterBuilder;
 import org.purl.wf4ever.rosrs.client.notifications.Notification;
 
 import pl.psnc.dl.wf4ever.portal.components.EventPanel;
-import pl.psnc.dl.wf4ever.portal.events.NotificationsLoadedEvent;
 import pl.psnc.dl.wf4ever.portal.events.ResourceSelectedEvent;
 
 import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 
 /**
  * A list of notification headers.
@@ -92,18 +90,6 @@ public class NotificationsList extends EventPanel {
             }
             return dateFormatter.print(dateTime);
         }
-    }
-
-
-    /**
-     * Refresh when the notifications are loaded.
-     * 
-     * @param event
-     *            the trigger
-     */
-    @Subscribe
-    public void onNotificationsLoaded(NotificationsLoadedEvent event) {
-        event.getTarget().add(this);
     }
 
 
