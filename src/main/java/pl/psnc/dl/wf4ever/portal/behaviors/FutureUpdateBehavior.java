@@ -85,7 +85,10 @@ public class FutureUpdateBehavior<T> extends AbstractAjaxTimerBehavior {
 
     @Override
     protected void onTimer(final AjaxRequestTarget target) {
-        if (future.getObject().isDone()) {
+        if (future.getObject() == null) {
+            stop();
+            LOGGER.warn("The future object is no longer available");
+        } else if (future.getObject().isDone()) {
             try {
                 T data = future.getObject().get();
                 if (model != null) {
