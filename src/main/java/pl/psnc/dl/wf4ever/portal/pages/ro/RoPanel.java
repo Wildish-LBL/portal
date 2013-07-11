@@ -9,7 +9,6 @@ import java.util.concurrent.Future;
 import org.apache.log4j.Logger;
 import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.time.Duration;
@@ -118,8 +117,7 @@ public class RoPanel extends Panel {
         add(new RoContentPanel("content", researchObjectModel, eventBusModel));
         add(new RoEvoBox("ro-evo-box", researchObjectModel, eventBusModel));
 
-        CompoundPropertyModel<Notification> selectedNotification = new CompoundPropertyModel<Notification>(
-                (Notification) null);
+        IModel<Notification> selectedNotification = new Model<Notification>((Notification) null);
         NotificationsList notificationsList = new NotificationsList("notificationsList", notificationsModel,
                 selectedNotification, eventBusModel);
         add(notificationsList);

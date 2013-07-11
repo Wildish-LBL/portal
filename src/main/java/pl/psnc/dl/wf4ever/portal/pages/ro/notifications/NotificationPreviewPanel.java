@@ -39,8 +39,8 @@ public class NotificationPreviewPanel extends EventPanel {
      * @param eventBusModel
      *            event bus for knowing when to refresh
      */
-    public NotificationPreviewPanel(String id, CompoundPropertyModel<Notification> model, IModel<EventBus> eventBusModel) {
-        super(id, model, eventBusModel);
+    public NotificationPreviewPanel(String id, IModel<Notification> model, IModel<EventBus> eventBusModel) {
+        super(id, new CompoundPropertyModel<>(model), eventBusModel);
         setOutputMarkupId(true);
         add(new Label("title"));
         add(new Label("published", new PublishedDateModel()));

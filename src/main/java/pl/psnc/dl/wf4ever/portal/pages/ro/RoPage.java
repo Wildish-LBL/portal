@@ -83,7 +83,6 @@ public class RoPage extends BasePage {
             public Component getLoadingComponent(String markupId) {
                 return new LoadingCircle(markupId, "Loading research object metadata...");
             }
-
         });
     }
 
