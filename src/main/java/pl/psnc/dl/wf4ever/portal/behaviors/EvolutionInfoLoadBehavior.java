@@ -23,7 +23,7 @@ public final class EvolutionInfoLoadBehavior extends OnDomReadyAjaxBehaviour {
     private static final long serialVersionUID = -3101949124011172256L;
 
     /** Logger. */
-    static final Logger LOG = Logger.getLogger(RoLoadBehavior.class);
+    static final Logger LOG = Logger.getLogger(EvolutionInfoLoadBehavior.class);
 
     /** Research object model. */
     private IModel<ResearchObject> model;

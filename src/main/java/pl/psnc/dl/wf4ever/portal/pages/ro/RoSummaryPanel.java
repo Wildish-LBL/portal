@@ -3,7 +3,6 @@ package pl.psnc.dl.wf4ever.portal.pages.ro;
 import java.net.URI;
 
 import org.apache.log4j.Logger;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.model.IModel;
@@ -11,13 +10,10 @@ import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
 import pl.psnc.dl.wf4ever.portal.components.EventPanel;
-import pl.psnc.dl.wf4ever.portal.components.LoadingCircle;
 import pl.psnc.dl.wf4ever.portal.components.form.EditableTextPanel;
-import pl.psnc.dl.wf4ever.portal.events.RoLoadedEvent;
 import pl.psnc.dl.wf4ever.portal.model.AnnotationTripleModel;
 
 import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 
 /**
@@ -34,9 +30,6 @@ public class RoSummaryPanel extends EventPanel {
     /** Logger. */
     @SuppressWarnings("unused")
     private static final Logger LOG = Logger.getLogger(RoSummaryPanel.class);
-
-    /** Temporary panel while data are loading. */
-    private WebMarkupContainer tmp;
 
 
     /**
@@ -75,27 +68,6 @@ public class RoSummaryPanel extends EventPanel {
     @Override
     protected void onConfigure() {
         super.onConfigure();
-        if (!((ResearchObject) getDefaultModelObject()).isLoaded()) {
-            tmp = new LoadingCircle(getId(), "Loading...");
-            this.replaceWith(tmp);
-        }
     }
 
-
-    /**
-     * Replace the temporary panel with this when the metadata has loaded.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @Subscribe
-    public void onRoLoaded(RoLoadedEvent event) {
-        if (tmp != null) {
-            // sometimes it may happen that this panel has a stale version of RO. I don't know why :(
-            this.setDefaultModelObject(event.getResearchObject());
-            tmp.replaceWith(this);
-            tmp = null;
-        }
-        event.getTarget().add(this);
-    }
 }

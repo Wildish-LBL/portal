@@ -29,5 +29,6 @@ public class LoadingCircle extends Panel {
      */
     public LoadingCircle(String id, String loadingText) {
         super(id);
+        add(new Label("loading-label", loadingText));
     }
 }

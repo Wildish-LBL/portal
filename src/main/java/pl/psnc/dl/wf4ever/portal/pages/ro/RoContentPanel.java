@@ -22,7 +22,6 @@ import pl.psnc.dl.wf4ever.portal.components.annotations.AdvancedAnnotationsPanel
 import pl.psnc.dl.wf4ever.portal.components.annotations.CommentsList;
 import pl.psnc.dl.wf4ever.portal.events.AddLinkEvent;
 import pl.psnc.dl.wf4ever.portal.events.FolderChangeEvent;
-import pl.psnc.dl.wf4ever.portal.events.RoLoadedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.DuplicateEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddReadyEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddedEvent;
@@ -104,21 +103,6 @@ public class RoContentPanel extends EventPanel {
         add(new UploadResourceModal("upload-resource-modal", eventBusModel));
         add(new AddFolderModal("add-folder-modal", eventBusModel));
         add(new MoveResourceModal("move-resource-modal", allFolders, eventBusModel));
-    }
-
-
-    /**
-     * Initialize the current folder and resource when the RO metadata have been loaded.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @Subscribe
-    public void onRoLoaded(RoLoadedEvent event) {
-        // sometimes it may happen that this panel has a stale version of RO. I don't know why :(
-        this.setDefaultModelObject(event.getResearchObject());
-        changeFolder(null, event.getTarget());
-        event.getTarget().add(this);
     }
 
 
