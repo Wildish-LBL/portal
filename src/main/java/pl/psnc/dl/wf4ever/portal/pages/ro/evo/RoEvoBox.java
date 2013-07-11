@@ -1,5 +1,6 @@
 package pl.psnc.dl.wf4ever.portal.pages.ro.evo;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -47,7 +48,7 @@ public class RoEvoBox extends EventPanel {
     private WebMarkupContainer tmp;
 
     /** All nodes in the visualization mapped to research objects they represent. */
-    private Map<ResearchObject, RoEvoNode> allNodes;
+    private Map<URI, RoEvoNode> allNodes;
 
     /** The RO for which the visualization is drawn. */
     private IModel<ResearchObject> researchObjectModel;
@@ -254,8 +255,10 @@ public class RoEvoBox extends EventPanel {
      * @return a node
      */
     private RoEvoNode findOrCreateNode(ResearchObject ro) {
-        RoEvoNode node = allNodes.containsKey(ro) ? allNodes.get(ro) : new RoEvoNode(ro);
-        allNodes.put(ro, node);
+        if (!allNodes.containsKey(ro.getUri())) {
+            allNodes.put(ro.getUri(), new RoEvoNode(ro));
+        }
+        RoEvoNode node = allNodes.get(ro.getUri());
         node.setIndex(nextIndex++);
         return node;
     }
@@ -354,11 +357,11 @@ public class RoEvoBox extends EventPanel {
         sb.append("initRoEvo(instance);");
         for (RoEvoNode node : allNodes.values()) {
             if (node.getResearchObject().getLiveRO() != null) {
-                RoEvoNode live = allNodes.get(node.getResearchObject().getLiveRO());
+                RoEvoNode live = allNodes.get(node.getResearchObject().getLiveRO().getUri());
                 sb.append(createConnection(node, live, "Has live RO"));
             }
             if (node.getResearchObject().getPreviousSnapshot() != null) {
-                RoEvoNode snapshot = allNodes.get(node.getResearchObject().getPreviousSnapshot());
+                RoEvoNode snapshot = allNodes.get(node.getResearchObject().getPreviousSnapshot().getUri());
                 sb.append(createConnection(node, snapshot, "Previous snapshot"));
             }
         }
