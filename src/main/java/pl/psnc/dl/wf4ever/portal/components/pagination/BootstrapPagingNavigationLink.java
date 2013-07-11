@@ -23,12 +23,12 @@ public class BootstrapPagingNavigationLink extends AjaxPagingNavigationLink {
      *            See Component
      * @param pageable
      *            The pageable component for this page link
-     * @param pageNumber
+     * @param pageIndex
      *            The page number in the PageableListView that this link links to. Negative pageNumbers are relative to
      *            the end of the list.
      */
-    public BootstrapPagingNavigationLink(String id, IPageable pageable, int pageNumber) {
-        super(id, pageable, pageNumber);
+    public BootstrapPagingNavigationLink(String id, IPageable pageable, long pageIndex) {
+        super(id, pageable, pageIndex);
     }
 
 

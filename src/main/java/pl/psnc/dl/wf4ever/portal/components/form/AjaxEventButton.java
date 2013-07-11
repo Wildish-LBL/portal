@@ -5,8 +5,8 @@ import java.lang.reflect.InvocationTargetException;
 import org.apache.log4j.Logger;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.IAjaxCallDecorator;
-import org.apache.wicket.ajax.calldecorator.AjaxCallDecorator;
+import org.apache.wicket.ajax.attributes.AjaxCallListener;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
@@ -110,17 +110,21 @@ public class AjaxEventButton extends AjaxButton {
 
 
     @Override
-    protected IAjaxCallDecorator getAjaxCallDecorator() {
-        return new AjaxCallDecorator() {
+    protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+        super.updateAjaxAttributes(attributes);
 
-            private static final long serialVersionUID = 3361600615366656231L;
+        AjaxCallListener myAjaxCallListener = new AjaxCallListener() {
+
+            /** id. */
+            private static final long serialVersionUID = -5008615244332637745L;
 
 
             @Override
-            public CharSequence decorateScript(Component c, CharSequence script) {
-                return "showBusy(); " + script;
+            public CharSequence getBeforeHandler(Component component) {
+                return "showBusy();";
             }
         };
+        attributes.getAjaxCallListeners().add(myAjaxCallListener);
     }
 
 }

@@ -77,7 +77,7 @@ public class JobStatusUpdatingBehaviour extends AjaxSelfUpdatingTimerBehavior {
         super.onPostProcessTarget(target);
         status.refresh();
         if (status.getState() != State.RUNNING) {
-            stop();
+            stop(target);
             parent.remove(this);
         }
         switch (status.getState()) {

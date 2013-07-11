@@ -4,7 +4,8 @@ import java.net.URI;
 
 import org.apache.wicket.ajax.AjaxEventBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.IHeaderResponse;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.Radio;
@@ -170,7 +171,8 @@ public class UploadResourceModal extends EventPanel {
     @Override
     public void renderHead(IHeaderResponse response) {
         super.renderHead(response);
-        response.renderJavaScriptReference(new JavaScriptResourceReference(getClass(), "UploadResourceModal.js"));
+        response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(getClass(),
+                "UploadResourceModal.js")));
     }
 
 

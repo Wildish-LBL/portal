@@ -12,7 +12,8 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.html.IHeaderResponse;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
@@ -178,7 +179,7 @@ public class SearchResultsPage extends BasePage implements SearchResultsListener
     @Override
     public void renderHead(IHeaderResponse response) {
         super.renderHead(response);
-        response.renderCSSReference(CSS_REFERENCE);
+        response.render(CssHeaderItem.forReference(CSS_REFERENCE));
     }
 
 
@@ -255,7 +256,7 @@ public class SearchResultsPage extends BasePage implements SearchResultsListener
      * @param index
      *            index of this result in the overall list
      */
-    public static void populateItem(ListItem<FoundRO> item, int index) {
+    public static void populateItem(ListItem<FoundRO> item, long index) {
         final FoundRO result = item.getModelObject();
         item.add(new Label("index", "" + index + "."));
         BookmarkablePageLink<Void> link = new BookmarkablePageLink<>("link", RoPage.class);

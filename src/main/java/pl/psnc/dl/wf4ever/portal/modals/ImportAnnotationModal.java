@@ -1,7 +1,8 @@
 package pl.psnc.dl.wf4ever.portal.modals;
 
 import org.apache.log4j.Logger;
-import org.apache.wicket.markup.html.IHeaderResponse;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
@@ -96,7 +97,8 @@ public class ImportAnnotationModal extends EventPanel {
     @Override
     public void renderHead(IHeaderResponse response) {
         super.renderHead(response);
-        response.renderJavaScriptReference(new JavaScriptResourceReference(getClass(), "ImportAnnotationModal.js"));
+        response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(getClass(),
+                "ImportAnnotationModal.js")));
     }
 
 

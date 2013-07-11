@@ -11,7 +11,8 @@ import org.apache.log4j.Logger;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
-import org.apache.wicket.markup.html.IHeaderResponse;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.StringHeaderItem;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -119,7 +120,8 @@ public class RoPage extends BasePage {
             if (headers != null && !headers.isEmpty()) {
                 Multimap<String, URI> links = Utils.getLinkHeaders(headers);
                 for (Entry<String, URI> link : links.entries()) {
-                    response.renderString(String.format(HTML_LINK_TEMPLATE, link.getKey(), link.getValue()));
+                    response.render(StringHeaderItem.forString(String.format(HTML_LINK_TEMPLATE, link.getKey(),
+                        link.getValue())));
                 }
             }
             head.close();

@@ -1,6 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.pages.ro.notifications;
 
-import org.apache.wicket.markup.html.IHeaderResponse;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
@@ -111,7 +112,8 @@ public class NotificationPreviewPanel extends EventPanel {
 
     @Override
     public void renderHead(IHeaderResponse response) {
-        response.renderCSSReference(new CssResourceReference(NotificationPreviewPanel.class, "notifications.css"));
         super.renderHead(response);
+        response.render(CssHeaderItem.forReference(new CssResourceReference(NotificationPreviewPanel.class,
+                "notifications.css")));
     }
 }

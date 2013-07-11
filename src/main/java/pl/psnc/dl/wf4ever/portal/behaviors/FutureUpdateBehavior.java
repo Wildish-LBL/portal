@@ -89,7 +89,7 @@ public class FutureUpdateBehavior<T> extends AbstractAjaxTimerBehavior {
     @Override
     protected void onTimer(final AjaxRequestTarget target) {
         if (future.getObject() == null) {
-            stop();
+            stop(target);
             LOGGER.warn("The future object is no longer available");
         } else if (future.getObject().isDone()) {
             try {
@@ -97,10 +97,10 @@ public class FutureUpdateBehavior<T> extends AbstractAjaxTimerBehavior {
                 if (model != null) {
                     model.setObject(data);
                 }
-                stop();
+                stop(target);
                 onPostSuccess(target);
             } catch (InterruptedException | ExecutionException e) {
-                stop();
+                stop(target);
                 String message = "Error occurred while fetching data: " + e.getMessage();
                 LOGGER.error(message, e);
                 onUpdateError(target, e);

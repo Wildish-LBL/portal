@@ -1,6 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.modals;
 
-import org.apache.wicket.markup.html.IHeaderResponse;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.RequiredTextField;
 import org.apache.wicket.markup.html.form.TextField;
@@ -80,7 +81,8 @@ public class AddFolderModal extends EventPanel {
     @Override
     public void renderHead(IHeaderResponse response) {
         super.renderHead(response);
-        response.renderJavaScriptReference(new JavaScriptResourceReference(getClass(), "AddFolderModal.js"));
+        response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(getClass(),
+                "AddFolderModal.js")));
     }
 
 

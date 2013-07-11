@@ -6,7 +6,8 @@ import org.apache.log4j.Logger;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.html.IHeaderResponse;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
@@ -152,8 +153,8 @@ public class NotificationsIndicator extends EventPanel {
 
     @Override
     public void renderHead(IHeaderResponse response) {
-        response.renderJavaScript("var notificationsTab='" + tabId + "';", "tabId");
         super.renderHead(response);
+        response.render(JavaScriptHeaderItem.forScript("var notificationsTab='" + tabId + "';", "tabId"));
     }
 
 }

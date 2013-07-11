@@ -3,7 +3,8 @@ package pl.psnc.dl.wf4ever.portal.modals;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.wicket.markup.html.IHeaderResponse;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
@@ -99,7 +100,8 @@ public class DownloadMetadataModal extends EventPanel {
     @Override
     public void renderHead(IHeaderResponse response) {
         super.renderHead(response);
-        response.renderJavaScriptReference(new JavaScriptResourceReference(getClass(), "DownloadMetadataModal.js"));
+        response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(getClass(),
+                "DownloadMetadataModal.js")));
     }
 
 

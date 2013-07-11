@@ -35,7 +35,7 @@ public class BootstrapPagingNavigation extends AjaxPagingNavigation {
 
 
     @Override
-    protected Link<?> newPagingNavigationLink(String id, IPageable pageable, int pageIndex) {
+    protected Link<?> newPagingNavigationLink(String id, IPageable pageable, long pageIndex) {
         return new BootstrapPagingNavigationLink(id, pageable, pageIndex);
     }
 
@@ -73,7 +73,7 @@ public class BootstrapPagingNavigation extends AjaxPagingNavigation {
         protected void onComponentTag(ComponentTag tag) {
             super.onComponentTag(tag);
             // Get the index of page this link shall point to
-            final int pageIndex = getStartIndex() + getIndex();
+            final long pageIndex = getStartIndex() + getIndex();
             if (pageIndex == pageable.getCurrentPage()) {
                 tag.put("class", "active");
             }

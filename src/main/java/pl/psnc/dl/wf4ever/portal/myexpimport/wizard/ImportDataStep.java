@@ -57,7 +57,7 @@ public class ImportDataStep extends WizardStep {
                         + ");");
 
                 if (model.getStatus() == ImportStatus.FINISHED || model.getStatus() == ImportStatus.FAILED) {
-                    stop();
+                    stop(target);
                     importStatus.remove(this);
                     setComplete(true);
                     target.add(ImportDataStep.this.getParent().getParent());

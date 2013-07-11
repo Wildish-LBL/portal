@@ -6,7 +6,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.wicket.AttributeModifier;
-import org.apache.wicket.markup.html.IHeaderResponse;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
@@ -78,10 +80,10 @@ public class QualityBar extends EventPanel {
 
     @Override
     public void renderHead(IHeaderResponse response) {
-        response.renderJavaScriptReference(PROGRESSBAR_CLASS_REFERENCE);
+        response.render(JavaScriptHeaderItem.forReference(PROGRESSBAR_CLASS_REFERENCE));
         if (getDefaultModelObject() != null) {
             EvaluationResult result = (EvaluationResult) getDefaultModelObject();
-            response.renderOnDomReadyJavaScript("setValue(" + result.getEvaluationScore() + ");");
+            response.render(OnDomReadyHeaderItem.forScript("setValue(" + result.getEvaluationScore() + ");"));
         }
     }
 

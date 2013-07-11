@@ -65,10 +65,9 @@ public class OAuthPage extends WebPage {
                 LOG.info("Successfully received myExperiment access token");
             }
         }
-        if (!continueToOriginalDestination()) {
-            LOG.warn("Could not find the original destination");
-            throw new RestartResponseException(getApplication().getHomePage());
-        }
+        continueToOriginalDestination();
+        LOG.warn("Could not find the original destination");
+        throw new RestartResponseException(getApplication().getHomePage());
     }
 
 

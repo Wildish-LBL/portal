@@ -3,7 +3,8 @@ package pl.psnc.dl.wf4ever.portal.behaviors;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.IHeaderResponse;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 
 /**
@@ -41,7 +42,7 @@ public abstract class OnDomReadyAjaxBehaviour extends AbstractDefaultAjaxBehavio
     @Override
     public void renderHead(final Component component, final IHeaderResponse response) {
         super.renderHead(component, response);
-        response.renderOnDomReadyJavaScript(getCallbackScript().toString());
+        response.render(OnDomReadyHeaderItem.forScript(getCallbackScript().toString()));
     }
 
 

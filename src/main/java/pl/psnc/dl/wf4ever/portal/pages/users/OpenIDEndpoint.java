@@ -49,10 +49,9 @@ public class OpenIDEndpoint extends WebPage {
                 session.error("Open ID Confirmation Failed. No information was retrieved from the OpenID Provider.");
             } else {
                 register(openIdUser);
-                if (!continueToOriginalDestination()) {
-                    LOG.warn("Could not find the original destination");
-                    throw new RestartResponseException(getApplication().getHomePage());
-                }
+                continueToOriginalDestination();
+                LOG.warn("Could not find the original destination");
+                throw new RestartResponseException(getApplication().getHomePage());
             }
         }
         throw new RestartResponseException(AuthenticationPage.class);

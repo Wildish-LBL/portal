@@ -11,7 +11,8 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.html.IHeaderResponse;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -184,7 +185,7 @@ public class RoEvoBox extends EventPanel {
     @Override
     public void renderHead(IHeaderResponse response) {
         super.renderHead(response);
-        response.renderJavaScriptReference(JS_REFERENCE);
+        response.render(JavaScriptHeaderItem.forReference(JS_REFERENCE));
     }
 
 

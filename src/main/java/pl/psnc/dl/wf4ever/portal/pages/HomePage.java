@@ -145,7 +145,6 @@ public class HomePage extends BasePage {
                         URI baseURI = ((PortalApplication) getApplication()).getRecommenderEndpointURL().toURI();
                         List<Recommendation> recs = RecommenderService.getRecommendations(baseURI, myExpId, 10);
                         setRecommendations(recs);
-                        getSession().cleanupFeedbackMessages();
                         recommenderForm.setVisible(recs == null || recs.isEmpty());
                         //noRecommendations.setVisible(recs == null || recs.isEmpty());
                         //target.add(recommendationsDiv);
