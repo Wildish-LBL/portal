@@ -1,7 +1,6 @@
 package pl.psnc.dl.wf4ever.portal.pages.search;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +16,10 @@ import org.purl.wf4ever.rosrs.client.search.SearchServer;
 import org.purl.wf4ever.rosrs.client.search.SearchServer.SortOrder;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.FoundRO;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.SearchResult;
+
+import pl.psnc.dl.wf4ever.portal.events.search.SearchResultsAvailableEvent;
+
+import com.google.common.eventbus.EventBus;
 
 /**
  * A search results generator that fetches new results for each results page separately.
@@ -41,14 +44,14 @@ public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
     /** model of the sort fields. */
     private IModel<Map<String, SortOrder>> sortFields;
 
-    /** listeners for event of getting new search results. */
-    private List<SearchResultsListener> listeners = new ArrayList<>();
-
     /** current offset. */
     private long offset;
 
     /** number of all results. */
     private long resultCount;
+
+    /** event bus model. */
+    private IModel<EventBus> eventBusModel;
 
 
     /**
@@ -64,13 +67,16 @@ public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
      *            how many results should be fetched for each page
      * @param sortFieldsModel
      *            model of the sort fields
+     * @param eventBusModel
+     *            event bus model
      */
     public LazySearchResultsView(String id, SearchServer searchServer, String query, int resultsPerPage,
-            PropertyModel<Map<String, SortOrder>> sortFieldsModel) {
+            PropertyModel<Map<String, SortOrder>> sortFieldsModel, IModel<EventBus> eventBusModel) {
         super(id);
         this.searchServer = searchServer;
         this.query = query;
         this.sortFields = sortFieldsModel;
+        this.eventBusModel = eventBusModel;
         try {
             SearchResult results = searchServer.search(query, 0, 1, sortFields.getObject());
             this.resultCount = results.getNumFound();
@@ -88,9 +94,7 @@ public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
         try {
             SearchResult results = searchServer.search(query, (int) offset, (int) size, sortFields.getObject());
             this.offset = offset;
-            for (SearchResultsListener listener : listeners) {
-                listener.onSearchResultsAvailable(results);
-            }
+            eventBusModel.getObject().post(new SearchResultsAvailableEvent(results));
             return new ModelIterator<>(results.getROsList());
         } catch (SearchException e) {
             LOGGER.error("Can't search more data", e);
@@ -108,11 +112,6 @@ public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
     @Override
     protected void populateItem(Item<FoundRO> item) {
         SearchResultsPage.populateItem(item, offset + item.getIndex() + 1);
-    }
-
-
-    public List<SearchResultsListener> getListeners() {
-        return listeners;
     }
 
 

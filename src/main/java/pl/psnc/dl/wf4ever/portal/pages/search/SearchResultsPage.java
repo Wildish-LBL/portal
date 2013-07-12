@@ -21,6 +21,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.navigation.paging.IPageable;
 import org.apache.wicket.model.CompoundPropertyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -38,6 +39,8 @@ import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.components.pagination.BootstrapPagingNavigator;
 import pl.psnc.dl.wf4ever.portal.events.FacetValueClickedEvent;
+import pl.psnc.dl.wf4ever.portal.events.search.SearchResultsAvailableEvent;
+import pl.psnc.dl.wf4ever.portal.events.search.SortOptionChangeEvent;
 import pl.psnc.dl.wf4ever.portal.pages.BasePage;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
 
@@ -50,7 +53,7 @@ import com.google.common.eventbus.Subscribe;
  * @author piotrekhol
  * 
  */
-public class SearchResultsPage extends BasePage implements SearchResultsListener, SortOptionChangeListener {
+public class SearchResultsPage extends BasePage {
 
     /** id. */
     private static final long serialVersionUID = 1L;
@@ -83,6 +86,9 @@ public class SearchResultsPage extends BasePage implements SearchResultsListener
     /** The component displaying the list of results. */
     IPageable searchResultsList;
 
+    /** event bus model. */
+    private IModel<EventBus> eventBusModel;
+
 
     /**
      * Default constructor, displays all it can find.
@@ -104,7 +110,7 @@ public class SearchResultsPage extends BasePage implements SearchResultsListener
      */
     public SearchResultsPage(String searchKeywords, List<FacetValue> selectedFacetValues, SortOption sortOption) {
         super(new PageParameters());
-        LoadableDetachableModel<EventBus> eventBusModel = new LoadableDetachableModel<EventBus>() {
+        eventBusModel = new LoadableDetachableModel<EventBus>() {
 
             /** id. */
             private static final long serialVersionUID = 5225667860067218852L;
@@ -142,14 +148,13 @@ public class SearchResultsPage extends BasePage implements SearchResultsListener
         if (searchServer.supportsPagination()) {
             LazySearchResultsView lazySearchResultsList = new LazySearchResultsView("searchResultsListView",
                     searchServer, query, RESULTS_PER_PAGE, new PropertyModel<Map<String, SearchServer.SortOrder>>(this,
-                            "sortFields"));
-            lazySearchResultsList.getListeners().add(this);
+                            "sortFields"), eventBusModel);
             searchResultsList = lazySearchResultsList;
         } else {
             List<FoundRO> found;
             try {
                 SearchResult searchResult = searchServer.search(query, null, null, getSortFields());
-                onSearchResultsAvailable(searchResult);
+                eventBusModel.getObject().post(new SearchResultsAvailableEvent(searchResult));
                 found = searchResult.getROsList();
             } catch (SearchException e) {
                 error(e.getMessage());
@@ -197,8 +202,7 @@ public class SearchResultsPage extends BasePage implements SearchResultsListener
             }
         }
         SortDropDownChoice dropDown = new SortDropDownChoice("sortListView", new PropertyModel<SortOption>(this,
-                "sortOption"), sortOptions);
-        dropDown.getListeners().add(this);
+                "sortOption"), sortOptions, eventBusModel);
         return dropDown;
     }
 
@@ -308,19 +312,31 @@ public class SearchResultsPage extends BasePage implements SearchResultsListener
     }
 
 
-    @Override
-    public void onSearchResultsAvailable(SearchResult searchResult) {
+    /**
+     * Called when the search results are ready to be displayed.
+     * 
+     * @param event
+     *            trigger
+     */
+    @Subscribe
+    public void onSearchResultsAvailable(SearchResultsAvailableEvent event) {
         if (facetsList == null) {
-            facetsList = new ArrayList<>(searchResult.getFacetsList());
+            facetsList = new ArrayList<>(event.getSearchResult().getFacetsList());
             add(buildSortLinks());
         }
-        resultsCount = searchResult.getNumFound();
+        resultsCount = event.getSearchResult().getNumFound();
     }
 
 
-    @Override
-    public void onSortOptionChanged(SortOption newSortOption) {
-        setResponsePage(new SearchResultsPage(searchKeywords, selectedFacetValues, newSortOption));
+    /**
+     * Reload the page when the sort option changes.
+     * 
+     * @param event
+     *            event
+     */
+    @Subscribe
+    public void onSortOptionChanged(SortOptionChangeEvent event) {
+        setResponsePage(new SearchResultsPage(searchKeywords, selectedFacetValues, event.getNewSortOption()));
     }
 
 

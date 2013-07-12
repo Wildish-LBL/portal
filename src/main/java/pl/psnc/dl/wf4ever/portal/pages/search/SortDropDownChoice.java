@@ -1,11 +1,14 @@
 package pl.psnc.dl.wf4ever.portal.pages.search;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.markup.html.form.ChoiceRenderer;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.model.IModel;
+
+import pl.psnc.dl.wf4ever.portal.events.search.SortOptionChangeEvent;
+
+import com.google.common.eventbus.EventBus;
 
 /**
  * A drop down list for sort options.
@@ -18,8 +21,8 @@ public class SortDropDownChoice extends DropDownChoice<SortOption> {
     /** id. */
     private static final long serialVersionUID = 2380587615885283494L;
 
-    /** Listeners for the selection change. */
-    private List<SortOptionChangeListener> listeners = new ArrayList<>();
+    /** event bus model. */
+    private IModel<EventBus> eventBusModel;
 
 
     /**
@@ -31,9 +34,13 @@ public class SortDropDownChoice extends DropDownChoice<SortOption> {
      *            model getting and setting the selected sort option
      * @param choices
      *            available sort options
+     * @param eventBusModel
+     *            event bus model
      */
-    public SortDropDownChoice(String id, IModel<SortOption> selectedOption, List<? extends SortOption> choices) {
+    public SortDropDownChoice(String id, IModel<SortOption> selectedOption, List<? extends SortOption> choices,
+            IModel<EventBus> eventBusModel) {
         super(id, selectedOption, choices, new ChoiceRenderer<SortOption>("value", "key"));
+        this.eventBusModel = eventBusModel;
     }
 
 
@@ -45,14 +52,7 @@ public class SortDropDownChoice extends DropDownChoice<SortOption> {
 
     @Override
     protected void onSelectionChanged(SortOption newSelection) {
-        for (SortOptionChangeListener listener : listeners) {
-            listener.onSortOptionChanged(newSelection);
-        }
-    }
-
-
-    public List<SortOptionChangeListener> getListeners() {
-        return listeners;
+        eventBusModel.getObject().post(new SortOptionChangeEvent(newSelection));
     }
 
 }
