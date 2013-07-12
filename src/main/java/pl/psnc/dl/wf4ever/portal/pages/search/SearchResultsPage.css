@@ -2,6 +2,9 @@
 	font-weight: bold;
 }
 
+.not_numbered_list {
+	list-style: none;
+}
 
 /* search percent bar */
 .searchScore {
