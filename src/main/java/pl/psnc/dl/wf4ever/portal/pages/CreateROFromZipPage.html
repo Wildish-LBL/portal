@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wicket:extend xmlns:wicket="http://wicket.apache.org">
+	<div class="row">
+		<div class="span12" wicket:id="feedbackPanel"></div>
+	</div>
+	<div class="row">
+		<div class="span12 text-inside">
+			<p>
+				Creating an RO from <span wicket:id="name"></span> (<span
+					wicket:id="complete"></span>/<span wicket:id="total"></span>)
+			</p>
+			<textarea rows="10" cols="30" class="span11" id="console"
+				wicket:id="console"></textarea>
+			<p>
+				<a class="btn" wicket:id="go-to-ro"><i class="icon-arrow-right"></i> Go to your research object</a>
+			</p>
+		</div>
+	</div>
+</wicket:extend>

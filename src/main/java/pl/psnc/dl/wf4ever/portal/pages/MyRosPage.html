@@ -37,61 +37,27 @@
 				<div class="form-actions btn-toolbar">
 					<div class="btn-group">
 						<button class="btn" wicket:id="add">
-							<i class="icon-file"></i> Create an RO
+							<i class="icon-plus"></i> Create
 						</button>
 						<button class="btn" wicket:id="delete">
-							<i class="icon-trash"></i> Delete selected ROs
+							<i class="icon-trash"></i> Delete
 						</button>
 					</div>
 					<div class="btn-group">
 						<button class="btn success" type="submit" wicket:id="myExpImport">
-							<i class="icon-forward"></i> Import an RO from myExperiment
+							<i class="icon-forward"></i> Import from myExperiment
+						</button>
+					</div>
+					<div class="btn-group">
+						<button class="btn" type="submit" wicket:id="add-zip">
+							<i class="icon-folder-close"></i> Create from ZIP
 						</button>
 					</div>
 				</div>
 			</form>
 		</div>
 	</div>
-	<div id="confirm-delete-modal" class="modal hide">
-		<div class="modal-header">
-			<a class="close" href="#">×</a>
-			<h3>Confirm</h3>
-		</div>
-		<div class="modal-body">
-			<div class="row">
-				<div class="span6" wicket:id="deleteFeedbackPanel"></div>
-			</div>
-			<p>
-				Are you sure you want to delete <span wicket:id="deleteCnt">X
-					Research Objects</span> ?
-			</p>
-		</div>
-		<div class="modal-footer">
-			<a class="btn btn-primary" wicket:id="confirmDelete">Yes</a> <a
-				class="btn" wicket:id="cancelDelete">No</a>
-		</div>
-	</div>
-	<div id="confirm-add-modal" class="modal hide">
-		<form class="form-horizontal" wicket:id="addForm">
-			<div class="modal-header">
-				<a class="close" href="#">×</a>
-				<h3>Prompt</h3>
-			</div>
-			<div class="modal-body control-group">
-				<div class="row">
-					<div class="span6" wicket:id="addFeedbackPanel"></div>
-				</div>
-				<fieldset>
-					<label class="control-label" for="roId">RO identifier</label>
-					<div class="controls">
-						<input type="text" id="roId" wicket:id="roId" />
-					</div>
-				</fieldset>
-			</div>
-			<div class="modal-footer">
-				<a class="btn btn-primary" wicket:id="confirmAdd" type="submit">OK</a>
-				<a class="btn" wicket:id="cancelAdd">Cancel</a>
-			</div>
-		</form>
-	</div>
+	<div wicket:id="delete-ro-modal"></div>
+	<div wicket:id="create-ro-modal"></div>
+	<div wicket:id="zip-upload-modal"></div>
 </wicket:extend>

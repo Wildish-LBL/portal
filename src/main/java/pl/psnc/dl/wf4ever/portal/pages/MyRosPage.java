@@ -1,20 +1,21 @@
 package pl.psnc.dl.wf4ever.portal.pages;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.http.HttpStatus;
 import org.apache.log4j.Logger;
-import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Check;
 import org.apache.wicket.markup.html.form.CheckGroup;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.RequiredTextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.RefreshingView;
@@ -22,18 +23,28 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.validation.IValidatable;
-import org.apache.wicket.validation.IValidator;
-import org.apache.wicket.validation.ValidationError;
 import org.purl.wf4ever.rosrs.client.ROSRService;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
-import pl.psnc.dl.wf4ever.portal.components.UniversalStyledAjaxButton;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
+import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
+import pl.psnc.dl.wf4ever.portal.events.ros.RoCreateClickedEvent;
+import pl.psnc.dl.wf4ever.portal.events.ros.RoCreateReadyEvent;
+import pl.psnc.dl.wf4ever.portal.events.ros.RoDeleteClickedEvent;
+import pl.psnc.dl.wf4ever.portal.events.ros.RoDeleteReadyEvent;
+import pl.psnc.dl.wf4ever.portal.events.ros.ZipAddClickedEvent;
+import pl.psnc.dl.wf4ever.portal.events.ros.ZipAddReadyEvent;
+import pl.psnc.dl.wf4ever.portal.modals.CreateROModal;
+import pl.psnc.dl.wf4ever.portal.modals.DeleteROModal;
+import pl.psnc.dl.wf4ever.portal.modals.UploadZipModal;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
 import pl.psnc.dl.wf4ever.portal.utils.ModelIteratorAdapter;
+
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+import com.sun.jersey.api.client.Client;
 
 /**
  * A page with user's own Research Objects.
@@ -53,14 +64,17 @@ public class MyRosPage extends BasePage {
     /** ROs selected by the user. */
     final List<ResearchObject> selectedResearchObjects = new ArrayList<ResearchObject>();
 
-    /** New RO id. */
-    private String roId;
+    /** Feedback panel. */
+    private MyFeedbackPanel feedbackPanel;
 
-    /** Feedback panel for adding ROs. */
-    private MyFeedbackPanel addFeedbackPanel;
+    /** Event bus. */
+    private IModel<EventBus> eventBusModel;
 
-    /** Default feedback panel. */
-    private MyFeedbackPanel deleteFeedbackPanel;
+    /** List of ROs. */
+    private ArrayList<ResearchObject> researchObjects;
+
+    /** Form with the list and buttons. */
+    private Form<?> form;
 
 
     /**
@@ -73,14 +87,14 @@ public class MyRosPage extends BasePage {
      * @throws ROSRSException
      *             getting the RO list ends with an unexpected response code
      */
-    @SuppressWarnings("serial")
     public MyRosPage(final PageParameters parameters)
             throws URISyntaxException, ROSRSException {
         super(parameters);
 
-        final ROSRService rosrs = MySession.get().getRosrs();
+        MySession session = MySession.get();
+        final ROSRService rosrs = session.getRosrs();
         List<URI> uris = rosrs.getROList(false);
-        final List<ResearchObject> researchObjects = new ArrayList<ResearchObject>();
+        researchObjects = new ArrayList<ResearchObject>();
         for (URI uri : uris) {
             try {
                 researchObjects.add(new ResearchObject(uri, rosrs));
@@ -89,156 +103,95 @@ public class MyRosPage extends BasePage {
             }
         }
 
-        final Form<?> form = new Form<Void>("form");
+        eventBusModel = session.addEventBus();
+        eventBusModel.getObject().register(this);
+
+        form = new Form<Void>("form");
         form.setOutputMarkupId(true);
         add(form);
-        form.add(new MyFeedbackPanel("feedbackPanel"));
+        feedbackPanel = new MyFeedbackPanel("feedbackPanel");
+        form.add(feedbackPanel);
         CheckGroup<ResearchObject> group = new CheckGroup<ResearchObject>("group", selectedResearchObjects);
         form.add(group);
         RefreshingView<ResearchObject> list = new MyROsRefreshingView("rosListView", researchObjects);
         group.add(list);
 
-        final Label deleteCntLabel = new Label("deleteCnt", new PropertyModel<String>(this, "deleteCnt"));
-        deleteCntLabel.setOutputMarkupId(true);
-        add(deleteCntLabel);
-
-        final Form<?> addForm = new Form<Void>("addForm");
-        RequiredTextField<String> name = new RequiredTextField<String>("roId", new PropertyModel<String>(this, "roId"));
-        name.add(new IValidator<String>() {
-
-            @Override
-            public void validate(IValidatable<String> validatable) {
-                try {
-                    if (!rosrs.isRoIdFree(validatable.getValue())) {
-                        validatable.error(new ValidationError().setMessage("This ID is already in use"));
-                    }
-                } catch (Exception e) {
-                    LOG.error(e);
-                    // assume it's ok
-                }
-            }
-
-        });
-        addForm.add(name);
-        add(addForm);
-
-        addFeedbackPanel = new MyFeedbackPanel("addFeedbackPanel");
-        addFeedbackPanel.setOutputMarkupId(true);
-        addForm.add(addFeedbackPanel);
-
-        form.add(new UniversalStyledAjaxButton("delete", form) {
-
-            @Override
-            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                super.onSubmit(target, form);
-                form.process(null);
-                if (!selectedResearchObjects.isEmpty()) {
-                    target.add(deleteCntLabel);
-                    target.appendJavaScript("$('#confirm-delete-modal').modal('show')");
-                }
-            }
-        });
-
-        deleteFeedbackPanel = new MyFeedbackPanel("deleteFeedbackPanel");
-        deleteFeedbackPanel.setOutputMarkupId(true);
-        add(deleteFeedbackPanel);
-
-        add(new UniversalStyledAjaxButton("confirmDelete", form) {
-
-            @Override
-            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                super.onSubmit(target, form);
-                for (ResearchObject ro : selectedResearchObjects) {
-                    try {
-                        rosrs.deleteResearchObject(ro.getUri());
-                        researchObjects.remove(ro);
-                    } catch (Exception e) {
-                        error("Could not delete Research Object: " + ro.getUri() + " (" + e.getMessage() + ")");
-                    }
-                }
-                target.add(form);
-                target.add(deleteFeedbackPanel);
-                target.appendJavaScript("$('#confirm-delete-modal').modal('hide')");
-            }
-        });
-
-        add(new UniversalStyledAjaxButton("cancelDelete", form) {
-
-            @Override
-            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                super.onSubmit(target, form);
-                target.appendJavaScript("$('#confirm-delete-modal').modal('hide')");
-            }
-        });
-
-        form.add(new UniversalStyledAjaxButton("add", form) {
-
-            @Override
-            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                super.onSubmit(target, form);
-                target.appendJavaScript("$('#confirm-add-modal').modal('show')");
-            }
-        });
-
-        addForm.add(new UniversalStyledAjaxButton("confirmAdd", addForm) {
-
-            @Override
-            protected void onSubmit(AjaxRequestTarget target, Form<?> addForm) {
-                super.onSubmit(target, addForm);
-                try {
-                    researchObjects.add(ResearchObject.create(rosrs, roId));
-                    target.appendJavaScript("$('#confirm-add-modal').modal('hide')");
-                } catch (ROSRSException e) {
-                    if (e.getStatus() == HttpStatus.SC_CONFLICT) {
-                        error("This ID is already used.");
-                    } else {
-                        error("Could not add Research Object: " + roId + " (" + e.getMessage() + ")");
-                    }
-                }
-                target.add(form);
-                target.add(addFeedbackPanel);
-            }
-
-
-            @Override
-            protected void onError(AjaxRequestTarget target, Form<?> form) {
-                super.onError(target, form);
-                target.add(addFeedbackPanel);
-            }
-        });
-
-        addForm.add(new UniversalStyledAjaxButton("cancelAdd", addForm) {
-
-            @Override
-            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                super.onSubmit(target, form);
-                target.appendJavaScript("$('#confirm-add-modal').modal('hide')");
-            }
-        }.setDefaultFormProcessing(false));
+        form.add(new AuthenticatedAjaxEventButton("delete", form, eventBusModel, RoDeleteClickedEvent.class));
+        form.add(new AuthenticatedAjaxEventButton("add", form, eventBusModel, RoCreateClickedEvent.class));
+        form.add(new AuthenticatedAjaxEventButton("add-zip", form, eventBusModel, ZipAddClickedEvent.class));
         form.add(new BookmarkablePageLink<Void>("myExpImport", MyExpImportPage.class));
+
+        add(new DeleteROModal("delete-ro-modal", eventBusModel, new PropertyModel<List<ResearchObject>>(this,
+                "selectedResearchObjects")));
+        add(new CreateROModal("create-ro-modal", eventBusModel));
+        add(new UploadZipModal("zip-upload-modal", eventBusModel));
     }
 
 
     /**
-     * The message to display when deleting ROs.
+     * Create a new RO.
      * 
-     * @return the message
+     * @param event
+     *            event
      */
-    public String getDeleteCnt() {
-        if (selectedResearchObjects.size() == 1) {
-            return "1 Research Object";
+    @Subscribe
+    public void onRoCreate(RoCreateReadyEvent event) {
+        try {
+            researchObjects.add(ResearchObject.create(MySession.get().getRosrs(), event.getRoId()));
+        } catch (ROSRSException e) {
+            if (e.getStatus() == HttpStatus.SC_CONFLICT) {
+                error("This ID is already used.");
+            } else {
+                error("Could not add Research Object: " + event.getRoId() + " (" + e.getMessage() + ")");
+            }
         }
-        return selectedResearchObjects.size() + " Research Objects";
+        event.getTarget().add(form);
     }
 
 
-    public String getRoId() {
-        return roId;
+    /**
+     * Delete an RO.
+     * 
+     * @param event
+     *            event
+     */
+    @Subscribe
+    public void onRoDelete(RoDeleteReadyEvent event) {
+        for (ResearchObject ro : selectedResearchObjects) {
+            try {
+                ro.delete();
+                researchObjects.remove(ro);
+            } catch (Exception e) {
+                error("Could not delete Research Object: " + ro.getUri() + " (" + e.getMessage() + ")");
+            }
+        }
+        event.getTarget().add(form);
     }
 
 
-    public void setRoId(String roId) {
-        this.roId = roId;
+    /**
+     * Process the details of the ZIP archive and redirect to the RO creation page.
+     * 
+     * @param event
+     *            event with URI or path of the ZIP archive
+     */
+    @Subscribe
+    public void onRoFromZip(ZipAddReadyEvent event) {
+        try {
+            InputStream inputStream;
+            String name;
+            if (event.getUploadedFile() != null) {
+                inputStream = event.getUploadedFile().getInputStream();
+                name = event.getUploadedFile().getClientFileName();
+            } else {
+                inputStream = Client.create().resource(event.getResourceUri()).get(InputStream.class);
+                name = Paths.get(event.getResourceUri()).getFileName().toString();
+            }
+            setResponsePage(new CreateROFromZipPage(inputStream, name));
+        } catch (IOException e) {
+            LOG.error("Invalid ZIP archive", e);
+            error("Invalid ZIP archive: " + e.getLocalizedMessage());
+        }
     }
 
 

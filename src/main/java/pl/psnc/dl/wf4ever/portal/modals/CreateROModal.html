@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<wicket:panel xmlns:wicket="http://wicket.apache.org">
+	<div id="create-ro-modal" class="modal hide">
+		<form class="form-horizontal" wicket:id="form">
+			<div class="modal-header">
+				<a wicket:id="close" class="close">&times;</a>
+				<h3>Prompt</h3>
+			</div>
+			<div class="modal-body control-group">
+				<div class="row">
+					<div class="span6" wicket:id="feedbackPanel"></div>
+				</div>
+				<fieldset>
+					<label class="control-label" for="roId">RO identifier</label>
+					<div class="controls">
+						<input type="text" id="roId" wicket:id="roId" />
+					</div>
+				</fieldset>
+			</div>
+			<div class="modal-footer">
+				<a class="btn btn-primary" wicket:id="ok" type="submit">OK</a>
+				<a class="btn" wicket:id="cancel">Cancel</a>
+			</div>
+		</form>
+	</div>
+</wicket:panel>
