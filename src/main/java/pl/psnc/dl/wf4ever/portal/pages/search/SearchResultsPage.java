@@ -66,7 +66,7 @@ public class SearchResultsPage extends BasePage implements SearchResultsListener
             "SearchResultsPage.css");
 
     /** Facets to display. */
-    private transient List<FacetEntry> facetsList;
+    private ArrayList<FacetEntry> facetsList;
 
     /** The keywords provided by the user. */
     private String searchKeywords;
@@ -311,7 +311,7 @@ public class SearchResultsPage extends BasePage implements SearchResultsListener
     @Override
     public void onSearchResultsAvailable(SearchResult searchResult) {
         if (facetsList == null) {
-            facetsList = searchResult.getFacetsList();
+            facetsList = new ArrayList<>(searchResult.getFacetsList());
             add(buildSortLinks());
         }
         resultsCount = searchResult.getNumFound();
