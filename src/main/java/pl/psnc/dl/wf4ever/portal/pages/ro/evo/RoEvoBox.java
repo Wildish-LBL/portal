@@ -23,7 +23,6 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
 import pl.psnc.dl.wf4ever.portal.components.EventPanel;
-import pl.psnc.dl.wf4ever.portal.components.LoadingCircle;
 import pl.psnc.dl.wf4ever.portal.events.RoEvolutionLoadedEvent;
 import pl.psnc.dl.wf4ever.portal.model.RoEvoNode;
 
@@ -44,9 +43,6 @@ public class RoEvoBox extends EventPanel {
     /** Logger. */
     @SuppressWarnings("unused")
     private static final Logger LOG = Logger.getLogger(RoEvoBox.class);
-
-    /** a temporary panel shown while the evolution info is loaded. */
-    private WebMarkupContainer tmp;
 
     /** All nodes in the visualization mapped to research objects they represent. */
     private Map<URI, RoEvoNode> allNodes;
@@ -76,6 +72,7 @@ public class RoEvoBox extends EventPanel {
         super(id, researchObjectModel, eventBusModel);
         this.researchObjectModel = researchObjectModel;
         setOutputMarkupPlaceholderTag(true);
+        init();
     }
 
 
@@ -83,6 +80,9 @@ public class RoEvoBox extends EventPanel {
      * Reconstruct this panel.
      */
     protected void init() {
+        if (!researchObjectModel.getObject().isEvolutionInformationLoaded()) {
+            researchObjectModel.getObject().loadEvolutionInformation();
+        }
         this.removeAll();
         WebMarkupContainer live = new WebMarkupContainer("live");
         add(live);
@@ -186,16 +186,7 @@ public class RoEvoBox extends EventPanel {
     public void renderHead(IHeaderResponse response) {
         super.renderHead(response);
         response.render(JavaScriptHeaderItem.forReference(JS_REFERENCE));
-    }
-
-
-    @Override
-    protected void onConfigure() {
-        super.onConfigure();
-        if (!researchObjectModel.getObject().isEvolutionInformationLoaded()) {
-            tmp = new LoadingCircle(getId(), "Loading...");
-            this.replaceWith(tmp);
-        }
+        response.render(JavaScriptHeaderItem.forScript(getDrawJavaScript(), "roevo"));
     }
 
 
@@ -207,10 +198,6 @@ public class RoEvoBox extends EventPanel {
      */
     @Subscribe
     public void onRoEvolutionLoaded(RoEvolutionLoadedEvent event) {
-        if (tmp != null) {
-            tmp.replaceWith(this);
-            tmp = null;
-        }
         init();
         event.getTarget().appendJavaScript(getDrawJavaScript());
         event.getTarget().add(this);

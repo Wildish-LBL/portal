@@ -7,7 +7,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.log4j.Logger;
+import org.apache.wicket.Component;
 import org.apache.wicket.authroles.authorization.strategies.role.Roles;
+import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -23,9 +25,9 @@ import org.purl.wf4ever.rosrs.client.notifications.NotificationService;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
-import pl.psnc.dl.wf4ever.portal.behaviors.EvolutionInfoLoadBehavior;
 import pl.psnc.dl.wf4ever.portal.behaviors.FutureUpdateBehavior;
 import pl.psnc.dl.wf4ever.portal.behaviors.JobStatusUpdatingBehaviour;
+import pl.psnc.dl.wf4ever.portal.components.LoadingCircle;
 import pl.psnc.dl.wf4ever.portal.components.annotations.AdvancedAnnotationsPanel;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.events.MetadataDownloadEvent;
@@ -115,7 +117,25 @@ public class RoPanel extends Panel {
         add(new RoCommentsPanel("comments", researchObjectModel, eventBusModel));
         add(new AdvancedAnnotationsPanel("advanced-annotations", "ro-basic-view", researchObjectModel, eventBusModel));
         add(new RoContentPanel("content", researchObjectModel, eventBusModel));
-        add(new RoEvoBox("ro-evo-box", researchObjectModel, eventBusModel));
+
+        add(new AjaxLazyLoadPanel("ro-evo-box", researchObjectModel) {
+
+            /** id. */
+            private static final long serialVersionUID = 3059220547438504606L;
+
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public Component getLazyLoadComponent(String markupId) {
+                return new RoEvoBox(markupId, (IModel<ResearchObject>) getDefaultModel(), eventBusModel);
+            }
+
+
+            @Override
+            public Component getLoadingComponent(String markupId) {
+                return new LoadingCircle(markupId, "Loading research object evolution metadata...");
+            }
+        });
 
         IModel<Notification> selectedNotification = new Model<Notification>((Notification) null);
         NotificationsList notificationsList = new NotificationsList("notificationsList", notificationsModel,
@@ -131,7 +151,6 @@ public class RoPanel extends Panel {
             notificationService, researchObjectModel));
         add(new FutureUpdateBehavior<ArrayList<Notification>>(Duration.seconds(1),
                 session.addFuture(notificationsFuture), notificationsModel, notificationsIndicator, notificationsList));
-        add(new EvolutionInfoLoadBehavior(feedbackPanel, researchObjectModel, eventBusModel));
     }
 
 
