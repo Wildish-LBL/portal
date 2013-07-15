@@ -1,20 +1,12 @@
 package pl.psnc.dl.wf4ever.portal.modals;
 
 import org.apache.log4j.Logger;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.util.lang.Bytes;
 import org.purl.wf4ever.rosrs.client.Annotable;
 
-import pl.psnc.dl.wf4ever.portal.components.EventPanel;
-import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
-import pl.psnc.dl.wf4ever.portal.components.form.AjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.OkClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.ImportAnnotationClickedEvent;
@@ -29,16 +21,13 @@ import com.google.common.eventbus.Subscribe;
  * @author piotrekhol
  * 
  */
-public class ImportAnnotationModal extends EventPanel {
+public class ImportAnnotationModal extends AbstractModal {
 
     /** id. */
     private static final long serialVersionUID = 8709783939660653237L;
 
     /** Logger. */
     private static final Logger LOG = Logger.getLogger(ImportAnnotationModal.class);
-
-    /** Modal window feedback panel. */
-    private MyFeedbackPanel feedbackPanel;
 
     /** The resource that is being annotated. */
     private IModel<? extends Annotable> annotableModel;
@@ -56,14 +45,7 @@ public class ImportAnnotationModal extends EventPanel {
      *            bus model
      */
     public ImportAnnotationModal(String id, final IModel<EventBus> eventBusModel) {
-        super(id, null, eventBusModel);
-
-        Form<?> form = new Form<Void>("form");
-        add(form);
-
-        feedbackPanel = new MyFeedbackPanel("feedbackPanel");
-        feedbackPanel.setOutputMarkupId(true);
-        form.add(feedbackPanel);
+        super(id, eventBusModel, "import-annotation-modal", "Import annotations");
 
         // Enable multipart mode (need for uploads file)
         form.setMultiPart(true);
@@ -72,35 +54,6 @@ public class ImportAnnotationModal extends EventPanel {
         form.setMaxSize(Bytes.megabytes(10));
         fileUpload = new FileUploadField("fileUpload");
         form.add(fileUpload);
-
-        LoadableDetachableModel<EventBus> internalEventBusModel = new LoadableDetachableModel<EventBus>() {
-
-            /** id. */
-            private static final long serialVersionUID = 5225667860067218852L;
-
-
-            @Override
-            protected EventBus load() {
-                return new EventBus();
-            }
-        };
-        internalEventBusModel.getObject().register(this);
-
-        AjaxEventButton ok = new AjaxEventButton("ok", form, internalEventBusModel, OkClickedEvent.class);
-        form.setDefaultButton(ok);
-        form.add(ok);
-        form.add(new AjaxEventButton("cancel", form, internalEventBusModel, CancelClickedEvent.class)
-                .setDefaultFormProcessing(false));
-        form.add(new AjaxEventButton("close", form, internalEventBusModel, CancelClickedEvent.class)
-                .setDefaultFormProcessing(false));
-    }
-
-
-    @Override
-    public void renderHead(IHeaderResponse response) {
-        super.renderHead(response);
-        response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(getClass(),
-                "ImportAnnotationModal.js")));
     }
 
 
@@ -113,7 +66,7 @@ public class ImportAnnotationModal extends EventPanel {
     @Subscribe
     public void onImportAnnotationsClicked(ImportAnnotationClickedEvent event) {
         this.annotableModel = event.getAnnotableModel();
-        event.getTarget().appendJavaScript("$('#import-annotation-modal').modal('show')");
+        show(event.getTarget());
     }
 
 
@@ -130,7 +83,7 @@ public class ImportAnnotationModal extends EventPanel {
             try {
                 eventBusModel.getObject().post(
                     new ImportAnnotationReadyEvent(event.getTarget(), annotableModel, uploadedFile));
-                event.getTarget().prependJavaScript("$('#import-annotation-modal').modal('hide')");
+                hide(event.getTarget());
             } catch (Exception e) {
                 LOG.error("Error when importing annotation", e);
                 error(e);
@@ -148,8 +101,7 @@ public class ImportAnnotationModal extends EventPanel {
      */
     @Subscribe
     public void onCancel(CancelClickedEvent event) {
-        event.getTarget().add(feedbackPanel);
-        event.getTarget().appendJavaScript("$('#import-annotation-modal').modal('hide')");
+        hide(event.getTarget());
     }
 
 }

@@ -2,18 +2,11 @@ package pl.psnc.dl.wf4ever.portal.modals;
 
 import java.util.List;
 
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
-import pl.psnc.dl.wf4ever.portal.components.EventPanel;
-import pl.psnc.dl.wf4ever.portal.components.form.AjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.OkClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.ros.RoDeleteClickedEvent;
@@ -28,8 +21,11 @@ import com.google.common.eventbus.Subscribe;
  * @author piotrekhol
  * 
  */
-@SuppressWarnings("serial")
-public class DeleteROModal extends EventPanel {
+public class DeleteROModal extends AbstractModal {
+
+    /** id. */
+    private static final long serialVersionUID = 2193789648186156745L;
+
 
     /**
      * Constructor.
@@ -42,25 +38,13 @@ public class DeleteROModal extends EventPanel {
      *            ROs to delete
      */
     public DeleteROModal(String id, final IModel<EventBus> eventBusModel, final IModel<List<ResearchObject>> toDelete) {
-        super(id, toDelete, eventBusModel);
-        setOutputMarkupId(true);
-        final Form<?> form = new Form<Void>("form");
-        add(form);
-
-        LoadableDetachableModel<EventBus> internalEventBusModel = new LoadableDetachableModel<EventBus>() {
-
-            /** id. */
-            private static final long serialVersionUID = 5225667860067218852L;
-
-
-            @Override
-            protected EventBus load() {
-                return new EventBus();
-            }
-        };
-        internalEventBusModel.getObject().register(this);
+        super(id, toDelete, eventBusModel, "delete-ro-modal", "Confirm");
 
         form.add(new Label("deleteCnt", new AbstractReadOnlyModel<String>() {
+
+            /** id. */
+            private static final long serialVersionUID = -3411390081180717367L;
+
 
             @Override
             public String getObject() {
@@ -70,22 +54,6 @@ public class DeleteROModal extends EventPanel {
                 return toDelete.getObject().size() + " Research Objects";
             }
         }));
-
-        AjaxEventButton ok = new AjaxEventButton("ok", form, internalEventBusModel, OkClickedEvent.class);
-        form.setDefaultButton(ok);
-        form.add(ok);
-        form.add(new AjaxEventButton("cancel", form, internalEventBusModel, CancelClickedEvent.class)
-                .setDefaultFormProcessing(false));
-        form.add(new AjaxEventButton("close", form, internalEventBusModel, CancelClickedEvent.class)
-                .setDefaultFormProcessing(false));
-    }
-
-
-    @Override
-    public void renderHead(IHeaderResponse response) {
-        super.renderHead(response);
-        response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(getClass(),
-                "DeleteROModal.js")));
     }
 
 
@@ -99,8 +67,7 @@ public class DeleteROModal extends EventPanel {
     @Subscribe
     public void onRoDelete(RoDeleteClickedEvent event) {
         if (!((List<ResearchObject>) getDefaultModelObject()).isEmpty()) {
-            event.getTarget().add(this);
-            event.getTarget().appendJavaScript("$('#delete-ro-modal').modal('show')");
+            show(event.getTarget());
         }
     }
 
@@ -114,7 +81,7 @@ public class DeleteROModal extends EventPanel {
     @Subscribe
     public void onOk(OkClickedEvent event) {
         eventBusModel.getObject().post(new RoDeleteReadyEvent(event.getTarget()));
-        event.getTarget().prependJavaScript("$('#delete-ro-modal').modal('hide')");
+        hide(event.getTarget());
     }
 
 
@@ -126,6 +93,6 @@ public class DeleteROModal extends EventPanel {
      */
     @Subscribe
     public void onCancel(CancelClickedEvent event) {
-        event.getTarget().appendJavaScript("$('#delete-ro-modal').modal('hide')");
+        hide(event.getTarget());
     }
 }

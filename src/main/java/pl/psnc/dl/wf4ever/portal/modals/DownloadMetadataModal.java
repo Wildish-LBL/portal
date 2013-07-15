@@ -3,19 +3,11 @@ package pl.psnc.dl.wf4ever.portal.modals;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.form.DropDownChoice;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-import pl.psnc.dl.wf4ever.portal.components.EventPanel;
-import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
-import pl.psnc.dl.wf4ever.portal.components.form.AjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.MetadataDownloadClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.MetadataDownloadEvent;
@@ -31,14 +23,13 @@ import com.google.common.eventbus.Subscribe;
  * @author piotrekhol
  * 
  */
-@SuppressWarnings("serial")
-public class DownloadMetadataModal extends EventPanel {
+public class DownloadMetadataModal extends AbstractModal {
+
+    /** id. */
+    private static final long serialVersionUID = 69939222284940124L;
 
     /** RDF format selected by the user. */
     private RDFFormat format = RDFFormat.RDFXML;
-
-    /** Modal window feedback panel. */
-    private MyFeedbackPanel feedbackPanel;
 
 
     /**
@@ -50,32 +41,18 @@ public class DownloadMetadataModal extends EventPanel {
      *            bus model
      */
     public DownloadMetadataModal(String id, final IModel<EventBus> eventBusModel) {
-        super(id, null, eventBusModel);
-
-        Form<?> form = new Form<Void>("downloadMetadataForm");
-        add(form);
-
-        feedbackPanel = new MyFeedbackPanel("feedbackPanel");
-        feedbackPanel.setOutputMarkupId(true);
-        form.add(feedbackPanel);
-
-        LoadableDetachableModel<EventBus> internalEventBusModel = new LoadableDetachableModel<EventBus>() {
-
-            /** id. */
-            private static final long serialVersionUID = 5225667860067218852L;
-
-
-            @Override
-            protected EventBus load() {
-                return new EventBus();
-            }
-        };
-        internalEventBusModel.getObject().register(this);
+        super(id, null, eventBusModel, "download-metadata-modal", "Download metadata");
 
         List<RDFFormat> formats = Arrays.asList(RDFFormat.RDFXML, RDFFormat.TURTLE, RDFFormat.TRIG, RDFFormat.TRIX,
             RDFFormat.N3);
         DropDownChoice<RDFFormat> formatDropDown = new DropDownChoice<RDFFormat>("rdfFormat",
                 new PropertyModel<RDFFormat>(this, "format"), formats, new IChoiceRenderer<RDFFormat>() {
+
+                    /**
+                     * 
+                     */
+                    private static final long serialVersionUID = 1736168325971226618L;
+
 
                     @Override
                     public Object getDisplayValue(RDFFormat format) {
@@ -89,21 +66,6 @@ public class DownloadMetadataModal extends EventPanel {
                     }
                 });
         form.add(formatDropDown);
-        AjaxEventButton ok = new AjaxEventButton("ok", form, internalEventBusModel, OkClickedEvent.class);
-        form.setDefaultButton(ok);
-        form.add(ok);
-        form.add(new AjaxEventButton("cancel", form, internalEventBusModel, CancelClickedEvent.class)
-                .setDefaultFormProcessing(false));
-        form.add(new AjaxEventButton("close", form, internalEventBusModel, CancelClickedEvent.class)
-                .setDefaultFormProcessing(false));
-    }
-
-
-    @Override
-    public void renderHead(IHeaderResponse response) {
-        super.renderHead(response);
-        response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(getClass(),
-                "DownloadMetadataModal.js")));
     }
 
 
@@ -115,7 +77,7 @@ public class DownloadMetadataModal extends EventPanel {
      */
     @Subscribe
     public void onMetadataDownloadClicked(MetadataDownloadClickedEvent event) {
-        event.getTarget().appendJavaScript("$('#download-metadata-modal').modal('show')");
+        show(event.getTarget());
     }
 
 
@@ -128,7 +90,7 @@ public class DownloadMetadataModal extends EventPanel {
     @Subscribe
     public void onOk(OkClickedEvent event) {
         eventBusModel.getObject().post(new MetadataDownloadEvent(event.getTarget(), format));
-        event.getTarget().prependJavaScript("$('#download-metadata-modal').modal('hide');");
+        hide(event.getTarget());
     }
 
 
@@ -140,7 +102,7 @@ public class DownloadMetadataModal extends EventPanel {
      */
     @Subscribe
     public void onCancel(CancelClickedEvent event) {
-        event.getTarget().appendJavaScript("$('#download-metadata-modal').modal('hide')");
+        hide(event.getTarget());
     }
 
 

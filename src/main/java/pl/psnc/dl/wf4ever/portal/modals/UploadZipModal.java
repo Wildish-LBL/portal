@@ -4,25 +4,17 @@ import java.net.URI;
 
 import org.apache.wicket.ajax.AjaxEventBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.Radio;
 import org.apache.wicket.markup.html.form.RadioGroup;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.util.lang.Bytes;
 
-import pl.psnc.dl.wf4ever.portal.components.EventPanel;
-import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
-import pl.psnc.dl.wf4ever.portal.components.form.AjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.components.form.RequiredURITextField;
 import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.OkClickedEvent;
@@ -39,7 +31,7 @@ import com.google.common.eventbus.Subscribe;
  * @author piotrekhol
  * 
  */
-public class UploadZipModal extends EventPanel {
+public class UploadZipModal extends AbstractModal {
 
     /** id. */
     private static final long serialVersionUID = -7754788822535330561L;
@@ -56,9 +48,6 @@ public class UploadZipModal extends EventPanel {
     /** Div for uploading files. */
     private final WebMarkupContainer fileDiv;
 
-    /** Feedback panel. */
-    private MyFeedbackPanel feedbackPanel;
-
     /** Component for the uploaded file. */
     private FileUploadField fileUpload;
 
@@ -72,26 +61,7 @@ public class UploadZipModal extends EventPanel {
      *            event bus
      */
     public UploadZipModal(String id, final IModel<EventBus> eventBusModel) {
-        super(id, null, eventBusModel);
-        Form<?> form = new Form<Void>("form");
-        add(form);
-
-        feedbackPanel = new MyFeedbackPanel("feedbackPanel");
-        feedbackPanel.setOutputMarkupId(true);
-        form.add(feedbackPanel);
-
-        LoadableDetachableModel<EventBus> internalEventBusModel = new LoadableDetachableModel<EventBus>() {
-
-            /** id. */
-            private static final long serialVersionUID = 5225667860067218852L;
-
-
-            @Override
-            protected EventBus load() {
-                return new EventBus();
-            }
-        };
-        internalEventBusModel.getObject().register(this);
+        super(id, eventBusModel, "upload-zip-modal", "Create an RO from ZIP");
 
         // Enable multipart mode (needed for uploading files)
         form.setMultiPart(true);
@@ -163,22 +133,6 @@ public class UploadZipModal extends EventPanel {
         TextField<URI> resourceURIField = new RequiredURITextField("resourceURI", new PropertyModel<URI>(this,
                 "resourceURI"));
         resourceDiv.add(resourceURIField);
-
-        AjaxEventButton ok = new AjaxEventButton("ok", form, internalEventBusModel, OkClickedEvent.class);
-        form.setDefaultButton(ok);
-        form.add(ok);
-        form.add(new AjaxEventButton("cancel", form, internalEventBusModel, CancelClickedEvent.class)
-                .setDefaultFormProcessing(false));
-        form.add(new AjaxEventButton("close", form, internalEventBusModel, CancelClickedEvent.class)
-                .setDefaultFormProcessing(false));
-    }
-
-
-    @Override
-    public void renderHead(IHeaderResponse response) {
-        super.renderHead(response);
-        response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(getClass(),
-                "UploadZipModal.js")));
     }
 
 
@@ -190,7 +144,7 @@ public class UploadZipModal extends EventPanel {
      */
     @Subscribe
     public void onAddZipClicked(ZipAddClickedEvent event) {
-        event.getTarget().appendJavaScript("$('#upload-zip-modal').modal('show')");
+        show(event.getTarget());
     }
 
 
@@ -208,12 +162,12 @@ public class UploadZipModal extends EventPanel {
                 final FileUpload uploadedFile = fileUpload.getFileUpload();
                 if (uploadedFile != null) {
                     eventBusModel.getObject().post(new ZipAddReadyEvent(event.getTarget(), uploadedFile));
-                    event.getTarget().prependJavaScript("$('#upload-zip-modal').modal('hide')");
+                    hide(event.getTarget());
                 }
                 break;
             case REMOTE:
                 eventBusModel.getObject().post(new ZipAddReadyEvent(event.getTarget(), resourceURI));
-                event.getTarget().prependJavaScript("$('#upload-zip-modal').modal('hide')");
+                hide(event.getTarget());
                 break;
         }
         event.getTarget().add(feedbackPanel);
@@ -228,7 +182,7 @@ public class UploadZipModal extends EventPanel {
      */
     @Subscribe
     public void onCancel(CancelClickedEvent event) {
-        event.getTarget().appendJavaScript("$('#upload-zip-modal').modal('hide')");
+        hide(event.getTarget());
     }
 
 

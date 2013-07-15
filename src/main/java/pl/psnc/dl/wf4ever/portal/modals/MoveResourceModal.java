@@ -2,20 +2,12 @@ package pl.psnc.dl.wf4ever.portal.modals;
 
 import java.util.List;
 
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.form.ChoiceRenderer;
 import org.apache.wicket.markup.html.form.DropDownChoice;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.purl.wf4ever.rosrs.client.Folder;
 
-import pl.psnc.dl.wf4ever.portal.components.EventPanel;
-import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
-import pl.psnc.dl.wf4ever.portal.components.form.AjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.OkClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.AggregationChangedEvent;
@@ -31,14 +23,13 @@ import com.google.common.eventbus.Subscribe;
  * @author piotrekhol
  * 
  */
-@SuppressWarnings("serial")
-public class MoveResourceModal extends EventPanel {
+public class MoveResourceModal extends AbstractModal {
+
+    /** id. */
+    private static final long serialVersionUID = 5398436522469957609L;
 
     /** Folder selected by the user. */
     private Folder folder = null;
-
-    /** Modal window feedback panel. */
-    private MyFeedbackPanel feedbackPanel;
 
 
     /**
@@ -52,44 +43,9 @@ public class MoveResourceModal extends EventPanel {
      *            bus model
      */
     public MoveResourceModal(String id, IModel<List<Folder>> foldersModel, final IModel<EventBus> eventBusModel) {
-        super(id, foldersModel, eventBusModel);
-        setOutputMarkupPlaceholderTag(true);
-        Form<?> form = new Form<Void>("form");
-        add(form);
-
-        feedbackPanel = new MyFeedbackPanel("feedbackPanel");
-        feedbackPanel.setOutputMarkupId(true);
-        form.add(feedbackPanel);
-
-        LoadableDetachableModel<EventBus> internalEventBusModel = new LoadableDetachableModel<EventBus>() {
-
-            /** id. */
-            private static final long serialVersionUID = 5225667860067218852L;
-
-
-            @Override
-            protected EventBus load() {
-                return new EventBus();
-            }
-        };
-        internalEventBusModel.getObject().register(this);
+        super(id, foldersModel, eventBusModel, "move-resource-modal", "Move a resource");
         form.add(new DropDownChoice<Folder>("folder", new PropertyModel<Folder>(this, "folder"), foldersModel,
                 new ChoiceRenderer<Folder>("path", "uri")));
-        AjaxEventButton ok = new AjaxEventButton("ok", form, internalEventBusModel, OkClickedEvent.class);
-        form.setDefaultButton(ok);
-        form.add(ok);
-        form.add(new AjaxEventButton("cancel", form, internalEventBusModel, CancelClickedEvent.class)
-                .setDefaultFormProcessing(false));
-        form.add(new AjaxEventButton("close", form, internalEventBusModel, CancelClickedEvent.class)
-                .setDefaultFormProcessing(false));
-    }
-
-
-    @Override
-    public void renderHead(IHeaderResponse response) {
-        super.renderHead(response);
-        response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(getClass(),
-                "MoveResourceModal.js")));
     }
 
 
@@ -101,7 +57,7 @@ public class MoveResourceModal extends EventPanel {
      */
     @Subscribe
     public void onResourceMoveClicked(ResourceMoveClickedEvent event) {
-        event.getTarget().appendJavaScript("$('#move-resource-modal').modal('show')");
+        show(event.getTarget());
     }
 
 
@@ -116,7 +72,7 @@ public class MoveResourceModal extends EventPanel {
         if (folder != null) {
             eventBusModel.getObject().post(new ResourceMoveEvent(event.getTarget(), folder));
         }
-        event.getTarget().prependJavaScript("$('#move-resource-modal').modal('hide');");
+        hide(event.getTarget());
     }
 
 
@@ -128,7 +84,7 @@ public class MoveResourceModal extends EventPanel {
      */
     @Subscribe
     public void onCancel(CancelClickedEvent event) {
-        event.getTarget().appendJavaScript("$('#move-resource-modal').modal('hide')");
+        hide(event.getTarget());
     }
 
 

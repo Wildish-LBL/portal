@@ -1,18 +1,10 @@
 package pl.psnc.dl.wf4ever.portal.modals;
 
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.RequiredTextField;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-import pl.psnc.dl.wf4ever.portal.components.EventPanel;
-import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
-import pl.psnc.dl.wf4ever.portal.components.form.AjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.OkClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddClickedEvent;
@@ -27,12 +19,10 @@ import com.google.common.eventbus.Subscribe;
  * @author piotrekhol
  * 
  */
-@SuppressWarnings("serial")
-public class AddFolderModal extends EventPanel {
+public class AddFolderModal extends AbstractModal {
 
-    /** Feedback panel. */
-    private MyFeedbackPanel feedbackPanel;
-
+    /** id. */
+    private static final long serialVersionUID = -8887521104588150784L;
     /** Folder name. */
     private String name;
 
@@ -46,45 +36,9 @@ public class AddFolderModal extends EventPanel {
      *            event bus
      */
     public AddFolderModal(String id, final IModel<EventBus> eventBusModel) {
-        super(id, null, eventBusModel);
-        Form<?> form = new Form<Void>("form");
-        add(form);
-
-        feedbackPanel = new MyFeedbackPanel("feedbackPanel");
-        feedbackPanel.setOutputMarkupId(true);
-        form.add(feedbackPanel);
-
-        LoadableDetachableModel<EventBus> internalEventBusModel = new LoadableDetachableModel<EventBus>() {
-
-            /** id. */
-            private static final long serialVersionUID = 5225667860067218852L;
-
-
-            @Override
-            protected EventBus load() {
-                return new EventBus();
-            }
-        };
-        internalEventBusModel.getObject().register(this);
-
+        super(id, eventBusModel, "add-folder-modal", "Add folder");
         TextField<String> nameField = new RequiredTextField<>("folder-name", new PropertyModel<String>(this, "name"));
         form.add(nameField);
-
-        AjaxEventButton ok = new AjaxEventButton("ok", form, internalEventBusModel, OkClickedEvent.class);
-        form.setDefaultButton(ok);
-        form.add(ok);
-        form.add(new AjaxEventButton("cancel", form, internalEventBusModel, CancelClickedEvent.class)
-                .setDefaultFormProcessing(false));
-        form.add(new AjaxEventButton("close", form, internalEventBusModel, CancelClickedEvent.class)
-                .setDefaultFormProcessing(false));
-    }
-
-
-    @Override
-    public void renderHead(IHeaderResponse response) {
-        super.renderHead(response);
-        response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(getClass(),
-                "AddFolderModal.js")));
     }
 
 
@@ -96,7 +50,7 @@ public class AddFolderModal extends EventPanel {
      */
     @Subscribe
     public void onAddFolderClicked(FolderAddClickedEvent event) {
-        event.getTarget().appendJavaScript("$('#add-folder-modal').modal('show')");
+        show(event.getTarget());
     }
 
 
@@ -109,8 +63,7 @@ public class AddFolderModal extends EventPanel {
     @Subscribe
     public void onOk(OkClickedEvent event) {
         eventBusModel.getObject().post(new FolderAddReadyEvent(event.getTarget(), name));
-        event.getTarget().prependJavaScript("$('#add-folder-modal').modal('hide')");
-        event.getTarget().add(feedbackPanel);
+        hide(event.getTarget());
     }
 
 
@@ -122,8 +75,7 @@ public class AddFolderModal extends EventPanel {
      */
     @Subscribe
     public void onCancel(CancelClickedEvent event) {
-        event.getTarget().appendJavaScript("$('#add-folder-modal').modal('hide')");
-        event.getTarget().add(feedbackPanel);
+        hide(event.getTarget());
     }
 
 
