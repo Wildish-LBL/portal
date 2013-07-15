@@ -252,13 +252,13 @@ public class CreateROThread extends Thread {
     private void addEntry(ResearchObject ro, String name, InputStream inputStream, Map<String, Folder> createdFolders)
             throws ROSRSException, ROException {
         //TODO can we make it more general?
-        if (name.contains("__MACOSX") || name.contains(".DS_Store") || name.endsWith("/")) {
+        Path path = Paths.get(name);
+        if (name.endsWith("/") || path.getFileName().toString().startsWith(".")) {
             log("Skipping " + name + ".\n");
         } else {
             log("Adding " + name + "... ");
             String contentType = mfm.getContentType(name);
             Resource resource = ro.aggregate(name, inputStream, contentType);
-            Path path = Paths.get(name);
             boolean parentExisted = false;
             while (path.getParent() != null && !parentExisted) {
                 if (!createdFolders.containsKey(path.getParent().toString())) {
