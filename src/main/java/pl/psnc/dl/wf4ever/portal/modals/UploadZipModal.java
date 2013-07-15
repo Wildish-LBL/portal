@@ -164,7 +164,9 @@ public class UploadZipModal extends EventPanel {
                 "resourceURI"));
         resourceDiv.add(resourceURIField);
 
-        form.add(new AjaxEventButton("ok", form, internalEventBusModel, OkClickedEvent.class));
+        AjaxEventButton ok = new AjaxEventButton("ok", form, internalEventBusModel, OkClickedEvent.class);
+        form.setDefaultButton(ok);
+        form.add(ok);
         form.add(new AjaxEventButton("cancel", form, internalEventBusModel, CancelClickedEvent.class)
                 .setDefaultFormProcessing(false));
         form.add(new AjaxEventButton("close", form, internalEventBusModel, CancelClickedEvent.class)

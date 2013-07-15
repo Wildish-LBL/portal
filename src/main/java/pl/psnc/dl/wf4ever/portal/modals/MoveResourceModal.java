@@ -75,7 +75,9 @@ public class MoveResourceModal extends EventPanel {
         internalEventBusModel.getObject().register(this);
         form.add(new DropDownChoice<Folder>("folder", new PropertyModel<Folder>(this, "folder"), foldersModel,
                 new ChoiceRenderer<Folder>("path", "uri")));
-        form.add(new AjaxEventButton("ok", form, internalEventBusModel, OkClickedEvent.class));
+        AjaxEventButton ok = new AjaxEventButton("ok", form, internalEventBusModel, OkClickedEvent.class);
+        form.setDefaultButton(ok);
+        form.add(ok);
         form.add(new AjaxEventButton("cancel", form, internalEventBusModel, CancelClickedEvent.class)
                 .setDefaultFormProcessing(false));
         form.add(new AjaxEventButton("close", form, internalEventBusModel, CancelClickedEvent.class)
