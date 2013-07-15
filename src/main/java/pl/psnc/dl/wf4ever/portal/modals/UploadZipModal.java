@@ -72,7 +72,7 @@ public class UploadZipModal extends AbstractModal {
         fileDiv = new WebMarkupContainer("fileUploadDiv");
         fileDiv.setOutputMarkupId(true);
         fileDiv.setOutputMarkupPlaceholderTag(true);
-        form.add(fileDiv);
+        modal.add(fileDiv);
 
         RadioGroup<ResourceLocalRemote> radioGroup = new RadioGroup<ResourceLocalRemote>("radioGroup",
                 new PropertyModel<ResourceLocalRemote>(this, "resourceType"));
@@ -129,7 +129,7 @@ public class UploadZipModal extends AbstractModal {
         };
         fileDiv.add(fileUpload);
 
-        modal.add(new RequiredURITextField("resourceURI", new PropertyModel<URI>(this, "resourceURI")));
+        resourceDiv.add(new RequiredURITextField("resourceURI", new PropertyModel<URI>(this, "resourceURI")));
     }
 
 

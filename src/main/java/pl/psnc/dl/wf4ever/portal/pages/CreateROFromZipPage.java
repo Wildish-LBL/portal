@@ -134,13 +134,15 @@ public class CreateROFromZipPage extends BasePage {
                 if (progressModel.getThreadState() == State.TERMINATED) {
                     stop(target);
                     console.remove(this);
-                    PageParameters params = new PageParameters();
-                    params.add("ro", progressModel.getRoUri());
-                    BookmarkablePageLink<String> link = new BookmarkablePageLink<>("go-to-ro", RoPage.class, params);
-                    placeholder.replaceWith(link);
-                    link.setOutputMarkupId(true);
-                    link.setVisible(true);
-                    target.add(link);
+                    if (progressModel.getRoUri() != null) {
+                        PageParameters params = new PageParameters();
+                        params.add("ro", progressModel.getRoUri());
+                        BookmarkablePageLink<String> link = new BookmarkablePageLink<>("go-to-ro", RoPage.class, params);
+                        placeholder.replaceWith(link);
+                        link.setOutputMarkupId(true);
+                        link.setVisible(true);
+                        target.add(link);
+                    }
                 }
             }
         });

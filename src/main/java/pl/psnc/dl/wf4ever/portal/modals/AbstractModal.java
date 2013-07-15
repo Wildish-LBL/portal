@@ -41,6 +41,7 @@ public abstract class AbstractModal extends EventPanel {
     /** Modal id in HTML for JavaScript hiding and showing. */
     private String modalId;
 
+    /** The div with a different ID for each modal. */
     protected WebMarkupContainer modal;
 
 
