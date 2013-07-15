@@ -36,7 +36,7 @@ public class CreateROModal extends AbstractModal {
      */
     public CreateROModal(String id, final IModel<EventBus> eventBusModel) {
         super(id, eventBusModel, "create-ro-modal", "Create RO");
-        form.add(new RequiredTextField<String>("roId", new PropertyModel<String>(this, "roId")));
+        modal.add(new RequiredTextField<String>("roId", new PropertyModel<String>(this, "roId")));
     }
 
 

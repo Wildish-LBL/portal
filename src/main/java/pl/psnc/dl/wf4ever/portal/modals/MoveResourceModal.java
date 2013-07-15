@@ -44,7 +44,7 @@ public class MoveResourceModal extends AbstractModal {
      */
     public MoveResourceModal(String id, IModel<List<Folder>> foldersModel, final IModel<EventBus> eventBusModel) {
         super(id, foldersModel, eventBusModel, "move-resource-modal", "Move a resource");
-        form.add(new DropDownChoice<Folder>("folder", new PropertyModel<Folder>(this, "folder"), foldersModel,
+        modal.add(new DropDownChoice<Folder>("folder", new PropertyModel<Folder>(this, "folder"), foldersModel,
                 new ChoiceRenderer<Folder>("path", "uri")));
     }
 

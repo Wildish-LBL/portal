@@ -1,7 +1,6 @@
 package pl.psnc.dl.wf4ever.portal.modals;
 
 import org.apache.wicket.markup.html.form.RequiredTextField;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 
@@ -37,8 +36,7 @@ public class AddFolderModal extends AbstractModal {
      */
     public AddFolderModal(String id, final IModel<EventBus> eventBusModel) {
         super(id, eventBusModel, "add-folder-modal", "Add folder");
-        TextField<String> nameField = new RequiredTextField<>("folder-name", new PropertyModel<String>(this, "name"));
-        form.add(nameField);
+        modal.add(new RequiredTextField<>("folder-name", new PropertyModel<String>(this, "name")));
     }
 
 

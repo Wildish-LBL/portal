@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <wicket:panel xmlns:wicket="http://wicket.apache.org">
-	<div wicket:id="modal" class="modal hide">
-		<form class="form-horizontal" wicket:id="form">
+	<form class="form-horizontal" wicket:id="form">
+		<div wicket:id="modal" class="modal hide">
 			<div class="modal-header">
 				<a wicket:id="close" class="close">&times;</a>
 				<h3 wicket:id="title">Question</h3>
@@ -16,6 +16,6 @@
 				<a class="btn btn-primary" wicket:id="ok" type="submit">OK</a> <a
 					class="btn" wicket:id="cancel">Cancel</a>
 			</div>
-		</form>
-	</div>
+		</div>
+	</form>
 </wicket:panel>

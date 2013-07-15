@@ -7,7 +7,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Radio;
 import org.apache.wicket.markup.html.form.RadioGroup;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.model.IModel;
@@ -69,7 +68,7 @@ public class UploadZipModal extends AbstractModal {
         resourceDiv = new WebMarkupContainer("resourceURIDiv");
         resourceDiv.setOutputMarkupId(true);
         resourceDiv.setOutputMarkupPlaceholderTag(true);
-        form.add(resourceDiv);
+        modal.add(resourceDiv);
         fileDiv = new WebMarkupContainer("fileUploadDiv");
         fileDiv.setOutputMarkupId(true);
         fileDiv.setOutputMarkupPlaceholderTag(true);
@@ -77,7 +76,7 @@ public class UploadZipModal extends AbstractModal {
 
         RadioGroup<ResourceLocalRemote> radioGroup = new RadioGroup<ResourceLocalRemote>("radioGroup",
                 new PropertyModel<ResourceLocalRemote>(this, "resourceType"));
-        form.add(radioGroup);
+        modal.add(radioGroup);
         Radio<ResourceLocalRemote> local = new Radio<ResourceLocalRemote>("local", new Model<ResourceLocalRemote>(
                 ResourceLocalRemote.LOCAL));
         local.add(new AjaxEventBehavior("onclick") {
@@ -130,9 +129,7 @@ public class UploadZipModal extends AbstractModal {
         };
         fileDiv.add(fileUpload);
 
-        TextField<URI> resourceURIField = new RequiredURITextField("resourceURI", new PropertyModel<URI>(this,
-                "resourceURI"));
-        resourceDiv.add(resourceURIField);
+        modal.add(new RequiredURITextField("resourceURI", new PropertyModel<URI>(this, "resourceURI")));
     }
 
 

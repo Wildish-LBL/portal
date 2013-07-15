@@ -41,6 +41,8 @@ public abstract class AbstractModal extends EventPanel {
     /** Modal id in HTML for JavaScript hiding and showing. */
     private String modalId;
 
+    protected WebMarkupContainer modal;
+
 
     /**
      * Constructor.
@@ -77,18 +79,18 @@ public abstract class AbstractModal extends EventPanel {
         super(id, model, eventBusModel);
         setOutputMarkupId(true);
         this.modalId = modalId;
-        WebMarkupContainer modal = new WebMarkupContainer("modal");
-        modal.add(AttributeAppender.replace("id", modalId));
-        add(modal);
-
         form = new Form<Void>("form");
-        modal.add(form);
+        add(form);
+
+        modal = new WebMarkupContainer("modal");
+        modal.add(AttributeAppender.replace("id", modalId));
+        form.add(modal);
 
         feedbackPanel = new MyFeedbackPanel("feedbackPanel");
         feedbackPanel.setOutputMarkupId(true);
-        form.add(feedbackPanel);
+        modal.add(feedbackPanel);
 
-        form.add(new Label("title", title));
+        modal.add(new Label("title", title));
 
         internalEventBusModel = new LoadableDetachableModel<EventBus>() {
 
@@ -105,10 +107,10 @@ public abstract class AbstractModal extends EventPanel {
 
         AjaxEventButton ok = new AjaxEventButton("ok", form, internalEventBusModel, OkClickedEvent.class);
         form.setDefaultButton(ok);
-        form.add(ok);
-        form.add(new AjaxEventButton("cancel", form, internalEventBusModel, CancelClickedEvent.class)
+        modal.add(ok);
+        modal.add(new AjaxEventButton("cancel", form, internalEventBusModel, CancelClickedEvent.class)
                 .setDefaultFormProcessing(false));
-        form.add(new AjaxEventButton("close", form, internalEventBusModel, CancelClickedEvent.class)
+        modal.add(new AjaxEventButton("close", form, internalEventBusModel, CancelClickedEvent.class)
                 .setDefaultFormProcessing(false));
     }
 

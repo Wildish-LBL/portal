@@ -40,7 +40,7 @@ public class DeleteROModal extends AbstractModal {
     public DeleteROModal(String id, final IModel<EventBus> eventBusModel, final IModel<List<ResearchObject>> toDelete) {
         super(id, toDelete, eventBusModel, "delete-ro-modal", "Confirm");
 
-        form.add(new Label("deleteCnt", new AbstractReadOnlyModel<String>() {
+        modal.add(new Label("deleteCnt", new AbstractReadOnlyModel<String>() {
 
             /** id. */
             private static final long serialVersionUID = -3411390081180717367L;

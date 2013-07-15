@@ -53,7 +53,7 @@ public class ImportAnnotationModal extends AbstractModal {
         // max upload size, 10k
         form.setMaxSize(Bytes.megabytes(10));
         fileUpload = new FileUploadField("fileUpload");
-        form.add(fileUpload);
+        modal.add(fileUpload);
     }
 
 
