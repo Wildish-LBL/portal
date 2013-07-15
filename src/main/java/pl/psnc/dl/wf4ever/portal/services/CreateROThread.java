@@ -18,6 +18,10 @@ import javax.activation.MimetypesFileTypeMap;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
+import org.joda.time.Interval;
+import org.joda.time.Period;
 import org.purl.wf4ever.rosrs.client.Folder;
 import org.purl.wf4ever.rosrs.client.ROSRService;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
@@ -72,6 +76,12 @@ public class CreateROThread extends Thread {
 
         /** The URI of the created RO. */
         private URI roUri = null;
+
+        /** Time when the thread started. */
+        private DateTime startTime;
+
+        /** Estimated time when the thread finishes. */
+        private DateTime endTime;
 
 
         public synchronized State getThreadState() {
@@ -138,6 +148,81 @@ public class CreateROThread extends Thread {
         public synchronized void setRoUri(URI roUri) {
             this.roUri = roUri;
         }
+
+
+        public synchronized Duration getTimeElapsed() {
+            return startTime != null ? new Interval(startTime, DateTime.now()).toDuration() : null;
+        }
+
+
+        /**
+         * Get an estimate of time remaining to finish.
+         * 
+         * @return a Duration or null
+         */
+        public synchronized Duration getTimeRemaining() {
+            if (endTime != null) {
+                DateTime now = DateTime.now();
+                if (now.isAfter(endTime)) {
+                    return new Duration(0);
+                } else {
+                    return new Interval(DateTime.now(), endTime).toDuration();
+                }
+            } else {
+                return null;
+            }
+        }
+
+
+        /**
+         * Get elapsed time as string hh:mm:ss.
+         * 
+         * @return formatted time or null
+         */
+        public synchronized String getTimeElapsedFormatted() {
+            Duration duration = getTimeElapsed();
+            if (duration == null) {
+                return null;
+            }
+            Period period = duration.toPeriod();
+            return String.format("%02d:%02d:%02d", period.getHours(), period.getMinutes(), period.getSeconds());
+        }
+
+
+        /**
+         * Get remaining time as string hh:mm:ss.
+         * 
+         * @return formatted time or null
+         */
+        public synchronized String getTimeRemainingFormatted() {
+            Duration duration = getTimeRemaining();
+            if (duration == null) {
+                return null;
+            }
+            Period period = duration.toPeriod();
+            return String.format("%02d:%02d:%02d", period.getHours(), period.getMinutes(), period.getSeconds());
+        }
+
+
+        DateTime getStartTime() {
+            return startTime;
+        }
+
+
+        void setStartTime(DateTime startTime) {
+            this.startTime = startTime;
+        }
+
+
+        DateTime getEndTime() {
+            return endTime;
+        }
+
+
+        void setEndTime(DateTime endTime) {
+            this.endTime = endTime;
+        }
+
     }
 
 
@@ -189,6 +274,7 @@ public class CreateROThread extends Thread {
     @Override
     public void run() {
         try {
+            progressModel.setStartTime(DateTime.now());
             File temp = File.createTempFile(zipName, ".zip");
             FileOutputStream outputStream = new FileOutputStream(temp);
             log("Uploading the archive... ");
@@ -204,6 +290,7 @@ public class CreateROThread extends Thread {
                 while (entries.hasMoreElements()) {
                     ZipEntry entry = entries.nextElement();
                     addEntry(ro, entry.getName(), zipFile.getInputStream(entry), createdFolders);
+                    updateEstimatedTime();
                 }
             }
             log("FINISHED");
@@ -219,6 +306,19 @@ public class CreateROThread extends Thread {
             }
             progressModel.setThreadState(State.TERMINATED);
         }
+    }
+
+
+    /**
+     * Update the estimated time based on time elapsed and number of entries parsed.
+     */
+    private void updateEstimatedTime() {
+        if (progressModel.getComplete() == 0) {
+            return;
+        }
+        long oneTaskMillis = progressModel.getTimeElapsed().getMillis() / progressModel.getComplete();
+        long allTasksMillis = oneTaskMillis * progressModel.getTotal();
+        progressModel.setEndTime(progressModel.getStartTime().plus(allTasksMillis));
     }
 
 

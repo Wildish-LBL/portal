@@ -9,6 +9,8 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.time.Duration;
@@ -27,6 +29,41 @@ import pl.psnc.dl.wf4ever.portal.services.CreateROThread.State;
  * 
  */
 public class CreateROFromZipPage extends BasePage {
+
+    /**
+     * A model that returns a "?" instead of null.
+     * 
+     * @author piotrekhol
+     * 
+     */
+    static class QuestionMarkModel extends AbstractReadOnlyModel<String> {
+
+        /** id. */
+        private static final long serialVersionUID = -3997633235115647568L;
+
+        /** The original model. */
+        private IModel<?> model;
+
+
+        /**
+         * Constructor.
+         * 
+         * @param model
+         *            the original model
+         */
+        public QuestionMarkModel(IModel<?> model) {
+            this.model = model;
+        }
+
+
+        @Override
+        public String getObject() {
+            Object value = model.getObject();
+            return value != null ? value.toString() : "?";
+        }
+
+    }
+
 
     /** id. */
     private static final long serialVersionUID = -3233388849667095897L;
@@ -56,10 +93,18 @@ public class CreateROFromZipPage extends BasePage {
         CreateROThread create = new CreateROThread(zip, zipName, MySession.get().getRosrs());
         progressModel = create.getProgressModel();
 
-        final Label completeLabel = new Label("complete", new PropertyModel<String>(this, "complete"));
+        final Label completeLabel = new Label("complete", new QuestionMarkModel(new PropertyModel<String>(
+                progressModel, "complete")));
         add(completeLabel.setOutputMarkupId(true));
-        final Label totalLabel = new Label("total", new PropertyModel<String>(this, "total"));
+        final Label totalLabel = new Label("total", new QuestionMarkModel(new PropertyModel<String>(progressModel,
+                "total")));
         add(totalLabel.setOutputMarkupId(true));
+        final Label timeElapsed = new Label("time-elapsed", new QuestionMarkModel(new PropertyModel<String>(
+                progressModel, "timeElapsedFormatted")));
+        add(timeElapsed.setOutputMarkupId(true));
+        final Label timeRemaining = new Label("time-remaining", new QuestionMarkModel(new PropertyModel<String>(
+                progressModel, "timeRemainingFormatted")));
+        add(timeRemaining.setOutputMarkupId(true));
 
         final TextArea<String> console = new TextArea<>("console", new PropertyModel<String>(progressModel,
                 "outputString"));
@@ -83,6 +128,8 @@ public class CreateROFromZipPage extends BasePage {
 
                 target.add(completeLabel);
                 target.add(totalLabel);
+                target.add(timeElapsed);
+                target.add(timeRemaining);
                 target.appendJavaScript("$('#console').scrollTop($('#console')[0].scrollHeight);");
                 if (progressModel.getThreadState() == State.TERMINATED) {
                     stop(target);
@@ -101,13 +148,4 @@ public class CreateROFromZipPage extends BasePage {
         create.start();
     }
 
-
-    public String getComplete() {
-        return progressModel.getComplete() != null ? "" + progressModel.getComplete() : "?";
-    }
-
-
-    public String getTotal() {
-        return progressModel.getTotal() != null ? "" + progressModel.getTotal() : "?";
-    }
 }
