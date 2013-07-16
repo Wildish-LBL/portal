@@ -67,6 +67,7 @@ public class DeleteROModal extends AbstractModal {
     @Subscribe
     public void onRoDelete(RoDeleteClickedEvent event) {
         if (!((List<ResearchObject>) getDefaultModelObject()).isEmpty()) {
+            event.getTarget().add(this);
             show(event.getTarget());
         }
     }
