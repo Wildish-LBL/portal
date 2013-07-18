@@ -2,8 +2,8 @@ package pl.psnc.dl.wf4ever.portal.modals;
 
 import java.net.URI;
 
-import org.apache.wicket.ajax.AjaxEventBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormChoiceComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Radio;
 import org.apache.wicket.markup.html.form.RadioGroup;
@@ -65,54 +65,53 @@ public class UploadZipModal extends AbstractModal {
         // Enable multipart mode (needed for uploading files)
         form.setMultiPart(true);
 
-        resourceDiv = new WebMarkupContainer("resourceURIDiv");
-        resourceDiv.setOutputMarkupId(true);
+        resourceDiv = new WebMarkupContainer("resourceURIDiv") {
+
+            /** id. */
+            private static final long serialVersionUID = -5439904589164043855L;
+
+
+            @Override
+            protected void onConfigure() {
+                setVisible(resourceType == ResourceLocalRemote.REMOTE);
+            }
+        };
         resourceDiv.setOutputMarkupPlaceholderTag(true);
         modal.add(resourceDiv);
-        fileDiv = new WebMarkupContainer("fileUploadDiv");
-        fileDiv.setOutputMarkupId(true);
+        fileDiv = new WebMarkupContainer("fileUploadDiv") {
+
+            /** id. */
+            private static final long serialVersionUID = -481041541365628716L;
+
+
+            @Override
+            protected void onConfigure() {
+                setVisible(resourceType == ResourceLocalRemote.LOCAL);
+            }
+        };
         fileDiv.setOutputMarkupPlaceholderTag(true);
         modal.add(fileDiv);
 
         RadioGroup<ResourceLocalRemote> radioGroup = new RadioGroup<ResourceLocalRemote>("radioGroup",
                 new PropertyModel<ResourceLocalRemote>(this, "resourceType"));
         modal.add(radioGroup);
-        Radio<ResourceLocalRemote> local = new Radio<ResourceLocalRemote>("local", new Model<ResourceLocalRemote>(
-                ResourceLocalRemote.LOCAL));
-        local.add(new AjaxEventBehavior("onclick") {
+        radioGroup.add(new AjaxFormChoiceComponentUpdatingBehavior() {
 
             /** id. */
             private static final long serialVersionUID = -1653173329010286091L;
 
 
             @Override
-            protected void onEvent(AjaxRequestTarget target) {
-                resourceDiv.setVisible(false);
-                fileDiv.setVisible(true);
+            protected void onUpdate(AjaxRequestTarget target) {
                 target.add(resourceDiv);
                 target.add(fileDiv);
             }
 
         });
-        radioGroup.add(local);
-        Radio<ResourceLocalRemote> remote = new Radio<ResourceLocalRemote>("remote", new Model<ResourceLocalRemote>(
-                ResourceLocalRemote.REMOTE));
-        remote.add(new AjaxEventBehavior("onclick") {
-
-            /** id. */
-            private static final long serialVersionUID = -1689888759359590693L;
-
-
-            @Override
-            protected void onEvent(AjaxRequestTarget target) {
-                resourceDiv.setVisible(true);
-                fileDiv.setVisible(false);
-                target.add(resourceDiv);
-                target.add(fileDiv);
-            }
-
-        });
-        radioGroup.add(remote);
+        radioGroup.add(new Radio<ResourceLocalRemote>("local",
+                new Model<ResourceLocalRemote>(ResourceLocalRemote.LOCAL)));
+        radioGroup.add(new Radio<ResourceLocalRemote>("remote", new Model<ResourceLocalRemote>(
+                ResourceLocalRemote.REMOTE)));
 
         // max upload size, 500MB
         form.setMaxSize(Bytes.megabytes(500));
