@@ -9,7 +9,6 @@ import org.purl.wf4ever.rosrs.client.Annotable;
 
 import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.OkClickedEvent;
-import pl.psnc.dl.wf4ever.portal.events.annotations.ImportAnnotationClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.ImportAnnotationReadyEvent;
 
 import com.google.common.eventbus.EventBus;
@@ -41,11 +40,15 @@ public class ImportAnnotationModal extends AbstractModal {
      * 
      * @param id
      *            wicket id
+     * @param annotableModel
+     *            the annotated resource
      * @param eventBusModel
      *            bus model
      */
-    public ImportAnnotationModal(String id, final IModel<EventBus> eventBusModel) {
+    public ImportAnnotationModal(String id, IModel<? extends Annotable> annotableModel,
+            final IModel<EventBus> eventBusModel) {
         super(id, eventBusModel, "import-annotation-modal", "Import annotations");
+        this.annotableModel = annotableModel;
 
         // Enable multipart mode (need for uploads file)
         form.setMultiPart(true);
@@ -54,19 +57,6 @@ public class ImportAnnotationModal extends AbstractModal {
         form.setMaxSize(Bytes.megabytes(10));
         fileUpload = new FileUploadField("fileUpload");
         modal.add(fileUpload);
-    }
-
-
-    /**
-     * Display this modal.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @Subscribe
-    public void onImportAnnotationsClicked(ImportAnnotationClickedEvent event) {
-        this.annotableModel = event.getAnnotableModel();
-        show(event.getTarget());
     }
 
 

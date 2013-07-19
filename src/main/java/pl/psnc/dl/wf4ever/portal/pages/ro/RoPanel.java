@@ -33,6 +33,7 @@ import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.events.MetadataDownloadEvent;
 import pl.psnc.dl.wf4ever.portal.events.RoEvolutionLoadedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationAddedEvent;
+import pl.psnc.dl.wf4ever.portal.events.annotations.ImportAnnotationClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.ImportAnnotationReadyEvent;
 import pl.psnc.dl.wf4ever.portal.events.evo.JobFinishedEvent;
 import pl.psnc.dl.wf4ever.portal.events.evo.ReleaseCreateEvent;
@@ -69,6 +70,9 @@ public class RoPanel extends Panel {
 
     /** Loadable event bus model. */
     private IModel<EventBus> eventBusModel;
+
+    /** Import annotations modal. */
+    private ImportAnnotationModal importAnnotationsModal;
 
 
     /**
@@ -144,13 +148,31 @@ public class RoPanel extends Panel {
         add(new NotificationPreviewPanel("notificationPanel", selectedNotification, eventBusModel));
 
         add(new DownloadMetadataModal("download-metadata-modal", eventBusModel));
-        add(new ImportAnnotationModal("import-annotation-modal", eventBusModel));
+        importAnnotationsModal = new ImportAnnotationModal("import-annotation-modal", researchObjectModel,
+                eventBusModel);
+        add(importAnnotationsModal);
 
         ExecutorService executor = Executors.newFixedThreadPool(10);
         Future<ArrayList<Notification>> notificationsFuture = executor.submit(RoPage.createNotificationsCallable(
             notificationService, researchObjectModel));
         add(new FutureUpdateBehavior<ArrayList<Notification>>(Duration.seconds(1),
                 session.addFuture(notificationsFuture), notificationsModel, notificationsIndicator, notificationsList));
+    }
+
+
+    /**
+     * Display the modal.
+     * 
+     * @param event
+     *            AJAX event
+     */
+    @Subscribe
+    public void onImportAnnotationsClicked(ImportAnnotationClickedEvent event) {
+        ImportAnnotationModal importAnnotationsModal2 = new ImportAnnotationModal("import-annotation-modal",
+                event.getAnnotableModel(), eventBusModel);
+        importAnnotationsModal.replaceWith(importAnnotationsModal2);
+        importAnnotationsModal = importAnnotationsModal2;
+        importAnnotationsModal.show(event.getTarget());
     }
 
 

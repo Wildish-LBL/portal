@@ -12,7 +12,6 @@ import org.apache.wicket.model.PropertyModel;
 import pl.psnc.dl.wf4ever.portal.components.annotations.TemplateDropDownChoice;
 import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.OkClickedEvent;
-import pl.psnc.dl.wf4ever.portal.events.ros.RoCreateClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.ros.RoCreateReadyEvent;
 import pl.psnc.dl.wf4ever.portal.model.template.ResearchObjectTemplate;
 
@@ -75,18 +74,6 @@ public class CreateROModal extends AbstractModal {
 
         modal.add(new TextField<String>("ro-title", new PropertyModel<String>(this, "title")));
         modal.add(new TextArea<String>("description", new PropertyModel<String>(this, "description")));
-    }
-
-
-    /**
-     * Show itself.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @Subscribe
-    public void onRoCreate(RoCreateClickedEvent event) {
-        show(event.getTarget());
     }
 
 

@@ -11,7 +11,6 @@ import org.purl.wf4ever.rosrs.client.Folder;
 import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.OkClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.AggregationChangedEvent;
-import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceMoveClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceMoveEvent;
 
 import com.google.common.eventbus.EventBus;
@@ -46,18 +45,6 @@ public class MoveResourceModal extends AbstractModal {
         super(id, foldersModel, eventBusModel, "move-resource-modal", "Move a resource");
         modal.add(new DropDownChoice<Folder>("folder", new PropertyModel<Folder>(this, "folder"), foldersModel,
                 new ChoiceRenderer<Folder>("path", "uri")));
-    }
-
-
-    /**
-     * Show itself.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @Subscribe
-    public void onResourceMoveClicked(ResourceMoveClickedEvent event) {
-        show(event.getTarget());
     }
 
 

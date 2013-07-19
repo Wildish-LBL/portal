@@ -23,12 +23,15 @@ import pl.psnc.dl.wf4ever.portal.components.annotations.CommentsList;
 import pl.psnc.dl.wf4ever.portal.events.AddLinkEvent;
 import pl.psnc.dl.wf4ever.portal.events.FolderChangeEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.DuplicateEvent;
+import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddReadyEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddedEvent;
+import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceAddClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceAddReadyEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceAddedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceDeleteClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceDeletedEvent;
+import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceMoveClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceMoveEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceMovedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.UpdateClickedEvent;
@@ -68,6 +71,15 @@ public class RoContentPanel extends EventPanel {
     /** A list of visited folders. */
     private FolderHierarchyModel folderHierarchyModel;
 
+    /** Modal window for adding resources. */
+    private UploadResourceModal uploadResourceModal;
+
+    /** Modal window for adding folders. */
+    private AddFolderModal addFolderModal;
+
+    /** Modal window for moving resources. */
+    private MoveResourceModal moveResourceModal;
+
 
     /**
      * Constructor.
@@ -100,9 +112,59 @@ public class RoContentPanel extends EventPanel {
         add(new ResourceSummaryPanel("resource-summary", resourceModel, eventBusModel));
         add(new CommentsList("resource-comments", resourceModel, eventBusModel));
         add(new AdvancedAnnotationsPanel("advanced-annotations", "resource-basic-view", resourceModel, eventBusModel));
-        add(new UploadResourceModal("upload-resource-modal", eventBusModel));
-        add(new AddFolderModal("add-folder-modal", eventBusModel));
-        add(new MoveResourceModal("move-resource-modal", allFolders, eventBusModel));
+
+        uploadResourceModal = new UploadResourceModal("upload-resource-modal", eventBusModel);
+        add(uploadResourceModal);
+        addFolderModal = new AddFolderModal("add-folder-modal", eventBusModel);
+        add(addFolderModal);
+        moveResourceModal = new MoveResourceModal("move-resource-modal", allFolders, eventBusModel);
+        add(moveResourceModal);
+    }
+
+
+    /**
+     * Show the modal.
+     * 
+     * @param event
+     *            AJAX event
+     */
+    @Subscribe
+    public void onAddResourceClicked(ResourceAddClickedEvent event) {
+        UploadResourceModal uploadResourceModal2 = new UploadResourceModal("upload-resource-modal", eventBusModel);
+        uploadResourceModal.replaceWith(uploadResourceModal2);
+        uploadResourceModal = uploadResourceModal2;
+        uploadResourceModal.show(event.getTarget());
+    }
+
+
+    /**
+     * Show the modal.
+     * 
+     * @param event
+     *            AJAX event
+     */
+    @Subscribe
+    public void onAddFolderClicked(FolderAddClickedEvent event) {
+        AddFolderModal addFolderModal2 = new AddFolderModal("add-folder-modal", eventBusModel);
+        addFolderModal.replaceWith(addFolderModal2);
+        addFolderModal = addFolderModal2;
+        addFolderModal.show(event.getTarget());
+    }
+
+
+    /**
+     * Show the modal.
+     * 
+     * @param event
+     *            AJAX event
+     */
+    @Subscribe
+    public void onResourceMoveClicked(ResourceMoveClickedEvent event) {
+        IModel<List<Folder>> allFolders = new PropertyModel<List<Folder>>(getDefaultModel(), "allFolders");
+        MoveResourceModal moveResourceModal2 = new MoveResourceModal("move-resource-modal", allFolders, eventBusModel);
+        moveResourceModal.replaceWith(moveResourceModal2);
+        moveResourceModal = moveResourceModal2;
+        moveResourceModal.show(event.getTarget());
     }
 
 

@@ -6,7 +6,6 @@ import org.apache.wicket.model.PropertyModel;
 
 import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.OkClickedEvent;
-import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddReadyEvent;
 
 import com.google.common.eventbus.EventBus;
@@ -37,18 +36,6 @@ public class AddFolderModal extends AbstractModal {
     public AddFolderModal(String id, final IModel<EventBus> eventBusModel) {
         super(id, eventBusModel, "add-folder-modal", "Add folder");
         modal.add(new RequiredTextField<>("folder-name", new PropertyModel<String>(this, "name")));
-    }
-
-
-    /**
-     * Show itself.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @Subscribe
-    public void onAddFolderClicked(FolderAddClickedEvent event) {
-        show(event.getTarget());
     }
 
 

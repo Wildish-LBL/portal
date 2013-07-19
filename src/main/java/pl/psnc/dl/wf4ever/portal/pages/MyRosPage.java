@@ -78,6 +78,15 @@ public class MyRosPage extends BasePage {
     /** Form with the list and buttons. */
     private Form<?> form;
 
+    /** Modal window for deleting the ROs. */
+    private DeleteROModal deleteROModal;
+
+    /** Modal window for creating a new RO. */
+    private CreateROModal createROModal;
+
+    /** Modal window for creating an RO from a ZIP. */
+    private UploadZipModal uploadZipModal;
+
 
     /**
      * Constructor.
@@ -123,10 +132,61 @@ public class MyRosPage extends BasePage {
         form.add(new AuthenticatedAjaxEventButton("add-zip", form, eventBusModel, ZipAddClickedEvent.class));
         form.add(new BookmarkablePageLink<Void>("myExpImport", MyExpImportPage.class));
 
-        add(new DeleteROModal("delete-ro-modal", eventBusModel, new PropertyModel<List<ResearchObject>>(this,
-                "selectedResearchObjects")));
-        add(new CreateROModal("create-ro-modal", eventBusModel));
-        add(new UploadZipModal("zip-upload-modal", eventBusModel));
+        deleteROModal = new DeleteROModal("delete-ro-modal", eventBusModel, new PropertyModel<List<ResearchObject>>(
+                this, "selectedResearchObjects"));
+        add(deleteROModal);
+        createROModal = new CreateROModal("create-ro-modal", eventBusModel);
+        add(createROModal);
+        uploadZipModal = new UploadZipModal("zip-upload-modal", eventBusModel);
+        add(uploadZipModal);
+    }
+
+
+    /**
+     * Show the modal.
+     * 
+     * @param event
+     *            AJAX event
+     */
+    @Subscribe
+    public void onRoDelete(RoDeleteClickedEvent event) {
+        if (!selectedResearchObjects.isEmpty()) {
+            DeleteROModal deleteROModal2 = new DeleteROModal("delete-ro-modal", eventBusModel,
+                    new PropertyModel<List<ResearchObject>>(this, "selectedResearchObjects"));
+            deleteROModal.replaceWith(deleteROModal2);
+            deleteROModal = deleteROModal2;
+            deleteROModal.show(event.getTarget());
+        }
+    }
+
+
+    /**
+     * Show the modal.
+     * 
+     * @param event
+     *            AJAX event
+     */
+    @Subscribe
+    public void onRoCreate(RoCreateClickedEvent event) {
+        CreateROModal createROModal2 = new CreateROModal("create-ro-modal", eventBusModel);
+        createROModal.replaceWith(createROModal2);
+        createROModal = createROModal2;
+        createROModal.show(event.getTarget());
+    }
+
+
+    /**
+     * Show the modal.
+     * 
+     * @param event
+     *            AJAX event
+     */
+    @Subscribe
+    public void onAddZipClicked(ZipAddClickedEvent event) {
+        UploadZipModal uploadZipModal2 = new UploadZipModal("zip-upload-modal", eventBusModel);
+        uploadZipModal.replaceWith(uploadZipModal2);
+        uploadZipModal = uploadZipModal2;
+        uploadZipModal.show(event.getTarget());
     }
 
 
@@ -137,7 +197,7 @@ public class MyRosPage extends BasePage {
      *            event
      */
     @Subscribe
-    public void onRoCreate(RoCreateReadyEvent event) {
+    public void onRoCreated(RoCreateReadyEvent event) {
         try {
             ResearchObject ro;
             if (event.getTemplate() == null) {

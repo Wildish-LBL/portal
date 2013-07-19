@@ -132,6 +132,7 @@ public abstract class AbstractModal extends EventPanel {
      *            AJAX target
      */
     public void show(AjaxRequestTarget target) {
+        target.add(this);
         target.appendJavaScript("$('#" + modalId + "').modal('show')");
     }
 

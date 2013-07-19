@@ -18,7 +18,6 @@ import pl.psnc.dl.wf4ever.portal.components.annotations.ResourceTypeDropDownChoi
 import pl.psnc.dl.wf4ever.portal.components.form.RequiredURITextField;
 import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.OkClickedEvent;
-import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceAddClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceAddReadyEvent;
 import pl.psnc.dl.wf4ever.portal.model.ResourceLocalRemote;
 import pl.psnc.dl.wf4ever.portal.model.ResourceType;
@@ -125,18 +124,6 @@ public class UploadResourceModal extends AbstractModal {
         fileDiv.add(fileUpload);
 
         resourceDiv.add(new RequiredURITextField("resourceURI", new PropertyModel<URI>(this, "resourceURI")));
-    }
-
-
-    /**
-     * Show itself.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @Subscribe
-    public void onAddResourceClicked(ResourceAddClickedEvent event) {
-        show(event.getTarget());
     }
 
 

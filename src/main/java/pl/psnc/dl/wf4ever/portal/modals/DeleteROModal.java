@@ -9,7 +9,6 @@ import org.purl.wf4ever.rosrs.client.ResearchObject;
 
 import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.OkClickedEvent;
-import pl.psnc.dl.wf4ever.portal.events.ros.RoDeleteClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.ros.RoDeleteReadyEvent;
 
 import com.google.common.eventbus.EventBus;
@@ -54,22 +53,6 @@ public class DeleteROModal extends AbstractModal {
                 return toDelete.getObject().size() + " Research Objects";
             }
         }));
-    }
-
-
-    /**
-     * Show itself.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @SuppressWarnings("unchecked")
-    @Subscribe
-    public void onRoDelete(RoDeleteClickedEvent event) {
-        if (!((List<ResearchObject>) getDefaultModelObject()).isEmpty()) {
-            event.getTarget().add(this);
-            show(event.getTarget());
-        }
     }
 
 
