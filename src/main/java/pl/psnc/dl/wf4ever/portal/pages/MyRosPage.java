@@ -25,6 +25,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.purl.wf4ever.rosrs.client.ROSRService;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
+import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
@@ -137,13 +138,23 @@ public class MyRosPage extends BasePage {
     @Subscribe
     public void onRoCreate(RoCreateReadyEvent event) {
         try {
-            researchObjects.add(ResearchObject.create(MySession.get().getRosrs(), event.getRoId()));
+            ResearchObject ro;
+            if (event.getTemplate() == null) {
+                ro = ResearchObject.create(MySession.get().getRosrs(), event.getRoId());
+            } else {
+                ro = event.getTemplate().create(MySession.get().getRosrs(), event.getRoId());
+            }
+            researchObjects.add(ro);
         } catch (ROSRSException e) {
             if (e.getStatus() == HttpStatus.SC_CONFLICT) {
                 error("This ID is already used.");
             } else {
                 error("Could not add Research Object: " + event.getRoId() + " (" + e.getMessage() + ")");
             }
+            LOG.error("Could not create RO", e);
+        } catch (ROException e) {
+            error("Could not add Research Object: " + event.getRoId() + " (" + e.getMessage() + ")");
+            LOG.error("Could not create RO", e);
         }
         event.getTarget().add(form);
     }

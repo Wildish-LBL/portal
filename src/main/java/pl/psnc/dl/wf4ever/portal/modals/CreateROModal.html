@@ -1,9 +1,18 @@
 <?xml version="1.0"?>
 <wicket:extend xmlns:wicket="http://wicket.apache.org">
 	<fieldset>
-		<label class="control-label" for="roId">RO identifier</label>
-		<div class="controls">
-			<input type="text" id="roId" wicket:id="roId" />
+		<div class="control-group">
+			<label class="control-label" for="roId">RO identifier</label>
+			<div class="controls">
+				<input type="text" id="roId" wicket:id="roId" />
+			</div>
+		</div>
+		<div class="control-group">
+			<label class="control-label" for="type">Template</label>
+			<div class="controls">
+				<select class="span4" id="type" wicket:id="templates">
+				</select><span class="help-block" wicket:id="template-description"></span>
+			</div>
 		</div>
 	</fieldset>
 </wicket:extend>
