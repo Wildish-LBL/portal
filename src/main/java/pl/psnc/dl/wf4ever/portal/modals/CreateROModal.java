@@ -4,6 +4,8 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.RequiredTextField;
+import org.apache.wicket.markup.html.form.TextArea;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 
@@ -34,6 +36,12 @@ public class CreateROModal extends AbstractModal {
     /** RO template. */
     private ResearchObjectTemplate template;
 
+    /** RO title. */
+    private String title;
+
+    /** RO description. */
+    private String description;
+
 
     /**
      * Constructor.
@@ -48,11 +56,11 @@ public class CreateROModal extends AbstractModal {
         modal.add(new RequiredTextField<String>("roId", new PropertyModel<String>(this, "roId")));
         TemplateDropDownChoice templates = new TemplateDropDownChoice("templates",
                 new PropertyModel<ResearchObjectTemplate>(this, "template"));
-        final Label description = new Label("template-description", new PropertyModel<String>(this,
+        final Label templateDescription = new Label("template-description", new PropertyModel<String>(this,
                 "template.description"));
-        description.setOutputMarkupId(true);
+        templateDescription.setOutputMarkupId(true);
         modal.add(templates);
-        modal.add(description);
+        modal.add(templateDescription);
         templates.add(new AjaxFormComponentUpdatingBehavior("onchange") {
 
             /** id. */
@@ -61,9 +69,12 @@ public class CreateROModal extends AbstractModal {
 
             @Override
             protected void onUpdate(AjaxRequestTarget target) {
-                target.add(description);
+                target.add(templateDescription);
             }
         });
+
+        modal.add(new TextField<String>("ro-title", new PropertyModel<String>(this, "title")));
+        modal.add(new TextArea<String>("description", new PropertyModel<String>(this, "description")));
     }
 
 
@@ -87,7 +98,13 @@ public class CreateROModal extends AbstractModal {
      */
     @Subscribe
     public void onOk(OkClickedEvent event) {
-        eventBusModel.getObject().post(new RoCreateReadyEvent(event.getTarget(), roId, template));
+        if (title != null && title.trim().isEmpty()) {
+            title = null;
+        }
+        if (description != null && description.trim().isEmpty()) {
+            description = null;
+        }
+        eventBusModel.getObject().post(new RoCreateReadyEvent(event.getTarget(), roId, template, title, description));
         hide(event.getTarget());
     }
 
@@ -121,5 +138,25 @@ public class CreateROModal extends AbstractModal {
 
     public void setTemplate(ResearchObjectTemplate template) {
         this.template = template;
+    }
+
+
+    public String getTitle() {
+        return title;
+    }
+
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+
+    public String getDescription() {
+        return description;
+    }
+
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

@@ -19,6 +19,12 @@ public class RoCreateReadyEvent extends AbstractAjaxEvent {
     /** RO template. */
     private final ResearchObjectTemplate template;
 
+    /** RO title. */
+    private final String title;
+
+    /** RO description. */
+    private final String description;
+
 
     /**
      * Constructor.
@@ -29,11 +35,18 @@ public class RoCreateReadyEvent extends AbstractAjaxEvent {
      *            RO id
      * @param template
      *            RO template (may be null)
+     * @param title
+     *            RO title
+     * @param description
+     *            RO description
      */
-    public RoCreateReadyEvent(AjaxRequestTarget target, String roId, ResearchObjectTemplate template) {
+    public RoCreateReadyEvent(AjaxRequestTarget target, String roId, ResearchObjectTemplate template, String title,
+            String description) {
         super(target);
         this.roId = roId;
         this.template = template;
+        this.title = title;
+        this.description = description;
     }
 
 
@@ -44,6 +57,16 @@ public class RoCreateReadyEvent extends AbstractAjaxEvent {
 
     public ResearchObjectTemplate getTemplate() {
         return template;
+    }
+
+
+    public String getTitle() {
+        return title;
+    }
+
+
+    public String getDescription() {
+        return description;
     }
 
 }

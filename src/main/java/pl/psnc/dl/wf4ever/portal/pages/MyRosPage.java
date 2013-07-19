@@ -45,6 +45,7 @@ import pl.psnc.dl.wf4ever.portal.utils.ModelIteratorAdapter;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import com.hp.hpl.jena.vocabulary.DCTerms;
 import com.sun.jersey.api.client.Client;
 
 /**
@@ -145,6 +146,12 @@ public class MyRosPage extends BasePage {
                 ro = event.getTemplate().create(MySession.get().getRosrs(), event.getRoId());
             }
             researchObjects.add(ro);
+            if (event.getTitle() != null) {
+                ro.createPropertyValue(DCTerms.title, event.getTitle());
+            }
+            if (event.getDescription() != null) {
+                ro.createPropertyValue(DCTerms.description, event.getDescription());
+            }
         } catch (ROSRSException e) {
             if (e.getStatus() == HttpStatus.SC_CONFLICT) {
                 error("This ID is already used.");
