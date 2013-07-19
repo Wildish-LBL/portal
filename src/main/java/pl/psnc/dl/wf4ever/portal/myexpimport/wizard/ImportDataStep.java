@@ -3,6 +3,7 @@
  */
 package pl.psnc.dl.wf4ever.portal.myexpimport.wizard;
 
+import org.apache.wicket.Application;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -16,6 +17,8 @@ import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.myexpimport.wizard.ImportModel.ImportStatus;
 import pl.psnc.dl.wf4ever.portal.services.MyExpImportService;
+
+import com.googlecode.wicket.jquery.ui.widget.progressbar.ProgressBar;
 
 /**
  * Step of performing the import process.
@@ -38,24 +41,27 @@ public class ImportDataStep extends WizardStep {
      * @param model
      *            import model
      */
-    @SuppressWarnings("serial")
     public ImportDataStep(final ImportModel model) {
         super("Import data", null);
         setOutputMarkupId(true);
-        final Label importStatus = new Label("message", new PropertyModel<String>(model, "message"));
-        importStatus.setOutputMarkupId(true);
-        importStatus.setEscapeModelStrings(false);
-        add(importStatus);
         setComplete(false);
 
+        final ProgressBar progressBar = new ProgressBar("progress-bar", new PropertyModel<Integer>(model,
+                "progressInPercent"));
+        add(progressBar);
+        final Label importStatus = new Label("message", new PropertyModel<String>(model, "message"));
+        add(importStatus.setOutputMarkupId(true).setEscapeModelStrings(false));
+
         final AjaxSelfUpdatingTimerBehavior updater = new AjaxSelfUpdatingTimerBehavior(Duration.milliseconds(INTERVAL)) {
+
+            /** id. */
+            private static final long serialVersionUID = 4629392247158141573L;
+
 
             @Override
             protected void onPostProcessTarget(AjaxRequestTarget target) {
                 super.onPostProcessTarget(target);
-                target.appendJavaScript("$(\"#progressbar\").progressbar(\"value\", " + model.getProgressInPercent()
-                        + ");");
-
+                target.add(progressBar);
                 if (model.getStatus() == ImportStatus.FINISHED || model.getStatus() == ImportStatus.FAILED) {
                     stop(target);
                     importStatus.remove(this);
@@ -65,6 +71,10 @@ public class ImportDataStep extends WizardStep {
             }
         };
         add(new AjaxButton("go") {
+
+            /** id. */
+            private static final long serialVersionUID = -1566765092932052987L;
+
 
             @Override
             protected void onError(AjaxRequestTarget target, Form<?> form) {
@@ -83,10 +93,22 @@ public class ImportDataStep extends WizardStep {
 
                     this.setEnabled(false);
                     target.add(this);
-                    getRequestCycle().setResponsePage(getPage());
                 }
             }
         }).setEnabled(model.getStatus() == ImportStatus.NOT_STARTED).setOutputMarkupId(true);
     }
 
+
+    @Override
+    protected void onBeforeRender() {
+        Application.get().getMarkupSettings().setStripWicketTags(true);
+        super.onBeforeRender();
+    }
+
+
+    @Override
+    protected void onAfterRender() {
+        Application.get().getMarkupSettings().setStripWicketTags(false);
+        super.onAfterRender();
+    }
 }

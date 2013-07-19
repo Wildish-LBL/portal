@@ -19,6 +19,8 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.apache.log4j.Logger;
 import org.purl.wf4ever.rosrs.client.ROSRService;
+import org.purl.wf4ever.rosrs.client.ResearchObject;
+import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 import org.scribe.model.Response;
 import org.scribe.model.Token;
@@ -47,7 +49,6 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.DCTerms;
-import com.sun.jersey.api.client.ClientResponse;
 
 /**
  * Service for importing content from myExperiment to RODL. Runs a background thread.
@@ -163,8 +164,8 @@ public final class MyExpImportService {
         /** Number of steps completed during import. */
         private int stepsComplete = 0;
 
-        /** RO URI. */
-        private URI researchObjectURI;
+        /** RO. */
+        private ResearchObject researchObject;
 
         /** List of errors that happened during the import. */
         private final List<String> errors = new ArrayList<>();
@@ -240,14 +241,14 @@ public final class MyExpImportService {
             stepsTotal = simpleResourcesCnt * 4 + packs.size() * 2 + 3;
 
             try {
-                researchObjectURI = createRO(rodlURI, model.getRoId());
+                researchObject = createRO(rodlURI, model.getRoId());
             } catch (Exception e) {
                 LOG.error("Creating RO", e);
                 errors.add(String.format("When creating RO: %s", e.getMessage()));
                 model.setProgressInPercent(100);
                 model.setStatus(ImportStatus.FAILED);
             }
-            if (researchObjectURI != null) {
+            if (researchObject != null) {
                 importFiles(model.getSelectedFiles());
                 importWorkflows(model.getSelectedWorkflows());
                 importPacks(packs);
@@ -278,16 +279,17 @@ public final class MyExpImportService {
          *            RODL URI
          * @param roId
          *            RO id (last segment of URI)
-         * @return RO URI
+         * @return RO
          * @throws ROSRSException
          *             when the RO could not be created
          */
-        private URI createRO(URI rodlURI, String roId)
+        private ResearchObject createRO(URI rodlURI, String roId)
                 throws ROSRSException {
             model.setMessage(String.format("Creating a Research Object \"%s\"", roId));
-            ClientResponse r = rosrs.createResearchObject(roId);
+            ResearchObject ro = ResearchObject.create(rosrs, roId);
+            model.setResearchObject(ro);
             incrementStepsComplete();
-            return r.getLocation();
+            return ro;
         }
 
 
@@ -347,7 +349,7 @@ public final class MyExpImportService {
             Workflow w = (Workflow) getResource(header, Workflow.class);
             model.setMessage(String.format("Transforming workflow %s", w.getResource()));
             Wf2ROService.transformWorkflow(wf2ROService, URI.create(w.getContentUri()), w.getContentType(),
-                researchObjectURI, rosrs.getToken());
+                researchObject.getUri(), rosrs.getToken());
             incrementStepsComplete();
             return w;
         }
@@ -456,9 +458,11 @@ public final class MyExpImportService {
          *             when there is a problem with Wf-RO service
          * @throws ROSRSException
          *             the resource couldn't be uploaded to ROSRS
+         * @throws ROException
+         *             ROSRS returned incorrect data
          */
         private void importInternalPackItem(Pack pack, InternalPackItemHeader packItemHeader)
-                throws JAXBException, OAuthException, URISyntaxException, IOException, ROSRSException {
+                throws JAXBException, OAuthException, URISyntaxException, IOException, ROSRSException, ROException {
             InternalPackItem internalItem = (InternalPackItem) getResource(packItemHeader, InternalPackItem.class);
             BaseResourceHeader resourceHeader = internalItem.getItem();
             BaseResource r;
@@ -485,15 +489,17 @@ public final class MyExpImportService {
          *             when the resource URI cannot be created
          * @throws ROSRSException
          *             the resource couldn't be created in ROSRS
+         * @throws ROException
+         *             ROSRS returned incorrect data
          */
         private File importFile(FileHeader res)
-                throws OAuthException, JAXBException, URISyntaxException, ROSRSException {
+                throws OAuthException, JAXBException, URISyntaxException, ROSRSException, ROException {
             File r = (File) getResource(res, File.class);
             incrementStepsComplete();
 
             model.setMessage(String.format("Uploading %s", r.getFilename()));
-            rosrs.aggregateInternalResource(researchObjectURI, r.getFilename(),
-                new ByteArrayInputStream(r.getContentDecoded()), r.getContentType());
+            researchObject.aggregate(r.getFilename(), new ByteArrayInputStream(r.getContentDecoded()),
+                r.getContentType());
 
             incrementStepsComplete();
             return r;
@@ -544,21 +550,21 @@ public final class MyExpImportService {
             String rdf = response.getBody();
             URI annTargetURI;
             if (res instanceof Pack) {
-                annTargetURI = researchObjectURI;
+                annTargetURI = researchObject.getUri();
             } else if (res instanceof File) {
-                annTargetURI = researchObjectURI.resolve(((File) res).getFilenameURI());
+                annTargetURI = researchObject.getUri().resolve(((File) res).getFilenameURI());
             } else {
                 incrementStepsComplete();
                 return;
             }
             incrementStepsComplete();
 
-            String bodyPath = ROSRService.createAnnotationBodyPath(researchObjectURI.relativize(annTargetURI)
+            String bodyPath = ROSRService.createAnnotationBodyPath(researchObject.getUri().relativize(annTargetURI)
                     .toString());
             model.setMessage(String.format("Uploading annotation body %s", bodyPath));
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             createAnnotationBody(annTargetURI, rdf).write(out);
-            rosrs.addAnnotation(researchObjectURI, new HashSet<>(Arrays.asList(annTargetURI)), bodyPath,
+            rosrs.addAnnotation(researchObject.getUri(), new HashSet<>(Arrays.asList(annTargetURI)), bodyPath,
                 new ByteArrayInputStream(out.toByteArray()), "application/rdf+xml");
             incrementStepsComplete();
         }

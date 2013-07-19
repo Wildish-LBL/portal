@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.purl.wf4ever.rosrs.client.ResearchObject;
 
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.FileHeader;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.PackHeader;
@@ -85,6 +86,9 @@ public class ImportModel implements Serializable {
 
     /** Data import progress, 0-100. */
     private int progressInPercent = 0;
+
+    /** RO that is created. */
+    private ResearchObject researchObject = null;
 
 
     /**
@@ -223,6 +227,16 @@ public class ImportModel implements Serializable {
 
     public void setProgressInPercent(int progressInPercent) {
         this.progressInPercent = progressInPercent;
+    }
+
+
+    public ResearchObject getResearchObject() {
+        return researchObject;
+    }
+
+
+    public void setResearchObject(ResearchObject researchObject) {
+        this.researchObject = researchObject;
     }
 
 }
