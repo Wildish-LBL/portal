@@ -254,7 +254,6 @@
 					<stopPort>9998</stopPort>
 					<webApp>
 						<contextPath>/</contextPath>
-						<descriptor>target/portal/WEB-INF/web.xml</descriptor>
 					</webApp>
 					<useTestScope>true</useTestScope>
 				</configuration>
