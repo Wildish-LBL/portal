@@ -20,7 +20,7 @@
 		</init-param>
 		<init-param>
 			<param-name>configuration</param-name>
-			<param-value>development</param-value>
+			<param-value>${wicketconfig}</param-value>
 		</init-param>
 	</filter>
 
