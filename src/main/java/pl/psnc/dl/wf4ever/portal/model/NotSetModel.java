@@ -1,8 +1,7 @@
-package pl.psnc.dl.wf4ever.portal.components.form;
+package pl.psnc.dl.wf4ever.portal.model;
 
-import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.PropertyModel;
 
 /**
  * A label that displays "Not set" when the value is null.
@@ -10,7 +9,7 @@ import org.apache.wicket.model.PropertyModel;
  * @author piotrekhol
  * 
  */
-public class NotSetLabel extends Label {
+public class NotSetModel extends AbstractReadOnlyModel<String> {
 
     /** id. */
     private static final long serialVersionUID = 5810881670929377406L;
@@ -22,14 +21,10 @@ public class NotSetLabel extends Label {
     /**
      * Constructor.
      * 
-     * @param id
-     *            wicket id
      * @param model
      *            the model for the value, can have a null value
      */
-    public NotSetLabel(String id, IModel<String> model) {
-        super(id);
-        setDefaultModel(new PropertyModel<String>(this, "valueOrNotSet"));
+    public NotSetModel(IModel<String> model) {
         originalModel = model;
     }
 
@@ -39,24 +34,13 @@ public class NotSetLabel extends Label {
     }
 
 
-    public void setOriginalModel(IModel<String> originalModel) {
-        this.originalModel = originalModel;
-    }
-
-
-    @Override
-    protected void onConfigure() {
-        super.onConfigure();
-        setEscapeModelStrings(originalModel.getObject() != null);
-    }
-
-
     /**
      * If the original value is not null, return it, otherwise return "<em>Not set</em>".
      * 
      * @return the original value or a replacement text
      */
-    public String getValueOrNotSet() {
+    @Override
+    public String getObject() {
         if (originalModel.getObject() != null) {
             return originalModel.getObject();
         } else {

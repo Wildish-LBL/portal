@@ -1,6 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.components.annotations;
 
 import org.apache.wicket.MarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
@@ -10,12 +11,12 @@ import org.purl.wf4ever.rosrs.client.Annotable;
 
 import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
-import pl.psnc.dl.wf4ever.portal.components.form.NotSetLabel;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationAddedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationCancelledEvent;
 import pl.psnc.dl.wf4ever.portal.events.edit.ApplyEvent;
 import pl.psnc.dl.wf4ever.portal.events.edit.CancelEvent;
 import pl.psnc.dl.wf4ever.portal.events.edit.EditEvent;
+import pl.psnc.dl.wf4ever.portal.model.NotSetModel;
 import pl.psnc.dl.wf4ever.portal.model.ResourceType;
 import pl.psnc.dl.wf4ever.portal.model.ResourceTypeModel;
 
@@ -61,7 +62,7 @@ public class ResourceTypePanel extends EventPanel {
             super(id, markupId, markupProvider, model);
             Form<Void> form = new Form<Void>("form");
             add(form);
-            form.add(new NotSetLabel("text", new PropertyModel<String>(model, "name")));
+            form.add(new Label("text", new NotSetModel(new PropertyModel<String>(model, "name"))));
             form.add(new AuthenticatedAjaxEventButton("edit", form, internalEventBusModel, EditEvent.class));
         }
     }
