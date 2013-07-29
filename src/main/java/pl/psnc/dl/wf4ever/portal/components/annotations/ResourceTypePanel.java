@@ -19,6 +19,7 @@ import pl.psnc.dl.wf4ever.portal.events.edit.EditEvent;
 import pl.psnc.dl.wf4ever.portal.model.NotSetModel;
 import pl.psnc.dl.wf4ever.portal.model.ResourceType;
 import pl.psnc.dl.wf4ever.portal.model.ResourceTypeModel;
+import pl.psnc.dl.wf4ever.portal.model.SanitizedModel;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -62,7 +63,8 @@ public class ResourceTypePanel extends EventPanel {
             super(id, markupId, markupProvider, model);
             Form<Void> form = new Form<Void>("form");
             add(form);
-            form.add(new Label("text", new NotSetModel(new PropertyModel<String>(model, "name"))));
+            form.add(new Label("text", new SanitizedModel(new NotSetModel(new PropertyModel<String>(model, "name"))))
+                    .setEscapeModelStrings(false));
             form.add(new AuthenticatedAjaxEventButton("edit", form, internalEventBusModel, EditEvent.class));
         }
     }

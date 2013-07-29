@@ -10,8 +10,6 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.owasp.html.PolicyFactory;
-import org.owasp.html.Sanitizers;
 import org.purl.wf4ever.rosrs.client.Annotable;
 
 import pl.psnc.dl.wf4ever.portal.components.EventPanel;
@@ -24,6 +22,7 @@ import pl.psnc.dl.wf4ever.portal.events.edit.DeleteEvent;
 import pl.psnc.dl.wf4ever.portal.events.edit.EditEvent;
 import pl.psnc.dl.wf4ever.portal.model.AnnotationTripleModel;
 import pl.psnc.dl.wf4ever.portal.model.NotSetModel;
+import pl.psnc.dl.wf4ever.portal.model.SanitizedModel;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -42,10 +41,6 @@ public class EditableTextPanel extends EventPanel {
 
     /** id. */
     private static final long serialVersionUID = 1L;
-
-    /** A set of policies for allowed HTML tags. */
-    private static PolicyFactory sanitizer = Sanitizers.BLOCKS.and(Sanitizers.FORMATTING).and(Sanitizers.LINKS)
-            .and(Sanitizers.STYLES);
 
     /** should the delete button be visible. */
     private boolean canDelete = true;
@@ -233,9 +228,6 @@ public class EditableTextPanel extends EventPanel {
         /** Delete. */
         private AjaxButton deleteButton;
 
-        /** Label with value. */
-        private Label notSetLabel;
-
         /** Form for button and label. */
         protected Form<Void> form;
 
@@ -260,8 +252,8 @@ public class EditableTextPanel extends EventPanel {
             setOutputMarkupPlaceholderTag(true);
             form = new Form<Void>("form");
             add(form);
-            notSetLabel = new Label("text", new NotSetModel(model.getValueModel()));
-            form.add(notSetLabel);
+            form.add(new Label("text", new SanitizedModel(new NotSetModel(model.getValueModel())))
+                    .setEscapeModelStrings(false));
             form.add(new AuthenticatedAjaxEventButton("edit", form, internalEventBusModel, EditEvent.class));
             deleteButton = new AuthenticatedAjaxEventButton("delete", form, internalEventBusModel, DeleteEvent.class);
             form.add(deleteButton);
