@@ -10,7 +10,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 
 import pl.psnc.dl.wf4ever.portal.components.annotations.TemplateDropDownChoice;
-import pl.psnc.dl.wf4ever.portal.events.ros.RoCreateReadyEvent;
 import pl.psnc.dl.wf4ever.portal.model.template.ResearchObjectTemplate;
 
 import com.google.common.eventbus.EventBus;
@@ -88,8 +87,27 @@ public class CreateROModal extends AbstractModal {
         if (description != null && description.trim().isEmpty()) {
             description = null;
         }
-        eventBusModel.getObject().post(new RoCreateReadyEvent(target, roId, template, title, description));
+        onApply(target, roId, template, title, description);
         hide(target);
+    }
+
+
+    /**
+     * Ready to create the RO.
+     * 
+     * @param target
+     *            response target
+     * @param roId
+     *            RO id
+     * @param template
+     *            RO template (may be null)
+     * @param title
+     *            RO title
+     * @param description
+     *            RO description
+     */
+    public void onApply(AjaxRequestTarget target, String roId, ResearchObjectTemplate template, String title,
+            String description) {
     }
 
 

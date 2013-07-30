@@ -15,7 +15,6 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.lang.Bytes;
 
 import pl.psnc.dl.wf4ever.portal.components.form.RequiredURITextField;
-import pl.psnc.dl.wf4ever.portal.events.ros.ZipAddReadyEvent;
 import pl.psnc.dl.wf4ever.portal.model.ResourceLocalRemote;
 
 import com.google.common.eventbus.EventBus;
@@ -135,16 +134,40 @@ public class UploadZipModal extends AbstractModal {
             default:
                 final FileUpload uploadedFile = fileUpload.getFileUpload();
                 if (uploadedFile != null) {
-                    eventBusModel.getObject().post(new ZipAddReadyEvent(target, uploadedFile));
+                    onApply(target, uploadedFile);
                     hide(target);
                 }
                 break;
             case REMOTE:
-                eventBusModel.getObject().post(new ZipAddReadyEvent(target, resourceURI));
+                onApply(target, resourceURI);
                 hide(target);
                 break;
         }
         target.add(feedbackPanel);
+    }
+
+
+    /**
+     * Resource aggregated by reference only.
+     * 
+     * @param target
+     *            response target
+     * @param resourceURI
+     *            resource URI
+     */
+    protected void onApply(AjaxRequestTarget target, URI resourceURI) {
+    }
+
+
+    /**
+     * Apply.
+     * 
+     * @param target
+     *            response target
+     * @param uploadedFile
+     *            the uploaded file
+     */
+    protected void onApply(AjaxRequestTarget target, FileUpload uploadedFile) {
     }
 
 

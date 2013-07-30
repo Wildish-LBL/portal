@@ -9,7 +9,7 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
 
 /**
- * A button the creates an AJAX Event when clicked.
+ * A button the creates shows a "busy" indicator when clicked.
  * 
  * @author piotrekhol
  * 

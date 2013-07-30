@@ -8,8 +8,6 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
-import pl.psnc.dl.wf4ever.portal.events.ros.RoDeleteReadyEvent;
-
 import com.google.common.eventbus.EventBus;
 
 /**
@@ -57,7 +55,17 @@ public class DeleteROModal extends AbstractModal {
 
     @Override
     public void onOk(AjaxRequestTarget target) {
-        eventBusModel.getObject().post(new RoDeleteReadyEvent(target));
+        onApply(target);
         hide(target);
+    }
+
+
+    /**
+     * ROs are ready to be deleted.
+     * 
+     * @param target
+     *            AJAX target
+     */
+    public void onApply(AjaxRequestTarget target) {
     }
 }
