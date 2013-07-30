@@ -2,17 +2,15 @@ package pl.psnc.dl.wf4ever.portal.modals;
 
 import java.util.List;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
-import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
-import pl.psnc.dl.wf4ever.portal.events.OkClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.ros.RoDeleteReadyEvent;
 
 import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 
 /**
  * A modal for adding resources to the RO.
@@ -57,27 +55,9 @@ public class DeleteROModal extends AbstractModal {
     }
 
 
-    /**
-     * Post an event and hide.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @Subscribe
-    public void onOk(OkClickedEvent event) {
-        eventBusModel.getObject().post(new RoDeleteReadyEvent(event.getTarget()));
-        hide(event.getTarget());
-    }
-
-
-    /**
-     * Hide.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @Subscribe
-    public void onCancel(CancelClickedEvent event) {
-        hide(event.getTarget());
+    @Override
+    public void onOk(AjaxRequestTarget target) {
+        eventBusModel.getObject().post(new RoDeleteReadyEvent(target));
+        hide(target);
     }
 }

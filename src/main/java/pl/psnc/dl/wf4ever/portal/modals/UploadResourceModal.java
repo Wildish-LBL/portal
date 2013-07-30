@@ -16,14 +16,11 @@ import org.apache.wicket.util.lang.Bytes;
 
 import pl.psnc.dl.wf4ever.portal.components.annotations.ResourceTypeDropDownChoice;
 import pl.psnc.dl.wf4ever.portal.components.form.RequiredURITextField;
-import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
-import pl.psnc.dl.wf4ever.portal.events.OkClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceAddReadyEvent;
 import pl.psnc.dl.wf4ever.portal.model.ResourceLocalRemote;
 import pl.psnc.dl.wf4ever.portal.model.ResourceType;
 
 import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 
 /**
  * A modal for adding resources to the RO.
@@ -127,43 +124,23 @@ public class UploadResourceModal extends AbstractModal {
     }
 
 
-    /**
-     * Post an event and hide.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @Subscribe
-    public void onOk(OkClickedEvent event) {
+    @Override
+    public void onOk(AjaxRequestTarget target) {
         switch (resourceType) {
             case LOCAL:
             default:
                 final FileUpload uploadedFile = fileUpload.getFileUpload();
                 if (uploadedFile != null) {
-                    eventBusModel.getObject().post(
-                        new ResourceAddReadyEvent(event.getTarget(), uploadedFile, resourceClass));
-                    hide(event.getTarget());
+                    eventBusModel.getObject().post(new ResourceAddReadyEvent(target, uploadedFile, resourceClass));
+                    hide(target);
                 }
                 break;
             case REMOTE:
-                eventBusModel.getObject()
-                        .post(new ResourceAddReadyEvent(event.getTarget(), resourceURI, resourceClass));
-                hide(event.getTarget());
+                eventBusModel.getObject().post(new ResourceAddReadyEvent(target, resourceURI, resourceClass));
+                hide(target);
                 break;
         }
-        event.getTarget().add(feedbackPanel);
-    }
-
-
-    /**
-     * Hide.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @Subscribe
-    public void onCancel(CancelClickedEvent event) {
-        hide(event.getTarget());
+        target.add(feedbackPanel);
     }
 
 

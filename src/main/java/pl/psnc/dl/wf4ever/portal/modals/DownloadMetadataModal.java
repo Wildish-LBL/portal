@@ -3,15 +3,14 @@ package pl.psnc.dl.wf4ever.portal.modals;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 
-import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.MetadataDownloadClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.MetadataDownloadEvent;
-import pl.psnc.dl.wf4ever.portal.events.OkClickedEvent;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
 import com.google.common.eventbus.EventBus;
@@ -80,28 +79,10 @@ public class DownloadMetadataModal extends AbstractModal {
     }
 
 
-    /**
-     * Post an event and hide.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @Subscribe
-    public void onOk(OkClickedEvent event) {
-        eventBusModel.getObject().post(new MetadataDownloadEvent(event.getTarget(), format));
-        hide(event.getTarget());
-    }
-
-
-    /**
-     * Hide.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @Subscribe
-    public void onCancel(CancelClickedEvent event) {
-        hide(event.getTarget());
+    @Override
+    public void onOk(AjaxRequestTarget target) {
+        eventBusModel.getObject().post(new MetadataDownloadEvent(target, format));
+        hide(target);
     }
 
 
