@@ -64,7 +64,7 @@ public class MyRosPage extends BasePage {
     private static final Logger LOG = Logger.getLogger(MyRosPage.class);
 
     /** ROs selected by the user. */
-    final List<ResearchObject> selectedResearchObjects = new ArrayList<ResearchObject>();
+    private List<ResearchObject> selectedResearchObjects = new ArrayList<ResearchObject>();
 
     /** Feedback panel. */
     private MyFeedbackPanel feedbackPanel;
@@ -73,7 +73,7 @@ public class MyRosPage extends BasePage {
     private IModel<EventBus> eventBusModel;
 
     /** List of ROs. */
-    private ArrayList<ResearchObject> researchObjects;
+    private List<ResearchObject> researchObjects;
 
     /** Form with the list and buttons. */
     private Form<?> form;
@@ -122,7 +122,8 @@ public class MyRosPage extends BasePage {
         add(form);
         feedbackPanel = new MyFeedbackPanel("feedbackPanel");
         form.add(feedbackPanel);
-        CheckGroup<ResearchObject> group = new CheckGroup<ResearchObject>("group", selectedResearchObjects);
+        CheckGroup<ResearchObject> group = new CheckGroup<ResearchObject>("group",
+                new PropertyModel<List<ResearchObject>>(this, "selectedResearchObjects"));
         form.add(group);
         RefreshingView<ResearchObject> list = new MyROsRefreshingView("rosListView", researchObjects);
         group.add(list);
@@ -150,9 +151,10 @@ public class MyRosPage extends BasePage {
      */
     @Subscribe
     public void onRoDelete(RoDeleteClickedEvent event) {
-        if (!selectedResearchObjects.isEmpty()) {
-            DeleteROModal deleteROModal2 = new DeleteROModal("delete-ro-modal", eventBusModel,
-                    new PropertyModel<List<ResearchObject>>(this, "selectedResearchObjects"));
+        IModel<ArrayList<ResearchObject>> model = new PropertyModel<ArrayList<ResearchObject>>(getPageReference(),
+                "page.selectedResearchObjects");
+        if (!model.getObject().isEmpty()) {
+            DeleteROModal deleteROModal2 = new DeleteROModal("delete-ro-modal", eventBusModel, model);
             deleteROModal.replaceWith(deleteROModal2);
             deleteROModal = deleteROModal2;
             deleteROModal.show(event.getTarget());

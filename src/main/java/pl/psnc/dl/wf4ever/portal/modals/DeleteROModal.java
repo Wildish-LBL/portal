@@ -36,7 +36,8 @@ public class DeleteROModal extends AbstractModal {
      * @param toDelete
      *            ROs to delete
      */
-    public DeleteROModal(String id, final IModel<EventBus> eventBusModel, final IModel<List<ResearchObject>> toDelete) {
+    public DeleteROModal(String id, final IModel<EventBus> eventBusModel,
+            final IModel<? extends List<ResearchObject>> toDelete) {
         super(id, toDelete, eventBusModel, "delete-ro-modal", "Confirm");
 
         modal.add(new Label("deleteCnt", new AbstractReadOnlyModel<String>() {
