@@ -10,13 +10,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 
 import pl.psnc.dl.wf4ever.portal.components.annotations.TemplateDropDownChoice;
-import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
-import pl.psnc.dl.wf4ever.portal.events.OkClickedEvent;
-import pl.psnc.dl.wf4ever.portal.events.ros.RoCreateReadyEvent;
 import pl.psnc.dl.wf4ever.portal.model.template.ResearchObjectTemplate;
 
 import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 
 /**
  * A modal for adding resources to the RO.
@@ -80,31 +76,50 @@ public class CreateROModal extends AbstractModal {
     /**
      * Post an event and hide.
      * 
-     * @param event
-     *            AJAX event
+     * @param target
+     *            AJAX target
      */
-    @Subscribe
-    public void onOk(OkClickedEvent event) {
+    @Override
+    public void onOk(AjaxRequestTarget target) {
         if (title != null && title.trim().isEmpty()) {
             title = null;
         }
         if (description != null && description.trim().isEmpty()) {
             description = null;
         }
-        eventBusModel.getObject().post(new RoCreateReadyEvent(event.getTarget(), roId, template, title, description));
-        hide(event.getTarget());
+        onApply(target, roId, template, title, description);
+        hide(target);
+    }
+
+
+    /**
+     * Ready to create the RO.
+     * 
+     * @param target
+     *            response target
+     * @param roId
+     *            RO id
+     * @param template
+     *            RO template (may be null)
+     * @param title
+     *            RO title
+     * @param description
+     *            RO description
+     */
+    public void onApply(AjaxRequestTarget target, String roId, ResearchObjectTemplate template, String title,
+            String description) {
     }
 
 
     /**
      * Hide.
      * 
-     * @param event
-     *            AJAX event
+     * @param target
+     *            AJAX target
      */
-    @Subscribe
-    public void onCancel(CancelClickedEvent event) {
-        hide(event.getTarget());
+    @Override
+    public void onCancel(AjaxRequestTarget target) {
+        hide(target);
     }
 
 

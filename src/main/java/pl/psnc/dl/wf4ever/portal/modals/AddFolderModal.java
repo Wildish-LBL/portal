@@ -1,15 +1,13 @@
 package pl.psnc.dl.wf4ever.portal.modals;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.RequiredTextField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 
-import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
-import pl.psnc.dl.wf4ever.portal.events.OkClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddReadyEvent;
 
 import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 
 /**
  * A modal for adding resources to the RO.
@@ -39,28 +37,10 @@ public class AddFolderModal extends AbstractModal {
     }
 
 
-    /**
-     * Post an event and hide.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @Subscribe
-    public void onOk(OkClickedEvent event) {
-        eventBusModel.getObject().post(new FolderAddReadyEvent(event.getTarget(), name));
-        hide(event.getTarget());
-    }
-
-
-    /**
-     * Hide.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @Subscribe
-    public void onCancel(CancelClickedEvent event) {
-        hide(event.getTarget());
+    @Override
+    public void onOk(AjaxRequestTarget target) {
+        eventBusModel.getObject().post(new FolderAddReadyEvent(target, name));
+        hide(target);
     }
 
 

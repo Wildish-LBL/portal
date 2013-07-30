@@ -2,17 +2,13 @@ package pl.psnc.dl.wf4ever.portal.modals;
 
 import java.util.List;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
-import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
-import pl.psnc.dl.wf4ever.portal.events.OkClickedEvent;
-import pl.psnc.dl.wf4ever.portal.events.ros.RoDeleteReadyEvent;
-
 import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 
 /**
  * A modal for adding resources to the RO.
@@ -36,7 +32,8 @@ public class DeleteROModal extends AbstractModal {
      * @param toDelete
      *            ROs to delete
      */
-    public DeleteROModal(String id, final IModel<EventBus> eventBusModel, final IModel<List<ResearchObject>> toDelete) {
+    public DeleteROModal(String id, final IModel<EventBus> eventBusModel,
+            final IModel<? extends List<ResearchObject>> toDelete) {
         super(id, toDelete, eventBusModel, "delete-ro-modal", "Confirm");
 
         modal.add(new Label("deleteCnt", new AbstractReadOnlyModel<String>() {
@@ -56,27 +53,19 @@ public class DeleteROModal extends AbstractModal {
     }
 
 
-    /**
-     * Post an event and hide.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @Subscribe
-    public void onOk(OkClickedEvent event) {
-        eventBusModel.getObject().post(new RoDeleteReadyEvent(event.getTarget()));
-        hide(event.getTarget());
+    @Override
+    public void onOk(AjaxRequestTarget target) {
+        onApply(target);
+        hide(target);
     }
 
 
     /**
-     * Hide.
+     * ROs are ready to be deleted.
      * 
-     * @param event
-     *            AJAX event
+     * @param target
+     *            AJAX target
      */
-    @Subscribe
-    public void onCancel(CancelClickedEvent event) {
-        hide(event.getTarget());
+    public void onApply(AjaxRequestTarget target) {
     }
 }

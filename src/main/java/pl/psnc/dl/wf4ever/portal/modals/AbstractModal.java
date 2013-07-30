@@ -1,6 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.modals;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -8,13 +9,10 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 
 import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
-import pl.psnc.dl.wf4ever.portal.components.form.AjaxEventButton;
-import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
-import pl.psnc.dl.wf4ever.portal.events.OkClickedEvent;
+import pl.psnc.dl.wf4ever.portal.components.form.AjaxDecoratedButton;
 
 import com.google.common.eventbus.EventBus;
 
@@ -34,9 +32,6 @@ public abstract class AbstractModal extends EventPanel {
 
     /** Form for all input fields and buttons. */
     protected Form<?> form;
-
-    /** Internal event bus for button clicks. */
-    protected IModel<EventBus> internalEventBusModel;
 
     /** Modal id in HTML for JavaScript hiding and showing. */
     private String modalId;
@@ -93,26 +88,64 @@ public abstract class AbstractModal extends EventPanel {
 
         modal.add(new Label("title", title));
 
-        internalEventBusModel = new LoadableDetachableModel<EventBus>() {
+        AjaxButton ok = new AjaxDecoratedButton("ok", form) {
 
             /** id. */
-            private static final long serialVersionUID = 5225667860067218852L;
+            private static final long serialVersionUID = 1L;
 
 
             @Override
-            protected EventBus load() {
-                return new EventBus();
+            protected void onAfterSubmit(AjaxRequestTarget target, Form<?> form) {
+                super.onAfterSubmit(target, form);
+                onOk(target);
             }
         };
-        internalEventBusModel.getObject().register(this);
-
-        AjaxEventButton ok = new AjaxEventButton("ok", form, internalEventBusModel, OkClickedEvent.class);
         form.setDefaultButton(ok);
         modal.add(ok);
-        modal.add(new AjaxEventButton("cancel", form, internalEventBusModel, CancelClickedEvent.class)
-                .setDefaultFormProcessing(false));
-        modal.add(new AjaxEventButton("close", form, internalEventBusModel, CancelClickedEvent.class)
-                .setDefaultFormProcessing(false));
+        modal.add(new AjaxDecoratedButton("cancel", form) {
+
+            /** id. */
+            private static final long serialVersionUID = 1L;
+
+
+            @Override
+            protected void onAfterSubmit(AjaxRequestTarget target, Form<?> form) {
+                super.onAfterSubmit(target, form);
+                onCancel(target);
+            }
+        }.setDefaultFormProcessing(false));
+        modal.add(new AjaxDecoratedButton("close", form) {
+
+            /** id. */
+            private static final long serialVersionUID = 1L;
+
+
+            @Override
+            protected void onAfterSubmit(AjaxRequestTarget target, Form<?> form) {
+                super.onAfterSubmit(target, form);
+                onCancel(target);
+            }
+        }.setDefaultFormProcessing(false));
+    }
+
+
+    /**
+     * Post an event and hide.
+     * 
+     * @param target
+     *            AJAX target
+     */
+    protected abstract void onOk(AjaxRequestTarget target);
+
+
+    /**
+     * Hide.
+     * 
+     * @param target
+     *            AJAX target
+     */
+    protected void onCancel(AjaxRequestTarget target) {
+        hide(target);
     }
 
 

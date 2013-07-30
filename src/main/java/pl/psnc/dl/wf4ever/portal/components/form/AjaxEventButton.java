@@ -75,7 +75,7 @@ public class AjaxEventButton extends AjaxButton {
 
 
     @Override
-    protected final void onSubmit(AjaxRequestTarget target, Form<?> form) {
+    protected final void onAfterSubmit(AjaxRequestTarget target, Form<?> form) {
         target.appendJavaScript("hideBusy()");
         AbstractAjaxEvent event = newEvent(target);
         if (event != null) {

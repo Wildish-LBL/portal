@@ -1,18 +1,16 @@
 package pl.psnc.dl.wf4ever.portal.modals;
 
 import org.apache.log4j.Logger;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.lang.Bytes;
 import org.purl.wf4ever.rosrs.client.Annotable;
 
-import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
-import pl.psnc.dl.wf4ever.portal.events.OkClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.ImportAnnotationReadyEvent;
 
 import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 
 /**
  * Modal window for importing an annotation body.
@@ -60,38 +58,18 @@ public class ImportAnnotationModal extends AbstractModal {
     }
 
 
-    /**
-     * Post an event and hide.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @Subscribe
-    public void onOk(OkClickedEvent event) {
+    @Override
+    public void onOk(AjaxRequestTarget target) {
         final FileUpload uploadedFile = fileUpload.getFileUpload();
         if (uploadedFile != null) {
             try {
-                eventBusModel.getObject().post(
-                    new ImportAnnotationReadyEvent(event.getTarget(), annotableModel, uploadedFile));
-                hide(event.getTarget());
+                eventBusModel.getObject().post(new ImportAnnotationReadyEvent(target, annotableModel, uploadedFile));
+                hide(target);
             } catch (Exception e) {
                 LOG.error("Error when importing annotation", e);
                 error(e);
             }
         }
-        event.getTarget().add(feedbackPanel);
+        target.add(feedbackPanel);
     }
-
-
-    /**
-     * Hide.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @Subscribe
-    public void onCancel(CancelClickedEvent event) {
-        hide(event.getTarget());
-    }
-
 }

@@ -15,13 +15,9 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.lang.Bytes;
 
 import pl.psnc.dl.wf4ever.portal.components.form.RequiredURITextField;
-import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
-import pl.psnc.dl.wf4ever.portal.events.OkClickedEvent;
-import pl.psnc.dl.wf4ever.portal.events.ros.ZipAddReadyEvent;
 import pl.psnc.dl.wf4ever.portal.model.ResourceLocalRemote;
 
 import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 
 /**
  * A modal for uploading a zip archive.
@@ -131,41 +127,47 @@ public class UploadZipModal extends AbstractModal {
     }
 
 
-    /**
-     * Post an event and hide.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @Subscribe
-    public void onOk(OkClickedEvent event) {
+    @Override
+    public void onOk(AjaxRequestTarget target) {
         switch (resourceType) {
             case LOCAL:
             default:
                 final FileUpload uploadedFile = fileUpload.getFileUpload();
                 if (uploadedFile != null) {
-                    eventBusModel.getObject().post(new ZipAddReadyEvent(event.getTarget(), uploadedFile));
-                    hide(event.getTarget());
+                    onApply(target, uploadedFile);
+                    hide(target);
                 }
                 break;
             case REMOTE:
-                eventBusModel.getObject().post(new ZipAddReadyEvent(event.getTarget(), resourceURI));
-                hide(event.getTarget());
+                onApply(target, resourceURI);
+                hide(target);
                 break;
         }
-        event.getTarget().add(feedbackPanel);
+        target.add(feedbackPanel);
     }
 
 
     /**
-     * Hide.
+     * Resource aggregated by reference only.
      * 
-     * @param event
-     *            AJAX event
+     * @param target
+     *            response target
+     * @param resourceURI
+     *            resource URI
      */
-    @Subscribe
-    public void onCancel(CancelClickedEvent event) {
-        hide(event.getTarget());
+    protected void onApply(AjaxRequestTarget target, URI resourceURI) {
+    }
+
+
+    /**
+     * Apply.
+     * 
+     * @param target
+     *            response target
+     * @param uploadedFile
+     *            the uploaded file
+     */
+    protected void onApply(AjaxRequestTarget target, FileUpload uploadedFile) {
     }
 
 

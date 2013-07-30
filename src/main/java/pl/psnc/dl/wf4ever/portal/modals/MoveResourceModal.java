@@ -2,14 +2,13 @@ package pl.psnc.dl.wf4ever.portal.modals;
 
 import java.util.List;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.ChoiceRenderer;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Folder;
 
-import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
-import pl.psnc.dl.wf4ever.portal.events.OkClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.AggregationChangedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceMoveEvent;
 
@@ -48,30 +47,12 @@ public class MoveResourceModal extends AbstractModal {
     }
 
 
-    /**
-     * Post an event and hide.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @Subscribe
-    public void onOk(OkClickedEvent event) {
+    @Override
+    public void onOk(AjaxRequestTarget target) {
         if (folder != null) {
-            eventBusModel.getObject().post(new ResourceMoveEvent(event.getTarget(), folder));
+            eventBusModel.getObject().post(new ResourceMoveEvent(target, folder));
         }
-        hide(event.getTarget());
-    }
-
-
-    /**
-     * Hide.
-     * 
-     * @param event
-     *            AJAX event
-     */
-    @Subscribe
-    public void onCancel(CancelClickedEvent event) {
-        hide(event.getTarget());
+        hide(target);
     }
 
 
