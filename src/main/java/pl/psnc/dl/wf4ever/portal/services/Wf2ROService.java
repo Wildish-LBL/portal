@@ -7,10 +7,10 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.http.HttpStatus;
 import org.apache.log4j.Logger;
-import org.purl.wf4ever.rosrs.client.evo.JobStatus;
-import org.purl.wf4ever.rosrs.client.evo.JobStatus.State;
 
 import pl.psnc.dl.wf4ever.portal.model.JobConfig;
+import pl.psnc.dl.wf4ever.portal.model.JobStatus;
+import pl.psnc.dl.wf4ever.portal.model.JobStatus.State;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
