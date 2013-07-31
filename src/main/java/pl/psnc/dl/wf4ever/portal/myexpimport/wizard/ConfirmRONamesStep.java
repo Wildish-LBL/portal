@@ -4,14 +4,16 @@
 package pl.psnc.dl.wf4ever.portal.myexpimport.wizard;
 
 import org.apache.log4j.Logger;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.extensions.wizard.WizardStep;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.RequiredTextField;
-import org.apache.wicket.validation.IValidatable;
-import org.apache.wicket.validation.IValidator;
-import org.apache.wicket.validation.ValidationError;
+import org.apache.wicket.markup.html.form.TextArea;
+import org.apache.wicket.markup.html.form.TextField;
 
-import pl.psnc.dl.wf4ever.portal.MySession;
+import pl.psnc.dl.wf4ever.portal.components.annotations.TemplateDropDownChoice;
 
 /**
  * Step for providing the RO ID.
@@ -25,6 +27,7 @@ public class ConfirmRONamesStep extends WizardStep {
     private static final long serialVersionUID = -3238571883021517707L;
 
     /** Logger. */
+    @SuppressWarnings("unused")
     private static final Logger LOG = Logger.getLogger(ConfirmRONamesStep.class);
 
 
@@ -34,28 +37,30 @@ public class ConfirmRONamesStep extends WizardStep {
      * @param model
      *            import model
      */
-    @SuppressWarnings("serial")
     public ConfirmRONamesStep(ImportModel model) {
         super("Confirm RO identifier", null);
 
         Form<?> form = new Form<Void>("form");
-        RequiredTextField<String> name = new RequiredTextField<String>("roId");
-        name.add(new IValidator<String>() {
+        form.add(new RequiredTextField<String>("roId"));
+        TemplateDropDownChoice templates = new TemplateDropDownChoice("template");
+        final Label templateDescription = new Label("template.description");
+        templateDescription.setOutputMarkupId(true);
+        form.add(templates);
+        form.add(templateDescription);
+        templates.add(new AjaxFormComponentUpdatingBehavior("onchange") {
+
+            /** id. */
+            private static final long serialVersionUID = 1L;
+
 
             @Override
-            public void validate(IValidatable<String> validatable) {
-                try {
-                    if (!MySession.get().getRosrs().isRoIdFree(validatable.getValue())) {
-                        validatable.error(new ValidationError().setMessage("This ID is already in use"));
-                    }
-                } catch (Exception e) {
-                    LOG.error(e);
-                    // assume it's ok
-                }
+            protected void onUpdate(AjaxRequestTarget target) {
+                target.add(templateDescription);
             }
-
         });
-        form.add(name);
+
+        form.add(new TextField<String>("title"));
+        form.add(new TextArea<String>("description"));
         add(form);
     }
 }

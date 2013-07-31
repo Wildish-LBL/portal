@@ -32,6 +32,18 @@ public class TemplateDropDownChoice extends TitledDropDownChoice<ResearchObjectT
     }
 
 
+    /**
+     * Constructor.
+     * 
+     * @param id
+     *            wicket id
+     */
+    public TemplateDropDownChoice(String id) {
+        super(id, null, ResearchObjectTemplate.VALUES, new ChoiceRenderer<ResearchObjectTemplate>("title", "title"));
+        setNullValid(true);
+    }
+
+
     @Override
     protected Object getTitle(ResearchObjectTemplate choice) {
         return choice.getDescription() != null ? choice.getDescription() : choice.getTitle();

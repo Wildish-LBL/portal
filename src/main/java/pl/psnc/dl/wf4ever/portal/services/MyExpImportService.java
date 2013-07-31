@@ -88,8 +88,7 @@ public final class MyExpImportService {
      */
     public static void startImport(ImportModel model, ROSRService rosrs, URI wf2ROService, Token myExpAccessToken,
             String consumerKey, String consumerSecret) {
-        new ImportThread(model, rosrs, wf2ROService, wf2ROService, myExpAccessToken, consumerKey, consumerSecret)
-                .start();
+        new ImportThread(model, rosrs, wf2ROService, myExpAccessToken, consumerKey, consumerSecret).start();
     }
 
 
@@ -164,14 +163,8 @@ public final class MyExpImportService {
         /** Number of steps completed during import. */
         private int stepsComplete = 0;
 
-        /** RO. */
-        private ResearchObject researchObject;
-
         /** List of errors that happened during the import. */
         private final List<String> errors = new ArrayList<>();
-
-        /** RODL URI. */
-        private final URI rodlURI;
 
         /** Wf-RO transformation service URI. */
         private final URI wf2ROService;
@@ -187,8 +180,6 @@ public final class MyExpImportService {
          *            Import model with all the settings
          * @param rosrs
          *            the ROSRS client
-         * @param rodlURI
-         *            RODL URI
          * @param wf2ROService
          *            Wf-RO transformation service URI
          * @param myExpAccessToken
@@ -198,11 +189,10 @@ public final class MyExpImportService {
          * @param consumerSecret
          *            myExp consumer secret
          */
-        public ImportThread(ImportModel importModel, ROSRService rosrs, URI rodlURI, URI wf2ROService,
-                Token myExpAccessToken, String consumerKey, String consumerSecret) {
+        public ImportThread(ImportModel importModel, ROSRService rosrs, URI wf2ROService, Token myExpAccessToken,
+                String consumerKey, String consumerSecret) {
             super();
             model = importModel;
-            this.rodlURI = rodlURI;
             this.wf2ROService = wf2ROService;
             myExpToken = myExpAccessToken;
             this.rosrs = rosrs;
@@ -241,14 +231,14 @@ public final class MyExpImportService {
             stepsTotal = simpleResourcesCnt * 4 + packs.size() * 2 + 3;
 
             try {
-                researchObject = createRO(rodlURI, model.getRoId());
+                createRO();
             } catch (Exception e) {
                 LOG.error("Creating RO", e);
                 errors.add(String.format("When creating RO: %s", e.getMessage()));
                 model.setProgressInPercent(100);
                 model.setStatus(ImportStatus.FAILED);
             }
-            if (researchObject != null) {
+            if (model.getResearchObject() != null) {
                 importFiles(model.getSelectedFiles());
                 importWorkflows(model.getSelectedWorkflows());
                 importPacks(packs);
@@ -275,21 +265,32 @@ public final class MyExpImportService {
         /**
          * Create an RO in RODL.
          * 
-         * @param rodlURI
-         *            RODL URI
-         * @param roId
-         *            RO id (last segment of URI)
-         * @return RO
          * @throws ROSRSException
          *             when the RO could not be created
+         * @throws ROException
+         *             when incorrect data were returned
          */
-        private ResearchObject createRO(URI rodlURI, String roId)
-                throws ROSRSException {
-            model.setMessage(String.format("Creating a Research Object \"%s\"", roId));
-            ResearchObject ro = ResearchObject.create(rosrs, roId);
+        private void createRO()
+                throws ROSRSException, ROException {
+            model.setMessage(String.format("Creating a Research Object \"%s\"", model.getRoId()));
+
+            ResearchObject ro;
+            if (model.getTemplate() == null) {
+                ro = ResearchObject.create(rosrs, model.getRoId());
+            } else {
+                model.setMessage(String.format("Applying template: \"%s\"", model.getTemplate().getTitle()));
+                ro = model.getTemplate().create(rosrs, model.getRoId());
+            }
+            if (model.getTitle() != null) {
+                model.setMessage("Setting title");
+                ro.createPropertyValue(DCTerms.title, model.getTitle());
+            }
+            if (model.getDescription() != null) {
+                model.setMessage("Setting description");
+                ro.createPropertyValue(DCTerms.description, model.getDescription());
+            }
             model.setResearchObject(ro);
             incrementStepsComplete();
-            return ro;
         }
 
 
@@ -348,8 +349,8 @@ public final class MyExpImportService {
                 throws OAuthException, JAXBException, IOException {
             Workflow w = (Workflow) getResource(header, Workflow.class);
             model.setMessage(String.format("Transforming workflow %s", w.getResource()));
-            Wf2ROService.transformWorkflow(wf2ROService, URI.create(w.getContentUri()), w.getContentType(),
-                researchObject.getUri(), rosrs.getToken());
+            Wf2ROService.transformWorkflow(wf2ROService, URI.create(w.getContentUri()), w.getContentType(), model
+                    .getResearchObject().getUri(), rosrs.getToken());
             incrementStepsComplete();
             return w;
         }
@@ -498,7 +499,7 @@ public final class MyExpImportService {
             incrementStepsComplete();
 
             model.setMessage(String.format("Uploading %s", r.getFilename()));
-            researchObject.aggregate(r.getFilename(), new ByteArrayInputStream(r.getContentDecoded()),
+            model.getResearchObject().aggregate(r.getFilename(), new ByteArrayInputStream(r.getContentDecoded()),
                 r.getContentType());
 
             incrementStepsComplete();
@@ -550,22 +551,22 @@ public final class MyExpImportService {
             String rdf = response.getBody();
             URI annTargetURI;
             if (res instanceof Pack) {
-                annTargetURI = researchObject.getUri();
+                annTargetURI = model.getResearchObject().getUri();
             } else if (res instanceof File) {
-                annTargetURI = researchObject.getUri().resolve(((File) res).getFilenameURI());
+                annTargetURI = model.getResearchObject().getUri().resolve(((File) res).getFilenameURI());
             } else {
                 incrementStepsComplete();
                 return;
             }
             incrementStepsComplete();
 
-            String bodyPath = ROSRService.createAnnotationBodyPath(researchObject.getUri().relativize(annTargetURI)
-                    .toString());
+            String bodyPath = ROSRService.createAnnotationBodyPath(model.getResearchObject().getUri()
+                    .relativize(annTargetURI).toString());
             model.setMessage(String.format("Uploading annotation body %s", bodyPath));
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             createAnnotationBody(annTargetURI, rdf).write(out);
-            rosrs.addAnnotation(researchObject.getUri(), new HashSet<>(Arrays.asList(annTargetURI)), bodyPath,
-                new ByteArrayInputStream(out.toByteArray()), "application/rdf+xml");
+            rosrs.addAnnotation(model.getResearchObject().getUri(), new HashSet<>(Arrays.asList(annTargetURI)),
+                bodyPath, new ByteArrayInputStream(out.toByteArray()), "application/rdf+xml");
             incrementStepsComplete();
         }
 

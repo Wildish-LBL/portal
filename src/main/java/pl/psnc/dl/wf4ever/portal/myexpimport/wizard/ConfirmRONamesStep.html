@@ -1,13 +1,35 @@
 <?xml version="1.0"?>
 <wicket:panel xmlns:wicket="http://wicket.apache.org">
 	<div class="inspan9" style="margin-top: 30px;">
-		<p>Please type in the Research Object identifier.</p>
+		<p>Please type in the Research Object id and optionally choose a template, title and description.</p>
 		<form class="form-horizontal" wicket:id="form">
 			<fieldset>
 				<div class="control-group">
 					<label class="control-label" for="roId">RO identifier</label>
 					<div class="controls">
-						<input type="text" id="roId" wicket:id="roId" />
+						<input class="span4" type="text" id="roId" wicket:id="roId" />
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label" for="type">Template</label>
+					<div class="controls">
+						<select class="span4" id="type" wicket:id="template">
+						</select><span class="help-block" wicket:id="template.description"></span>
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label" for="title">Title</label>
+					<div class="controls">
+						<input class="span4" type="text" id="title" wicket:id="title"
+							placeholder="an optional title" />
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label" for="description">Description</label>
+					<div class="controls">
+						<textarea class="span4" rows="3" id="description"
+							wicket:id="description"
+							placeholder="an optional description (plain text)" />
 					</div>
 				</div>
 			</fieldset>

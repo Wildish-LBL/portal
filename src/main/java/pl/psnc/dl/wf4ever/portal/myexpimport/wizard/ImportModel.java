@@ -11,6 +11,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
+import pl.psnc.dl.wf4ever.portal.model.template.ResearchObjectTemplate;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.FileHeader;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.PackHeader;
 import pl.psnc.dl.wf4ever.portal.myexpimport.model.User;
@@ -89,6 +90,15 @@ public class ImportModel implements Serializable {
 
     /** RO that is created. */
     private ResearchObject researchObject = null;
+
+    /** RO template. */
+    private ResearchObjectTemplate template;
+
+    /** RO title. */
+    private String title;
+
+    /** RO description. */
+    private String description;
 
 
     /**
@@ -237,6 +247,36 @@ public class ImportModel implements Serializable {
 
     public void setResearchObject(ResearchObject researchObject) {
         this.researchObject = researchObject;
+    }
+
+
+    public ResearchObjectTemplate getTemplate() {
+        return template;
+    }
+
+
+    public void setTemplate(ResearchObjectTemplate template) {
+        this.template = template;
+    }
+
+
+    public String getTitle() {
+        return title;
+    }
+
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+
+    public String getDescription() {
+        return description;
+    }
+
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
 }
