@@ -11,9 +11,7 @@ import org.purl.wf4ever.rosrs.client.Resource;
 import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AnnotationEditAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
-import pl.psnc.dl.wf4ever.portal.events.AddLinkEvent;
 import pl.psnc.dl.wf4ever.portal.events.ResourceSelectedEvent;
-import pl.psnc.dl.wf4ever.portal.events.aggregation.DuplicateEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceDeleteClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceMoveClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.UpdateClickedEvent;
@@ -61,8 +59,6 @@ public class ResourceActionsPanel extends EventPanel {
         form.add(new AuthenticatedAjaxEventButton("update", form, eventBusModel, UpdateClickedEvent.class));
         form.add(new AuthenticatedAjaxEventButton("delete", form, eventBusModel, ResourceDeleteClickedEvent.class));
         form.add(new AuthenticatedAjaxEventButton("move", form, eventBusModel, ResourceMoveClickedEvent.class));
-        form.add(new AuthenticatedAjaxEventButton("duplicate", form, eventBusModel, DuplicateEvent.class));
-        form.add(new AuthenticatedAjaxEventButton("link-add", form, eventBusModel, AddLinkEvent.class));
         form.add(new AnnotationEditAjaxEventButton("add-comment", form, model, eventBusModel,
                 CommentAddClickedEvent.class));
         form.add(new Button("show-all"));

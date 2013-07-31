@@ -2,6 +2,11 @@
 <html xmlns:wicket="http://wicket.apache.org">
 <body>
 	<wicket:panel xmlns:wicket="http://wicket.apache.org">
+		<script type="text/javascript">
+			$(document).ready(function() {
+				$('.my-tooltip').tooltip();
+			})
+		</script>
 		<form class="form-inline" wicket:id="form">
 			<div class="btn-toolbar">
 				<button data-original-title="download this resource"
@@ -25,32 +30,17 @@
 					wicket:id="add-comment">
 					<i class="icon-plus"></i> Comment
 				</button>
-				<button data-target="#resource-advanced-view" data-toggle="tab" data-original-title="show all annotations" 
-					data-placement="top" data-container="body"
-					class="btn btn-small my-tooltip" type="submit" wicket:id="show-all">
+				<button data-target="#resource-advanced-view" data-toggle="tab"
+					data-original-title="show all annotations" data-placement="top"
+					data-container="body" class="btn btn-small my-tooltip"
+					type="submit" wicket:id="show-all">
 					<i class="icon-list"></i> Show all
 				</button>
-				<div class="btn-group">
-					<a class="btn btn-small dropdown-toggle" data-toggle="dropdown"
-						href="#">More... <span class="caret"></span>
-					</a>
-					<ul class="dropdown-menu">
-						<li><a href="#" data-original-title="move to another folder"
-							data-toggle="tooltip" data-placement="right"
-							data-container="body" class="my-tooltip" type="submit"
-							wicket:id="move"><i class="icon-folder-open"></i> Move </a></li>
-						<li><a href="#"
-							data-original-title="create a duplicate of this resource"
-							data-toggle="tooltip" data-placement="right"
-							data-container="body" class="my-tooltip" wicket:id="duplicate"><i
-								class="icon-file"></i> Duplicate</a></li>
-						<li><a href="#"
-							data-original-title="create a link to this resource"
-							data-toggle="tooltip" data-placement="right"
-							data-container="body" class="my-tooltip" wicket:id="link-add"><i
-								class="icon-share-alt"></i> Link</a></li>
-					</ul>
-				</div>
+				<button data-original-title="move to another folder"
+					data-toggle="tooltip" data-placement="top" data-container="body"
+					class="btn btn-small my-tooltip" type="submit" wicket:id="move">
+					<i class="icon-folder-open"></i> Move
+				</button>
 			</div>
 		</form>
 	</wicket:panel>
