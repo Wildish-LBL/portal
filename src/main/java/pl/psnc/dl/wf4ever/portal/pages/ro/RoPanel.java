@@ -30,6 +30,7 @@ import pl.psnc.dl.wf4ever.portal.behaviors.JobStatusUpdatingBehaviour;
 import pl.psnc.dl.wf4ever.portal.components.LoadingCircle;
 import pl.psnc.dl.wf4ever.portal.components.annotations.AdvancedAnnotationsPanel;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
+import pl.psnc.dl.wf4ever.portal.events.ErrorEvent;
 import pl.psnc.dl.wf4ever.portal.events.MetadataDownloadEvent;
 import pl.psnc.dl.wf4ever.portal.events.RoEvolutionLoadedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationAddedEvent;
@@ -282,6 +283,18 @@ public class RoPanel extends Panel {
         ResearchObject researchObject = (ResearchObject) getDefaultModelObject();
         return researchObject.getUri()
                 .resolve(".ro/manifest." + format.getDefaultFileExtension() + "?original=manifest.rdf").toString();
+    }
+
+
+    /**
+     * Refresh feedback panel in case of error.
+     * 
+     * @param event
+     *            AJAX event
+     */
+    @Subscribe
+    public void onError(ErrorEvent event) {
+        event.getTarget().add(feedbackPanel);
     }
 
 }

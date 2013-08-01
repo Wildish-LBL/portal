@@ -7,6 +7,7 @@ import org.apache.wicket.ajax.form.AjaxFormChoiceComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Radio;
 import org.apache.wicket.markup.html.form.RadioGroup;
+import org.apache.wicket.markup.html.form.RequiredTextField;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.model.IModel;
@@ -15,7 +16,6 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.lang.Bytes;
 
 import pl.psnc.dl.wf4ever.portal.components.annotations.ResourceTypeDropDownChoice;
-import pl.psnc.dl.wf4ever.portal.components.form.RequiredURITextField;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceAddReadyEvent;
 import pl.psnc.dl.wf4ever.portal.model.ResourceLocalRemote;
 import pl.psnc.dl.wf4ever.portal.model.ResourceType;
@@ -120,7 +120,7 @@ public class UploadResourceModal extends AbstractModal {
         fileUpload = new FileUploadField("fileUpload");
         fileDiv.add(fileUpload);
 
-        resourceDiv.add(new RequiredURITextField("resourceURI", new PropertyModel<URI>(this, "resourceURI")));
+        resourceDiv.add(new RequiredTextField<URI>("resourceURI", new PropertyModel<URI>(this, "resourceURI")));
     }
 
 

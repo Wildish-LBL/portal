@@ -95,8 +95,7 @@ public abstract class AbstractModal extends EventPanel {
 
 
             @Override
-            protected void onAfterSubmit(AjaxRequestTarget target, Form<?> form) {
-                super.onAfterSubmit(target, form);
+            public void onClicked(AjaxRequestTarget target, Form<?> form) {
                 onOk(target);
             }
         };
@@ -109,8 +108,7 @@ public abstract class AbstractModal extends EventPanel {
 
 
             @Override
-            protected void onAfterSubmit(AjaxRequestTarget target, Form<?> form) {
-                super.onAfterSubmit(target, form);
+            public void onClicked(AjaxRequestTarget target, Form<?> form) {
                 onCancel(target);
             }
         }.setDefaultFormProcessing(false));
@@ -121,8 +119,7 @@ public abstract class AbstractModal extends EventPanel {
 
 
             @Override
-            protected void onAfterSubmit(AjaxRequestTarget target, Form<?> form) {
-                super.onAfterSubmit(target, form);
+            public void onClicked(AjaxRequestTarget target, Form<?> form) {
                 onCancel(target);
             }
         }.setDefaultFormProcessing(false));

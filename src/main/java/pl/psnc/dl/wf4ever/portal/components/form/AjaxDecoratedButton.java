@@ -48,9 +48,21 @@ public abstract class AjaxDecoratedButton extends AjaxButton {
 
 
     @Override
-    protected void onAfterSubmit(AjaxRequestTarget target, Form<?> form) {
+    public final void onAfterSubmit(AjaxRequestTarget target, Form<?> form) {
         target.appendJavaScript("hideBusy()");
+        onClicked(target, form);
     }
+
+
+    /**
+     * Called after the form has been submitted.
+     * 
+     * @param target
+     *            AJAX target
+     * @param form
+     *            form to which the button belongs
+     */
+    public abstract void onClicked(AjaxRequestTarget target, Form<?> form);
 
 
     @Override

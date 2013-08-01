@@ -6,6 +6,8 @@ import java.util.Locale;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
+import org.apache.wicket.ConverterLocator;
+import org.apache.wicket.IConverterLocator;
 import org.apache.wicket.Session;
 import org.apache.wicket.authroles.authentication.AbstractAuthenticatedWebSession;
 import org.apache.wicket.authroles.authentication.AuthenticatedWebApplication;
@@ -20,6 +22,7 @@ import org.purl.wf4ever.rosrs.client.search.SearchServer;
 import org.purl.wf4ever.rosrs.client.search.SolrSearchServer;
 import org.purl.wf4ever.rosrs.client.search.SparqlSearchServer;
 
+import pl.psnc.dl.wf4ever.portal.components.form.AbsoluteURIConverter;
 import pl.psnc.dl.wf4ever.portal.pages.AllRosPage;
 import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
 import pl.psnc.dl.wf4ever.portal.pages.CreateROFromZipPage;
@@ -266,6 +269,14 @@ public class PortalApplication extends AuthenticatedWebApplication {
         } catch (Exception e) {
             LOG.error("Failed to load admin tokens: " + e.getMessage());
         }
+    }
+
+
+    @Override
+    protected IConverterLocator newConverterLocator() {
+        ConverterLocator locator = (ConverterLocator) super.newConverterLocator();
+        locator.set(URI.class, new AbsoluteURIConverter());
+        return locator;
     }
 
 

@@ -310,8 +310,7 @@ public class MyRosPage extends BasePage {
 
 
         @Override
-        protected void onAfterSubmit(AjaxRequestTarget target, Form<?> form) {
-            super.onAfterSubmit(target, form);
+        public void onClicked(AjaxRequestTarget target, Form<?> form) {
             IModel<ArrayList<ResearchObject>> model = new PropertyModel<ArrayList<ResearchObject>>(getPageReference(),
                     "page.selectedResearchObjects");
             if (!model.getObject().isEmpty()) {
@@ -351,8 +350,7 @@ public class MyRosPage extends BasePage {
 
 
         @Override
-        protected void onAfterSubmit(AjaxRequestTarget target, Form<?> form) {
-            super.onAfterSubmit(target, form);
+        public void onClicked(AjaxRequestTarget target, Form<?> form) {
             CreateROModal createROModal2 = new InternalCreateROModal("create-ro-modal", eventBusModel);
             createROModal.replaceWith(createROModal2);
             createROModal = createROModal2;
@@ -388,8 +386,7 @@ public class MyRosPage extends BasePage {
 
 
         @Override
-        protected void onAfterSubmit(AjaxRequestTarget target, Form<?> form) {
-            super.onAfterSubmit(target, form);
+        public void onClicked(AjaxRequestTarget target, Form<?> form) {
             UploadZipModal uploadZipModal2 = new InternalUploadZipModal("zip-upload-modal", eventBusModel);
             uploadZipModal.replaceWith(uploadZipModal2);
             uploadZipModal = uploadZipModal2;

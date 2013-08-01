@@ -5,16 +5,18 @@ import java.net.URI;
 import org.apache.log4j.Logger;
 import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.RequiredTextField;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
@@ -24,8 +26,8 @@ import org.purl.wf4ever.rosrs.client.AnnotationTriple;
 import org.purl.wf4ever.rosrs.client.Utils;
 
 import pl.psnc.dl.wf4ever.portal.components.EventPanel;
+import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxDecoratedButton;
 import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
-import pl.psnc.dl.wf4ever.portal.components.form.RequiredURITextField;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationAddedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationCancelledEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationDeletedEvent;
@@ -88,23 +90,11 @@ public class EditableAnnotationTextPanel extends EventPanel {
             boolean editMode) {
         super(id, model, eventBusModel);
         setOutputMarkupPlaceholderTag(true);
-        LoadableDetachableModel<EventBus> internalEventBusModel = new LoadableDetachableModel<EventBus>() {
-
-            /** id. */
-            private static final long serialVersionUID = 5225667860067218852L;
-
-
-            @Override
-            protected EventBus load() {
-                return new EventBus();
-            }
-        };
-        internalEventBusModel.getObject().register(this);
         newProperty = model.getObject().getProperty();
         newValue = model.getObject().getValue();
-        viewFragment = new ViewFragment("content", "view", this, model, internalEventBusModel);
+        viewFragment = new ViewFragment("content", "view", this, model, eventBusModel);
         editFragment = new EditFragment("content", "editSingle", this, new PropertyModel<URI>(this, "newProperty"),
-                new PropertyModel<String>(this, "newValue"), internalEventBusModel);
+                new PropertyModel<String>(this, "newValue"), eventBusModel);
         add(editMode ? editFragment : viewFragment);
     }
 
@@ -194,14 +184,6 @@ public class EditableAnnotationTextPanel extends EventPanel {
      */
     @Subscribe
     public void onCancel(CancelEvent event) {
-        editFragment.replaceWith(viewFragment);
-        event.getTarget().appendJavaScript("$('.tooltip').remove();");
-        event.getTarget().add(this);
-        if (eventBusModel != null && eventBusModel.getObject() != null) {
-            IModel<? extends Annotable> annotable = ((AnnotationTripleModel) this.getDefaultModel())
-                    .getAnnotableModel();
-            eventBusModel.getObject().post(new AnnotationCancelledEvent(event.getTarget(), annotable));
-        }
     }
 
 
@@ -333,11 +315,28 @@ public class EditableAnnotationTextPanel extends EventPanel {
                 IModel<String> valueModel, final IModel<EventBus> internalEventBusModel) {
             super(id, markupId, markupProvider);
             setOutputMarkupPlaceholderTag(true);
-            add(new RequiredURITextField("property-name", propertyModel));
+            add(new RequiredTextField<URI>("property-name", propertyModel));
             add(new TextField<>("value", valueModel));
             add(new AuthenticatedAjaxEventButton("apply", null, internalEventBusModel, ApplyEvent.class));
-            add(new AuthenticatedAjaxEventButton("cancel", null, internalEventBusModel, CancelEvent.class)
-                    .setDefaultFormProcessing(false));
+            add(new AuthenticatedAjaxDecoratedButton("cancel", null) {
+
+                /** id. */
+                private static final long serialVersionUID = 1421233396070192749L;
+
+
+                @Override
+                public void onClicked(AjaxRequestTarget target, Form<?> form) {
+                    editFragment.replaceWith(viewFragment);
+                    target.appendJavaScript("$('.tooltip').remove();");
+                    target.add(EditableAnnotationTextPanel.this);
+                    if (eventBusModel != null && eventBusModel.getObject() != null) {
+                        IModel<? extends Annotable> annotable = ((AnnotationTripleModel) EditableAnnotationTextPanel.this
+                                .getDefaultModel()).getAnnotableModel();
+                        eventBusModel.getObject().post(new AnnotationCancelledEvent(target, annotable));
+                    }
+                }
+
+            }.setDefaultFormProcessing(false));
         }
     }
 

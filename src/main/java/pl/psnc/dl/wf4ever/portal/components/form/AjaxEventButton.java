@@ -13,6 +13,7 @@ import org.apache.wicket.model.IModel;
 
 import pl.psnc.dl.wf4ever.portal.events.AbstractAjaxEvent;
 import pl.psnc.dl.wf4ever.portal.events.AbstractClickAjaxEvent;
+import pl.psnc.dl.wf4ever.portal.events.ErrorEvent;
 
 import com.google.common.eventbus.EventBus;
 
@@ -106,6 +107,7 @@ public class AjaxEventButton extends AjaxButton {
     protected void onError(AjaxRequestTarget target, Form<?> form) {
         target.appendJavaScript("hideBusy()");
         LOG.error("Error when submitting the button");
+        eventBusModel.getObject().post(new ErrorEvent(target));
     }
 
 
