@@ -20,9 +20,7 @@ import pl.psnc.dl.wf4ever.portal.components.FolderBreadcrumbsPanel;
 import pl.psnc.dl.wf4ever.portal.components.FolderContentsPanel;
 import pl.psnc.dl.wf4ever.portal.components.annotations.AdvancedAnnotationsPanel;
 import pl.psnc.dl.wf4ever.portal.components.annotations.CommentsList;
-import pl.psnc.dl.wf4ever.portal.events.AddLinkEvent;
 import pl.psnc.dl.wf4ever.portal.events.FolderChangeEvent;
-import pl.psnc.dl.wf4ever.portal.events.aggregation.DuplicateEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddReadyEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddedEvent;
@@ -34,9 +32,11 @@ import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceDeletedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceMoveClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceMoveEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceMovedEvent;
+import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceUpdateReadyEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.UpdateClickedEvent;
 import pl.psnc.dl.wf4ever.portal.modals.AddFolderModal;
 import pl.psnc.dl.wf4ever.portal.modals.MoveResourceModal;
+import pl.psnc.dl.wf4ever.portal.modals.UpdateResourceModal;
 import pl.psnc.dl.wf4ever.portal.modals.UploadResourceModal;
 import pl.psnc.dl.wf4ever.portal.model.FolderHierarchyModel;
 
@@ -80,6 +80,9 @@ public class RoContentPanel extends EventPanel {
     /** Modal window for moving resources. */
     private MoveResourceModal moveResourceModal;
 
+    /** Modal window for updating resources. */
+    private UpdateResourceModal updateResourceModal;
+
 
     /**
      * Constructor.
@@ -119,6 +122,8 @@ public class RoContentPanel extends EventPanel {
         add(addFolderModal);
         moveResourceModal = new MoveResourceModal("move-resource-modal", allFolders, eventBusModel);
         add(moveResourceModal);
+        updateResourceModal = new UpdateResourceModal("update-resource-modal", eventBusModel);
+        add(updateResourceModal);
     }
 
 
@@ -180,9 +185,18 @@ public class RoContentPanel extends EventPanel {
     }
 
 
+    /**
+     * Show the modal for updating the resource.
+     * 
+     * @param event
+     *            AJAX event
+     */
     @Subscribe
-    public void onResourceRename(UpdateClickedEvent event) {
-        //TODO
+    public void onResourceUpdateClicked(UpdateClickedEvent event) {
+        UpdateResourceModal updateResourceModal2 = new UpdateResourceModal("update-resource-modal", eventBusModel);
+        updateResourceModal.replaceWith(updateResourceModal2);
+        updateResourceModal = updateResourceModal2;
+        updateResourceModal.show(event.getTarget());
     }
 
 
@@ -248,18 +262,6 @@ public class RoContentPanel extends EventPanel {
     }
 
 
-    @Subscribe
-    public void onResourceDuplicate(DuplicateEvent event) {
-        //TODO
-    }
-
-
-    @Subscribe
-    public void onResourceAddLink(AddLinkEvent event) {
-        //TODO
-    }
-
-
     /**
      * Aggregate a resource.
      * 
@@ -290,6 +292,29 @@ public class RoContentPanel extends EventPanel {
         }
         if (currentFolder != null) {
             currentFolder.addEntry(resource, null);
+        }
+        eventBusModel.getObject().post(new ResourceAddedEvent(event.getTarget()));
+    }
+
+
+    /**
+     * Aggregate a resource.
+     * 
+     * @param event
+     *            AJAX event
+     * 
+     * @throws ROSRSException
+     *             unexpected response code
+     * @throws IOException
+     *             can't get the uploaded file
+     * @throws ROException
+     *             the manifest is incorrect
+     */
+    @Subscribe
+    public void onResourceUpdate(ResourceUpdateReadyEvent event)
+            throws ROSRSException, IOException, ROException {
+        if (event.getUploadedFile() != null) {
+            currentResource.update(event.getUploadedFile().getInputStream(), event.getUploadedFile().getContentType());
         }
         eventBusModel.getObject().post(new ResourceAddedEvent(event.getTarget()));
     }

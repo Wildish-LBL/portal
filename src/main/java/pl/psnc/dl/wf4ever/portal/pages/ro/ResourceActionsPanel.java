@@ -6,6 +6,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
+import org.purl.wf4ever.rosrs.client.Folder;
 import org.purl.wf4ever.rosrs.client.Resource;
 
 import pl.psnc.dl.wf4ever.portal.components.EventPanel;
@@ -38,6 +39,9 @@ public class ResourceActionsPanel extends EventPanel {
     /** Form for the buttons. */
     private Form<Void> form;
 
+    /** Button for updating resources. */
+    private AuthenticatedAjaxEventButton updateButton;
+
 
     /**
      * Constructor.
@@ -56,7 +60,8 @@ public class ResourceActionsPanel extends EventPanel {
         form = new Form<Void>("form");
         add(form);
         form.add(new ExternalLink("download", new PropertyModel<String>(model, "uri")));
-        form.add(new AuthenticatedAjaxEventButton("update", form, eventBusModel, UpdateClickedEvent.class));
+        updateButton = new AuthenticatedAjaxEventButton("update", form, eventBusModel, UpdateClickedEvent.class);
+        form.add(updateButton);
         form.add(new AuthenticatedAjaxEventButton("delete", form, eventBusModel, ResourceDeleteClickedEvent.class));
         form.add(new AuthenticatedAjaxEventButton("move", form, eventBusModel, ResourceMoveClickedEvent.class));
         form.add(new AnnotationEditAjaxEventButton("add-comment", form, model, eventBusModel,
@@ -69,6 +74,7 @@ public class ResourceActionsPanel extends EventPanel {
     protected void onConfigure() {
         super.onConfigure();
         setEnabled(getDefaultModelObject() != null);
+        updateButton.setEnabled(!(getDefaultModelObject() instanceof Folder));
     }
 
 

@@ -8,9 +8,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -18,6 +18,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.log4j.Logger;
+import org.purl.wf4ever.rosrs.client.Annotable;
 import org.purl.wf4ever.rosrs.client.ROSRService;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.exception.ROException;
@@ -549,25 +550,42 @@ public final class MyExpImportService {
             // in the future, the RDF could be parsed (and somewhat validated)
             // and the filename can be extracted from it
             String rdf = response.getBody();
-            URI annTargetURI;
+            Annotable annTarget;
             if (res instanceof Pack) {
-                annTargetURI = model.getResearchObject().getUri();
+                annTarget = model.getResearchObject();
             } else if (res instanceof File) {
-                annTargetURI = model.getResearchObject().getUri().resolve(((File) res).getFilenameURI());
+                annTarget = new org.purl.wf4ever.rosrs.client.Resource(model.getResearchObject(),
+                        ((File) res).getFilenameURI(), null, null, null);
             } else {
                 incrementStepsComplete();
                 return;
             }
             incrementStepsComplete();
 
-            String bodyPath = ROSRService.createAnnotationBodyPath(model.getResearchObject().getUri()
-                    .relativize(annTargetURI).toString());
+            String bodyPath = createAnnotationBodyPath(annTarget.getName());
             model.setMessage(String.format("Uploading annotation body %s", bodyPath));
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            createAnnotationBody(annTargetURI, rdf).write(out);
-            rosrs.addAnnotation(model.getResearchObject().getUri(), new HashSet<>(Arrays.asList(annTargetURI)),
+            createAnnotationBody(annTarget.getUri(), rdf).write(out);
+            rosrs.addAnnotation(model.getResearchObject().getUri(), Collections.singleton(annTarget.getUri()),
                 bodyPath, new ByteArrayInputStream(out.toByteArray()), "application/rdf+xml");
             incrementStepsComplete();
+        }
+
+
+        /**
+         * Generate a path for an annotation body of a resource. The template is ["ro"|resource_name] + "-" +
+         * random_string.
+         * 
+         * @param targetName
+         *            the last segment or full URI
+         * @return an annotation body path relative to the RO URI
+         */
+        private static String createAnnotationBodyPath(String targetName) {
+            if (targetName.endsWith("/")) {
+                targetName = targetName.substring(0, targetName.length() - 1);
+            }
+            String randomBit = "" + Math.abs(UUID.randomUUID().getLeastSignificantBits());
+            return ".ro/" + targetName + "-" + randomBit + ".ttl";
         }
 
 

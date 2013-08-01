@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.log4j.Logger;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -37,6 +38,9 @@ public class QualityBar extends EventPanel {
 
     /** id. */
     private static final long serialVersionUID = -8244521183370538171L;
+
+    /** Logger. */
+    private static final Logger LOGGER = Logger.getLogger(QualityBar.class);
 
     /** JavaScript for drawing the progress bar. */
     private static final JavaScriptResourceReference PROGRESSBAR_CLASS_REFERENCE = new JavaScriptResourceReference(
@@ -141,6 +145,10 @@ public class QualityBar extends EventPanel {
             @Override
             public EvaluationResult call()
                     throws Exception {
+                if (service == null) {
+                    LOGGER.error("Checklist evaluation service is null");
+                    return null;
+                }
                 return service.evaluate(model.getObject().getUri(), "ready-to-release");
             }
         };
