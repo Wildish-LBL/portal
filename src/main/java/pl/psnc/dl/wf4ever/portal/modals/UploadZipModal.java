@@ -89,7 +89,7 @@ public class UploadZipModal extends AbstractModal {
 
         RadioGroup<ResourceLocalRemote> radioGroup = new RadioGroup<ResourceLocalRemote>("radioGroup",
                 new PropertyModel<ResourceLocalRemote>(this, "resourceType"));
-        modal.add(radioGroup);
+        modal.add(withFocus(radioGroup));
         radioGroup.add(new AjaxFormChoiceComponentUpdatingBehavior() {
 
             /** id. */

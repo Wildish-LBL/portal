@@ -1,5 +1,6 @@
 package pl.psnc.dl.wf4ever.portal.modals;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -38,6 +39,9 @@ public abstract class AbstractModal extends EventPanel {
 
     /** The div with a different ID for each modal. */
     protected WebMarkupContainer modal;
+
+    /** Component that will receive focus on show. */
+    protected Component componentWithFocus = null;
 
 
     /**
@@ -164,6 +168,23 @@ public abstract class AbstractModal extends EventPanel {
     public void show(AjaxRequestTarget target) {
         target.add(this);
         target.appendJavaScript("$('#" + modalId + "').modal('show')");
+        if (componentWithFocus != null) {
+            target.focusComponent(componentWithFocus);
+        }
+    }
+
+
+    /**
+     * Set this component to have focus on show.
+     * 
+     * @param component
+     *            form component
+     * @return the same component
+     */
+    protected Component withFocus(Component component) {
+        componentWithFocus = component;
+        componentWithFocus.setOutputMarkupId(true);
+        return componentWithFocus;
     }
 
 

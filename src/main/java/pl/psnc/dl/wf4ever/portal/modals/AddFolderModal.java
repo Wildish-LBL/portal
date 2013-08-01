@@ -33,7 +33,7 @@ public class AddFolderModal extends AbstractModal {
      */
     public AddFolderModal(String id, final IModel<EventBus> eventBusModel) {
         super(id, eventBusModel, "add-folder-modal", "Add folder");
-        modal.add(new RequiredTextField<>("folder-name", new PropertyModel<String>(this, "name")));
+        modal.add(withFocus(new RequiredTextField<>("folder-name", new PropertyModel<String>(this, "name"))));
     }
 
 

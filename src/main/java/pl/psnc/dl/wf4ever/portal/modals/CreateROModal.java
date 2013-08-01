@@ -48,7 +48,7 @@ public class CreateROModal extends AbstractModal {
      */
     public CreateROModal(String id, final IModel<EventBus> eventBusModel) {
         super(id, eventBusModel, "create-ro-modal", "Create RO");
-        modal.add(new RequiredTextField<String>("roId", new PropertyModel<String>(this, "roId")));
+        modal.add(withFocus(new RequiredTextField<String>("roId", new PropertyModel<String>(this, "roId"))));
         TemplateDropDownChoice templates = new TemplateDropDownChoice("templates",
                 new PropertyModel<ResearchObjectTemplate>(this, "template"));
         final Label templateDescription = new Label("template-description", new PropertyModel<String>(this,

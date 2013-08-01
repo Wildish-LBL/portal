@@ -44,8 +44,8 @@ public class DownloadMetadataModal extends AbstractModal {
 
         List<RDFFormat> formats = Arrays.asList(RDFFormat.RDFXML, RDFFormat.TURTLE, RDFFormat.TRIG, RDFFormat.TRIX,
             RDFFormat.N3);
-        modal.add(new DropDownChoice<RDFFormat>("rdfFormat", new PropertyModel<RDFFormat>(this, "format"), formats,
-                new IChoiceRenderer<RDFFormat>() {
+        modal.add(withFocus(new DropDownChoice<RDFFormat>("rdfFormat", new PropertyModel<RDFFormat>(this, "format"),
+                formats, new IChoiceRenderer<RDFFormat>() {
 
                     /**
                      * 
@@ -63,7 +63,7 @@ public class DownloadMetadataModal extends AbstractModal {
                     public String getIdValue(RDFFormat format, int index) {
                         return "" + index;
                     }
-                }));
+                })));
     }
 
 

@@ -42,7 +42,7 @@ public class UpdateResourceModal extends AbstractModal {
         // max upload size, 10k
         form.setMaxSize(Bytes.megabytes(10));
         fileUpload = new FileUploadField("fileUpload");
-        modal.add(fileUpload);
+        modal.add(withFocus(fileUpload));
     }
 
 
