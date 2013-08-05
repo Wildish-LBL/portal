@@ -23,6 +23,7 @@ import org.openid4java.discovery.DiscoveryInformation;
 import org.purl.wf4ever.rosrs.client.ROSRService;
 import org.purl.wf4ever.rosrs.client.users.User;
 import org.purl.wf4ever.rosrs.client.users.UserManagementService;
+import org.purl.wf4ever.wf2ro.Wf2ROService;
 import org.scribe.model.Token;
 
 import com.google.common.eventbus.EventBus;
@@ -169,6 +170,9 @@ public class MySession extends AbstractAuthenticatedWebSession {
     /** UMS client. */
     private UserManagementService ums;
 
+    /** Wf-RO transformation service. */
+    private Wf2ROService wf2ro;
+
     /** Keep futures here so that they are not dropped between subsequent page refreshes. */
     private transient Map<Integer, SoftReference<Future<?>>> futures;
 
@@ -218,6 +222,7 @@ public class MySession extends AbstractAuthenticatedWebSession {
             PortalApplication app = (PortalApplication) getApplication();
             this.rosrs = new ROSRService(app.getRodlURI().resolve("ROs/"), userToken);
             this.user = getUms().getWhoAmi(userToken);
+            this.wf2ro = new Wf2ROService(app.getWf2ROService(), userToken);
         } catch (Exception e) {
             LOG.error("Error when retrieving user data: " + e.getMessage());
         }
@@ -356,6 +361,11 @@ public class MySession extends AbstractAuthenticatedWebSession {
 
     public UserManagementService getUms() {
         return ums;
+    }
+
+
+    public Wf2ROService getWf2ROService() {
+        return wf2ro;
     }
 
 

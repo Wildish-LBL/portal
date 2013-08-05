@@ -7,9 +7,11 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
+import org.purl.wf4ever.rosrs.client.Folder;
 import org.purl.wf4ever.rosrs.client.Resource;
 
 import pl.psnc.dl.wf4ever.portal.components.EventPanel;
+import pl.psnc.dl.wf4ever.portal.components.WorkflowTransformPanel;
 import pl.psnc.dl.wf4ever.portal.components.annotations.ResourceTypePanel;
 import pl.psnc.dl.wf4ever.portal.components.form.EditableTextPanel;
 import pl.psnc.dl.wf4ever.portal.events.ResourceSelectedEvent;
@@ -44,10 +46,13 @@ public class ResourceSummaryPanel extends EventPanel {
      *            wicket id
      * @param model
      *            selected resource model
+     * @param currentFolderModel
+     *            current folder model
      * @param eventBusModel
      *            event bus model
      */
-    public ResourceSummaryPanel(String id, IModel<Resource> model, IModel<EventBus> eventBusModel) {
+    public ResourceSummaryPanel(String id, IModel<Resource> model, IModel<Folder> currentFolderModel,
+            IModel<EventBus> eventBusModel) {
         super(id, model, eventBusModel);
         setOutputMarkupPlaceholderTag(true);
 
@@ -55,7 +60,9 @@ public class ResourceSummaryPanel extends EventPanel {
                 "uri")));
         add(new EditableTextPanel("titlePanel", new AnnotationTripleModel(model, URI.create(DCTerms.title.getURI()),
                 true), eventBusModel, false).setCanDelete(false));
-        add(new ResourceTypePanel("resource-type", new ResourceTypeModel(model), eventBusModel));
+        ResourceTypeModel resourceTypeModel = new ResourceTypeModel(model);
+        add(new ResourceTypePanel("resource-type", resourceTypeModel, eventBusModel));
+        add(new WorkflowTransformPanel("transform", model, resourceTypeModel, currentFolderModel, eventBusModel));
         add(new Label("author", new PropertyModel<String>(model, "author.name")));
         add(new Label("createdFormatted", new PropertyModel<String>(model, "createdFormatted")));
         add(new Label("annotations", new PropertyModel<Integer>(model, "annotations.size")));

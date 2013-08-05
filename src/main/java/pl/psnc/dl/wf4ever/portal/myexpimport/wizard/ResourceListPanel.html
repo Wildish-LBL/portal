@@ -6,9 +6,10 @@
 			wicket:id="resourceListLinkLabel">[Hide/show]</span>]
 		</a>&nbsp; <a wicket:id="selectAll">[Select all]</a>&nbsp; <a
 			wicket:id="deselectAll">[Deselect all]</a>
+	</p>
 	<div wicket:id="resourceList">
 		<form wicket:id="form">
-			<span wicket:id="group">
+			<div wicket:id="group">
 				<table class="resourceList table table-striped">
 					<tr wicket:id="resourceListView">
 						<td class="checkbox"><input type="checkbox" style="margin-left: 0px;" wicket:id="checkbox" /></td>
@@ -16,8 +17,7 @@
 						<td class="link"><a wicket:id="link"><small>link</small></a></td>
 					</tr>
 				</table>
-			</span>
+			</div>
 		</form>
 	</div>
-	</p>
 </wicket:panel>

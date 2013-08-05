@@ -191,6 +191,11 @@
 			<artifactId>owasp-java-html-sanitizer</artifactId>
 			<version>r173</version>
 		</dependency>
+		<dependency>
+			<groupId>org.purl.wf4ever.wf-ro</groupId>
+			<artifactId>wf-ro-client</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>portal</finalName>
@@ -249,7 +254,7 @@
 				<version>8.1.10.v20130312</version>
 				<configuration>
 					<contextXml>${basedir}/src/main/webapp/WEB-INF/jetty-context.xml</contextXml>
-					<scanIntervalSeconds>10</scanIntervalSeconds>
+					<scanIntervalSeconds>0</scanIntervalSeconds>
 					<stopKey>stop</stopKey>
 					<stopPort>9998</stopPort>
 					<webApp>

@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.feedback.FeedbackMessage;
 import org.apache.wicket.feedback.FeedbackMessagesModel;
 import org.apache.wicket.feedback.IFeedback;
@@ -34,6 +35,8 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+
+import pl.psnc.dl.wf4ever.portal.events.FeedbackEvent;
 
 /**
  * A panel that displays {@link org.apache.wicket.feedback.FeedbackMessage}s in a list view. The maximum number of
@@ -336,5 +339,13 @@ public class MyFeedbackPanel extends Panel implements IFeedback {
         Label label = new Label(id, (serializable == null) ? "" : serializable.toString());
         label.setEscapeModelStrings(MyFeedbackPanel.this.getEscapeModelStrings());
         return label;
+    }
+
+
+    @Override
+    public void onEvent(IEvent<?> event) {
+        if (event.getPayload() instanceof FeedbackEvent) {
+            ((FeedbackEvent) event.getPayload()).getTarget().add(this);
+        }
     }
 }

@@ -4,7 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
 import org.apache.wicket.model.IModel;
@@ -33,9 +32,6 @@ public class JobStatusUpdatingBehaviour extends AjaxSelfUpdatingTimerBehavior {
     /** job status to check. */
     private final JobStatus status;
 
-    /** behavior parent used to display feedback messages. */
-    private Component parent;
-
     /** snapshot/release... */
     private String name;
 
@@ -49,8 +45,6 @@ public class JobStatusUpdatingBehaviour extends AjaxSelfUpdatingTimerBehavior {
     /**
      * Constructor.
      * 
-     * @param parent
-     *            behavior parent used to display feedback messages
      * @param status
      *            job status to check
      * @param name
@@ -60,15 +54,14 @@ public class JobStatusUpdatingBehaviour extends AjaxSelfUpdatingTimerBehavior {
      * @param eventClass
      *            class of event posted when the job finished
      */
-    public JobStatusUpdatingBehaviour(Component parent, JobStatus status, String name, IModel<EventBus> eventBusModel,
+    public JobStatusUpdatingBehaviour(JobStatus status, String name, IModel<EventBus> eventBusModel,
             Class<? extends JobFinishedEvent> eventClass) {
         super(Duration.milliseconds(1000));
-        this.parent = parent;
         this.status = status;
         this.name = name;
         this.eventBusModel = eventBusModel;
         this.eventClass = eventClass;
-        parent.info(String.format("A %s %s is being created...", name, status.getTarget()));
+        getComponent().info(String.format("A %s %s is being created...", name, status.getTarget()));
     }
 
 
@@ -78,22 +71,22 @@ public class JobStatusUpdatingBehaviour extends AjaxSelfUpdatingTimerBehavior {
         status.refresh();
         if (status.getState() != State.RUNNING) {
             stop(target);
-            parent.remove(this);
+            getComponent().remove(this);
         }
         switch (status.getState()) {
             case RUNNING:
-                parent.info(String.format("A %s %s is being created...", name, status.getTarget()));
+                getComponent().info(String.format("A %s %s is being created...", name, status.getTarget()));
                 break;
             case DONE:
-                parent.success(String.format("%s %s has been created!", StringUtils.capitalize(name),
-                    status.getTarget()));
+                getComponent().success(
+                    String.format("%s %s has been created!", StringUtils.capitalize(name), status.getTarget()));
                 JobFinishedEvent event = newEvent(target);
                 eventBusModel.getObject().post(event);
                 break;
             default:
-                parent.error(String.format("%s: %s", status.getState(), status.getReason()));
+                getComponent().error(String.format("%s: %s", status.getState(), status.getReason()));
         }
-        target.add(parent);
+        target.add(getComponent());
     }
 
 

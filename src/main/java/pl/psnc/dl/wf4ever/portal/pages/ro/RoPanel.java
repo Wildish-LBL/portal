@@ -189,8 +189,8 @@ public class RoPanel extends Panel {
         final JobStatus status = researchObject.snapshot(researchObject.getName().substring(0,
             researchObject.getName().length() - 1)
                 + "-snapshot");
-        feedbackPanel.add(new JobStatusUpdatingBehaviour(feedbackPanel, status, "snapshot", eventBusModel,
-                SnapshotCreatedEvent.class));
+        feedbackPanel
+                .add(new JobStatusUpdatingBehaviour(status, "snapshot", eventBusModel, SnapshotCreatedEvent.class));
         event.getTarget().add(feedbackPanel);
     }
 
@@ -207,8 +207,7 @@ public class RoPanel extends Panel {
         final JobStatus status = researchObject.archive(researchObject.getName().substring(0,
             researchObject.getName().length() - 1)
                 + "-release");
-        feedbackPanel.add(new JobStatusUpdatingBehaviour(feedbackPanel, status, "release", eventBusModel,
-                ReleaseCreatedEvent.class));
+        feedbackPanel.add(new JobStatusUpdatingBehaviour(status, "release", eventBusModel, ReleaseCreatedEvent.class));
         event.getTarget().add(feedbackPanel);
     }
 

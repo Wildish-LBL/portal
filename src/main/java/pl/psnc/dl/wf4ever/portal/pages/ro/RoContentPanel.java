@@ -1,8 +1,12 @@
 package pl.psnc.dl.wf4ever.portal.pages.ro;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
+
+import javax.activation.MimetypesFileTypeMap;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -39,6 +43,7 @@ import pl.psnc.dl.wf4ever.portal.modals.MoveResourceModal;
 import pl.psnc.dl.wf4ever.portal.modals.UpdateResourceModal;
 import pl.psnc.dl.wf4ever.portal.modals.UploadResourceModal;
 import pl.psnc.dl.wf4ever.portal.model.FolderHierarchyModel;
+import pl.psnc.dl.wf4ever.portal.services.CreateROThread;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -59,7 +64,6 @@ public class RoContentPanel extends EventPanel {
     private static final long serialVersionUID = -3775797988389365540L;
 
     /** Logger. */
-    @SuppressWarnings("unused")
     private static final Logger LOG = Logger.getLogger(RoContentPanel.class);
 
     /** The currently viewed folder. */
@@ -82,6 +86,17 @@ public class RoContentPanel extends EventPanel {
 
     /** Modal window for updating resources. */
     private UpdateResourceModal updateResourceModal;
+
+    /** MIME type guessing utility. */
+    private static MimetypesFileTypeMap mfm = new MimetypesFileTypeMap();
+
+    static {
+        try (InputStream mimeTypesIs = CreateROThread.class.getClassLoader().getResourceAsStream("mime.types")) {
+            mfm = new MimetypesFileTypeMap(mimeTypesIs);
+        } catch (IOException e) {
+            LOG.error("Can't initialize mime types", e);
+        }
+    }
 
 
     /**
@@ -112,7 +127,7 @@ public class RoContentPanel extends EventPanel {
         add(new FolderContentsPanel("folder-contents", folderModel, resourceModel, rootFolders, unrootedResourcesModel,
                 eventBusModel));
         add(new ResourceActionsPanel("resource-actions", resourceModel, eventBusModel));
-        add(new ResourceSummaryPanel("resource-summary", resourceModel, eventBusModel));
+        add(new ResourceSummaryPanel("resource-summary", resourceModel, folderModel, eventBusModel));
         add(new CommentsList("resource-comments", resourceModel, eventBusModel));
         add(new AdvancedAnnotationsPanel("advanced-annotations", "resource-basic-view", resourceModel, eventBusModel));
 
@@ -281,8 +296,12 @@ public class RoContentPanel extends EventPanel {
         ResearchObject researchObject = (ResearchObject) getDefaultModelObject();
         Resource resource;
         if (event.getUploadedFile() != null) {
+            String contentType = event.getUploadedFile().getContentType();
+            if (contentType == null || MediaType.APPLICATION_OCTET_STREAM.equals(contentType)) {
+                contentType = mfm.getContentType(event.getUploadedFile().getClientFileName());
+            }
             resource = researchObject.aggregate(event.getUploadedFile().getClientFileName(), event.getUploadedFile()
-                    .getInputStream(), event.getUploadedFile().getContentType());
+                    .getInputStream(), contentType);
         } else {
             URI absoluteResourceURI = researchObject.getUri().resolve(event.getResourceUri());
             resource = researchObject.aggregate(absoluteResourceURI);

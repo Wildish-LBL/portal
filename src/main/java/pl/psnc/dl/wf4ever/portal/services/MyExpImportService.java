@@ -23,6 +23,8 @@ import org.purl.wf4ever.rosrs.client.ROSRService;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
+import org.purl.wf4ever.wf2ro.ServiceException;
+import org.purl.wf4ever.wf2ro.Wf2ROService;
 import org.scribe.model.Response;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
@@ -87,8 +89,8 @@ public final class MyExpImportService {
      * @param consumerSecret
      *            myExp consumer secret
      */
-    public static void startImport(ImportModel model, ROSRService rosrs, URI wf2ROService, Token myExpAccessToken,
-            String consumerKey, String consumerSecret) {
+    public static void startImport(ImportModel model, ROSRService rosrs, Wf2ROService wf2ROService,
+            Token myExpAccessToken, String consumerKey, String consumerSecret) {
         new ImportThread(model, rosrs, wf2ROService, myExpAccessToken, consumerKey, consumerSecret).start();
     }
 
@@ -167,8 +169,8 @@ public final class MyExpImportService {
         /** List of errors that happened during the import. */
         private final List<String> errors = new ArrayList<>();
 
-        /** Wf-RO transformation service URI. */
-        private final URI wf2ROService;
+        /** Wf-RO transformation service. */
+        private final Wf2ROService wf2ROService;
 
         /** ROSRS client. */
         private ROSRService rosrs;
@@ -181,7 +183,7 @@ public final class MyExpImportService {
          *            Import model with all the settings
          * @param rosrs
          *            the ROSRS client
-         * @param wf2ROService
+         * @param wf2roService2
          *            Wf-RO transformation service URI
          * @param myExpAccessToken
          *            myExperiment OAuth access token
@@ -190,11 +192,11 @@ public final class MyExpImportService {
          * @param consumerSecret
          *            myExp consumer secret
          */
-        public ImportThread(ImportModel importModel, ROSRService rosrs, URI wf2ROService, Token myExpAccessToken,
-                String consumerKey, String consumerSecret) {
+        public ImportThread(ImportModel importModel, ROSRService rosrs, Wf2ROService wf2roService2,
+                Token myExpAccessToken, String consumerKey, String consumerSecret) {
             super();
             model = importModel;
-            this.wf2ROService = wf2ROService;
+            this.wf2ROService = wf2roService2;
             myExpToken = myExpAccessToken;
             this.rosrs = rosrs;
             service = MyExpApi.getOAuthService(consumerKey, consumerSecret);
@@ -345,13 +347,15 @@ public final class MyExpImportService {
          *             when there is a problem with parsing the workflow metadata
          * @throws IOException
          *             when there is a problem with the Wf-RO service
+         * @throws ServiceException
+         *             when the workflow cannot be transformed
          */
         private Workflow importWorkflow(WorkflowHeader header)
-                throws OAuthException, JAXBException, IOException {
+                throws OAuthException, JAXBException, IOException, ServiceException {
             Workflow w = (Workflow) getResource(header, Workflow.class);
             model.setMessage(String.format("Transforming workflow %s", w.getResource()));
-            Wf2ROService.transformWorkflow(wf2ROService, URI.create(w.getContentUri()), w.getContentType(), model
-                    .getResearchObject().getUri(), rosrs.getToken());
+            wf2ROService.transform(URI.create(w.getContentUri()), w.getContentType(), model.getResearchObject()
+                    .getUri());
             incrementStepsComplete();
             return w;
         }
@@ -462,9 +466,12 @@ public final class MyExpImportService {
          *             the resource couldn't be uploaded to ROSRS
          * @throws ROException
          *             ROSRS returned incorrect data
+         * @throws ServiceException
+         *             when the workflow cannot be transformed
          */
         private void importInternalPackItem(Pack pack, InternalPackItemHeader packItemHeader)
-                throws JAXBException, OAuthException, URISyntaxException, IOException, ROSRSException, ROException {
+                throws JAXBException, OAuthException, URISyntaxException, IOException, ROSRSException, ROException,
+                ServiceException {
             InternalPackItem internalItem = (InternalPackItem) getResource(packItemHeader, InternalPackItem.class);
             BaseResourceHeader resourceHeader = internalItem.getItem();
             BaseResource r;
