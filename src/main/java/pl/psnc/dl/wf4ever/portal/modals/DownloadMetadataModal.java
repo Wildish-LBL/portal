@@ -66,7 +66,7 @@ public class DownloadMetadataModal extends AbstractModal {
     @Override
     public void onEvent(IEvent<?> event) {
         super.onEvent(event);
-        if (event instanceof MetadataDownloadClickedEvent) {
+        if (event.getPayload() instanceof MetadataDownloadClickedEvent) {
             onMetadataDownloadClicked((MetadataDownloadClickedEvent) event.getPayload());
         }
     }
@@ -78,7 +78,7 @@ public class DownloadMetadataModal extends AbstractModal {
      * @param event
      *            AJAX event
      */
-    public void onMetadataDownloadClicked(MetadataDownloadClickedEvent event) {
+    private void onMetadataDownloadClicked(MetadataDownloadClickedEvent event) {
         show(event.getTarget());
     }
 
