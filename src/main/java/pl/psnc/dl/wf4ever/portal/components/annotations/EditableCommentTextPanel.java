@@ -4,15 +4,12 @@ import org.apache.log4j.Logger;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Annotation;
 
 import pl.psnc.dl.wf4ever.portal.components.form.EditableTextPanel;
 import pl.psnc.dl.wf4ever.portal.model.AnnotationTimestampModel;
 import pl.psnc.dl.wf4ever.portal.model.AnnotationTripleModel;
-
-import com.google.common.eventbus.EventBus;
 
 /**
  * A panel for inline comments, show the annotation author and creation date.
@@ -37,17 +34,15 @@ public class EditableCommentTextPanel extends EditableTextPanel {
      *            wicket id
      * @param model
      *            the model for the quad
-     * @param eventBusModel
-     *            event bus model for when a comment is added, deleted or edited
      */
-    public EditableCommentTextPanel(String id, AnnotationTripleModel model, final IModel<EventBus> eventBusModel) {
-        super(id, model, eventBusModel, true, false);
+    public EditableCommentTextPanel(String id, AnnotationTripleModel model) {
+        super(id, model, true, false);
     }
 
 
     @Override
-    protected Fragment newViewFragment(AnnotationTripleModel model, IModel<EventBus> internalEventBusModel) {
-        return new CommentViewFragment("content", "view", this, model, internalEventBusModel);
+    protected Fragment newViewFragment(AnnotationTripleModel model) {
+        return new CommentViewFragment("content", "view", this, model);
 
     }
 
@@ -75,12 +70,10 @@ public class EditableCommentTextPanel extends EditableTextPanel {
          *            the location of the fragment
          * @param model
          *            the comment value model
-         * @param internalEventBusModel
-         *            the event bus for the button clicks
          */
         public CommentViewFragment(String id, String markupId, MarkupContainer markupProvider,
-                AnnotationTripleModel model, IModel<EventBus> internalEventBusModel) {
-            super(id, markupId, markupProvider, model, internalEventBusModel);
+                AnnotationTripleModel model) {
+            super(id, markupId, markupProvider, model);
             form.add(new Label("authorDate", new AnnotationTimestampModel(new PropertyModel<Annotation>(model
                     .getObject(), "annotation"))));
         }

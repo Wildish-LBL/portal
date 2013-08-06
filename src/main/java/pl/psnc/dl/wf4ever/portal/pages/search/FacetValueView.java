@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -13,8 +14,6 @@ import org.apache.wicket.model.IModel;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.FacetValue;
 
 import pl.psnc.dl.wf4ever.portal.events.FacetValueClickedEvent;
-
-import com.google.common.eventbus.EventBus;
 
 /**
  * A view of options for a facet.
@@ -34,9 +33,6 @@ public class FacetValueView extends ListView<FacetValue> {
     /** selected values for this facet. */
     private List<FacetValue> selected;
 
-    /** Event bus model for posting {@link FacetValueClickedEvent} events. */
-    private IModel<EventBus> eventBusModel;
-
 
     /**
      * Constructor.
@@ -47,13 +43,9 @@ public class FacetValueView extends ListView<FacetValue> {
      *            selected values for this facet
      * @param model
      *            model for a list of available facet values
-     * @param eventBusModel
-     *            event bus model for posting {@link FacetValueClickedEvent} events
      */
-    public FacetValueView(String id, List<FacetValue> selected, IModel<? extends List<? extends FacetValue>> model,
-            IModel<EventBus> eventBusModel) {
+    public FacetValueView(String id, List<FacetValue> selected, IModel<? extends List<? extends FacetValue>> model) {
         super(id, model);
-        this.eventBusModel = eventBusModel;
         this.selected = selected;
         this.setOutputMarkupId(true);
     }
@@ -76,7 +68,7 @@ public class FacetValueView extends ListView<FacetValue> {
                     item.add(AttributeAppender.replace("class", "selected_filter_label"));
                 }
                 target.add(item);
-                eventBusModel.getObject().post(new FacetValueClickedEvent(target, facetValue));
+                send(getPage(), Broadcast.BREADTH, new FacetValueClickedEvent(target, facetValue));
             }
         };
         link.add(new Label("label", facetValue.getLabel()));

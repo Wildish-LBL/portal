@@ -12,6 +12,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.ExternalLink;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.joda.time.DateTime;
@@ -19,17 +20,13 @@ import org.joda.time.format.DateTimeFormat;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.notifications.Notification;
 
-import pl.psnc.dl.wf4ever.portal.components.EventPanel;
-
-import com.google.common.eventbus.EventBus;
-
 /**
  * An indicator of a number of notifications for this RO.
  * 
  * @author pejot
  * 
  */
-public class NotificationsIndicator extends EventPanel {
+public class NotificationsIndicator extends Panel {
 
     /** Logger. */
     @SuppressWarnings("unused")
@@ -77,17 +74,14 @@ public class NotificationsIndicator extends EventPanel {
      *            research object for this indicator
      * @param notificationsModel
      *            the model of the list of notifications of the RO
-     * @param eventBusModel
-     *            event bus model
      * @param rssLink
      *            URL of the notifications RSS
      * @param tabId
      *            Id of the tab which will be shown when user clicks on the indicator.
      */
     public NotificationsIndicator(String id, IModel<ResearchObject> researchObjectModel,
-            IModel<? extends List<Notification>> notificationsModel, final IModel<EventBus> eventBusModel,
-            String rssLink, String tabId) {
-        super(id, notificationsModel, eventBusModel);
+            IModel<? extends List<Notification>> notificationsModel, String rssLink, String tabId) {
+        super(id, notificationsModel);
         setOutputMarkupId(true);
         this.tabId = tabId;
         Form<Void> form = new Form<Void>("form");

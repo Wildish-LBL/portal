@@ -4,13 +4,13 @@ import java.net.URI;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormChoiceComponentUpdatingBehavior;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Radio;
 import org.apache.wicket.markup.html.form.RadioGroup;
 import org.apache.wicket.markup.html.form.RequiredTextField;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.lang.Bytes;
@@ -19,8 +19,6 @@ import pl.psnc.dl.wf4ever.portal.components.annotations.ResourceTypeDropDownChoi
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceAddReadyEvent;
 import pl.psnc.dl.wf4ever.portal.model.ResourceLocalRemote;
 import pl.psnc.dl.wf4ever.portal.model.ResourceType;
-
-import com.google.common.eventbus.EventBus;
 
 /**
  * A modal for adding resources to the RO.
@@ -57,11 +55,9 @@ public class UploadResourceModal extends AbstractModal {
      * 
      * @param id
      *            wicket id
-     * @param eventBusModel
-     *            event bus
      */
-    public UploadResourceModal(String id, final IModel<EventBus> eventBusModel) {
-        super(id, eventBusModel, "upload-resource-modal", "Upload a resource");
+    public UploadResourceModal(String id) {
+        super(id, "upload-resource-modal", "Upload a resource");
 
         // Enable multipart mode (need for uploads file)
         form.setMultiPart(true);
@@ -131,12 +127,12 @@ public class UploadResourceModal extends AbstractModal {
             default:
                 final FileUpload uploadedFile = fileUpload.getFileUpload();
                 if (uploadedFile != null) {
-                    eventBusModel.getObject().post(new ResourceAddReadyEvent(target, uploadedFile, resourceClass));
+                    send(getPage(), Broadcast.BREADTH, new ResourceAddReadyEvent(target, uploadedFile, resourceClass));
                     hide(target);
                 }
                 break;
             case REMOTE:
-                eventBusModel.getObject().post(new ResourceAddReadyEvent(target, resourceURI, resourceClass));
+                send(getPage(), Broadcast.BREADTH, new ResourceAddReadyEvent(target, resourceURI, resourceClass));
                 hide(target);
                 break;
         }

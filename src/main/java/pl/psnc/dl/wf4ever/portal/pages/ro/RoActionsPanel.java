@@ -1,14 +1,16 @@
 package pl.psnc.dl.wf4ever.portal.pages.ro;
 
 import org.apache.log4j.Logger;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.ExternalLink;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.evo.EvoType;
 
-import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.MetadataDownloadClickedEvent;
@@ -17,16 +19,13 @@ import pl.psnc.dl.wf4ever.portal.events.evo.ReleaseCreateEvent;
 import pl.psnc.dl.wf4ever.portal.events.evo.SnapshotClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.evo.SnapshotCreateEvent;
 
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
-
 /**
  * A panel for actions related to the RO.
  * 
  * @author Piotr Hołubowicz
  * 
  */
-public class RoActionsPanel extends EventPanel {
+public class RoActionsPanel extends Panel {
 
     /** id. */
     private static final long serialVersionUID = -3775797988389365540L;
@@ -52,22 +51,30 @@ public class RoActionsPanel extends EventPanel {
      *            wicket id
      * @param model
      *            the model of the research object
-     * @param eventBusModel
-     *            event bus model for button clicks
      */
-    public RoActionsPanel(String id, final IModel<ResearchObject> model, final IModel<EventBus> eventBusModel) {
-        super(id, model, eventBusModel);
+    public RoActionsPanel(String id, final IModel<ResearchObject> model) {
+        super(id, model);
         setOutputMarkupId(true);
         form = new Form<Void>("form");
         add(form);
         form.add(new ExternalLink("downloadROZipped", new PropertyModel<String>(this, "ROZipLink")));
-        form.add(new AjaxEventButton("downloadMetadata", form, eventBusModel, MetadataDownloadClickedEvent.class));
-        snapshotButton = new AuthenticatedAjaxEventButton("snapshot-ro-button", form, eventBusModel,
-                SnapshotClickedEvent.class);
+        form.add(new AjaxEventButton("downloadMetadata", form, null, MetadataDownloadClickedEvent.class));
+        snapshotButton = new AuthenticatedAjaxEventButton("snapshot-ro-button", form, this, SnapshotClickedEvent.class);
         form.add(snapshotButton);
-        releaseButton = new AuthenticatedAjaxEventButton("release-ro-button", form, eventBusModel,
-                ReleaseClickedEvent.class);
+        releaseButton = new AuthenticatedAjaxEventButton("release-ro-button", form, this, ReleaseClickedEvent.class);
         form.add(releaseButton);
+    }
+
+
+    @Override
+    public void onEvent(IEvent<?> event) {
+        super.onEvent(event);
+        if (event.getPayload() instanceof SnapshotClickedEvent) {
+            onSnapshotClicked((SnapshotClickedEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof ReleaseClickedEvent) {
+            onReleaseClicked((ReleaseClickedEvent) event.getPayload());
+        }
     }
 
 
@@ -77,9 +84,8 @@ public class RoActionsPanel extends EventPanel {
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void onSnapshotClicked(SnapshotClickedEvent event) {
-        eventBusModel.getObject().post(new SnapshotCreateEvent(event.getTarget()));
+    private void onSnapshotClicked(SnapshotClickedEvent event) {
+        send(getPage(), Broadcast.BREADTH, new SnapshotCreateEvent(event.getTarget()));
     }
 
 
@@ -89,9 +95,8 @@ public class RoActionsPanel extends EventPanel {
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void onReleaseClicked(ReleaseClickedEvent event) {
-        eventBusModel.getObject().post(new ReleaseCreateEvent(event.getTarget()));
+    private void onReleaseClicked(ReleaseClickedEvent event) {
+        send(getPage(), Broadcast.BREADTH, new ReleaseCreateEvent(event.getTarget()));
     }
 
 

@@ -3,6 +3,8 @@ package pl.psnc.dl.wf4ever.portal.modals;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.form.ChoiceRenderer;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.model.IModel;
@@ -11,9 +13,6 @@ import org.purl.wf4ever.rosrs.client.Folder;
 
 import pl.psnc.dl.wf4ever.portal.events.aggregation.AggregationChangedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceMoveEvent;
-
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 
 /**
  * A modal window for moving a resource to a folder.
@@ -37,11 +36,9 @@ public class MoveResourceModal extends AbstractModal {
      *            wicket id
      * @param foldersModel
      *            a list of folders to choose from
-     * @param eventBusModel
-     *            bus model
      */
-    public MoveResourceModal(String id, IModel<List<Folder>> foldersModel, final IModel<EventBus> eventBusModel) {
-        super(id, foldersModel, eventBusModel, "move-resource-modal", "Move a resource");
+    public MoveResourceModal(String id, IModel<List<Folder>> foldersModel) {
+        super(id, foldersModel, "move-resource-modal", "Move a resource");
         modal.add(withFocus(new DropDownChoice<Folder>("folder", new PropertyModel<Folder>(this, "folder"),
                 foldersModel, new ChoiceRenderer<Folder>("path", "uri"))));
     }
@@ -50,9 +47,18 @@ public class MoveResourceModal extends AbstractModal {
     @Override
     public void onOk(AjaxRequestTarget target) {
         if (folder != null) {
-            eventBusModel.getObject().post(new ResourceMoveEvent(target, folder));
+            send(getPage(), Broadcast.BREADTH, new ResourceMoveEvent(target, folder));
         }
         hide(target);
+    }
+
+
+    @Override
+    public void onEvent(IEvent<?> event) {
+        super.onEvent(event);
+        if (event.getPayload() instanceof AggregationChangedEvent) {
+            onAggregationChanged((AggregationChangedEvent) event.getPayload());
+        }
     }
 
 
@@ -62,7 +68,6 @@ public class MoveResourceModal extends AbstractModal {
      * @param event
      *            AJAX event
      */
-    @Subscribe
     public void onAggregationChanged(AggregationChangedEvent event) {
         event.getTarget().add(this);
     }

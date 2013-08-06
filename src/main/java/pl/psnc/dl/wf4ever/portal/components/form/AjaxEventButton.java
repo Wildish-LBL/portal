@@ -8,14 +8,13 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxCallListener;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.event.IEventSink;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.model.IModel;
 
 import pl.psnc.dl.wf4ever.portal.events.AbstractAjaxEvent;
 import pl.psnc.dl.wf4ever.portal.events.AbstractClickAjaxEvent;
 import pl.psnc.dl.wf4ever.portal.events.ErrorEvent;
-
-import com.google.common.eventbus.EventBus;
 
 /**
  * A button the creates an AJAX Event when clicked.
@@ -31,8 +30,8 @@ public class AjaxEventButton extends AjaxButton {
     /** Logger. */
     private static final Logger LOG = Logger.getLogger(AjaxEventButton.class);
 
-    /** the event bus model to which the event is posted. */
-    protected IModel<EventBus> eventBusModel;
+    /** the root of the DOM subtree that will be notified. */
+    private IEventSink component;
 
     /** the class of the event to post. */
     protected Class<? extends AbstractClickAjaxEvent> eventClass;
@@ -45,15 +44,15 @@ public class AjaxEventButton extends AjaxButton {
      *            wicket ID
      * @param form
      *            for which will be validated
-     * @param eventBusModel
-     *            the event bus model to which the event is posted
+     * @param component
+     *            the root of the DOM subtree that will be notified
      * @param eventClass
      *            the class of the event to post
      */
-    public AjaxEventButton(String id, Form<?> form, IModel<EventBus> eventBusModel,
+    public AjaxEventButton(String id, Form<?> form, IEventSink component,
             Class<? extends AbstractClickAjaxEvent> eventClass) {
         super(id, form);
-        this.eventBusModel = eventBusModel;
+        this.component = component;
         this.eventClass = eventClass;
     }
 
@@ -63,15 +62,13 @@ public class AjaxEventButton extends AjaxButton {
      * 
      * @param id
      *            wicket ID
-     * @param eventBusModel
-     *            the event bus model to which the event is posted
+     * @param component
+     *            the root of the DOM subtree that will be notified
      * @param eventClass
      *            the class of the event to post
      */
-    public AjaxEventButton(String id, IModel<EventBus> eventBusModel, Class<? extends AbstractClickAjaxEvent> eventClass) {
-        super(id);
-        this.eventBusModel = eventBusModel;
-        this.eventClass = eventClass;
+    public AjaxEventButton(String id, IEventSink component, Class<? extends AbstractClickAjaxEvent> eventClass) {
+        this(id, null, component, eventClass);
     }
 
 
@@ -79,8 +76,11 @@ public class AjaxEventButton extends AjaxButton {
     protected final void onAfterSubmit(AjaxRequestTarget target, Form<?> form) {
         target.appendJavaScript("hideBusy()");
         AbstractAjaxEvent event = newEvent(target);
+        if (component == null) {
+            component = getPage();
+        }
         if (event != null) {
-            eventBusModel.getObject().post(event);
+            send(component, Broadcast.BREADTH, event);
         }
     }
 
@@ -107,7 +107,10 @@ public class AjaxEventButton extends AjaxButton {
     protected void onError(AjaxRequestTarget target, Form<?> form) {
         target.appendJavaScript("hideBusy()");
         LOG.error("Error when submitting the button");
-        eventBusModel.getObject().post(new ErrorEvent(target));
+        if (component == null) {
+            component = getPage();
+        }
+        send(component, Broadcast.BREADTH, new ErrorEvent(target));
     }
 
 

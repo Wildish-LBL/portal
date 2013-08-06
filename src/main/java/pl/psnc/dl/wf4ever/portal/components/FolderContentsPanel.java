@@ -8,12 +8,15 @@ import org.apache.wicket.ajax.AjaxEventBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.Behavior;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
@@ -26,8 +29,6 @@ import pl.psnc.dl.wf4ever.portal.events.FolderChangeEvent;
 import pl.psnc.dl.wf4ever.portal.events.ResourceSelectedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.AggregationChangedEvent;
 
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 /**
@@ -36,7 +37,7 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * @author piotrekhol
  * 
  */
-public class FolderContentsPanel extends EventPanel {
+public class FolderContentsPanel extends Panel {
 
     /**
      * Behavior for emphasizing graphically the resource if it's selected.
@@ -106,7 +107,7 @@ public class FolderContentsPanel extends EventPanel {
         @Override
         protected void onEvent(AjaxRequestTarget target) {
             resourceModel.setObject(resource);
-            eventBusModel.getObject().post(new ResourceSelectedEvent(target));
+            send(getPage(), Broadcast.BREADTH, new ResourceSelectedEvent(target));
         }
     }
 
@@ -138,13 +139,10 @@ public class FolderContentsPanel extends EventPanel {
      *            root folders
      * @param unrootedResourcesModel
      *            unrooted resources, will be displayed alongside root folders
-     * @param eventBusModel
-     *            event bus
      */
     public FolderContentsPanel(String id, final IModel<Folder> model, final IModel<Resource> resourceModel,
-            final IModel<List<Folder>> rootFolders, final IModel<List<Resource>> unrootedResourcesModel,
-            final IModel<EventBus> eventBusModel) {
-        super(id, model, eventBusModel);
+            final IModel<List<Folder>> rootFolders, final IModel<List<Resource>> unrootedResourcesModel) {
+        super(id, model);
         setOutputMarkupId(true);
         this.resourceModel = resourceModel;
 
@@ -182,7 +180,7 @@ public class FolderContentsPanel extends EventPanel {
                     @Override
                     public void onClick(AjaxRequestTarget target) {
                         model.setObject(folder);
-                        eventBusModel.getObject().post(new FolderChangeEvent(target));
+                        send(getPage(), Broadcast.BREADTH, new FolderChangeEvent(target));
                     }
                 };
                 item.add(link);
@@ -248,14 +246,25 @@ public class FolderContentsPanel extends EventPanel {
     }
 
 
+    @Override
+    public void onEvent(IEvent<?> event) {
+        super.onEvent(event);
+        if (event.getPayload() instanceof ResourceSelectedEvent) {
+            onResourceSelected((ResourceSelectedEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof AggregationChangedEvent) {
+            onAggregationChanged((AggregationChangedEvent) event.getPayload());
+        }
+    }
+
+
     /**
      * Called when the current resource has changed.
      * 
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void onResourceSelected(ResourceSelectedEvent event) {
+    private void onResourceSelected(ResourceSelectedEvent event) {
         event.getTarget().add(this);
     }
 
@@ -266,8 +275,7 @@ public class FolderContentsPanel extends EventPanel {
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void onAggregationChanged(AggregationChangedEvent event) {
+    private void onAggregationChanged(AggregationChangedEvent event) {
         event.getTarget().add(this);
     }
 }

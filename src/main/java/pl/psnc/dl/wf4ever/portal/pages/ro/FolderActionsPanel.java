@@ -1,18 +1,16 @@
 package pl.psnc.dl.wf4ever.portal.pages.ro;
 
 import org.apache.log4j.Logger;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.purl.wf4ever.rosrs.client.Folder;
 
-import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.FolderChangeEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceAddClickedEvent;
-
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 
 /**
  * A panel aggregating action buttons for a folder - add a new folder or resource.
@@ -20,7 +18,7 @@ import com.google.common.eventbus.Subscribe;
  * @author Piotr Hołubowicz
  * 
  */
-public class FolderActionsPanel extends EventPanel {
+public class FolderActionsPanel extends Panel {
 
     /** id. */
     private static final long serialVersionUID = -3775797988389365540L;
@@ -40,17 +38,24 @@ public class FolderActionsPanel extends EventPanel {
      *            wicket id
      * @param folderModel
      *            current folder
-     * @param eventBusModel
-     *            event bus model for button clicks
      */
-    public FolderActionsPanel(String id, final IModel<Folder> folderModel, final IModel<EventBus> eventBusModel) {
-        super(id, folderModel, eventBusModel);
+    public FolderActionsPanel(String id, final IModel<Folder> folderModel) {
+        super(id, folderModel);
 
         setOutputMarkupId(true);
         form = new Form<Void>("form");
         add(form);
-        form.add(new AuthenticatedAjaxEventButton("add-resource", form, eventBusModel, ResourceAddClickedEvent.class));
-        form.add(new AuthenticatedAjaxEventButton("add-folder", form, eventBusModel, FolderAddClickedEvent.class));
+        form.add(new AuthenticatedAjaxEventButton("add-resource", form, null, ResourceAddClickedEvent.class));
+        form.add(new AuthenticatedAjaxEventButton("add-folder", form, null, FolderAddClickedEvent.class));
+    }
+
+
+    @Override
+    public void onEvent(IEvent<?> event) {
+        super.onEvent(event);
+        if (event.getPayload() instanceof FolderChangeEvent) {
+            onFolderChange((FolderChangeEvent) event.getPayload());
+        }
     }
 
 
@@ -60,8 +65,7 @@ public class FolderActionsPanel extends EventPanel {
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void onFolderChange(FolderChangeEvent event) {
+    private void onFolderChange(FolderChangeEvent event) {
         event.getTarget().add(this);
     }
 

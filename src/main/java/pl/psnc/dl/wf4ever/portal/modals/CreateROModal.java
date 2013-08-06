@@ -2,17 +2,16 @@ package pl.psnc.dl.wf4ever.portal.modals;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.RequiredTextField;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 
 import pl.psnc.dl.wf4ever.portal.components.annotations.TemplateDropDownChoice;
+import pl.psnc.dl.wf4ever.portal.events.ros.RoCreateReadyEvent;
 import pl.psnc.dl.wf4ever.portal.model.template.ResearchObjectTemplate;
-
-import com.google.common.eventbus.EventBus;
 
 /**
  * A modal for adding resources to the RO.
@@ -43,11 +42,9 @@ public class CreateROModal extends AbstractModal {
      * 
      * @param id
      *            wicket id
-     * @param eventBusModel
-     *            event bus
      */
-    public CreateROModal(String id, final IModel<EventBus> eventBusModel) {
-        super(id, eventBusModel, "create-ro-modal", "Create RO");
+    public CreateROModal(String id) {
+        super(id, "create-ro-modal", "Create RO");
         modal.add(withFocus(new RequiredTextField<String>("roId", new PropertyModel<String>(this, "roId"))));
         TemplateDropDownChoice templates = new TemplateDropDownChoice("templates",
                 new PropertyModel<ResearchObjectTemplate>(this, "template"));
@@ -87,38 +84,7 @@ public class CreateROModal extends AbstractModal {
         if (description != null && description.trim().isEmpty()) {
             description = null;
         }
-        onApply(target, roId, template, title, description);
-        hide(target);
-    }
-
-
-    /**
-     * Ready to create the RO.
-     * 
-     * @param target
-     *            response target
-     * @param roId
-     *            RO id
-     * @param template
-     *            RO template (may be null)
-     * @param title
-     *            RO title
-     * @param description
-     *            RO description
-     */
-    public void onApply(AjaxRequestTarget target, String roId, ResearchObjectTemplate template, String title,
-            String description) {
-    }
-
-
-    /**
-     * Hide.
-     * 
-     * @param target
-     *            AJAX target
-     */
-    @Override
-    public void onCancel(AjaxRequestTarget target) {
+        send(getPage(), Broadcast.BREADTH, new RoCreateReadyEvent(target, roId, template, title, description));
         hide(target);
     }
 

@@ -7,10 +7,12 @@ import java.util.concurrent.Future;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.util.time.Duration;
@@ -22,11 +24,7 @@ import org.purl.wf4ever.rosrs.client.ResearchObject;
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.behaviors.FutureUpdateBehavior;
-import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.AggregationChangedEvent;
-
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 
 /**
  * Health progress bar.
@@ -34,7 +32,7 @@ import com.google.common.eventbus.Subscribe;
  * @author pejot
  * 
  */
-public class QualityBar extends EventPanel {
+public class QualityBar extends Panel {
 
     /** id. */
     private static final long serialVersionUID = -8244521183370538171L;
@@ -63,14 +61,11 @@ public class QualityBar extends EventPanel {
      *            wicket id
      * @param model
      *            RO health (0-100)
-     * @param eventBusModel
-     *            event bus model
      * @param researchObjectModel
      *            RO model for quality calculation
      */
-    public QualityBar(String id, IModel<EvaluationResult> model, IModel<ResearchObject> researchObjectModel,
-            IModel<EventBus> eventBusModel) {
-        super(id, model, eventBusModel);
+    public QualityBar(String id, IModel<EvaluationResult> model, IModel<ResearchObject> researchObjectModel) {
+        super(id, model);
         this.researchObjectModel = researchObjectModel;
         setOutputMarkupId(true);
         label = new WebMarkupContainer("initialLabel");
@@ -155,14 +150,22 @@ public class QualityBar extends EventPanel {
     }
 
 
+    @Override
+    public void onEvent(IEvent<?> event) {
+        super.onEvent(event);
+        if (event.getPayload() instanceof AggregationChangedEvent) {
+            onAggregationChanged((AggregationChangedEvent) event.getPayload());
+        }
+    }
+
+
     /**
      * When the aggregation has changed, recalculate the quality.
      * 
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void onAggregationChanged(AggregationChangedEvent event) {
+    private void onAggregationChanged(AggregationChangedEvent event) {
         FutureUpdateBehavior<EvaluationResult> behavior = getRecalculationBehavior();
         this.add(behavior);
         event.getTarget().appendJavaScript(behavior.getCallbackScript());

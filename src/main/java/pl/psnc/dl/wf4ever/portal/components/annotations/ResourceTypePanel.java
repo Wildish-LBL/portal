@@ -1,15 +1,16 @@
 package pl.psnc.dl.wf4ever.portal.components.annotations;
 
 import org.apache.wicket.MarkupContainer;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Annotable;
 
-import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationAddedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationCancelledEvent;
@@ -21,16 +22,13 @@ import pl.psnc.dl.wf4ever.portal.model.ResourceType;
 import pl.psnc.dl.wf4ever.portal.model.ResourceTypeModel;
 import pl.psnc.dl.wf4ever.portal.model.SanitizedModel;
 
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
-
 /**
  * A panel that allows to choose a resource type from a predefined list.
  * 
  * @author piotrekhol
  * 
  */
-public class ResourceTypePanel extends EventPanel {
+public class ResourceTypePanel extends Panel {
 
     /**
      * Read-only view fragment.
@@ -55,17 +53,14 @@ public class ResourceTypePanel extends EventPanel {
          *            container defining the fragment
          * @param model
          *            value model
-         * @param internalEventBusModel
-         *            event bus model for button clicks
          */
-        public ViewFragment(String id, String markupId, MarkupContainer markupProvider, ResourceTypeModel model,
-                IModel<EventBus> internalEventBusModel) {
+        public ViewFragment(String id, String markupId, MarkupContainer markupProvider, ResourceTypeModel model) {
             super(id, markupId, markupProvider, model);
             Form<Void> form = new Form<Void>("form");
             add(form);
             form.add(new Label("text", new SanitizedModel(new NotSetModel(new PropertyModel<String>(model, "name"))))
                     .setEscapeModelStrings(false));
-            form.add(new AuthenticatedAjaxEventButton("edit", form, internalEventBusModel, EditEvent.class));
+            form.add(new AuthenticatedAjaxEventButton("edit", form, ResourceTypePanel.this, EditEvent.class));
         }
     }
 
@@ -99,19 +94,16 @@ public class ResourceTypePanel extends EventPanel {
          *            container defining the fragment
          * @param model
          *            value model
-         * @param internalEventBusModel
-         *            event bus model for button clicks
          */
-        public EditFragment(String id, String markupId, MarkupContainer markupProvider, ResourceTypeModel model,
-                final IModel<EventBus> internalEventBusModel) {
+        public EditFragment(String id, String markupId, MarkupContainer markupProvider, ResourceTypeModel model) {
             super(id, markupId, markupProvider, model);
             resourceType = model.getObject();
             setOutputMarkupPlaceholderTag(true);
             Form<?> form = new Form<Void>("form");
             add(form);
             form.add(new ResourceTypeDropDownChoice("typeList", new PropertyModel<ResourceType>(this, "resourceType")));
-            form.add(new AuthenticatedAjaxEventButton("apply", form, internalEventBusModel, ApplyEvent.class));
-            form.add(new AuthenticatedAjaxEventButton("cancel", form, internalEventBusModel, CancelEvent.class)
+            form.add(new AuthenticatedAjaxEventButton("apply", form, ResourceTypePanel.this, ApplyEvent.class));
+            form.add(new AuthenticatedAjaxEventButton("cancel", form, ResourceTypePanel.this, CancelEvent.class)
                     .setDefaultFormProcessing(false));
         }
 
@@ -145,27 +137,28 @@ public class ResourceTypePanel extends EventPanel {
      *            wicket id
      * @param model
      *            the model of the value of the field
-     * @param eventBusModel
-     *            event bus model for triple add/edit/delete events
      */
-    public ResourceTypePanel(String id, ResourceTypeModel model, IModel<EventBus> eventBusModel) {
-        super(id, model, eventBusModel);
+    public ResourceTypePanel(String id, ResourceTypeModel model) {
+        super(id, model);
         setOutputMarkupPlaceholderTag(true);
-        LoadableDetachableModel<EventBus> internalEventBusModel = new LoadableDetachableModel<EventBus>() {
-
-            /** id. */
-            private static final long serialVersionUID = 5225667860067218852L;
-
-
-            @Override
-            protected EventBus load() {
-                return new EventBus();
-            }
-        };
-        internalEventBusModel.getObject().register(this);
-        viewFragment = new ViewFragment("content", "view", this, model, internalEventBusModel);
-        editFragment = new EditFragment("content", "edit", this, model, internalEventBusModel);
+        viewFragment = new ViewFragment("content", "view", this, model);
+        editFragment = new EditFragment("content", "edit", this, model);
         add(viewFragment);
+    }
+
+
+    @Override
+    public void onEvent(IEvent<?> event) {
+        super.onEvent(event);
+        if (event.getPayload() instanceof EditEvent) {
+            onEdit((EditEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof ApplyEvent) {
+            onApply((ApplyEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof CancelEvent) {
+            onCancel((CancelEvent) event.getPayload());
+        }
     }
 
 
@@ -175,8 +168,7 @@ public class ResourceTypePanel extends EventPanel {
      * @param event
      *            click event
      */
-    @Subscribe
-    public void onEdit(EditEvent event) {
+    private void onEdit(EditEvent event) {
         viewFragment.replaceWith(editFragment);
         event.getTarget().appendJavaScript("$('.tooltip').remove();");
         event.getTarget().add(this);
@@ -189,17 +181,14 @@ public class ResourceTypePanel extends EventPanel {
      * @param event
      *            click event
      */
-    @Subscribe
-    public void onApply(ApplyEvent event) {
+    private void onApply(ApplyEvent event) {
         editFragment.replaceWith(viewFragment);
         event.getTarget().appendJavaScript("$('.tooltip').remove();");
         event.getTarget().add(this);
         //set the value only when the user clicked OK
         ((ResourceTypeModel) this.getDefaultModel()).setObject(editFragment.getResourceType());
-        if (eventBusModel != null && eventBusModel.getObject() != null) {
-            IModel<? extends Annotable> annotable = ((ResourceTypeModel) this.getDefaultModel()).getResourceModel();
-            eventBusModel.getObject().post(new AnnotationAddedEvent(event.getTarget(), annotable));
-        }
+        IModel<? extends Annotable> annotable = ((ResourceTypeModel) this.getDefaultModel()).getResourceModel();
+        send(getPage(), Broadcast.BREADTH, new AnnotationAddedEvent(event.getTarget(), annotable));
     }
 
 
@@ -209,15 +198,12 @@ public class ResourceTypePanel extends EventPanel {
      * @param event
      *            click event
      */
-    @Subscribe
-    public void onCancel(CancelEvent event) {
+    private void onCancel(CancelEvent event) {
         editFragment.replaceWith(viewFragment);
         event.getTarget().appendJavaScript("$('.tooltip').remove();");
         event.getTarget().add(this);
-        if (eventBusModel != null && eventBusModel.getObject() != null) {
-            IModel<? extends Annotable> annotable = ((ResourceTypeModel) this.getDefaultModel()).getResourceModel();
-            eventBusModel.getObject().post(new AnnotationCancelledEvent(event.getTarget(), annotable));
-        }
+        IModel<? extends Annotable> annotable = ((ResourceTypeModel) this.getDefaultModel()).getResourceModel();
+        send(getPage(), Broadcast.BREADTH, new AnnotationCancelledEvent(event.getTarget(), annotable));
     }
 
 }

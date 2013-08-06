@@ -2,15 +2,13 @@ package pl.psnc.dl.wf4ever.portal.pages.ro;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
-import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.annotations.CommentsList;
 import pl.psnc.dl.wf4ever.portal.components.form.AnnotationEditAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.annotations.CommentAddClickedEvent;
-
-import com.google.common.eventbus.EventBus;
 
 /**
  * Panel aggregating the comments of an RO and buttons to change it.
@@ -18,7 +16,7 @@ import com.google.common.eventbus.EventBus;
  * @author Piotr Hołubowicz
  * 
  */
-public class RoCommentsPanel extends EventPanel {
+public class RoCommentsPanel extends Panel {
 
     /** id. */
     private static final long serialVersionUID = -3775797988389365540L;
@@ -41,20 +39,16 @@ public class RoCommentsPanel extends EventPanel {
      *            wicket id
      * @param model
      *            the research object model
-     * @param eventBusModel
-     *            event bus model for button clicks
      */
-    public RoCommentsPanel(String id, final IModel<ResearchObject> model, IModel<EventBus> eventBusModel) {
-        super(id, model, eventBusModel);
+    public RoCommentsPanel(String id, final IModel<ResearchObject> model) {
+        super(id, model);
         setOutputMarkupPlaceholderTag(true);
 
         form = new Form<Void>("form");
         add(form);
-        form.add(new AnnotationEditAjaxEventButton("add-comment", form, model, eventBusModel,
-                CommentAddClickedEvent.class));
+        form.add(new AnnotationEditAjaxEventButton("add-comment", form, model, null, CommentAddClickedEvent.class));
 
-        commentsList = new CommentsList("comments-list", model, eventBusModel);
+        commentsList = new CommentsList("comments-list", model);
         add(commentsList);
     }
-
 }

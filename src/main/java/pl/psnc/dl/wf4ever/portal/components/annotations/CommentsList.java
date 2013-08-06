@@ -4,24 +4,23 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.purl.wf4ever.rosrs.client.Annotable;
 import org.purl.wf4ever.rosrs.client.AnnotationTriple;
 import org.purl.wf4ever.rosrs.client.AnnotationTripleByDateComparator;
 
-import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.EditableTextPanel;
 import pl.psnc.dl.wf4ever.portal.events.ResourceSelectedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AbstractAnnotationEditedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.CommentAddClickedEvent;
 import pl.psnc.dl.wf4ever.portal.model.AnnotationTripleModel;
 
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 /**
@@ -30,7 +29,7 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * @author piotrekhol
  * 
  */
-public class CommentsList extends EventPanel {
+public class CommentsList extends Panel {
 
     /**
      * The list of comments.
@@ -60,7 +59,7 @@ public class CommentsList extends EventPanel {
         @Override
         protected void populateItem(ListItem<AnnotationTriple> item) {
             AnnotationTripleModel model = new AnnotationTripleModel(item.getModelObject());
-            item.add(new EditableCommentTextPanel("comment", model, eventBusModel));
+            item.add(new EditableCommentTextPanel("comment", model));
         }
     }
 
@@ -122,17 +121,14 @@ public class CommentsList extends EventPanel {
          *            wicket ID
          * @param model
          *            the model for the comment value
-         * @param eventBusModel
-         *            event bus model
          * @param target
          *            AJAX target to which to add the new panel
          */
-        public AddCommentPanel(String id, AnnotationTripleModel model, IModel<EventBus> eventBusModel,
-                AjaxRequestTarget target) {
+        public AddCommentPanel(String id, AnnotationTripleModel model, AjaxRequestTarget target) {
             super(id);
             setOutputMarkupId(true);
             setOutputMarkupPlaceholderTag(true);
-            add(new EditableTextPanel("new-comment", model, eventBusModel, true, true));
+            add(new EditableTextPanel("new-comment", model, true, true));
         }
 
     }
@@ -158,12 +154,9 @@ public class CommentsList extends EventPanel {
      *            wicket ID
      * @param annotableModel
      *            the model of the resource that the comments are about
-     * @param eventBusModel
-     *            event bus model for the event of adding/deleting comments
      */
-    public CommentsList(String id, final IModel<? extends Annotable> annotableModel,
-            final IModel<EventBus> eventBusModel) {
-        super(id, annotableModel, eventBusModel);
+    public CommentsList(String id, final IModel<? extends Annotable> annotableModel) {
+        super(id, annotableModel);
         setOutputMarkupPlaceholderTag(true);
         IModel<List<AnnotationTriple>> listModel = new CommentsToListModel(annotableModel);
         noComments = new WebMarkupContainer("no-comments");
@@ -178,31 +171,45 @@ public class CommentsList extends EventPanel {
     }
 
 
+    @Override
+    protected void onConfigure() {
+        noComments.setVisible(comments.getModelObject().isEmpty());
+        super.onConfigure();
+    }
+
+
+    @Override
+    public void onEvent(IEvent<?> event) {
+        super.onEvent(event);
+        if (event.getPayload() instanceof CommentAddClickedEvent) {
+            onAddCommentClicked((CommentAddClickedEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof AbstractAnnotationEditedEvent) {
+            onCommentAdded((AbstractAnnotationEditedEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof ResourceSelectedEvent) {
+            onResourceSelected((ResourceSelectedEvent) event.getPayload());
+        }
+    }
+
+
     /**
      * Called when the button is clicked to show the panel for the new comment.
      * 
      * @param event
      *            the AJAX event
      */
-    @Subscribe
-    public void onAddCommentClicked(CommentAddClickedEvent event) {
+    private void onAddCommentClicked(CommentAddClickedEvent event) {
         if (event.getAnnotableModel().getObject() == this.getDefaultModelObject()) {
             @SuppressWarnings("unchecked")
             AnnotationTripleModel model = new AnnotationTripleModel((IModel<Annotable>) this.getDefaultModel(),
                     RDFS.comment, false);
-            AddCommentPanel panel = new AddCommentPanel("add-comment", model, eventBusModel, event.getTarget());
+            AddCommentPanel panel = new AddCommentPanel("add-comment", model, event.getTarget());
             panel.setVisible(true);
             addCommentPanel.replaceWith(panel);
             addCommentPanel = panel;
             event.getTarget().add(addCommentPanel);
         }
-    }
-
-
-    @Override
-    protected void onConfigure() {
-        noComments.setVisible(comments.getModelObject().isEmpty());
-        super.onConfigure();
     }
 
 
@@ -212,8 +219,7 @@ public class CommentsList extends EventPanel {
      * @param event
      *            the AJAX event
      */
-    @Subscribe
-    public void onCommentAdded(AbstractAnnotationEditedEvent event) {
+    private void onCommentAdded(AbstractAnnotationEditedEvent event) {
         addCommentPanel.setVisible(false);
         event.getTarget().add(this);
     }
@@ -225,8 +231,7 @@ public class CommentsList extends EventPanel {
      * @param event
      *            the AJAX event
      */
-    @Subscribe
-    public void onResourceSelected(ResourceSelectedEvent event) {
+    private void onResourceSelected(ResourceSelectedEvent event) {
         event.getTarget().add(this);
     }
 

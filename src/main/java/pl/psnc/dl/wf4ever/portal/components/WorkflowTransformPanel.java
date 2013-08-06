@@ -6,12 +6,13 @@ import java.util.Set;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
-import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.authorization.Action;
 import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeAction;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.purl.wf4ever.rosrs.client.Folder;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
@@ -24,13 +25,13 @@ import org.purl.wf4ever.wf2ro.Wf2ROService;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.behaviors.WorkflowTransformationJobStatusUpdatingBehaviour;
-import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxDecoratedButton;
+import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
+import pl.psnc.dl.wf4ever.portal.events.WorkflowTransformClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.WorkflowTransformedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.AggregationChangedEvent;
 import pl.psnc.dl.wf4ever.portal.model.ResourceType;
 import pl.psnc.dl.wf4ever.portal.model.ResourceTypeModel;
 
-import com.google.common.eventbus.EventBus;
 import com.sun.jersey.api.client.ClientResponse;
 
 /**
@@ -39,7 +40,7 @@ import com.sun.jersey.api.client.ClientResponse;
  * @author piotrekhol
  * 
  */
-public class WorkflowTransformPanel extends EventPanel {
+public class WorkflowTransformPanel extends Panel {
 
     /** Logger. */
     private static final Logger LOGGER = Logger.getLogger(WorkflowTransformPanel.class);
@@ -52,7 +53,7 @@ public class WorkflowTransformPanel extends EventPanel {
      * 
      */
     @AuthorizeAction(action = Action.RENDER, roles = { Roles.USER })
-    private final class TransformButton extends AuthenticatedAjaxDecoratedButton {
+    private final class TransformButton extends AuthenticatedAjaxEventButton {
 
         /** id. */
         private static final long serialVersionUID = -993018287446638943L;
@@ -67,34 +68,10 @@ public class WorkflowTransformPanel extends EventPanel {
          *            for which will be validated
          */
         public TransformButton(String id, Form<?> form) {
-            super(id, form);
+            super(id, form, WorkflowTransformPanel.this, WorkflowTransformClickedEvent.class);
             setOutputMarkupPlaceholderTag(true);
         }
 
-
-        @Override
-        public void onClicked(AjaxRequestTarget target, Form<?> form) {
-            Resource resource = (Resource) WorkflowTransformPanel.this.getDefaultModelObject();
-            researchObject = resource.getResearchObject();
-            folder = folderModel.getObject();
-            try {
-                ClientResponse response = resource.getHead();
-                MediaType contentType = response.getType();
-                Wf2ROService service = MySession.get().getWf2ROService();
-                try {
-                    JobStatus status = service.transform(resource.getUri(), contentType.toString(), resource
-                            .getResearchObject().getUri());
-                    add(new WorkflowTransformationJobStatusUpdatingBehaviour(status));
-                    target.add(this);
-                } catch (ServiceException e) {
-                    error("Creating the transformation job returned an incorrect status. " + e.getMessage());
-                    LOGGER.error("Creating the transformation job returned an incorrect status. ", e);
-                }
-            } catch (ROSRSException e) {
-                error("Accessing the resource returned an incorrect status. " + e.getMessage());
-                LOGGER.error("Accessing the resource returned an incorrect status. ", e);
-            }
-        }
     }
 
 
@@ -125,12 +102,10 @@ public class WorkflowTransformPanel extends EventPanel {
      *            resource type model
      * @param folderModel
      *            current folder model
-     * @param eventBusModel
-     *            event bus model for triple add/edit/delete events
      */
     public WorkflowTransformPanel(String id, IModel<Resource> model, ResourceTypeModel resourceTypeModel,
-            IModel<Folder> folderModel, IModel<EventBus> eventBusModel) {
-        super(id, model, eventBusModel);
+            IModel<Folder> folderModel) {
+        super(id, model);
         this.resourceTypeModel = resourceTypeModel;
         this.folderModel = folderModel;
         setOutputMarkupPlaceholderTag(true);
@@ -149,8 +124,41 @@ public class WorkflowTransformPanel extends EventPanel {
 
     @Override
     public void onEvent(IEvent<?> event) {
+        if (event.getPayload() instanceof WorkflowTransformClickedEvent) {
+            onWorkflowTransformClicked((WorkflowTransformClickedEvent) event.getPayload());
+        }
         if (event.getPayload() instanceof WorkflowTransformedEvent) {
             onWorkflowTransformed((WorkflowTransformedEvent) event.getPayload());
+        }
+    }
+
+
+    /**
+     * Start the transformation process.
+     * 
+     * @param event
+     *            AJAX event
+     */
+    private void onWorkflowTransformClicked(WorkflowTransformClickedEvent event) {
+        Resource resource = (Resource) WorkflowTransformPanel.this.getDefaultModelObject();
+        researchObject = resource.getResearchObject();
+        folder = folderModel.getObject();
+        try {
+            ClientResponse response = resource.getHead();
+            MediaType contentType = response.getType();
+            Wf2ROService service = MySession.get().getWf2ROService();
+            try {
+                JobStatus status = service.transform(resource.getUri(), contentType.toString(), resource
+                        .getResearchObject().getUri());
+                add(new WorkflowTransformationJobStatusUpdatingBehaviour(status));
+                event.getTarget().add(this);
+            } catch (ServiceException e) {
+                error("Creating the transformation job returned an incorrect status. " + e.getMessage());
+                LOGGER.error("Creating the transformation job returned an incorrect status. ", e);
+            }
+        } catch (ROSRSException e) {
+            error("Accessing the resource returned an incorrect status. " + e.getMessage());
+            LOGGER.error("Accessing the resource returned an incorrect status. ", e);
         }
     }
 
@@ -161,7 +169,7 @@ public class WorkflowTransformPanel extends EventPanel {
      * @param event
      *            AJAX event
      */
-    public void onWorkflowTransformed(WorkflowTransformedEvent event) {
+    private void onWorkflowTransformed(WorkflowTransformedEvent event) {
         try {
             Set<Resource> oldResources = new HashSet<>(researchObject.getResources().values());
             researchObject.load();
@@ -172,7 +180,7 @@ public class WorkflowTransformPanel extends EventPanel {
                     folder.addEntry(resource, null);
                 }
             }
-            eventBusModel.getObject().post(new AggregationChangedEvent(event.getTarget()));
+            send(getPage(), Broadcast.BREADTH, new AggregationChangedEvent(event.getTarget()));
         } catch (ROSRSException | ROException e) {
             LOGGER.error("Error when reloading the RO after workflow transformation", e);
             error("Error when reloading the RO after workflow transformation: " + e.getMessage());

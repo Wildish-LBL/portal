@@ -3,12 +3,13 @@ package pl.psnc.dl.wf4ever.portal.modals;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
-import com.google.common.eventbus.EventBus;
+import pl.psnc.dl.wf4ever.portal.events.ros.RoDeleteReadyEvent;
 
 /**
  * A modal for adding resources to the RO.
@@ -27,14 +28,11 @@ public class DeleteROModal extends AbstractModal {
      * 
      * @param id
      *            wicket id
-     * @param eventBusModel
-     *            event bus
      * @param toDelete
      *            ROs to delete
      */
-    public DeleteROModal(String id, final IModel<EventBus> eventBusModel,
-            final IModel<? extends List<ResearchObject>> toDelete) {
-        super(id, toDelete, eventBusModel, "delete-ro-modal", "Confirm");
+    public DeleteROModal(String id, final IModel<? extends List<ResearchObject>> toDelete) {
+        super(id, toDelete, "delete-ro-modal", "Confirm");
 
         modal.add(new Label("deleteCnt", new AbstractReadOnlyModel<String>() {
 
@@ -55,17 +53,8 @@ public class DeleteROModal extends AbstractModal {
 
     @Override
     public void onOk(AjaxRequestTarget target) {
-        onApply(target);
+        send(getPage(), Broadcast.BREADTH, new RoDeleteReadyEvent(target));
         hide(target);
     }
 
-
-    /**
-     * ROs are ready to be deleted.
-     * 
-     * @param target
-     *            AJAX target
-     */
-    public void onApply(AjaxRequestTarget target) {
-    }
 }

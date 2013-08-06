@@ -11,13 +11,12 @@ import java.util.List;
 
 import org.apache.http.HttpStatus;
 import org.apache.log4j.Logger;
-import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Check;
 import org.apache.wicket.markup.html.form.CheckGroup;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.RefreshingView;
@@ -32,15 +31,19 @@ import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
-import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxDecoratedButton;
+import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
+import pl.psnc.dl.wf4ever.portal.events.ros.RoCreateClickedEvent;
+import pl.psnc.dl.wf4ever.portal.events.ros.RoCreateReadyEvent;
+import pl.psnc.dl.wf4ever.portal.events.ros.RoDeleteClickedEvent;
+import pl.psnc.dl.wf4ever.portal.events.ros.RoDeleteReadyEvent;
+import pl.psnc.dl.wf4ever.portal.events.ros.ZipAddClickedEvent;
+import pl.psnc.dl.wf4ever.portal.events.ros.ZipAddReadyEvent;
 import pl.psnc.dl.wf4ever.portal.modals.CreateROModal;
 import pl.psnc.dl.wf4ever.portal.modals.DeleteROModal;
 import pl.psnc.dl.wf4ever.portal.modals.UploadZipModal;
-import pl.psnc.dl.wf4ever.portal.model.template.ResearchObjectTemplate;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
 import pl.psnc.dl.wf4ever.portal.utils.ModelIteratorAdapter;
 
-import com.google.common.eventbus.EventBus;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 import com.sun.jersey.api.client.Client;
 
@@ -64,9 +67,6 @@ public class MyRosPage extends BasePage {
 
     /** Feedback panel. */
     private MyFeedbackPanel feedbackPanel;
-
-    /** Event bus. */
-    private IModel<EventBus> eventBusModel;
 
     /** List of ROs. */
     private List<ResearchObject> researchObjects;
@@ -110,9 +110,6 @@ public class MyRosPage extends BasePage {
             }
         }
 
-        eventBusModel = session.addEventBus();
-        eventBusModel.getObject().register(this);
-
         form = new Form<Void>("form");
         form.setOutputMarkupId(true);
         add(form);
@@ -124,275 +121,166 @@ public class MyRosPage extends BasePage {
         RefreshingView<ResearchObject> list = new MyROsRefreshingView("rosListView", researchObjects);
         group.add(list);
 
-        form.add(new ShowDeleteModelButton("delete", form));
-        form.add(new ShowCreateROModelButton("add", form));
-        form.add(new ShowUploadZIPModelButton("add-zip", form));
+        form.add(new AuthenticatedAjaxEventButton("delete", form, this, RoDeleteClickedEvent.class));
+        form.add(new AuthenticatedAjaxEventButton("add", form, this, RoCreateClickedEvent.class));
+        form.add(new AuthenticatedAjaxEventButton("add-zip", form, this, ZipAddClickedEvent.class));
         form.add(new BookmarkablePageLink<Void>("myExpImport", MyExpImportPage.class));
 
-        deleteROModal = new InternalDeleteROModal("delete-ro-modal", eventBusModel,
-                new PropertyModel<List<ResearchObject>>(this, "selectedResearchObjects"));
+        deleteROModal = new DeleteROModal("delete-ro-modal", new PropertyModel<List<ResearchObject>>(this,
+                "selectedResearchObjects"));
         add(deleteROModal);
-        createROModal = new InternalCreateROModal("create-ro-modal", eventBusModel);
+        createROModal = new CreateROModal("create-ro-modal");
         add(createROModal);
-        uploadZipModal = new InternalUploadZipModal("zip-upload-modal", eventBusModel);
+        uploadZipModal = new UploadZipModal("zip-upload-modal");
         add(uploadZipModal);
     }
 
 
-    /**
-     * Instance that.
-     * 
-     * @author piotrekhol
-     * 
-     */
-    private final class InternalUploadZipModal extends UploadZipModal {
-
-        /** id. */
-        private static final long serialVersionUID = 8322434091972051487L;
-
-
-        /**
-         * Constructor.
-         * 
-         * @param id
-         *            wicket id
-         * @param eventBusModel
-         *            event bus
-         */
-        private InternalUploadZipModal(String id, IModel<EventBus> eventBusModel) {
-            super(id, eventBusModel);
+    @Override
+    public void onEvent(IEvent<?> event) {
+        if (event.getPayload() instanceof RoCreateReadyEvent) {
+            onRoCreated((RoCreateReadyEvent) event.getPayload());
         }
+        if (event.getPayload() instanceof RoDeleteReadyEvent) {
+            onRoDelete((RoDeleteReadyEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof ZipAddReadyEvent) {
+            onRoFromZip((ZipAddReadyEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof RoCreateClickedEvent) {
+            onRoCreate((RoCreateClickedEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof RoDeleteClickedEvent) {
+            onRoDelete((RoDeleteClickedEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof ZipAddClickedEvent) {
+            onAddZipClicked((ZipAddClickedEvent) event.getPayload());
+        }
+    }
 
 
-        @Override
-        protected void onApply(AjaxRequestTarget target, FileUpload uploadedFile) {
+    /**
+     * Show the modal.
+     * 
+     * @param event
+     *            AJAX event
+     */
+    public void onRoDelete(RoDeleteClickedEvent event) {
+        if (!selectedResearchObjects.isEmpty()) {
+            DeleteROModal deleteROModal2 = new DeleteROModal("delete-ro-modal",
+                    new PropertyModel<List<ResearchObject>>(this, "selectedResearchObjects"));
+            deleteROModal.replaceWith(deleteROModal2);
+            deleteROModal = deleteROModal2;
+            deleteROModal.show(event.getTarget());
+        }
+    }
+
+
+    /**
+     * Show the modal.
+     * 
+     * @param event
+     *            AJAX event
+     */
+    public void onRoCreate(RoCreateClickedEvent event) {
+        CreateROModal createROModal2 = new CreateROModal("create-ro-modal");
+        createROModal.replaceWith(createROModal2);
+        createROModal = createROModal2;
+        createROModal.show(event.getTarget());
+    }
+
+
+    /**
+     * Show the modal.
+     * 
+     * @param event
+     *            AJAX event
+     */
+    public void onAddZipClicked(ZipAddClickedEvent event) {
+        UploadZipModal uploadZipModal2 = new UploadZipModal("zip-upload-modal");
+        uploadZipModal.replaceWith(uploadZipModal2);
+        uploadZipModal = uploadZipModal2;
+        uploadZipModal.show(event.getTarget());
+    }
+
+
+    /**
+     * Create a new RO.
+     * 
+     * @param event
+     *            event
+     */
+    public void onRoCreated(RoCreateReadyEvent event) {
+        try {
+            ResearchObject ro;
+            if (event.getTemplate() == null) {
+                ro = ResearchObject.create(MySession.get().getRosrs(), event.getRoId());
+            } else {
+                ro = event.getTemplate().create(MySession.get().getRosrs(), event.getRoId());
+            }
+            researchObjects.add(ro);
+            if (event.getTitle() != null) {
+                ro.createPropertyValue(DCTerms.title, event.getTitle());
+            }
+            if (event.getDescription() != null) {
+                ro.createPropertyValue(DCTerms.description, event.getDescription());
+            }
+        } catch (ROSRSException e) {
+            if (e.getStatus() == HttpStatus.SC_CONFLICT) {
+                error("This ID is already used.");
+            } else {
+                error("Could not add Research Object: " + event.getRoId() + " (" + e.getMessage() + ")");
+            }
+            LOG.error("Could not create RO", e);
+        } catch (ROException e) {
+            error("Could not add Research Object: " + event.getRoId() + " (" + e.getMessage() + ")");
+            LOG.error("Could not create RO", e);
+        }
+        event.getTarget().add(form);
+    }
+
+
+    /**
+     * Delete an RO.
+     * 
+     * @param event
+     *            event
+     */
+    public void onRoDelete(RoDeleteReadyEvent event) {
+        for (ResearchObject ro : selectedResearchObjects) {
             try {
-                setResponsePage(new CreateROFromZipPage(uploadedFile.getInputStream(), uploadedFile.getClientFileName()));
-            } catch (IOException e) {
-                LOG.error("Invalid ZIP archive", e);
-                error("Invalid ZIP archive: " + e.getLocalizedMessage());
+                ro.delete();
+                researchObjects.remove(ro);
+            } catch (Exception e) {
+                error("Could not delete Research Object: " + ro.getUri() + " (" + e.getMessage() + ")");
             }
         }
-
-
-        @Override
-        protected void onApply(AjaxRequestTarget target, URI resourceURI) {
-            setResponsePage(new CreateROFromZipPage(Client.create().resource(resourceURI).get(InputStream.class), Paths
-                    .get(resourceURI).getFileName().toString()));
-        }
+        event.getTarget().add(form);
     }
 
 
     /**
-     * Instance that deletes the ROs.
+     * Process the details of the ZIP archive and redirect to the RO creation page.
      * 
-     * @author piotrekhol
-     * 
+     * @param event
+     *            event with URI or path of the ZIP archive
      */
-    private final class InternalDeleteROModal extends DeleteROModal {
-
-        /** id. */
-        private static final long serialVersionUID = -535690076411811855L;
-
-
-        /**
-         * Constructor.
-         * 
-         * @param id
-         *            wicket id
-         * @param eventBusModel
-         *            event bus
-         * @param toDelete
-         *            ROs to delete
-         */
-        private InternalDeleteROModal(String id, IModel<EventBus> eventBusModel,
-                IModel<? extends List<ResearchObject>> toDelete) {
-            super(id, eventBusModel, toDelete);
-        }
-
-
-        @Override
-        public void onApply(AjaxRequestTarget target) {
-            for (ResearchObject ro : selectedResearchObjects) {
-                try {
-                    ro.delete();
-                    researchObjects.remove(ro);
-                } catch (Exception e) {
-                    error("Could not delete Research Object: " + ro.getUri() + " (" + e.getMessage() + ")");
-                }
+    public void onRoFromZip(ZipAddReadyEvent event) {
+        try {
+            InputStream inputStream;
+            String name;
+            if (event.getUploadedFile() != null) {
+                inputStream = event.getUploadedFile().getInputStream();
+                name = event.getUploadedFile().getClientFileName();
+            } else {
+                inputStream = Client.create().resource(event.getResourceUri()).get(InputStream.class);
+                name = Paths.get(event.getResourceUri()).getFileName().toString();
             }
-            target.add(MyRosPage.this.form);
+            setResponsePage(new CreateROFromZipPage(inputStream, name));
+        } catch (IOException e) {
+            LOG.error("Invalid ZIP archive", e);
+            error("Invalid ZIP archive: " + e.getLocalizedMessage());
         }
-    }
-
-
-    /**
-     * Instance that creates the RO.
-     * 
-     * @author piotrekhol
-     * 
-     */
-    private final class InternalCreateROModal extends CreateROModal {
-
-        /** id. */
-        private static final long serialVersionUID = 1218611500046636655L;
-
-
-        /**
-         * Constructor.
-         * 
-         * @param id
-         *            wicket id
-         * @param eventBusModel
-         *            event bus
-         */
-        private InternalCreateROModal(String id, IModel<EventBus> eventBusModel) {
-            super(id, eventBusModel);
-        }
-
-
-        @Override
-        public void onApply(AjaxRequestTarget target, String roId, ResearchObjectTemplate template, String title,
-                String description) {
-            try {
-                ResearchObject ro;
-                if (template == null) {
-                    ro = ResearchObject.create(MySession.get().getRosrs(), roId);
-                } else {
-                    ro = template.create(MySession.get().getRosrs(), roId);
-                }
-                researchObjects.add(ro);
-                if (title != null) {
-                    ro.createPropertyValue(DCTerms.title, title);
-                }
-                if (description != null) {
-                    ro.createPropertyValue(DCTerms.description, description);
-                }
-            } catch (ROSRSException e) {
-                if (e.getStatus() == HttpStatus.SC_CONFLICT) {
-                    error("This ID is already used.");
-                } else {
-                    error("Could not add Research Object: " + roId + " (" + e.getMessage() + ")");
-                }
-                LOG.error("Could not create RO", e);
-            } catch (ROException e) {
-                error("Could not add Research Object: " + roId + " (" + e.getMessage() + ")");
-                LOG.error("Could not create RO", e);
-            }
-            target.add(MyRosPage.this.form);
-        }
-    }
-
-
-    /**
-     * A button.
-     * 
-     * @author piotrekhol
-     * 
-     */
-    private class ShowDeleteModelButton extends AuthenticatedAjaxDecoratedButton {
-
-        /** id. */
-        private static final long serialVersionUID = -4510072124035188464L;
-
-
-        /**
-         * Constructor.
-         * 
-         * @param id
-         *            wicket ID
-         * @param form
-         *            for which will be validated
-         */
-        public ShowDeleteModelButton(String id, Form<?> form) {
-            super(id, form);
-        }
-
-
-        @Override
-        public void onClicked(AjaxRequestTarget target, Form<?> form) {
-            IModel<ArrayList<ResearchObject>> model = new PropertyModel<ArrayList<ResearchObject>>(getPageReference(),
-                    "page.selectedResearchObjects");
-            if (!model.getObject().isEmpty()) {
-                DeleteROModal deleteROModal2 = new InternalDeleteROModal("delete-ro-modal", eventBusModel, model);
-                deleteROModal.replaceWith(deleteROModal2);
-                deleteROModal = deleteROModal2;
-                deleteROModal.show(target);
-            }
-        }
-
-    }
-
-
-    /**
-     * A button.
-     * 
-     * @author piotrekhol
-     * 
-     */
-    private class ShowCreateROModelButton extends AuthenticatedAjaxDecoratedButton {
-
-        /** id. */
-        private static final long serialVersionUID = -4510072124035188464L;
-
-
-        /**
-         * Constructor.
-         * 
-         * @param id
-         *            wicket ID
-         * @param form
-         *            for which will be validated
-         */
-        public ShowCreateROModelButton(String id, Form<?> form) {
-            super(id, form);
-        }
-
-
-        @Override
-        public void onClicked(AjaxRequestTarget target, Form<?> form) {
-            CreateROModal createROModal2 = new InternalCreateROModal("create-ro-modal", eventBusModel);
-            createROModal.replaceWith(createROModal2);
-            createROModal = createROModal2;
-            createROModal.show(target);
-        }
-
-    }
-
-
-    /**
-     * A button.
-     * 
-     * @author piotrekhol
-     * 
-     */
-    private class ShowUploadZIPModelButton extends AuthenticatedAjaxDecoratedButton {
-
-        /** id. */
-        private static final long serialVersionUID = -4510072124035188464L;
-
-
-        /**
-         * Constructor.
-         * 
-         * @param id
-         *            wicket ID
-         * @param form
-         *            for which will be validated
-         */
-        public ShowUploadZIPModelButton(String id, Form<?> form) {
-            super(id, form);
-        }
-
-
-        @Override
-        public void onClicked(AjaxRequestTarget target, Form<?> form) {
-            UploadZipModal uploadZipModal2 = new InternalUploadZipModal("zip-upload-modal", eventBusModel);
-            uploadZipModal.replaceWith(uploadZipModal2);
-            uploadZipModal = uploadZipModal2;
-            uploadZipModal.show(target);
-        }
-
     }
 
 

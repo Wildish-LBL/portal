@@ -3,7 +3,6 @@
  */
 package pl.psnc.dl.wf4ever.portal;
 
-import java.io.Serializable;
 import java.lang.ref.SoftReference;
 import java.net.URI;
 import java.util.HashMap;
@@ -26,8 +25,6 @@ import org.purl.wf4ever.rosrs.client.users.UserManagementService;
 import org.purl.wf4ever.wf2ro.Wf2ROService;
 import org.scribe.model.Token;
 
-import com.google.common.eventbus.EventBus;
-
 /**
  * Custom app session.
  * 
@@ -35,56 +32,6 @@ import com.google.common.eventbus.EventBus;
  * 
  */
 public class MySession extends AbstractAuthenticatedWebSession {
-
-    /**
-     * A simple model that searches for the event bus of a given key. The returned value will be the same even if the
-     * calling page is serialized/deserialized.
-     * 
-     * This class is static so that there is no reference to MySession, to prevent the session from being serialized.
-     * 
-     * @author piotrekhol
-     * 
-     */
-    private static class EventBusModel extends AbstractReadOnlyModel<EventBus> {
-
-        /** id. */
-        private static final long serialVersionUID = 5225667860067218852L;
-
-        /** key. */
-        private int key;
-
-
-        /**
-         * Constructor.
-         * 
-         * @param key
-         *            key
-         */
-        public EventBusModel(int key) {
-            this.key = key;
-        }
-
-
-        @Override
-        public EventBus getObject() {
-            return MySession.get().getEventBus(key);
-        }
-    }
-
-
-    /**
-     * An event bus that is serializable.
-     * 
-     * @author piotrekhol
-     * 
-     */
-    private static class SerializableEventBus extends EventBus implements Serializable {
-
-        /** id. */
-        private static final long serialVersionUID = -848280536883820491L;
-
-    }
-
 
     /**
      * A simple model that searches for the background job of a given key. The returned value will be the same even if
@@ -175,9 +122,6 @@ public class MySession extends AbstractAuthenticatedWebSession {
 
     /** Keep futures here so that they are not dropped between subsequent page refreshes. */
     private transient Map<Integer, SoftReference<Future<?>>> futures;
-
-    /** Keep event buses here so that they are not dropped between subsequent page refreshes. */
-    private Map<Integer, SoftReference<? extends EventBus>> eventBuses;
 
 
     /**
@@ -412,51 +356,4 @@ public class MySession extends AbstractAuthenticatedWebSession {
         SoftReference<Future<?>> value = getFutures().get(key);
         return value != null ? value.get() : null;
     }
-
-
-    /**
-     * Get or create the transient store.
-     * 
-     * @return a map
-     */
-    private synchronized Map<Integer, SoftReference<? extends EventBus>> getEventBuses() {
-        if (eventBuses == null) {
-            eventBuses = new HashMap<>();
-        }
-        return eventBuses;
-    }
-
-
-    /**
-     * Store an event bus.
-     * 
-     * @return a read only model to retrieve the event bus
-     */
-    public IModel<EventBus> addEventBus() {
-        int key;
-        do {
-            key = new Random().nextInt();
-        } while (getEventBuses().containsKey(key));
-        getEventBuses().put(key, new SoftReference<EventBus>(new SerializableEventBus()));
-        return new EventBusModel(key);
-    }
-
-
-    /**
-     * Return the value. If there is no value, create a new event bus. SoftReference is used so that the values can be
-     * deleted if they take too much memory.
-     * 
-     * @param key
-     *            key
-     * @return value
-     */
-    private synchronized EventBus getEventBus(int key) {
-        SoftReference<? extends EventBus> value = getEventBuses().get(key);
-        if (value == null || value.get() == null) {
-            LOG.warn("Need to create a new event bus because the old one expired.");
-            getEventBuses().put(key, new SoftReference<>(new SerializableEventBus()));
-        }
-        return value.get();
-    }
-
 }

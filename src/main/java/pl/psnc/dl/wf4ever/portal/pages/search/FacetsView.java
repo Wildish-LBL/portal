@@ -10,8 +10,6 @@ import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.FacetValue;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.solr.FacetEntry;
 
-import com.google.common.eventbus.EventBus;
-
 /**
  * A list of facets.
  * 
@@ -26,9 +24,6 @@ public class FacetsView extends ListView<FacetEntry> {
     /** selected facet values, for all facets. */
     private List<FacetValue> selected;
 
-    /** event bus model that is passed to individual values so that they can post events about clicks. */
-    private IModel<EventBus> eventBusModel;
-
 
     /**
      * Constructor.
@@ -39,13 +34,9 @@ public class FacetsView extends ListView<FacetEntry> {
      *            selected facet values, for all facets
      * @param model
      *            model for all facets
-     * @param eventBusModel
-     *            event bus model that is passed to individual values so that they can post events about clicks
      */
-    public FacetsView(String id, List<FacetValue> selected, IModel<? extends List<? extends FacetEntry>> model,
-            IModel<EventBus> eventBusModel) {
+    public FacetsView(String id, List<FacetValue> selected, IModel<? extends List<? extends FacetEntry>> model) {
         super(id, model);
-        this.eventBusModel = eventBusModel;
         this.selected = selected;
     }
 
@@ -56,7 +47,7 @@ public class FacetsView extends ListView<FacetEntry> {
         FacetEntry facet = item.getModelObject();
         item.add(new Label("name", new PropertyModel<String>(facet, "name")));
         FacetValueView facetValueView = new FacetValueView("options", selected, new PropertyModel<List<FacetValue>>(
-                item.getModel(), "values"), eventBusModel);
+                item.getModel(), "values"));
         item.add(facetValueView);
         item.setVisible(facetValueView.hasVisibleValues());
 

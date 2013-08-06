@@ -1,8 +1,10 @@
 package pl.psnc.dl.wf4ever.portal.pages.ro.notifications;
 
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -11,11 +13,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
 import org.purl.wf4ever.rosrs.client.notifications.Notification;
 
-import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.events.ResourceSelectedEvent;
-
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 
 /**
  * A preview of a notification.
@@ -23,7 +21,7 @@ import com.google.common.eventbus.Subscribe;
  * @author piotrekhol
  * 
  */
-public class NotificationPreviewPanel extends EventPanel {
+public class NotificationPreviewPanel extends Panel {
 
     /** id. */
     private static final long serialVersionUID = 2297121898862626801L;
@@ -36,16 +34,23 @@ public class NotificationPreviewPanel extends EventPanel {
      *            wicket id
      * @param model
      *            notification model
-     * @param eventBusModel
-     *            event bus for knowing when to refresh
      */
-    public NotificationPreviewPanel(String id, IModel<Notification> model, IModel<EventBus> eventBusModel) {
-        super(id, new CompoundPropertyModel<>(model), eventBusModel);
+    public NotificationPreviewPanel(String id, IModel<Notification> model) {
+        super(id, new CompoundPropertyModel<>(model));
         setOutputMarkupId(true);
         add(new Label("title"));
         add(new Label("published", new PublishedDateModel()));
         add(new Label("sourceName"));
         add(new Label("content").setEscapeModelStrings(false));
+    }
+
+
+    @Override
+    public void onEvent(IEvent<?> event) {
+        super.onEvent(event);
+        if (event.getPayload() instanceof ResourceSelectedEvent) {
+            onNotificationSelected((ResourceSelectedEvent) event.getPayload());
+        }
     }
 
 
@@ -55,8 +60,7 @@ public class NotificationPreviewPanel extends EventPanel {
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void onNotificationSelected(ResourceSelectedEvent event) {
+    private void onNotificationSelected(ResourceSelectedEvent event) {
         event.getTarget().add(this);
     }
 

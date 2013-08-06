@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.repeater.AbstractPageableView;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.IModel;
@@ -18,8 +19,6 @@ import org.purl.wf4ever.rosrs.client.search.dataclasses.FoundRO;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.SearchResult;
 
 import pl.psnc.dl.wf4ever.portal.events.search.SearchResultsAvailableEvent;
-
-import com.google.common.eventbus.EventBus;
 
 /**
  * A search results generator that fetches new results for each results page separately.
@@ -50,9 +49,6 @@ public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
     /** number of all results. */
     private long resultCount;
 
-    /** event bus model. */
-    private IModel<EventBus> eventBusModel;
-
 
     /**
      * Constructor.
@@ -67,16 +63,13 @@ public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
      *            how many results should be fetched for each page
      * @param sortFieldsModel
      *            model of the sort fields
-     * @param eventBusModel
-     *            event bus model
      */
     public LazySearchResultsView(String id, SearchServer searchServer, String query, int resultsPerPage,
-            PropertyModel<Map<String, SortOrder>> sortFieldsModel, IModel<EventBus> eventBusModel) {
+            PropertyModel<Map<String, SortOrder>> sortFieldsModel) {
         super(id);
         this.searchServer = searchServer;
         this.query = query;
         this.sortFields = sortFieldsModel;
-        this.eventBusModel = eventBusModel;
         try {
             SearchResult results = searchServer.search(query, 0, 1, sortFields.getObject());
             this.resultCount = results.getNumFound();
@@ -94,7 +87,7 @@ public class LazySearchResultsView extends AbstractPageableView<FoundRO> {
         try {
             SearchResult results = searchServer.search(query, (int) offset, (int) size, sortFields.getObject());
             this.offset = offset;
-            eventBusModel.getObject().post(new SearchResultsAvailableEvent(results));
+            send(getPage(), Broadcast.BREADTH, new SearchResultsAvailableEvent(results));
             return new ModelIterator<>(results.getROsList());
         } catch (SearchException e) {
             LOGGER.error("Can't search more data", e);

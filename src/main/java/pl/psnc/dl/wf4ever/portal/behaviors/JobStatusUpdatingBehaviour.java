@@ -4,16 +4,15 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
-import org.apache.wicket.model.IModel;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.util.time.Duration;
 import org.purl.wf4ever.rosrs.client.evo.JobStatus;
 import org.purl.wf4ever.rosrs.client.evo.JobStatus.State;
 
 import pl.psnc.dl.wf4ever.portal.events.evo.JobFinishedEvent;
-
-import com.google.common.eventbus.EventBus;
 
 /**
  * A behavior for monitoring the progress of a snapshot/release operation.
@@ -38,9 +37,6 @@ public class JobStatusUpdatingBehaviour extends AjaxSelfUpdatingTimerBehavior {
     /** class of event posted when the job finished. */
     private Class<? extends JobFinishedEvent> eventClass;
 
-    /** event bus model. */
-    private IModel<EventBus> eventBusModel;
-
 
     /**
      * Constructor.
@@ -49,19 +45,14 @@ public class JobStatusUpdatingBehaviour extends AjaxSelfUpdatingTimerBehavior {
      *            job status to check
      * @param name
      *            "snapshot" or "release"
-     * @param eventBusModel
-     *            event bus model
      * @param eventClass
      *            class of event posted when the job finished
      */
-    public JobStatusUpdatingBehaviour(JobStatus status, String name, IModel<EventBus> eventBusModel,
-            Class<? extends JobFinishedEvent> eventClass) {
+    public JobStatusUpdatingBehaviour(JobStatus status, String name, Class<? extends JobFinishedEvent> eventClass) {
         super(Duration.milliseconds(1000));
         this.status = status;
         this.name = name;
-        this.eventBusModel = eventBusModel;
         this.eventClass = eventClass;
-        getComponent().info(String.format("A %s %s is being created...", name, status.getTarget()));
     }
 
 
@@ -69,24 +60,25 @@ public class JobStatusUpdatingBehaviour extends AjaxSelfUpdatingTimerBehavior {
     protected void onPostProcessTarget(AjaxRequestTarget target) {
         super.onPostProcessTarget(target);
         status.refresh();
+        Component component = getComponent();
         if (status.getState() != State.RUNNING) {
             stop(target);
             getComponent().remove(this);
         }
         switch (status.getState()) {
             case RUNNING:
-                getComponent().info(String.format("A %s %s is being created...", name, status.getTarget()));
+                component.info(String.format("A %s %s is being created...", name, status.getTarget()));
                 break;
             case DONE:
-                getComponent().success(
-                    String.format("%s %s has been created!", StringUtils.capitalize(name), status.getTarget()));
+                component.success(String.format("%s %s has been created!", StringUtils.capitalize(name),
+                    status.getTarget()));
                 JobFinishedEvent event = newEvent(target);
-                eventBusModel.getObject().post(event);
+                component.send(component.getPage(), Broadcast.BREADTH, event);
                 break;
             default:
-                getComponent().error(String.format("%s: %s", status.getState(), status.getReason()));
+                component.error(String.format("%s: %s", status.getState(), status.getReason()));
         }
-        target.add(getComponent());
+        target.add(component);
     }
 
 

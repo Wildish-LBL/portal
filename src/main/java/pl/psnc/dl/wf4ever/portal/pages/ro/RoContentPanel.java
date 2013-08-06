@@ -10,6 +10,9 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.event.IEvent;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Folder;
@@ -19,7 +22,6 @@ import org.purl.wf4ever.rosrs.client.Resource;
 import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
-import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.FolderBreadcrumbsPanel;
 import pl.psnc.dl.wf4ever.portal.components.FolderContentsPanel;
 import pl.psnc.dl.wf4ever.portal.components.annotations.AdvancedAnnotationsPanel;
@@ -45,8 +47,6 @@ import pl.psnc.dl.wf4ever.portal.modals.UploadResourceModal;
 import pl.psnc.dl.wf4ever.portal.model.FolderHierarchyModel;
 import pl.psnc.dl.wf4ever.portal.services.CreateROThread;
 
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 /**
@@ -58,7 +58,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
  * @author Piotr Hołubowicz
  * 
  */
-public class RoContentPanel extends EventPanel {
+public class RoContentPanel extends Panel {
 
     /** id. */
     private static final long serialVersionUID = -3775797988389365540L;
@@ -106,11 +106,9 @@ public class RoContentPanel extends EventPanel {
      *            wicket id
      * @param model
      *            research object model
-     * @param eventBusModel
-     *            event bus model for changes to the RO coming out of this panel
      */
-    public RoContentPanel(String id, final IModel<ResearchObject> model, IModel<EventBus> eventBusModel) {
-        super(id, model, eventBusModel);
+    public RoContentPanel(String id, final IModel<ResearchObject> model) {
+        super(id, model);
         setOutputMarkupId(true);
         setOutputMarkupPlaceholderTag(true);
 
@@ -122,23 +120,83 @@ public class RoContentPanel extends EventPanel {
         IModel<List<Folder>> allFolders = new PropertyModel<List<Folder>>(getDefaultModel(), "allFolders");
         folderHierarchyModel = new FolderHierarchyModel(folderModel);
 
-        add(new FolderBreadcrumbsPanel("folder-breadcrumbs", folderHierarchyModel, folderModel, eventBusModel));
-        add(new FolderActionsPanel("folder-actions", folderModel, eventBusModel));
-        add(new FolderContentsPanel("folder-contents", folderModel, resourceModel, rootFolders, unrootedResourcesModel,
-                eventBusModel));
-        add(new ResourceActionsPanel("resource-actions", resourceModel, eventBusModel));
-        add(new ResourceSummaryPanel("resource-summary", resourceModel, folderModel, eventBusModel));
-        add(new CommentsList("resource-comments", resourceModel, eventBusModel));
-        add(new AdvancedAnnotationsPanel("advanced-annotations", "resource-basic-view", resourceModel, eventBusModel));
+        add(new FolderBreadcrumbsPanel("folder-breadcrumbs", folderHierarchyModel, folderModel));
+        add(new FolderActionsPanel("folder-actions", folderModel));
+        add(new FolderContentsPanel("folder-contents", folderModel, resourceModel, rootFolders, unrootedResourcesModel));
+        add(new ResourceActionsPanel("resource-actions", resourceModel));
+        add(new ResourceSummaryPanel("resource-summary", resourceModel, folderModel));
+        add(new CommentsList("resource-comments", resourceModel));
+        add(new AdvancedAnnotationsPanel("advanced-annotations", "resource-basic-view", resourceModel));
 
-        uploadResourceModal = new UploadResourceModal("upload-resource-modal", eventBusModel);
+        uploadResourceModal = new UploadResourceModal("upload-resource-modal");
         add(uploadResourceModal);
-        addFolderModal = new AddFolderModal("add-folder-modal", eventBusModel);
+        addFolderModal = new AddFolderModal("add-folder-modal");
         add(addFolderModal);
-        moveResourceModal = new MoveResourceModal("move-resource-modal", allFolders, eventBusModel);
+        moveResourceModal = new MoveResourceModal("move-resource-modal", allFolders);
         add(moveResourceModal);
-        updateResourceModal = new UpdateResourceModal("update-resource-modal", eventBusModel);
+        updateResourceModal = new UpdateResourceModal("update-resource-modal");
         add(updateResourceModal);
+    }
+
+
+    @Override
+    public void onEvent(IEvent<?> event) {
+        super.onEvent(event);
+        if (event.getPayload() instanceof ResourceAddClickedEvent) {
+            onAddResourceClicked((ResourceAddClickedEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof FolderAddClickedEvent) {
+            onAddFolderClicked((FolderAddClickedEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof ResourceMoveClickedEvent) {
+            onResourceMoveClicked((ResourceMoveClickedEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof FolderChangeEvent) {
+            onFolderChange((FolderChangeEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof UpdateClickedEvent) {
+            onResourceUpdateClicked((UpdateClickedEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof ResourceDeleteClickedEvent) {
+            try {
+                onDeleteResourceClicked((ResourceDeleteClickedEvent) event.getPayload());
+            } catch (ROSRSException e) {
+                error("Can't delete the resource: " + e.getMessage());
+                LOG.error("Can't delete the resource", e);
+            }
+        }
+        if (event.getPayload() instanceof ResourceMoveEvent) {
+            try {
+                onResourceMove((ResourceMoveEvent) event.getPayload());
+            } catch (ROSRSException | ROException e) {
+                error("Can't move the resource: " + e.getMessage());
+                LOG.error("Can't move the resource", e);
+            }
+        }
+        if (event.getPayload() instanceof ResourceAddReadyEvent) {
+            try {
+                onResourceAdd((ResourceAddReadyEvent) event.getPayload());
+            } catch (ROSRSException | IOException | ROException e) {
+                error("Can't add the resource: " + e.getMessage());
+                LOG.error("Can't add the resource", e);
+            }
+        }
+        if (event.getPayload() instanceof ResourceUpdateReadyEvent) {
+            try {
+                onResourceUpdate((ResourceUpdateReadyEvent) event.getPayload());
+            } catch (ROSRSException | IOException | ROException e) {
+                error("Can't update the resource: " + e.getMessage());
+                LOG.error("Can't update the resource", e);
+            }
+        }
+        if (event.getPayload() instanceof FolderAddReadyEvent) {
+            try {
+                onFolderAdd((FolderAddReadyEvent) event.getPayload());
+            } catch (ROSRSException | ROException e) {
+                error("Can't add the folder: " + e.getMessage());
+                LOG.error("Can't add the folder", e);
+            }
+        }
     }
 
 
@@ -148,9 +206,8 @@ public class RoContentPanel extends EventPanel {
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void onAddResourceClicked(ResourceAddClickedEvent event) {
-        UploadResourceModal uploadResourceModal2 = new UploadResourceModal("upload-resource-modal", eventBusModel);
+    private void onAddResourceClicked(ResourceAddClickedEvent event) {
+        UploadResourceModal uploadResourceModal2 = new UploadResourceModal("upload-resource-modal");
         uploadResourceModal.replaceWith(uploadResourceModal2);
         uploadResourceModal = uploadResourceModal2;
         uploadResourceModal.show(event.getTarget());
@@ -163,9 +220,8 @@ public class RoContentPanel extends EventPanel {
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void onAddFolderClicked(FolderAddClickedEvent event) {
-        AddFolderModal addFolderModal2 = new AddFolderModal("add-folder-modal", eventBusModel);
+    private void onAddFolderClicked(FolderAddClickedEvent event) {
+        AddFolderModal addFolderModal2 = new AddFolderModal("add-folder-modal");
         addFolderModal.replaceWith(addFolderModal2);
         addFolderModal = addFolderModal2;
         addFolderModal.show(event.getTarget());
@@ -178,10 +234,9 @@ public class RoContentPanel extends EventPanel {
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void onResourceMoveClicked(ResourceMoveClickedEvent event) {
+    private void onResourceMoveClicked(ResourceMoveClickedEvent event) {
         IModel<List<Folder>> allFolders = new PropertyModel<List<Folder>>(getDefaultModel(), "allFolders");
-        MoveResourceModal moveResourceModal2 = new MoveResourceModal("move-resource-modal", allFolders, eventBusModel);
+        MoveResourceModal moveResourceModal2 = new MoveResourceModal("move-resource-modal", allFolders);
         moveResourceModal.replaceWith(moveResourceModal2);
         moveResourceModal = moveResourceModal2;
         moveResourceModal.show(event.getTarget());
@@ -194,8 +249,7 @@ public class RoContentPanel extends EventPanel {
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void onFolderChange(FolderChangeEvent event) {
+    private void onFolderChange(FolderChangeEvent event) {
         this.currentResource = null;
     }
 
@@ -206,9 +260,8 @@ public class RoContentPanel extends EventPanel {
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void onResourceUpdateClicked(UpdateClickedEvent event) {
-        UpdateResourceModal updateResourceModal2 = new UpdateResourceModal("update-resource-modal", eventBusModel);
+    private void onResourceUpdateClicked(UpdateClickedEvent event) {
+        UpdateResourceModal updateResourceModal2 = new UpdateResourceModal("update-resource-modal");
         updateResourceModal.replaceWith(updateResourceModal2);
         updateResourceModal = updateResourceModal2;
         updateResourceModal.show(event.getTarget());
@@ -223,8 +276,7 @@ public class RoContentPanel extends EventPanel {
      * @throws ROSRSException
      *             deleting the resource caused an unexpected response
      */
-    @Subscribe
-    public void onDeleteResourceClicked(ResourceDeleteClickedEvent event)
+    private void onDeleteResourceClicked(ResourceDeleteClickedEvent event)
             throws ROSRSException {
         if (currentResource != null) {
             currentResource.delete();
@@ -240,7 +292,7 @@ public class RoContentPanel extends EventPanel {
                 }
             }
         }
-        eventBusModel.getObject().post(new ResourceDeletedEvent(event.getTarget()));
+        send(getPage(), Broadcast.BREADTH, new ResourceDeletedEvent(event.getTarget()));
     }
 
 
@@ -254,8 +306,7 @@ public class RoContentPanel extends EventPanel {
      * @throws ROException
      *             when the data returned by ROSRS are incorrect
      */
-    @Subscribe
-    public void onResourceMove(ResourceMoveEvent event)
+    private void onResourceMove(ResourceMoveEvent event)
             throws ROSRSException, ROException {
         if (currentFolder != null) {
             FolderEntry entry = null;
@@ -273,7 +324,7 @@ public class RoContentPanel extends EventPanel {
             event.getFolder().load(false);
         }
         event.getFolder().addEntry(currentResource, null);
-        eventBusModel.getObject().post(new ResourceMovedEvent(event.getTarget()));
+        send(getPage(), Broadcast.BREADTH, new ResourceMovedEvent(event.getTarget()));
     }
 
 
@@ -290,8 +341,7 @@ public class RoContentPanel extends EventPanel {
      * @throws ROException
      *             the manifest is incorrect
      */
-    @Subscribe
-    public void onResourceAdd(ResourceAddReadyEvent event)
+    private void onResourceAdd(ResourceAddReadyEvent event)
             throws ROSRSException, IOException, ROException {
         ResearchObject researchObject = (ResearchObject) getDefaultModelObject();
         Resource resource;
@@ -312,7 +362,7 @@ public class RoContentPanel extends EventPanel {
         if (currentFolder != null) {
             currentFolder.addEntry(resource, null);
         }
-        eventBusModel.getObject().post(new ResourceAddedEvent(event.getTarget()));
+        send(getPage(), Broadcast.BREADTH, new ResourceAddedEvent(event.getTarget()));
     }
 
 
@@ -329,13 +379,12 @@ public class RoContentPanel extends EventPanel {
      * @throws ROException
      *             the manifest is incorrect
      */
-    @Subscribe
-    public void onResourceUpdate(ResourceUpdateReadyEvent event)
+    private void onResourceUpdate(ResourceUpdateReadyEvent event)
             throws ROSRSException, IOException, ROException {
         if (event.getUploadedFile() != null) {
             currentResource.update(event.getUploadedFile().getInputStream(), event.getUploadedFile().getContentType());
         }
-        eventBusModel.getObject().post(new ResourceAddedEvent(event.getTarget()));
+        send(getPage(), Broadcast.BREADTH, new ResourceAddedEvent(event.getTarget()));
     }
 
 
@@ -349,15 +398,14 @@ public class RoContentPanel extends EventPanel {
      * @throws ROException
      *             the manifest is incorrect
      */
-    @Subscribe
-    public void onFolderAdd(FolderAddReadyEvent event)
+    private void onFolderAdd(FolderAddReadyEvent event)
             throws ROSRSException, ROException {
         if (currentFolder != null) {
             currentFolder.addSubFolder(event.getFolderName()).getResource();
         } else {
             ((ResearchObject) this.getDefaultModelObject()).createFolder(event.getFolderName());
         }
-        eventBusModel.getObject().post(new FolderAddedEvent(event.getTarget()));
+        send(getPage(), Broadcast.BREADTH, new FolderAddedEvent(event.getTarget()));
     }
 
 
@@ -372,8 +420,7 @@ public class RoContentPanel extends EventPanel {
     protected void changeFolder(Folder newFolder, AjaxRequestTarget target) {
         currentFolder = newFolder;
         currentResource = null;
-        FolderChangeEvent event2 = new FolderChangeEvent(target);
-        eventBusModel.getObject().post(event2);
+        send(getPage(), Broadcast.BREADTH, new FolderChangeEvent(target));
     }
 
 

@@ -11,23 +11,21 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
-import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.events.RoEvolutionLoadedEvent;
 import pl.psnc.dl.wf4ever.portal.model.RoEvoNode;
-
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 
 /**
  * A panel for displaying the RO evolution surroundings.
@@ -35,7 +33,7 @@ import com.google.common.eventbus.Subscribe;
  * @author Piotr Hołubowicz
  * 
  */
-public class RoEvoBox extends EventPanel {
+public class RoEvoBox extends Panel {
 
     /** id. */
     private static final long serialVersionUID = -3775797988389365540L;
@@ -65,11 +63,9 @@ public class RoEvoBox extends EventPanel {
      *            wicket id
      * @param researchObjectModel
      *            The RO for which the visualization is drawn
-     * @param eventBusModel
-     *            event bus model
      */
-    public RoEvoBox(String id, IModel<ResearchObject> researchObjectModel, IModel<EventBus> eventBusModel) {
-        super(id, researchObjectModel, eventBusModel);
+    public RoEvoBox(String id, IModel<ResearchObject> researchObjectModel) {
+        super(id, researchObjectModel);
         this.researchObjectModel = researchObjectModel;
         setOutputMarkupPlaceholderTag(true);
         init();
@@ -190,14 +186,22 @@ public class RoEvoBox extends EventPanel {
     }
 
 
+    @Override
+    public void onEvent(IEvent<?> event) {
+        super.onEvent(event);
+        if (event.getPayload() instanceof RoEvolutionLoadedEvent) {
+            onRoEvolutionLoaded((RoEvolutionLoadedEvent) event.getPayload());
+        }
+    }
+
+
     /**
      * Replace the temporary panel with this one and redraw it.
      * 
      * @param event
      *            the trigger
      */
-    @Subscribe
-    public void onRoEvolutionLoaded(RoEvolutionLoadedEvent event) {
+    private void onRoEvolutionLoaded(RoEvolutionLoadedEvent event) {
         init();
         event.getTarget().appendJavaScript(getDrawJavaScript());
         event.getTarget().add(this);

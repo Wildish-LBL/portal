@@ -11,6 +11,8 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.Behavior;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -21,7 +23,6 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.navigation.paging.IPageable;
 import org.apache.wicket.model.CompoundPropertyModel;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
@@ -34,7 +35,6 @@ import org.purl.wf4ever.rosrs.client.search.dataclasses.FoundRO;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.SearchResult;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.solr.FacetEntry;
 
-import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.components.pagination.BootstrapPagingNavigator;
@@ -43,9 +43,6 @@ import pl.psnc.dl.wf4ever.portal.events.search.SearchResultsAvailableEvent;
 import pl.psnc.dl.wf4ever.portal.events.search.SortOptionChangeEvent;
 import pl.psnc.dl.wf4ever.portal.pages.BasePage;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
-
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 
 /**
  * The home page.
@@ -86,9 +83,6 @@ public class SearchResultsPage extends BasePage {
     /** The component displaying the list of results. */
     IPageable searchResultsList;
 
-    /** event bus model. */
-    private IModel<EventBus> eventBusModel;
-
 
     /**
      * Default constructor, displays all it can find.
@@ -110,8 +104,6 @@ public class SearchResultsPage extends BasePage {
      */
     public SearchResultsPage(String searchKeywords, List<FacetValue> selectedFacetValues, SortOption sortOption) {
         super(new PageParameters());
-        eventBusModel = MySession.get().addEventBus();
-        eventBusModel.getObject().register(this);
 
         if (sortOption != null) {
             this.sortOption = sortOption;
@@ -138,13 +130,13 @@ public class SearchResultsPage extends BasePage {
         if (searchServer.supportsPagination()) {
             LazySearchResultsView lazySearchResultsList = new LazySearchResultsView("searchResultsListView",
                     searchServer, query, RESULTS_PER_PAGE, new PropertyModel<Map<String, SearchServer.SortOrder>>(this,
-                            "sortFields"), eventBusModel);
+                            "sortFields"));
             searchResultsList = lazySearchResultsList;
         } else {
             List<FoundRO> found;
             try {
                 SearchResult searchResult = searchServer.search(query, null, null, getSortFields());
-                eventBusModel.getObject().post(new SearchResultsAvailableEvent(searchResult));
+                send(this, Broadcast.BREADTH, new SearchResultsAvailableEvent(searchResult));
                 found = searchResult.getROsList();
             } catch (SearchException e) {
                 error(e.getMessage());
@@ -157,7 +149,7 @@ public class SearchResultsPage extends BasePage {
         searchResultsDiv.setOutputMarkupId(true);
 
         FacetsView facetsView = new FacetsView("filters", getSelected(), new PropertyModel<List<FacetEntry>>(this,
-                "facets"), eventBusModel);
+                "facets"));
         add(facetsView);
 
         final WebMarkupContainer noResults = new WebMarkupContainer("noResults");
@@ -192,7 +184,7 @@ public class SearchResultsPage extends BasePage {
             }
         }
         SortDropDownChoice dropDown = new SortDropDownChoice("sortListView", new PropertyModel<SortOption>(this,
-                "sortOption"), sortOptions, eventBusModel);
+                "sortOption"), sortOptions);
         return dropDown;
     }
 
@@ -283,14 +275,28 @@ public class SearchResultsPage extends BasePage {
     }
 
 
+    @Override
+    public void onEvent(IEvent<?> event) {
+        super.onEvent(event);
+        if (event.getPayload() instanceof FacetValueClickedEvent) {
+            onFacetValueClicked((FacetValueClickedEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof SearchResultsAvailableEvent) {
+            onSearchResultsAvailable((SearchResultsAvailableEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof SortOptionChangeEvent) {
+            onSortOptionChanged((SortOptionChangeEvent) event.getPayload());
+        }
+    }
+
+
     /**
      * Select or deselect a facet value after it has been clicked.
      * 
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void onFacetValueClicked(FacetValueClickedEvent event) {
+    private void onFacetValueClicked(FacetValueClickedEvent event) {
         for (FacetValue val : selectedFacetValues) {
             if (val.getLabel().equals(event.getFacetValue().getLabel())
                     && val.getParamName().equals(event.getFacetValue().getParamName())) {
@@ -308,8 +314,7 @@ public class SearchResultsPage extends BasePage {
      * @param event
      *            trigger
      */
-    @Subscribe
-    public void onSearchResultsAvailable(SearchResultsAvailableEvent event) {
+    private void onSearchResultsAvailable(SearchResultsAvailableEvent event) {
         if (facetsList == null) {
             facetsList = new ArrayList<>(event.getSearchResult().getFacetsList());
             add(buildSortLinks());
@@ -324,8 +329,7 @@ public class SearchResultsPage extends BasePage {
      * @param event
      *            event
      */
-    @Subscribe
-    public void onSortOptionChanged(SortOptionChangeEvent event) {
+    private void onSortOptionChanged(SortOptionChangeEvent event) {
         setResponsePage(new SearchResultsPage(searchKeywords, selectedFacetValues, event.getNewSortOption()));
     }
 

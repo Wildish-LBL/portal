@@ -9,6 +9,8 @@ import java.util.concurrent.Future;
 import org.apache.log4j.Logger;
 import org.apache.wicket.Component;
 import org.apache.wicket.authroles.authorization.strategies.role.Roles;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
@@ -49,9 +51,6 @@ import pl.psnc.dl.wf4ever.portal.pages.ro.notifications.NotificationsIndicator;
 import pl.psnc.dl.wf4ever.portal.pages.ro.notifications.NotificationsList;
 import pl.psnc.dl.wf4ever.portal.utils.RDFFormat;
 
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
-
 /**
  * A panel with all RO data.
  * 
@@ -68,9 +67,6 @@ public class RoPanel extends Panel {
 
     /** The feedback panel. */
     private MyFeedbackPanel feedbackPanel;
-
-    /** Loadable event bus model. */
-    private IModel<EventBus> eventBusModel;
 
     /** Import annotations modal. */
     private ImportAnnotationModal importAnnotationsModal;
@@ -109,19 +105,17 @@ public class RoPanel extends Panel {
         IModel<EvaluationResult> qualityModel = new Model<EvaluationResult>();
         String rssLink = notificationService.getNotificationsUri(researchObjectModel.getObject().getUri(), null, null)
                 .toString();
-        eventBusModel = session.addEventBus();
-        eventBusModel.getObject().register(this);
 
-        add(new RoSummaryPanel("ro-summary", researchObjectModel, eventBusModel));
-        add(new RoActionsPanel("ro-actions", researchObjectModel, eventBusModel));
+        add(new RoSummaryPanel("ro-summary", researchObjectModel));
+        add(new RoActionsPanel("ro-actions", researchObjectModel));
         NotificationsIndicator notificationsIndicator = new NotificationsIndicator("notifications",
-                researchObjectModel, notificationsModel, eventBusModel, rssLink, "notifications");
+                researchObjectModel, notificationsModel, rssLink, "notifications");
         add(notificationsIndicator);
-        QualityBar qualityBar = new QualityBar("health-progress-bar", qualityModel, researchObjectModel, eventBusModel);
+        QualityBar qualityBar = new QualityBar("health-progress-bar", qualityModel, researchObjectModel);
         add(qualityBar);
-        add(new RoCommentsPanel("comments", researchObjectModel, eventBusModel));
-        add(new AdvancedAnnotationsPanel("advanced-annotations", "ro-basic-view", researchObjectModel, eventBusModel));
-        add(new RoContentPanel("content", researchObjectModel, eventBusModel));
+        add(new RoCommentsPanel("comments", researchObjectModel));
+        add(new AdvancedAnnotationsPanel("advanced-annotations", "ro-basic-view", researchObjectModel));
+        add(new RoContentPanel("content", researchObjectModel));
 
         add(new AjaxLazyLoadPanel("ro-evo-box", researchObjectModel) {
 
@@ -132,7 +126,7 @@ public class RoPanel extends Panel {
             @SuppressWarnings("unchecked")
             @Override
             public Component getLazyLoadComponent(String markupId) {
-                return new RoEvoBox(markupId, (IModel<ResearchObject>) getDefaultModel(), eventBusModel);
+                return new RoEvoBox(markupId, (IModel<ResearchObject>) getDefaultModel());
             }
 
 
@@ -144,13 +138,12 @@ public class RoPanel extends Panel {
 
         IModel<Notification> selectedNotification = new Model<Notification>((Notification) null);
         NotificationsList notificationsList = new NotificationsList("notificationsList", notificationsModel,
-                selectedNotification, eventBusModel);
+                selectedNotification);
         add(notificationsList);
-        add(new NotificationPreviewPanel("notificationPanel", selectedNotification, eventBusModel));
+        add(new NotificationPreviewPanel("notificationPanel", selectedNotification));
 
-        add(new DownloadMetadataModal("download-metadata-modal", eventBusModel));
-        importAnnotationsModal = new ImportAnnotationModal("import-annotation-modal", researchObjectModel,
-                eventBusModel);
+        add(new DownloadMetadataModal("download-metadata-modal"));
+        importAnnotationsModal = new ImportAnnotationModal("import-annotation-modal", researchObjectModel);
         add(importAnnotationsModal);
 
         ExecutorService executor = Executors.newFixedThreadPool(10);
@@ -161,16 +154,42 @@ public class RoPanel extends Panel {
     }
 
 
+    @Override
+    public void onEvent(IEvent<?> event) {
+        super.onEvent(event);
+        if (event.getPayload() instanceof ImportAnnotationClickedEvent) {
+            onImportAnnotationsClicked((ImportAnnotationClickedEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof SnapshotCreateEvent) {
+            createSnapshot((SnapshotCreateEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof ReleaseCreateEvent) {
+            createArchive((ReleaseCreateEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof JobFinishedEvent) {
+            onJobFinished((JobFinishedEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof MetadataDownloadEvent) {
+            onMetadataDownload((MetadataDownloadEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof ImportAnnotationReadyEvent) {
+            onAnnotationImport((ImportAnnotationReadyEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof ErrorEvent) {
+            onError((ErrorEvent) event.getPayload());
+        }
+    }
+
+
     /**
      * Display the modal.
      * 
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void onImportAnnotationsClicked(ImportAnnotationClickedEvent event) {
+    private void onImportAnnotationsClicked(ImportAnnotationClickedEvent event) {
         ImportAnnotationModal importAnnotationsModal2 = new ImportAnnotationModal("import-annotation-modal",
-                event.getAnnotableModel(), eventBusModel);
+                event.getAnnotableModel());
         importAnnotationsModal.replaceWith(importAnnotationsModal2);
         importAnnotationsModal = importAnnotationsModal2;
         importAnnotationsModal.show(event.getTarget());
@@ -183,14 +202,12 @@ public class RoPanel extends Panel {
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void createSnapshot(SnapshotCreateEvent event) {
+    private void createSnapshot(SnapshotCreateEvent event) {
         ResearchObject researchObject = (ResearchObject) getDefaultModelObject();
         final JobStatus status = researchObject.snapshot(researchObject.getName().substring(0,
             researchObject.getName().length() - 1)
                 + "-snapshot");
-        feedbackPanel
-                .add(new JobStatusUpdatingBehaviour(status, "snapshot", eventBusModel, SnapshotCreatedEvent.class));
+        feedbackPanel.add(new JobStatusUpdatingBehaviour(status, "snapshot", SnapshotCreatedEvent.class));
         event.getTarget().add(feedbackPanel);
     }
 
@@ -201,13 +218,12 @@ public class RoPanel extends Panel {
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void createArchive(ReleaseCreateEvent event) {
+    private void createArchive(ReleaseCreateEvent event) {
         ResearchObject researchObject = (ResearchObject) getDefaultModelObject();
         final JobStatus status = researchObject.archive(researchObject.getName().substring(0,
             researchObject.getName().length() - 1)
                 + "-release");
-        feedbackPanel.add(new JobStatusUpdatingBehaviour(status, "release", eventBusModel, ReleaseCreatedEvent.class));
+        feedbackPanel.add(new JobStatusUpdatingBehaviour(status, "release", ReleaseCreatedEvent.class));
         event.getTarget().add(feedbackPanel);
     }
 
@@ -218,11 +234,10 @@ public class RoPanel extends Panel {
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void onJobFinished(JobFinishedEvent event) {
+    private void onJobFinished(JobFinishedEvent event) {
         ResearchObject researchObject = (ResearchObject) getDefaultModelObject();
         researchObject.loadEvolutionInformation();
-        eventBusModel.getObject().post(new RoEvolutionLoadedEvent(event.getTarget()));
+        send(getPage(), Broadcast.BREADTH, new RoEvolutionLoadedEvent(event.getTarget()));
     }
 
 
@@ -232,8 +247,7 @@ public class RoPanel extends Panel {
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void onMetadataDownload(MetadataDownloadEvent event) {
+    private void onMetadataDownload(MetadataDownloadEvent event) {
         event.getTarget().appendJavaScript("window.location.href='" + getROMetadataLink(event.getFormat()) + "'");
     }
 
@@ -244,8 +258,7 @@ public class RoPanel extends Panel {
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void onAnnotationImport(ImportAnnotationReadyEvent event) {
+    private void onAnnotationImport(ImportAnnotationReadyEvent event) {
         String contentType = RDFFormat.forFileName(event.getUploadedFile().getClientFileName(), RDFFormat.RDFXML)
                 .getDefaultMIMEType();
         Annotable annotable = event.getAnnotableModel().getObject();
@@ -256,7 +269,7 @@ public class RoPanel extends Panel {
             error(e.getMessage());
             LOG.error("Can't import annotations", e);
         }
-        eventBusModel.getObject().post(new AnnotationAddedEvent(event.getTarget(), event.getAnnotableModel()));
+        send(getPage(), Broadcast.BREADTH, new AnnotationAddedEvent(event.getTarget(), event.getAnnotableModel()));
     }
 
 
@@ -291,8 +304,7 @@ public class RoPanel extends Panel {
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void onError(ErrorEvent event) {
+    private void onError(ErrorEvent event) {
         event.getTarget().add(feedbackPanel);
     }
 

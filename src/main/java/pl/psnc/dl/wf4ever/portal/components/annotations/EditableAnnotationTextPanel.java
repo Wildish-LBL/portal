@@ -5,17 +5,18 @@ import java.net.URI;
 import org.apache.log4j.Logger;
 import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
-import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.RequiredTextField;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
@@ -25,8 +26,6 @@ import org.purl.wf4ever.rosrs.client.Annotation;
 import org.purl.wf4ever.rosrs.client.AnnotationTriple;
 import org.purl.wf4ever.rosrs.client.Utils;
 
-import pl.psnc.dl.wf4ever.portal.components.EventPanel;
-import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxDecoratedButton;
 import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationAddedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationCancelledEvent;
@@ -39,16 +38,13 @@ import pl.psnc.dl.wf4ever.portal.model.AnnotationTimestampModel;
 import pl.psnc.dl.wf4ever.portal.model.AnnotationTripleModel;
 import pl.psnc.dl.wf4ever.portal.model.LocalNameModel;
 
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
-
 /**
  * A panel for inline comments, show the annotation author and creation date.
  * 
  * @author piotrekhol
  * 
  */
-public class EditableAnnotationTextPanel extends EventPanel {
+public class EditableAnnotationTextPanel extends Panel {
 
     /** Logger. */
     @SuppressWarnings("unused")
@@ -81,20 +77,17 @@ public class EditableAnnotationTextPanel extends EventPanel {
      *            wicket id
      * @param model
      *            the model for the quad
-     * @param eventBusModel
-     *            event bus model for when a comment is added, deleted or edited
      * @param editMode
      *            should the field start in an edit mode
      */
-    public EditableAnnotationTextPanel(String id, AnnotationTripleModel model, final IModel<EventBus> eventBusModel,
-            boolean editMode) {
-        super(id, model, eventBusModel);
+    public EditableAnnotationTextPanel(String id, AnnotationTripleModel model, boolean editMode) {
+        super(id, model);
         setOutputMarkupPlaceholderTag(true);
         newProperty = model.getObject().getProperty();
         newValue = model.getObject().getValue();
-        viewFragment = new ViewFragment("content", "view", this, model, eventBusModel);
+        viewFragment = new ViewFragment("content", "view", this, model);
         editFragment = new EditFragment("content", "editSingle", this, new PropertyModel<URI>(this, "newProperty"),
-                new PropertyModel<String>(this, "newValue"), eventBusModel);
+                new PropertyModel<String>(this, "newValue"));
         add(editMode ? editFragment : viewFragment);
     }
 
@@ -106,11 +99,9 @@ public class EditableAnnotationTextPanel extends EventPanel {
      *            wicket id
      * @param annotable
      *            the resource that will be annotated
-     * @param eventBusModel
-     *            event bus model for when a comment is added, deleted or edited
      */
-    public EditableAnnotationTextPanel(String id, Annotable annotable, final IModel<EventBus> eventBusModel) {
-        this(id, new AnnotationTripleModel(new Model<>(annotable), (URI) null, false), eventBusModel, true);
+    public EditableAnnotationTextPanel(String id, Annotable annotable) {
+        this(id, new AnnotationTripleModel(new Model<>(annotable), (URI) null, false), true);
     }
 
 
@@ -121,14 +112,31 @@ public class EditableAnnotationTextPanel extends EventPanel {
     }
 
 
+    @Override
+    public void onEvent(IEvent<?> event) {
+        super.onEvent(event);
+        if (event.getPayload() instanceof EditEvent) {
+            onEdit((EditEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof DeleteEvent) {
+            onDelete((DeleteEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof ApplyEvent) {
+            onApply((ApplyEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof CancelEvent) {
+            onCancel((CancelEvent) event.getPayload());
+        }
+    }
+
+
     /**
      * Called when the edit button is clicked. Replace the view fragment with edit.
      * 
      * @param event
      *            click event
      */
-    @Subscribe
-    public void onEdit(EditEvent event) {
+    private void onEdit(EditEvent event) {
         viewFragment.replaceWith(editFragment);
         event.getTarget().appendJavaScript("$('.tooltip').remove();");
         event.getTarget().add(this);
@@ -141,16 +149,12 @@ public class EditableAnnotationTextPanel extends EventPanel {
      * @param event
      *            click event
      */
-    @Subscribe
-    public void onDelete(DeleteEvent event) {
+    private void onDelete(DeleteEvent event) {
         ((AnnotationTripleModel) this.getDefaultModel()).delete();
         event.getTarget().appendJavaScript("$('.tooltip').remove();");
         event.getTarget().add(this);
-        if (eventBusModel != null && eventBusModel.getObject() != null) {
-            IModel<? extends Annotable> annotable = ((AnnotationTripleModel) this.getDefaultModel())
-                    .getAnnotableModel();
-            eventBusModel.getObject().post(new AnnotationDeletedEvent(event.getTarget(), annotable));
-        }
+        IModel<? extends Annotable> annotable = ((AnnotationTripleModel) this.getDefaultModel()).getAnnotableModel();
+        send(getPage(), Broadcast.BREADTH, new AnnotationDeletedEvent(event.getTarget(), annotable));
     }
 
 
@@ -160,19 +164,15 @@ public class EditableAnnotationTextPanel extends EventPanel {
      * @param event
      *            click event
      */
-    @Subscribe
-    public void onApply(ApplyEvent event) {
+    private void onApply(ApplyEvent event) {
         editFragment.replaceWith(viewFragment);
         event.getTarget().appendJavaScript("$('.tooltip').remove();");
         event.getTarget().add(this);
         //the tripleCopy now holds the updated property and value
         ((AnnotationTripleModel) this.getDefaultModel()).setPropertyAndValue(newProperty, newValue);
         //post event
-        if (eventBusModel != null && eventBusModel.getObject() != null) {
-            IModel<? extends Annotable> annotable = ((AnnotationTripleModel) this.getDefaultModel())
-                    .getAnnotableModel();
-            eventBusModel.getObject().post(new AnnotationAddedEvent(event.getTarget(), annotable));
-        }
+        IModel<? extends Annotable> annotable = ((AnnotationTripleModel) this.getDefaultModel()).getAnnotableModel();
+        send(getPage(), Broadcast.BREADTH, new AnnotationAddedEvent(event.getTarget(), annotable));
     }
 
 
@@ -182,8 +182,12 @@ public class EditableAnnotationTextPanel extends EventPanel {
      * @param event
      *            click event
      */
-    @Subscribe
-    public void onCancel(CancelEvent event) {
+    private void onCancel(CancelEvent event) {
+        editFragment.replaceWith(viewFragment);
+        event.getTarget().appendJavaScript("$('.tooltip').remove();");
+        event.getTarget().add(this);
+        IModel<? extends Annotable> annotable = ((AnnotationTripleModel) this.getDefaultModel()).getAnnotableModel();
+        send(getPage(), Broadcast.BREADTH, new AnnotationCancelledEvent(event.getTarget(), annotable));
     }
 
 
@@ -240,11 +244,8 @@ public class EditableAnnotationTextPanel extends EventPanel {
          *            container defining the fragment
          * @param model
          *            value model
-         * @param internalEventBusModel
-         *            event bus model for button clicks
          */
-        public ViewFragment(String id, String markupId, MarkupContainer markupProvider, IModel<AnnotationTriple> model,
-                final IModel<EventBus> internalEventBusModel) {
+        public ViewFragment(String id, String markupId, MarkupContainer markupProvider, IModel<AnnotationTriple> model) {
             super(id, markupId, markupProvider, model);
             setOutputMarkupPlaceholderTag(true);
 
@@ -258,8 +259,10 @@ public class EditableAnnotationTextPanel extends EventPanel {
                     new PropertyModel<Annotation>(model, "annotation"))));
             value = new Label("value", new PropertyModel<String>(model, "value"));
             valueColumn.add(value);
-            valueColumn.add(new AuthenticatedAjaxEventButton("edit", null, internalEventBusModel, EditEvent.class));
-            valueColumn.add(new AuthenticatedAjaxEventButton("delete", null, internalEventBusModel, DeleteEvent.class));
+            valueColumn.add(new AuthenticatedAjaxEventButton("edit", null, EditableAnnotationTextPanel.this,
+                    EditEvent.class));
+            valueColumn.add(new AuthenticatedAjaxEventButton("delete", null, EditableAnnotationTextPanel.this,
+                    DeleteEvent.class));
             add(valueColumn);
         }
 
@@ -308,35 +311,16 @@ public class EditableAnnotationTextPanel extends EventPanel {
          *            the property to edit
          * @param valueModel
          *            the value to edit
-         * @param internalEventBusModel
-         *            event bus model for button clicks
          */
         public EditFragment(String id, String markupId, MarkupContainer markupProvider, IModel<URI> propertyModel,
-                IModel<String> valueModel, final IModel<EventBus> internalEventBusModel) {
+                IModel<String> valueModel) {
             super(id, markupId, markupProvider);
             setOutputMarkupPlaceholderTag(true);
             add(new RequiredTextField<URI>("property-name", propertyModel));
             add(new TextField<>("value", valueModel));
-            add(new AuthenticatedAjaxEventButton("apply", null, internalEventBusModel, ApplyEvent.class));
-            add(new AuthenticatedAjaxDecoratedButton("cancel", null) {
-
-                /** id. */
-                private static final long serialVersionUID = 1421233396070192749L;
-
-
-                @Override
-                public void onClicked(AjaxRequestTarget target, Form<?> form) {
-                    editFragment.replaceWith(viewFragment);
-                    target.appendJavaScript("$('.tooltip').remove();");
-                    target.add(EditableAnnotationTextPanel.this);
-                    if (eventBusModel != null && eventBusModel.getObject() != null) {
-                        IModel<? extends Annotable> annotable = ((AnnotationTripleModel) EditableAnnotationTextPanel.this
-                                .getDefaultModel()).getAnnotableModel();
-                        eventBusModel.getObject().post(new AnnotationCancelledEvent(target, annotable));
-                    }
-                }
-
-            }.setDefaultFormProcessing(false));
+            add(new AuthenticatedAjaxEventButton("apply", null, EditableAnnotationTextPanel.this, ApplyEvent.class));
+            add(new AuthenticatedAjaxEventButton("cancel", null, EditableAnnotationTextPanel.this, CancelEvent.class)
+                    .setDefaultFormProcessing(false));
         }
     }
 

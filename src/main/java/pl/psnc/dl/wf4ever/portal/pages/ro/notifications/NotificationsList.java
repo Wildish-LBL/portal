@@ -6,10 +6,12 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxEventBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.Behavior;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PropertyListView;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -17,10 +19,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
 import org.purl.wf4ever.rosrs.client.notifications.Notification;
 
-import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.events.ResourceSelectedEvent;
-
-import com.google.common.eventbus.EventBus;
 
 /**
  * A list of notification headers.
@@ -28,7 +27,7 @@ import com.google.common.eventbus.EventBus;
  * @author piotrekhol
  * 
  */
-public class NotificationsList extends EventPanel {
+public class NotificationsList extends Panel {
 
     /** id. */
     private static final long serialVersionUID = -2527527943968289889L;
@@ -55,12 +54,10 @@ public class NotificationsList extends EventPanel {
      *            list of notifications
      * @param selectedNotificationModel
      *            the model for setting the selected notification
-     * @param eventBusModel
-     *            event bus for posting the user clicks
      */
     public NotificationsList(String id, IModel<? extends List<Notification>> notificationsModel,
-            IModel<Notification> selectedNotificationModel, IModel<EventBus> eventBusModel) {
-        super(id, selectedNotificationModel, eventBusModel);
+            IModel<Notification> selectedNotificationModel) {
+        super(id, selectedNotificationModel);
         this.selectedNotificationModel = selectedNotificationModel;
         list = new NotificationsPropertyListView("list", notificationsModel);
         list.setReuseItems(true);
@@ -133,7 +130,7 @@ public class NotificationsList extends EventPanel {
                 protected void onEvent(AjaxRequestTarget target) {
                     selectedNotificationModel.setObject(item.getModelObject());
                     target.add(NotificationsList.this);
-                    eventBusModel.getObject().post(new ResourceSelectedEvent(target));
+                    send(getPage(), Broadcast.BREADTH, new ResourceSelectedEvent(target));
                 }
             });
             item.add(new Behavior() {

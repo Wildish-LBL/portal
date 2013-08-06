@@ -4,18 +4,18 @@ import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Folder;
 
 import pl.psnc.dl.wf4ever.portal.events.FolderChangeEvent;
-
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 
 /**
  * Bootstrap breadcrumb that shows the current location given a list of folders. If there are no folders, an information
@@ -24,7 +24,7 @@ import com.google.common.eventbus.Subscribe;
  * @author piotrekhol
  * 
  */
-public class FolderBreadcrumbsPanel extends EventPanel {
+public class FolderBreadcrumbsPanel extends Panel {
 
     /** id. */
     private static final long serialVersionUID = 6161074268125343983L;
@@ -39,12 +39,9 @@ public class FolderBreadcrumbsPanel extends EventPanel {
      *            a list of folders model
      * @param folderModel
      *            the currently selected folder model, used when a user clicks on one of the folders
-     * @param eventBusModel
-     *            event bus model for clicks and refreshes
      */
-    public FolderBreadcrumbsPanel(String id, final IModel<List<Folder>> model, final IModel<Folder> folderModel,
-            final IModel<EventBus> eventBusModel) {
-        super(id, model, eventBusModel);
+    public FolderBreadcrumbsPanel(String id, final IModel<List<Folder>> model, final IModel<Folder> folderModel) {
+        super(id, model);
         setOutputMarkupId(true);
         AjaxLink<String> home = new AjaxLink<String>("home-link") {
 
@@ -55,7 +52,7 @@ public class FolderBreadcrumbsPanel extends EventPanel {
             @Override
             public void onClick(AjaxRequestTarget target) {
                 folderModel.setObject(null);
-                eventBusModel.getObject().post(new FolderChangeEvent(target));
+                send(getPage(), Broadcast.BREADTH, new FolderChangeEvent(target));
             }
         };
         add(home);
@@ -82,7 +79,7 @@ public class FolderBreadcrumbsPanel extends EventPanel {
                     @Override
                     public void onClick(AjaxRequestTarget target) {
                         folderModel.setObject(folder);
-                        eventBusModel.getObject().post(new FolderChangeEvent(target));
+                        send(getPage(), Broadcast.BREADTH, new FolderChangeEvent(target));
                     }
                 };
                 item.add(link);
@@ -93,14 +90,22 @@ public class FolderBreadcrumbsPanel extends EventPanel {
     }
 
 
+    @Override
+    public void onEvent(IEvent<?> event) {
+        super.onEvent(event);
+        if (event.getPayload() instanceof FolderChangeEvent) {
+            onFolderChange((FolderChangeEvent) event.getPayload());
+        }
+    }
+
+
     /**
      * Refresh when the current folder changes.
      * 
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void onFolderChange(FolderChangeEvent event) {
+    private void onFolderChange(FolderChangeEvent event) {
         event.getTarget().add(this);
     }
 

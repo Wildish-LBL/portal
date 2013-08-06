@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -12,13 +13,13 @@ import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.purl.wf4ever.rosrs.client.Annotable;
 import org.purl.wf4ever.rosrs.client.AnnotationTriple;
 
-import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AnnotationEditAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.ResourceSelectedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AbstractAnnotationEditedEvent;
@@ -26,16 +27,13 @@ import pl.psnc.dl.wf4ever.portal.events.annotations.AddAnnotationClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.ImportAnnotationClickedEvent;
 import pl.psnc.dl.wf4ever.portal.model.AnnotationTripleModel;
 
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
-
 /**
  * A panel aggregating action buttons for a folder - add a new folder or resource.
  * 
  * @author Piotr Hołubowicz
  * 
  */
-public class AdvancedAnnotationsPanel extends EventPanel {
+public class AdvancedAnnotationsPanel extends Panel {
 
     /**
      * A list of annotation triples.
@@ -65,7 +63,7 @@ public class AdvancedAnnotationsPanel extends EventPanel {
         @Override
         protected void populateItem(ListItem<AnnotationTriple> item) {
             item.add(new EditableAnnotationTextPanel("editable-annotation-triple", new AnnotationTripleModel(item
-                    .getModelObject()), eventBusModel, false));
+                    .getModelObject()), false));
             item.setRenderBodyOnly(true);
         }
 
@@ -99,12 +97,9 @@ public class AdvancedAnnotationsPanel extends EventPanel {
      *            id of the basic view panel (without any #)
      * @param model
      *            selected resource
-     * @param eventBusModel
-     *            event bus model for button clicks
      */
-    public AdvancedAnnotationsPanel(String id, String basicPanelId, final IModel<? extends Annotable> model,
-            final IModel<EventBus> eventBusModel) {
-        super(id, model, eventBusModel);
+    public AdvancedAnnotationsPanel(String id, String basicPanelId, final IModel<? extends Annotable> model) {
+        super(id, model);
         setOutputMarkupPlaceholderTag(true);
         form = new Form<Void>("form");
         add(form);
@@ -112,10 +107,9 @@ public class AdvancedAnnotationsPanel extends EventPanel {
         backButton.add(AttributeAppender.replace("data-target", "#" + basicPanelId));
 
         form.add(backButton);
-        form.add(new AnnotationEditAjaxEventButton("import-annotations", form, model, eventBusModel,
+        form.add(new AnnotationEditAjaxEventButton("import-annotations", form, model, null,
                 ImportAnnotationClickedEvent.class));
-        form.add(new AnnotationEditAjaxEventButton("annotate", form, model, eventBusModel,
-                AddAnnotationClickedEvent.class));
+        form.add(new AnnotationEditAjaxEventButton("annotate", form, model, this, AddAnnotationClickedEvent.class));
 
         form.add(new AnnotationTripleList("annotation-triple", new PropertyModel<List<AnnotationTriple>>(model,
                 "annotationTriples")));
@@ -124,7 +118,6 @@ public class AdvancedAnnotationsPanel extends EventPanel {
         addAnnotationPanel.setOutputMarkupPlaceholderTag(true);
         addAnnotationPanel.setVisible(false);
         form.add(addAnnotationPanel);
-
     }
 
 
@@ -142,14 +135,28 @@ public class AdvancedAnnotationsPanel extends EventPanel {
     }
 
 
+    @Override
+    public void onEvent(IEvent<?> event) {
+        super.onEvent(event);
+        if (event.getPayload() instanceof ResourceSelectedEvent) {
+            onResourceSelected((ResourceSelectedEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof AbstractAnnotationEditedEvent) {
+            onAnnotationEdited((AbstractAnnotationEditedEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof AddAnnotationClickedEvent) {
+            onAnnotateClicked((AddAnnotationClickedEvent) event.getPayload());
+        }
+    }
+
+
     /**
      * Refresh the panel when the selected resource changes.
      * 
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void onResourceSelected(ResourceSelectedEvent event) {
+    private void onResourceSelected(ResourceSelectedEvent event) {
         event.getTarget().add(this);
     }
 
@@ -160,8 +167,7 @@ public class AdvancedAnnotationsPanel extends EventPanel {
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void onAnnotationEdited(AbstractAnnotationEditedEvent event) {
+    private void onAnnotationEdited(AbstractAnnotationEditedEvent event) {
         addAnnotationPanel.setVisible(false);
         event.getTarget().add(this);
     }
@@ -173,11 +179,10 @@ public class AdvancedAnnotationsPanel extends EventPanel {
      * @param event
      *            the event that triggers this action
      */
-    @Subscribe
-    public void onAnnotateClicked(AddAnnotationClickedEvent event) {
+    private void onAnnotateClicked(AddAnnotationClickedEvent event) {
         if (event.getAnnotableModel().getObject() == this.getDefaultModelObject()) {
             EditableAnnotationTextPanel panel = new EditableAnnotationTextPanel("new-annotation",
-                    (Annotable) this.getDefaultModelObject(), eventBusModel);
+                    (Annotable) this.getDefaultModelObject());
             addAnnotationPanel.replaceWith(panel);
             addAnnotationPanel = panel;
             event.getTarget().add(addAnnotationPanel);

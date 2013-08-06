@@ -4,18 +4,19 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
-import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
-import pl.psnc.dl.wf4ever.portal.components.form.AjaxDecoratedButton;
-
-import com.google.common.eventbus.EventBus;
+import pl.psnc.dl.wf4ever.portal.components.form.AjaxEventButton;
+import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
+import pl.psnc.dl.wf4ever.portal.events.OkClickedEvent;
 
 /**
  * A modal for adding resources to the RO.
@@ -23,7 +24,7 @@ import com.google.common.eventbus.EventBus;
  * @author piotrekhol
  * 
  */
-public abstract class AbstractModal extends EventPanel {
+public abstract class AbstractModal extends Panel {
 
     /** id. */
     private static final long serialVersionUID = -278196023603190873L;
@@ -49,15 +50,13 @@ public abstract class AbstractModal extends EventPanel {
      * 
      * @param id
      *            wicket id
-     * @param eventBusModel
-     *            event bus
      * @param modalId
      *            modal HTML id, without any '#'
      * @param title
      *            modal title
      */
-    public AbstractModal(String id, IModel<EventBus> eventBusModel, String modalId, String title) {
-        this(id, null, eventBusModel, modalId, title);
+    public AbstractModal(String id, String modalId, String title) {
+        this(id, null, modalId, title);
     }
 
 
@@ -68,15 +67,13 @@ public abstract class AbstractModal extends EventPanel {
      *            wicket id
      * @param model
      *            panel model, may be null
-     * @param eventBusModel
-     *            event bus
      * @param modalId
      *            modal HTML id, without any '#'
      * @param title
      *            modal title
      */
-    public AbstractModal(String id, IModel<?> model, final IModel<EventBus> eventBusModel, String modalId, String title) {
-        super(id, model, eventBusModel);
+    public AbstractModal(String id, IModel<?> model, String modalId, String title) {
+        super(id, model);
         setOutputMarkupId(true);
         this.modalId = modalId;
         form = new Form<Void>("form");
@@ -92,41 +89,22 @@ public abstract class AbstractModal extends EventPanel {
 
         modal.add(new Label("title", title));
 
-        AjaxButton ok = new AjaxDecoratedButton("ok", form) {
-
-            /** id. */
-            private static final long serialVersionUID = 1L;
-
-
-            @Override
-            public void onClicked(AjaxRequestTarget target, Form<?> form) {
-                onOk(target);
-            }
-        };
+        AjaxButton ok = new AjaxEventButton("ok", form, this, OkClickedEvent.class);
         form.setDefaultButton(ok);
         modal.add(ok);
-        modal.add(new AjaxDecoratedButton("cancel", form) {
-
-            /** id. */
-            private static final long serialVersionUID = 1L;
-
-
-            @Override
-            public void onClicked(AjaxRequestTarget target, Form<?> form) {
-                onCancel(target);
-            }
-        }.setDefaultFormProcessing(false));
-        modal.add(new AjaxDecoratedButton("close", form) {
-
-            /** id. */
-            private static final long serialVersionUID = 1L;
+        modal.add(new AjaxEventButton("cancel", form, this, CancelClickedEvent.class).setDefaultFormProcessing(false));
+        modal.add(new AjaxEventButton("close", form, this, CancelClickedEvent.class).setDefaultFormProcessing(false));
+    }
 
 
-            @Override
-            public void onClicked(AjaxRequestTarget target, Form<?> form) {
-                onCancel(target);
-            }
-        }.setDefaultFormProcessing(false));
+    @Override
+    public void onEvent(IEvent<?> event) {
+        if (event.getPayload() instanceof OkClickedEvent) {
+            onOk(((OkClickedEvent) event.getPayload()).getTarget());
+        }
+        if (event.getPayload() instanceof CancelClickedEvent) {
+            onCancel(((CancelClickedEvent) event.getPayload()).getTarget());
+        }
     }
 
 

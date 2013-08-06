@@ -3,14 +3,15 @@ package pl.psnc.dl.wf4ever.portal.pages.ro;
 import java.net.URI;
 
 import org.apache.log4j.Logger;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.ExternalLink;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Folder;
 import org.purl.wf4ever.rosrs.client.Resource;
 
-import pl.psnc.dl.wf4ever.portal.components.EventPanel;
 import pl.psnc.dl.wf4ever.portal.components.WorkflowTransformPanel;
 import pl.psnc.dl.wf4ever.portal.components.annotations.ResourceTypePanel;
 import pl.psnc.dl.wf4ever.portal.components.form.EditableTextPanel;
@@ -19,8 +20,6 @@ import pl.psnc.dl.wf4ever.portal.events.annotations.AbstractAnnotationEditedEven
 import pl.psnc.dl.wf4ever.portal.model.AnnotationTripleModel;
 import pl.psnc.dl.wf4ever.portal.model.ResourceTypeModel;
 
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 
 /**
@@ -29,7 +28,7 @@ import com.hp.hpl.jena.vocabulary.DCTerms;
  * @author Piotr Hołubowicz
  * 
  */
-public class ResourceSummaryPanel extends EventPanel {
+public class ResourceSummaryPanel extends Panel {
 
     /** id. */
     private static final long serialVersionUID = -3775797988389365540L;
@@ -48,26 +47,23 @@ public class ResourceSummaryPanel extends EventPanel {
      *            selected resource model
      * @param currentFolderModel
      *            current folder model
-     * @param eventBusModel
-     *            event bus model
      */
-    public ResourceSummaryPanel(String id, IModel<Resource> model, IModel<Folder> currentFolderModel,
-            IModel<EventBus> eventBusModel) {
-        super(id, model, eventBusModel);
+    public ResourceSummaryPanel(String id, IModel<Resource> model, IModel<Folder> currentFolderModel) {
+        super(id, model);
         setOutputMarkupPlaceholderTag(true);
 
         add(new ExternalLink("uri", new PropertyModel<String>(model, "uri.toString"), new PropertyModel<URI>(model,
                 "uri")));
         add(new EditableTextPanel("titlePanel", new AnnotationTripleModel(model, URI.create(DCTerms.title.getURI()),
-                true), eventBusModel, false).setCanDelete(false));
+                true), false).setCanDelete(false));
         ResourceTypeModel resourceTypeModel = new ResourceTypeModel(model);
-        add(new ResourceTypePanel("resource-type", resourceTypeModel, eventBusModel));
-        add(new WorkflowTransformPanel("transform", model, resourceTypeModel, currentFolderModel, eventBusModel));
+        add(new ResourceTypePanel("resource-type", resourceTypeModel));
+        add(new WorkflowTransformPanel("transform", model, resourceTypeModel, currentFolderModel));
         add(new Label("author", new PropertyModel<String>(model, "author.name")));
         add(new Label("createdFormatted", new PropertyModel<String>(model, "createdFormatted")));
         add(new Label("annotations", new PropertyModel<Integer>(model, "annotations.size")));
         add(new EditableTextPanel("descriptionPanel", new AnnotationTripleModel(model, URI.create(DCTerms.description
-                .getURI()), true), eventBusModel, true).setCanDelete(false));
+                .getURI()), true), true).setCanDelete(false));
     }
 
 
@@ -78,14 +74,25 @@ public class ResourceSummaryPanel extends EventPanel {
     };
 
 
+    @Override
+    public void onEvent(IEvent<?> event) {
+        super.onEvent(event);
+        if (event.getPayload() instanceof ResourceSelectedEvent) {
+            onResourceSelected((ResourceSelectedEvent) event.getPayload());
+        }
+        if (event.getPayload() instanceof AbstractAnnotationEditedEvent) {
+            onAnnotationEdited((AbstractAnnotationEditedEvent) event.getPayload());
+        }
+    }
+
+
     /**
      * Refresh the panel when the selected resource changes.
      * 
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void onResourceSelected(ResourceSelectedEvent event) {
+    private void onResourceSelected(ResourceSelectedEvent event) {
         event.getTarget().add(this);
     }
 
@@ -96,8 +103,7 @@ public class ResourceSummaryPanel extends EventPanel {
      * @param event
      *            AJAX event
      */
-    @Subscribe
-    public void onAnnotationEdited(AbstractAnnotationEditedEvent event) {
+    private void onAnnotationEdited(AbstractAnnotationEditedEvent event) {
         event.getTarget().add(this);
     }
 

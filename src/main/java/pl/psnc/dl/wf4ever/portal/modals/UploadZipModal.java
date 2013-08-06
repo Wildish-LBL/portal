@@ -4,20 +4,19 @@ import java.net.URI;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormChoiceComponentUpdatingBehavior;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Radio;
 import org.apache.wicket.markup.html.form.RadioGroup;
 import org.apache.wicket.markup.html.form.RequiredTextField;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.lang.Bytes;
 
+import pl.psnc.dl.wf4ever.portal.events.ros.ZipAddReadyEvent;
 import pl.psnc.dl.wf4ever.portal.model.ResourceLocalRemote;
-
-import com.google.common.eventbus.EventBus;
 
 /**
  * A modal for uploading a zip archive.
@@ -51,11 +50,9 @@ public class UploadZipModal extends AbstractModal {
      * 
      * @param id
      *            wicket id
-     * @param eventBusModel
-     *            event bus
      */
-    public UploadZipModal(String id, final IModel<EventBus> eventBusModel) {
-        super(id, eventBusModel, "upload-zip-modal", "Create an RO from ZIP");
+    public UploadZipModal(String id) {
+        super(id, "upload-zip-modal", "Create an RO from ZIP");
 
         // Enable multipart mode (needed for uploading files)
         form.setMultiPart(true);
@@ -134,40 +131,16 @@ public class UploadZipModal extends AbstractModal {
             default:
                 final FileUpload uploadedFile = fileUpload.getFileUpload();
                 if (uploadedFile != null) {
-                    onApply(target, uploadedFile);
+                    send(getPage(), Broadcast.BREADTH, new ZipAddReadyEvent(target, uploadedFile));
                     hide(target);
                 }
                 break;
             case REMOTE:
-                onApply(target, resourceURI);
+                send(getPage(), Broadcast.BREADTH, new ZipAddReadyEvent(target, resourceURI));
                 hide(target);
                 break;
         }
         target.add(feedbackPanel);
-    }
-
-
-    /**
-     * Resource aggregated by reference only.
-     * 
-     * @param target
-     *            response target
-     * @param resourceURI
-     *            resource URI
-     */
-    protected void onApply(AjaxRequestTarget target, URI resourceURI) {
-    }
-
-
-    /**
-     * Apply.
-     * 
-     * @param target
-     *            response target
-     * @param uploadedFile
-     *            the uploaded file
-     */
-    protected void onApply(AjaxRequestTarget target, FileUpload uploadedFile) {
     }
 
 
