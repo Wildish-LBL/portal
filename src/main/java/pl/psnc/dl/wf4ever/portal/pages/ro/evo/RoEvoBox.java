@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -53,7 +52,7 @@ public class RoEvoBox extends Panel {
             "RoEvoBox.js");
 
     /** next unassigned index. */
-    private static int nextIndex;
+    private int nextIndex;
 
 
     /**
@@ -92,9 +91,6 @@ public class RoEvoBox extends Panel {
         List<RoEvoNode> archivedNodes = new ArrayList<>();
         allNodes = new HashMap<>();
 
-        if (!researchObjectModel.getObject().isEvolutionInformationLoaded()) {
-            researchObjectModel.getObject().loadEvolutionInformation();
-        }
         nextIndex = 0;
         switch (researchObjectModel.getObject().getEvoType()) {
             case LIVE:
@@ -126,10 +122,12 @@ public class RoEvoBox extends Panel {
      *            nodes representing archives
      */
     void drawForASnapshot(List<RoEvoNode> liveNodes, List<RoEvoNode> snapshotNodes, List<RoEvoNode> archivedNodes) {
-        List<ResearchObject> preorder = new ArrayList<>();
+        List<URI> preorder = new ArrayList<>();
         List<ResearchObject> postorder = new ArrayList<>();
         liveNodes.add(findOrCreateNode(researchObjectModel.getObject().getLiveRO()));
-        visit(researchObjectModel.getObject(), preorder, postorder);
+        Map<URI, ResearchObject> allROs = new HashMap<>();
+        allROs.put(researchObjectModel.getObject().getUri(), researchObjectModel.getObject());
+        visit(researchObjectModel.getObject(), preorder, postorder, allROs);
         for (ResearchObject ro : postorder) {
             switch (ro.getEvoType()) {
                 case SNAPSHOT:
@@ -154,14 +152,19 @@ public class RoEvoBox extends Panel {
      *            nodes representing archives
      */
     void drawForALiveRO(List<RoEvoNode> liveNodes, List<RoEvoNode> snapshotNodes, List<RoEvoNode> archivedNodes) {
-        List<ResearchObject> preorder = new ArrayList<>();
+        List<URI> preorder = new ArrayList<>();
         List<ResearchObject> postorder = new ArrayList<>();
-        Set<ResearchObject> snapshotsAndArchives = new HashSet<>();
-        snapshotsAndArchives.addAll(researchObjectModel.getObject().getSnapshots());
-        snapshotsAndArchives.addAll(researchObjectModel.getObject().getArchives());
-        for (ResearchObject ro : snapshotsAndArchives) {
-            if (!preorder.contains(ro)) {
-                visit(ro, preorder, postorder);
+        Map<URI, ResearchObject> allROs = new HashMap<>();
+        allROs.put(researchObjectModel.getObject().getUri(), researchObjectModel.getObject());
+        for (URI uri : researchObjectModel.getObject().getSnapshots()) {
+            allROs.put(uri, new ResearchObject(uri, researchObjectModel.getObject().getRosrs()));
+        }
+        for (URI uri : researchObjectModel.getObject().getArchives()) {
+            allROs.put(uri, new ResearchObject(uri, researchObjectModel.getObject().getRosrs()));
+        }
+        for (ResearchObject ro : new HashSet<>(allROs.values())) {
+            if (!preorder.contains(ro.getUri())) {
+                visit(ro, preorder, postorder, allROs);
             }
         }
         liveNodes.add(findOrCreateNode(researchObjectModel.getObject()));
@@ -203,7 +206,7 @@ public class RoEvoBox extends Panel {
      */
     private void onRoEvolutionLoaded(RoEvolutionLoadedEvent event) {
         init();
-        event.getTarget().appendJavaScript(getDrawJavaScript());
+        //        event.getTarget().appendJavaScript(getDrawJavaScript());
         event.getTarget().add(this);
     }
 
@@ -265,14 +268,20 @@ public class RoEvoBox extends Panel {
      *            the preorder numbering of ROs
      * @param postorder
      *            the postorder numbering of ROs
+     * @param allROs
+     *            all ROs mapped by URIs
      */
-    private void visit(ResearchObject ro, List<ResearchObject> preorder, List<ResearchObject> postorder) {
-        preorder.add(ro);
+    private void visit(ResearchObject ro, List<URI> preorder, List<ResearchObject> postorder,
+            Map<URI, ResearchObject> allROs) {
+        preorder.add(ro.getUri());
         if (!ro.isEvolutionInformationLoaded()) {
             ro.loadEvolutionInformation();
         }
         if (ro.getPreviousSnapshot() != null && !preorder.contains(ro.getPreviousSnapshot())) {
-            visit(ro.getPreviousSnapshot(), preorder, postorder);
+            if (!allROs.containsKey(ro.getPreviousSnapshot())) {
+                allROs.put(ro.getPreviousSnapshot(), new ResearchObject(ro.getPreviousSnapshot(), ro.getRosrs()));
+            }
+            visit(allROs.get(ro.getPreviousSnapshot()), preorder, postorder, allROs);
         }
         postorder.add(ro);
     }
@@ -353,7 +362,7 @@ public class RoEvoBox extends Panel {
                 sb.append(createConnection(node, live, "Has live RO"));
             }
             if (node.getResearchObject().getPreviousSnapshot() != null) {
-                RoEvoNode snapshot = allNodes.get(node.getResearchObject().getPreviousSnapshot().getUri());
+                RoEvoNode snapshot = allNodes.get(node.getResearchObject().getPreviousSnapshot());
                 sb.append(createConnection(node, snapshot, "Previous snapshot"));
             }
         }
