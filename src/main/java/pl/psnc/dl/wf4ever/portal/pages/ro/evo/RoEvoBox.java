@@ -13,6 +13,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -185,7 +186,7 @@ public class RoEvoBox extends Panel {
     public void renderHead(IHeaderResponse response) {
         super.renderHead(response);
         response.render(JavaScriptHeaderItem.forReference(JS_REFERENCE));
-        response.render(JavaScriptHeaderItem.forScript(getDrawJavaScript(), "roevo"));
+        response.render(OnDomReadyHeaderItem.forScript(getDrawJavaScript()));
     }
 
 
@@ -206,7 +207,6 @@ public class RoEvoBox extends Panel {
      */
     private void onRoEvolutionLoaded(RoEvolutionLoadedEvent event) {
         init();
-        //        event.getTarget().appendJavaScript(getDrawJavaScript());
         event.getTarget().add(this);
     }
 
@@ -350,8 +350,9 @@ public class RoEvoBox extends Panel {
      * @return the JavaScript code
      */
     private String getDrawJavaScript() {
+        String function = "drawArrows" + Math.abs(new Random().nextInt());
         final StringBuilder sb = new StringBuilder();
-        sb.append("function drawArrows() {");
+        sb.append("function " + function + "() {");
         sb.append("jsPlumb.ready(function() {");
         sb.append("initRoEvo(jsPlumb);");
         sb.append("var instance = jsPlumb.getInstance();");
@@ -369,8 +370,9 @@ public class RoEvoBox extends Panel {
         sb.append("});");
         sb.append("}");
 
-        sb.append("if ($(\"#history\").is(\":visible\")) { drawArrows(); } else {");
-        sb.append("$('a[data-toggle=\"tab\"][href=\"#history\"]').on('shown', function (e) { drawArrows(); $('a[data-toggle=\"tab\"][href=\"#history\"]').off('shown'); }); }");
+        sb.append("if ($(\"#history\").is(\":visible\")) { $(document).ready(" + function + "); } else {");
+        sb.append("$('a[data-toggle=\"tab\"][href=\"#history\"]').on('shown', function (e) { " + function
+                + "(); $('a[data-toggle=\"tab\"][href=\"#history\"]').off('shown'); }); }");
 
         return sb.toString();
     }
