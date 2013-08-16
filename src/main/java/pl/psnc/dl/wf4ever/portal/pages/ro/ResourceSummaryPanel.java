@@ -4,6 +4,7 @@ import java.net.URI;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.event.IEvent;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -37,6 +38,9 @@ public class ResourceSummaryPanel extends Panel {
     @SuppressWarnings("unused")
     private static final Logger LOG = Logger.getLogger(ResourceSummaryPanel.class);
 
+    /** Information that the resource is a nested RO. */
+    private WebMarkupContainer nestedRO;
+
 
     /**
      * Constructor.
@@ -51,6 +55,10 @@ public class ResourceSummaryPanel extends Panel {
     public ResourceSummaryPanel(String id, IModel<Resource> model, IModel<Folder> currentFolderModel) {
         super(id, model);
         setOutputMarkupPlaceholderTag(true);
+
+        nestedRO = new WebMarkupContainer("nested-ro");
+        nestedRO.setOutputMarkupPlaceholderTag(true);
+        add(nestedRO);
 
         add(new ExternalLink("uri", new PropertyModel<String>(model, "uri.toString"), new PropertyModel<URI>(model,
                 "uri")));
@@ -71,6 +79,7 @@ public class ResourceSummaryPanel extends Panel {
     protected void onConfigure() {
         super.onConfigure();
         setVisible(getDefaultModelObject() != null);
+        nestedRO.setVisible(getDefaultModelObject() != null && ((Resource) getDefaultModelObject()).isNestedRO());
     };
 
 
