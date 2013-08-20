@@ -346,7 +346,10 @@ public class RoContentPanel extends Panel {
         ResearchObject researchObject = (ResearchObject) getDefaultModelObject();
         Resource resource;
         if (event.getUploadedFile() != null) {
-            String contentType = event.getUploadedFile().getContentType();
+            String contentType = event.getMimeType();
+            if (contentType == null) {
+                contentType = event.getUploadedFile().getContentType();
+            }
             if (contentType == null || MediaType.APPLICATION_OCTET_STREAM.equals(contentType)) {
                 contentType = mfm.getContentType(event.getUploadedFile().getClientFileName());
             }

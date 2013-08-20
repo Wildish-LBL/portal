@@ -6,6 +6,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormChoiceComponentUpdatingBehavior;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Radio;
 import org.apache.wicket.markup.html.form.RadioGroup;
 import org.apache.wicket.markup.html.form.RequiredTextField;
@@ -48,6 +49,9 @@ public class UploadResourceModal extends AbstractModal {
 
     /** Component for the uploaded file. */
     private FileUploadField fileUpload;
+
+    /** Is the uploaded file an RO bundle? */
+    private boolean roBundle;
 
 
     /**
@@ -116,6 +120,8 @@ public class UploadResourceModal extends AbstractModal {
         fileUpload = new FileUploadField("fileUpload");
         fileDiv.add(fileUpload);
 
+        fileDiv.add(new CheckBox("ro-bundle-checkbox", new PropertyModel<Boolean>(this, "roBundle")));
+
         resourceDiv.add(new RequiredTextField<URI>("resourceURI", new PropertyModel<URI>(this, "resourceURI")));
     }
 
@@ -127,7 +133,9 @@ public class UploadResourceModal extends AbstractModal {
             default:
                 final FileUpload uploadedFile = fileUpload.getFileUpload();
                 if (uploadedFile != null) {
-                    send(getPage(), Broadcast.BREADTH, new ResourceAddReadyEvent(target, uploadedFile, resourceClass));
+                    String mimeType = roBundle ? "application/vnd.wf4ever.robundle+zip" : null;
+                    send(getPage(), Broadcast.BREADTH, new ResourceAddReadyEvent(target, uploadedFile, resourceClass,
+                            mimeType));
                     hide(target);
                 }
                 break;
@@ -185,5 +193,15 @@ public class UploadResourceModal extends AbstractModal {
 
     public void setResourceClass(ResourceType resourceClass) {
         this.resourceClass = resourceClass;
+    }
+
+
+    public boolean isRoBundle() {
+        return roBundle;
+    }
+
+
+    public void setRoBundle(boolean roBundle) {
+        this.roBundle = roBundle;
     }
 }

@@ -25,6 +25,9 @@ public class ResourceAddReadyEvent extends AbstractAjaxEvent {
     /** Resource URI, used only if the resources is added by reference. */
     private final URI resourceUri;
 
+    /** Custom MIME type. */
+    private String mimeType;
+
 
     /**
      * Constructor for a file uploaded with content.
@@ -35,12 +38,16 @@ public class ResourceAddReadyEvent extends AbstractAjaxEvent {
      *            the uploaded file
      * @param resourceClass
      *            resource class, if any
+     * @param mimeType
+     *            custom MIME type, if known
      */
-    public ResourceAddReadyEvent(AjaxRequestTarget target, FileUpload uploadedFile, ResourceType resourceClass) {
+    public ResourceAddReadyEvent(AjaxRequestTarget target, FileUpload uploadedFile, ResourceType resourceClass,
+            String mimeType) {
         super(target);
         this.uploadedFile = uploadedFile;
         this.resourceClass = resourceClass;
         this.resourceUri = null;
+        this.mimeType = mimeType;
     }
 
 
@@ -74,6 +81,16 @@ public class ResourceAddReadyEvent extends AbstractAjaxEvent {
 
     public URI getResourceUri() {
         return resourceUri;
+    }
+
+
+    public String getMimeType() {
+        return mimeType;
+    }
+
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
     }
 
 }
