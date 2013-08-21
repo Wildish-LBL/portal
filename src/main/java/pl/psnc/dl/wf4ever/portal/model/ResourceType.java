@@ -93,10 +93,18 @@ public class ResourceType implements Serializable {
             "Workflow Run",
             "A workflow run is a process run which has been enacted by a workflow engine, according to a workflow definition. Such a process typically contains several subprocesses corresponding to process descriptions.");
 
+    /** roterms:ResearchQuestion. */
+    public static final ResourceType RESEARCH_QUESTION = new ResourceType(
+            URI.create("http://purl.org/wf4ever/roterms#ResearchQuestion"), "Research Question");
+
+    /** roterms:Paper. */
+    public static final ResourceType PAPER = new ResourceType(URI.create("http://purl.org/wf4ever/roterms#Paper"),
+            "Paper");
+
     /** All static instances. */
     public static final List<ResourceType> VALUES = Arrays.asList(WORKFLOW, WORKFLOW_PROCESS, DATASET, DOCUMENT, IMAGE,
-        FILE, WORKFLOW_RUN, SKETCH, HYPOTHESIS, CONCLUSIONS, RESULTS, RESULTS_PRESENTATION, EXAMPLE_INPUT,
-        EXAMPLE_OUTPUT, WORKFLOW_RUN_BUNDLE, BIBLIOGRAPHIC_RESOURCE);
+        FILE, WORKFLOW_RUN, SKETCH, HYPOTHESIS, RESEARCH_QUESTION, PAPER, CONCLUSIONS, RESULTS, RESULTS_PRESENTATION,
+        EXAMPLE_INPUT, EXAMPLE_OUTPUT, WORKFLOW_RUN_BUNDLE, BIBLIOGRAPHIC_RESOURCE);
 
 
     /**
