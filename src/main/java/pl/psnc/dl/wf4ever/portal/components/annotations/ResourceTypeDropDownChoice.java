@@ -1,9 +1,11 @@
 package pl.psnc.dl.wf4ever.portal.components.annotations;
 
+import java.util.Collection;
+
 import org.apache.wicket.markup.html.form.ChoiceRenderer;
 import org.apache.wicket.model.IModel;
 
-import pl.psnc.dl.wf4ever.portal.components.form.TitledDropDownChoice;
+import pl.psnc.dl.wf4ever.portal.components.form.TitledDropDownMultipleChoice;
 import pl.psnc.dl.wf4ever.portal.model.ResourceType;
 
 /**
@@ -12,7 +14,7 @@ import pl.psnc.dl.wf4ever.portal.model.ResourceType;
  * @author piotrekhol
  * 
  */
-public class ResourceTypeDropDownChoice extends TitledDropDownChoice<ResourceType> {
+public class ResourceTypeDropDownChoice extends TitledDropDownMultipleChoice<ResourceType> {
 
     /** id. */
     private static final long serialVersionUID = 5494577273033932953L;
@@ -26,9 +28,10 @@ public class ResourceTypeDropDownChoice extends TitledDropDownChoice<ResourceTyp
      * @param model
      *            resource type model for getting and setting the selected value
      */
-    public ResourceTypeDropDownChoice(String id, IModel<ResourceType> model) {
+    public ResourceTypeDropDownChoice(String id, IModel<? extends Collection<ResourceType>> model) {
         super(id, model, ResourceType.VALUES, new ChoiceRenderer<ResourceType>("name", "uri"));
-        setNullValid(true);
+        // number of visible rows
+        setMaxRows(5);
     }
 
 

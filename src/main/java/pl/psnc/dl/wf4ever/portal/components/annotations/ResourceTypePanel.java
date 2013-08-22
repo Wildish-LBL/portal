@@ -8,7 +8,6 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Annotable;
 
 import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
@@ -17,8 +16,8 @@ import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationCancelledEvent;
 import pl.psnc.dl.wf4ever.portal.events.edit.ApplyEvent;
 import pl.psnc.dl.wf4ever.portal.events.edit.CancelEvent;
 import pl.psnc.dl.wf4ever.portal.events.edit.EditEvent;
+import pl.psnc.dl.wf4ever.portal.model.MergedCollectionModel;
 import pl.psnc.dl.wf4ever.portal.model.NotSetModel;
-import pl.psnc.dl.wf4ever.portal.model.ResourceType;
 import pl.psnc.dl.wf4ever.portal.model.ResourceTypeModel;
 import pl.psnc.dl.wf4ever.portal.model.SanitizedModel;
 
@@ -58,7 +57,7 @@ public class ResourceTypePanel extends Panel {
             super(id, markupId, markupProvider, model);
             Form<Void> form = new Form<Void>("form");
             add(form);
-            form.add(new Label("text", new SanitizedModel(new NotSetModel(new PropertyModel<String>(model, "name"))))
+            form.add(new Label("text", new SanitizedModel(new NotSetModel(new MergedCollectionModel(model))))
                     .setEscapeModelStrings(false));
             form.add(new AuthenticatedAjaxEventButton("edit", form, ResourceTypePanel.this, EditEvent.class));
         }
@@ -76,12 +75,6 @@ public class ResourceTypePanel extends Panel {
         /** id. */
         private static final long serialVersionUID = -4169842101720666349L;
 
-        /**
-         * the resource type that is currently selected. This is not automatically sent to the model, only after the
-         * user clicks OK.
-         */
-        private ResourceType resourceType;
-
 
         /**
          * Constructor.
@@ -97,24 +90,13 @@ public class ResourceTypePanel extends Panel {
          */
         public EditFragment(String id, String markupId, MarkupContainer markupProvider, ResourceTypeModel model) {
             super(id, markupId, markupProvider, model);
-            resourceType = model.getObject();
             setOutputMarkupPlaceholderTag(true);
             Form<?> form = new Form<Void>("form");
             add(form);
-            form.add(new ResourceTypeDropDownChoice("typeList", new PropertyModel<ResourceType>(this, "resourceType")));
+            form.add(new ResourceTypeDropDownChoice("typeList", model));
             form.add(new AuthenticatedAjaxEventButton("apply", form, ResourceTypePanel.this, ApplyEvent.class));
             form.add(new AuthenticatedAjaxEventButton("cancel", form, ResourceTypePanel.this, CancelEvent.class)
                     .setDefaultFormProcessing(false));
-        }
-
-
-        public ResourceType getResourceType() {
-            return resourceType;
-        }
-
-
-        public void setResourceType(ResourceType resourceType) {
-            this.resourceType = resourceType;
         }
 
     }
@@ -185,8 +167,6 @@ public class ResourceTypePanel extends Panel {
         editFragment.replaceWith(viewFragment);
         event.getTarget().appendJavaScript("$('.tooltip').remove();");
         event.getTarget().add(this);
-        //set the value only when the user clicked OK
-        ((ResourceTypeModel) this.getDefaultModel()).setObject(editFragment.getResourceType());
         IModel<? extends Annotable> annotable = ((ResourceTypeModel) this.getDefaultModel()).getResourceModel();
         send(getPage(), Broadcast.BREADTH, new AnnotationAddedEvent(event.getTarget(), annotable));
     }

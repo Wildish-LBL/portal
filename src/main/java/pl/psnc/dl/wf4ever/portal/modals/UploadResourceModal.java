@@ -1,6 +1,8 @@
 package pl.psnc.dl.wf4ever.portal.modals;
 
 import java.net.URI;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormChoiceComponentUpdatingBehavior;
@@ -37,6 +39,12 @@ public class UploadResourceModal extends AbstractModal {
 
     /** Resource class. */
     private ResourceType resourceClass = null;
+
+    /**
+     * the resource type that is currently selected. This is not automatically sent to the model, only after the user
+     * clicks OK.
+     */
+    private Set<ResourceType> resourceTypes = new HashSet<>();
 
     /** Resource URI. */
     private URI resourceURI;
@@ -92,7 +100,8 @@ public class UploadResourceModal extends AbstractModal {
         };
         fileDiv.setOutputMarkupPlaceholderTag(true);
         modal.add(fileDiv);
-        modal.add(new ResourceTypeDropDownChoice("typeList", new PropertyModel<ResourceType>(this, "resourceClass")));
+        modal.add(new ResourceTypeDropDownChoice("typeList",
+                new PropertyModel<Set<ResourceType>>(this, "resourceTypes")));
 
         RadioGroup<ResourceLocalRemote> radioGroup = new RadioGroup<ResourceLocalRemote>("radioGroup",
                 new PropertyModel<ResourceLocalRemote>(this, "resourceType"));
@@ -193,6 +202,16 @@ public class UploadResourceModal extends AbstractModal {
 
     public void setResourceClass(ResourceType resourceClass) {
         this.resourceClass = resourceClass;
+    }
+
+
+    public Set<ResourceType> getResourceTypes() {
+        return resourceTypes;
+    }
+
+
+    public void setResourceTypes(Set<ResourceType> resourceTypes) {
+        this.resourceTypes = resourceTypes;
     }
 
 
