@@ -2,7 +2,10 @@ package pl.psnc.dl.wf4ever.portal.model;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.model.IModel;
@@ -11,6 +14,8 @@ import org.purl.wf4ever.rosrs.client.AnnotationTriple;
 import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 /**
@@ -19,7 +24,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
  * @author piotrekhol
  * 
  */
-public class ResourceTypeModel implements IModel<ResourceType> {
+public class ResourceTypeModel implements IModel<Collection<ResourceType>> {
 
     /** Logger. */
     private static final Logger LOG = Logger.getLogger(ResourceTypeModel.class);
@@ -32,11 +37,8 @@ public class ResourceTypeModel implements IModel<ResourceType> {
     /** Resource used for the last value search. */
     private Annotable resource;
 
-    /** Triple with the last value found. May be null if no value was found. */
-    private AnnotationTriple triple;
-
-    /** Resource type. May be null if not found. */
-    private ResourceType resourceType;
+    /** Resource type. May be empty if not found. */
+    private Multimap<ResourceType, AnnotationTriple> resourceTypes = HashMultimap.create();
 
 
     /**
@@ -56,60 +58,62 @@ public class ResourceTypeModel implements IModel<ResourceType> {
 
 
     @Override
-    public ResourceType getObject() {
+    public Collection<ResourceType> getObject() {
         if (resourceModel.getObject() != null && !resourceModel.getObject().equals(resource)) {
             resource = resourceModel.getObject();
-            ResourceType resourceType2 = null;
-            AnnotationTriple triple2 = null;
-            List<AnnotationTriple> types = resource.getPropertyValues(RDF.type, false);
-            for (AnnotationTriple t : types) {
+            resourceTypes.clear();
+            List<AnnotationTriple> typeTriples = resource.getPropertyValues(RDF.type, false);
+            for (AnnotationTriple triple : typeTriples) {
                 try {
-                    URI typeUri = new URI(t.getValue());
-                    resourceType2 = ResourceType.forUri(typeUri);
-                    if (resourceType2 != null) {
-                        triple2 = t;
-                        break;
+                    URI typeUri = new URI(triple.getValue());
+                    ResourceType type = ResourceType.forUri(typeUri);
+                    if (type != null) {
+                        resourceTypes.put(type, triple);
                     }
                 } catch (URISyntaxException e) {
-                    LOG.debug("A type is not a URI: " + e.getMessage());
+                    LOG.warn("A type is not a URI: " + e.getMessage());
                 }
             }
-            triple = triple2;
-            resourceType = resourceType2;
         }
-        return resourceType;
+        // it seems that Wicket will attempt to take this collection, 
+        // modify it and return using setObject(). For this to work, it cannot
+        // be the Multiset#keySet value
+        return new HashSet<>(resourceTypes.keySet());
     }
 
 
     @Override
-    public void setObject(ResourceType type) {
+    public void setObject(Collection<ResourceType> newTypes) {
         resource = resourceModel.getObject();
-        if (triple != null) {
-            if (type != null) {
+        Set<ResourceType> oldTypes = resourceTypes.keySet();
+        Set<ResourceType> typesToRemove = new HashSet<>(oldTypes);
+        typesToRemove.removeAll(newTypes);
+        Set<ResourceType> typesToAdd = new HashSet<>(newTypes);
+        typesToAdd.removeAll(oldTypes);
+
+        Set<AnnotationTriple> triplesToRemove = new HashSet<>();
+        for (ResourceType type : typesToRemove) {
+            triplesToRemove.addAll(resourceTypes.removeAll(type));
+        }
+        Set<AnnotationTriple> triplesToAdd = new HashSet<>();
+        for (ResourceType type : typesToAdd) {
+            triplesToAdd.add(new AnnotationTriple(null, resource, RDF.type, type.getUri().toString(), false));
+        }
+        try {
+            Set<AnnotationTriple> newTriples = AnnotationTriple.batchUpdate(triplesToAdd, triplesToRemove);
+            for (AnnotationTriple triple : newTriples) {
                 try {
-                    triple.updateValue(type.getUri().toString());
-                    resourceType = type;
-                } catch (ROSRSException e) {
-                    LOG.error("Can't update annotation " + triple.getAnnotation(), e);
-                }
-            } else {
-                try {
-                    triple.delete();
-                    triple = null;
-                    resourceType = null;
-                } catch (ROSRSException e) {
-                    LOG.error("Can't delete annotation " + triple.getAnnotation(), e);
+                    URI typeUri = new URI(triple.getValue());
+                    ResourceType type = ResourceType.forUri(typeUri);
+                    if (type != null) {
+                        resourceTypes.put(type, triple);
+                    }
+                } catch (URISyntaxException e) {
+                    LOG.warn("A type is not a URI: " + e.getMessage());
                 }
             }
-        } else {
-            if (type != null) {
-                try {
-                    triple = resource.createPropertyValue(RDF.type, type.getUri());
-                    resourceType = type;
-                } catch (ROSRSException | ROException e) {
-                    LOG.error("Can't create annotation " + triple.getAnnotation(), e);
-                }
-            }
+        } catch (ROSRSException | ROException e1) {
+            LOG.error("Failed to update resource types", e1);
         }
     }
 
