@@ -3,9 +3,16 @@ package pl.psnc.dl.wf4ever.portal.model;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
+import org.purl.wf4ever.rosrs.client.Annotable;
+import org.purl.wf4ever.rosrs.client.AnnotationTriple;
+import org.purl.wf4ever.rosrs.client.Statement;
+
 import com.hp.hpl.jena.vocabulary.DCTerms;
+import com.hp.hpl.jena.vocabulary.RDF;
 
 /**
  * A type that a user can select for a resource.
@@ -101,10 +108,29 @@ public class ResourceType implements Serializable {
     public static final ResourceType PAPER = new ResourceType(URI.create("http://purl.org/wf4ever/roterms#Paper"),
             "Paper");
 
+    /** roterms:ExampleWorkflowRun. */
+    public static final ResourceType EXAMPLE_WORKFLOW_RUN = new WorkflowRunResourceType(
+            URI.create("http://purl.org/wf4ever/roterms#ExampleRun"),
+            "Example Workflow Run",
+            "A workflow run that serves as an example of how to use this workflow. Example runs typically take only a small subset of inputs and have short execution time.");
+
+    /** roterms:ProspectiveWorkflowRun. */
+    public static final ResourceType PROSPECTIVE_WORKFLOW_RUN = new WorkflowRunResourceType(
+            URI.create("http://purl.org/wf4ever/roterms#ProspectiveRun"),
+            "Prospective Workflow Run",
+            "A workflow run that is ready to start executing, e.g. all workflow inputs and configuration options have been provided, but no outputs are available yet.");
+
+    /** roterms:ResultGenerationRun. */
+    public static final ResourceType RESULT_GENERATION_WORKFLOW_RUN = new WorkflowRunResourceType(
+            URI.create("http://purl.org/wf4ever/roterms#ResultGenerationRun"),
+            "Result Generating Workflow Run",
+            "A workflow run that generated scientific results. Such workflow runs typically take complete data sets as inputs and may take longer to execute.");
+
     /** All static instances. */
     public static final List<ResourceType> VALUES = Arrays.asList(WORKFLOW, WORKFLOW_PROCESS, DATASET, DOCUMENT, IMAGE,
-        FILE, WORKFLOW_RUN, SKETCH, HYPOTHESIS, RESEARCH_QUESTION, PAPER, CONCLUSIONS, RESULTS, RESULTS_PRESENTATION,
-        EXAMPLE_INPUT, EXAMPLE_OUTPUT, WORKFLOW_RUN_BUNDLE, BIBLIOGRAPHIC_RESOURCE);
+        FILE, SKETCH, HYPOTHESIS, RESEARCH_QUESTION, PAPER, CONCLUSIONS, RESULTS, RESULTS_PRESENTATION, EXAMPLE_INPUT,
+        EXAMPLE_OUTPUT, WORKFLOW_RUN_BUNDLE, WORKFLOW_RUN, EXAMPLE_WORKFLOW_RUN, PROSPECTIVE_WORKFLOW_RUN,
+        RESULT_GENERATION_WORKFLOW_RUN, BIBLIOGRAPHIC_RESOURCE);
 
 
     /**
@@ -174,4 +200,32 @@ public class ResourceType implements Serializable {
         return getName();
     }
 
+
+    /**
+     * Return existing annotation triples that are related to this type, i.e. should be removed if this type is not
+     * selected.
+     * 
+     * @param resource
+     *            the resource that is annotated
+     * @param triples
+     *            a set of triples directly relating the annotated resource and this type
+     * @return a set of all triples that are related, including the ones given as a parameter
+     */
+    public Collection<? extends AnnotationTriple> getRelatedAnnotationTriples(Annotable resource,
+            Collection<AnnotationTriple> triples) {
+        return triples;
+    }
+
+
+    /**
+     * Return all new statements that should be created if a given resource should be assigned this type.
+     * 
+     * @param resource
+     *            the resource to annotate
+     * @return a collection of statements that may also describe other resources
+     */
+    public Collection<? extends Statement> getRelatedStatements(Annotable resource) {
+        return Collections.singleton(new Statement(resource.getUri(), URI.create(RDF.type.getURI()), getUri()
+                .toString()));
+    }
 }

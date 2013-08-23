@@ -37,9 +37,6 @@ public class UploadResourceModal extends AbstractModal {
     /** Type of currently added resource. */
     private ResourceLocalRemote resourceType = ResourceLocalRemote.LOCAL;
 
-    /** Resource class. */
-    private ResourceType resourceClass = null;
-
     /**
      * the resource type that is currently selected. This is not automatically sent to the model, only after the user
      * clicks OK.
@@ -143,13 +140,13 @@ public class UploadResourceModal extends AbstractModal {
                 final FileUpload uploadedFile = fileUpload.getFileUpload();
                 if (uploadedFile != null) {
                     String mimeType = roBundle ? "application/vnd.wf4ever.robundle+zip" : null;
-                    send(getPage(), Broadcast.BREADTH, new ResourceAddReadyEvent(target, uploadedFile, resourceClass,
+                    send(getPage(), Broadcast.BREADTH, new ResourceAddReadyEvent(target, uploadedFile, resourceTypes,
                             mimeType));
                     hide(target);
                 }
                 break;
             case REMOTE:
-                send(getPage(), Broadcast.BREADTH, new ResourceAddReadyEvent(target, resourceURI, resourceClass));
+                send(getPage(), Broadcast.BREADTH, new ResourceAddReadyEvent(target, resourceURI, resourceTypes));
                 hide(target);
                 break;
         }
@@ -192,16 +189,6 @@ public class UploadResourceModal extends AbstractModal {
 
     public void setResourceType(ResourceLocalRemote resourceType) {
         this.resourceType = resourceType;
-    }
-
-
-    public ResourceType getResourceClass() {
-        return resourceClass;
-    }
-
-
-    public void setResourceClass(ResourceType resourceClass) {
-        this.resourceClass = resourceClass;
     }
 
 

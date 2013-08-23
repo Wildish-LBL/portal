@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import org.apache.wicket.model.IModel;
 import org.purl.wf4ever.rosrs.client.Annotable;
 import org.purl.wf4ever.rosrs.client.AnnotationTriple;
+import org.purl.wf4ever.rosrs.client.Statement;
 import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
@@ -93,14 +94,15 @@ public class ResourceTypeModel implements IModel<Collection<ResourceType>> {
 
         Set<AnnotationTriple> triplesToRemove = new HashSet<>();
         for (ResourceType type : typesToRemove) {
-            triplesToRemove.addAll(resourceTypes.removeAll(type));
+            triplesToRemove.addAll(type.getRelatedAnnotationTriples(resource, resourceTypes.removeAll(type)));
         }
-        Set<AnnotationTriple> triplesToAdd = new HashSet<>();
+        Set<Statement> statementsToAdd = new HashSet<>();
         for (ResourceType type : typesToAdd) {
-            triplesToAdd.add(new AnnotationTriple(null, resource, RDF.type, type.getUri().toString(), false));
+            statementsToAdd.addAll(type.getRelatedStatements(resource));
         }
         try {
-            Set<AnnotationTriple> newTriples = AnnotationTriple.batchUpdate(triplesToAdd, triplesToRemove);
+            AnnotationTriple.batchRemove(triplesToRemove);
+            Set<AnnotationTriple> newTriples = AnnotationTriple.batchAdd(resource, statementsToAdd);
             for (AnnotationTriple triple : newTriples) {
                 try {
                     URI typeUri = new URI(triple.getValue());

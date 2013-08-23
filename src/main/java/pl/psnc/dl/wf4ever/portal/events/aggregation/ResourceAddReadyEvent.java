@@ -1,6 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.events.aggregation;
 
 import java.net.URI;
+import java.util.Collection;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
@@ -20,7 +21,7 @@ public class ResourceAddReadyEvent extends AbstractAjaxEvent {
     private final FileUpload uploadedFile;
 
     /** The RDF class of the resource. */
-    private final ResourceType resourceClass;
+    private final Collection<ResourceType> resourceTypes;
 
     /** Resource URI, used only if the resources is added by reference. */
     private final URI resourceUri;
@@ -36,16 +37,16 @@ public class ResourceAddReadyEvent extends AbstractAjaxEvent {
      *            response target
      * @param uploadedFile
      *            the uploaded file
-     * @param resourceClass
+     * @param resourceTypes
      *            resource class, if any
      * @param mimeType
      *            custom MIME type, if known
      */
-    public ResourceAddReadyEvent(AjaxRequestTarget target, FileUpload uploadedFile, ResourceType resourceClass,
-            String mimeType) {
+    public ResourceAddReadyEvent(AjaxRequestTarget target, FileUpload uploadedFile,
+            Collection<ResourceType> resourceTypes, String mimeType) {
         super(target);
         this.uploadedFile = uploadedFile;
-        this.resourceClass = resourceClass;
+        this.resourceTypes = resourceTypes;
         this.resourceUri = null;
         this.mimeType = mimeType;
     }
@@ -58,13 +59,13 @@ public class ResourceAddReadyEvent extends AbstractAjaxEvent {
      *            response target
      * @param resourceURI
      *            resource URI
-     * @param resourceClass
+     * @param resourceTypes
      *            resource class, if any
      */
-    public ResourceAddReadyEvent(AjaxRequestTarget target, URI resourceURI, ResourceType resourceClass) {
+    public ResourceAddReadyEvent(AjaxRequestTarget target, URI resourceURI, Collection<ResourceType> resourceTypes) {
         super(target);
         this.uploadedFile = null;
-        this.resourceClass = resourceClass;
+        this.resourceTypes = resourceTypes;
         this.resourceUri = resourceURI;
     }
 
@@ -74,8 +75,8 @@ public class ResourceAddReadyEvent extends AbstractAjaxEvent {
     }
 
 
-    public ResourceType getResourceClass() {
-        return resourceClass;
+    public Collection<ResourceType> getResourceTypes() {
+        return resourceTypes;
     }
 
 

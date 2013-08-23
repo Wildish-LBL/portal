@@ -14,6 +14,7 @@ import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Folder;
 import org.purl.wf4ever.rosrs.client.FolderEntry;
@@ -45,9 +46,8 @@ import pl.psnc.dl.wf4ever.portal.modals.MoveResourceModal;
 import pl.psnc.dl.wf4ever.portal.modals.UpdateResourceModal;
 import pl.psnc.dl.wf4ever.portal.modals.UploadResourceModal;
 import pl.psnc.dl.wf4ever.portal.model.FolderHierarchyModel;
+import pl.psnc.dl.wf4ever.portal.model.ResourceTypeModel;
 import pl.psnc.dl.wf4ever.portal.services.CreateROThread;
-
-import com.hp.hpl.jena.vocabulary.RDF;
 
 /**
  * A panel for exploring the RO. On the left side there is a list of folders/files. The user selects one folder at a
@@ -359,8 +359,13 @@ public class RoContentPanel extends Panel {
             URI absoluteResourceURI = researchObject.getUri().resolve(event.getResourceUri());
             resource = researchObject.aggregate(absoluteResourceURI);
         }
-        if (event.getResourceClass() != null) {
-            resource.createPropertyValue(URI.create(RDF.type.getURI()), event.getResourceClass().getUri());
+        if ("application/vnd.wf4ever.robundle+zip".equals(event.getMimeType())) {
+            // Adding RO bundles may create additional annotations in the RO
+            researchObject.load();
+        }
+        if (event.getResourceTypes() != null && !event.getResourceTypes().isEmpty()) {
+            ResourceTypeModel resourceTypeModel = new ResourceTypeModel(new Model<Resource>(resource));
+            resourceTypeModel.setObject(event.getResourceTypes());
         }
         if (currentFolder != null) {
             currentFolder.addEntry(resource, null);
