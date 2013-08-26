@@ -26,7 +26,9 @@ import org.purl.wf4ever.rosrs.client.Annotation;
 import org.purl.wf4ever.rosrs.client.AnnotationTriple;
 import org.purl.wf4ever.rosrs.client.Utils;
 
+import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
+import pl.psnc.dl.wf4ever.portal.events.ErrorEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationAddedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationCancelledEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationDeletedEvent;
@@ -88,7 +90,7 @@ public class EditableAnnotationTextPanel extends Panel {
         viewFragment = new ViewFragment("content", "view", this, model);
         editFragment = new EditFragment("content", "editSingle", this, new PropertyModel<URI>(this, "newProperty"),
                 new PropertyModel<String>(this, "newValue"));
-        add(editMode ? editFragment : viewFragment);
+        add(editMode ? editFragment : viewFragment).setOutputMarkupPlaceholderTag(true);
     }
 
 
@@ -297,6 +299,9 @@ public class EditableAnnotationTextPanel extends Panel {
         /** id. */
         private static final long serialVersionUID = -4169842101720666349L;
 
+        /** A div that contains all components. */
+        private WebMarkupContainer controlGroup;
+
 
         /**
          * Constructor.
@@ -316,11 +321,37 @@ public class EditableAnnotationTextPanel extends Panel {
                 IModel<String> valueModel) {
             super(id, markupId, markupProvider);
             setOutputMarkupPlaceholderTag(true);
-            add(new RequiredTextField<URI>("property-name", propertyModel));
-            add(new TextField<>("value", valueModel));
-            add(new AuthenticatedAjaxEventButton("apply", null, EditableAnnotationTextPanel.this, ApplyEvent.class));
-            add(new AuthenticatedAjaxEventButton("cancel", null, EditableAnnotationTextPanel.this, CancelEvent.class)
-                    .setDefaultFormProcessing(false));
+            controlGroup = new WebMarkupContainer("control-group");
+            controlGroup.setOutputMarkupPlaceholderTag(true);
+            add(controlGroup);
+            controlGroup.add(new RequiredTextField<URI>("property-name", propertyModel));
+            controlGroup.add(new TextField<>("value", valueModel));
+            controlGroup.add(new AuthenticatedAjaxEventButton("apply", null, EditableAnnotationTextPanel.this,
+                    ApplyEvent.class));
+            controlGroup.add(new AuthenticatedAjaxEventButton("cancel", null, EditableAnnotationTextPanel.this,
+                    CancelEvent.class).setDefaultFormProcessing(false));
+            controlGroup.add(new MyFeedbackPanel("feedback").setOutputMarkupPlaceholderTag(true));
+        }
+
+
+        @Override
+        public void onEvent(IEvent<?> event) {
+            super.onEvent(event);
+            if (event.getPayload() instanceof ErrorEvent) {
+                onError((ErrorEvent) event.getPayload());
+            }
+        }
+
+
+        /**
+         * Form validation failed.
+         * 
+         * @param event
+         *            the event payload
+         */
+        private void onError(ErrorEvent event) {
+            controlGroup.add(AttributeAppender.append("class", " error"));
+            event.getTarget().add(controlGroup);
         }
     }
 

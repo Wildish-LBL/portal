@@ -111,7 +111,7 @@ public class AjaxEventButton extends AjaxButton {
             component = getPage();
         }
         // the event gets propagated up to the entire page
-        send(component, Broadcast.BUBBLE, new ErrorEvent(target));
+        send(component, Broadcast.BREADTH, new ErrorEvent(target));
     }
 
 

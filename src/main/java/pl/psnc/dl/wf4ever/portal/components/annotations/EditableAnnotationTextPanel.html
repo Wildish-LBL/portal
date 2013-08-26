@@ -39,7 +39,7 @@
 				$('.property-edit').typeahead(options);
 			})
 		</script>
-			<div class="edit-block">
+			<div class="edit-block control-group" wicket:id="control-group">
 				<input class="property property-edit" autocomplete="off" type="text"
 					placeholder="property (type to see hints)"
 					wicket:id="property-name"></input> <input class="value" type="text"
@@ -56,6 +56,8 @@
 						<i class="icon-remove"></i>
 					</button>
 				</div>
+				<span class="help-block" wicket:id="feedback">Please correct
+					the error</span>
 			</div></td>
 	</wicket:fragment>
 </wicket:panel>
