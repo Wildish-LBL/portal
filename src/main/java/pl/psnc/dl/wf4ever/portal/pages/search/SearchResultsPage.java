@@ -34,6 +34,7 @@ import org.purl.wf4ever.rosrs.client.search.dataclasses.FacetValue;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.FoundRO;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.SearchResult;
 import org.purl.wf4ever.rosrs.client.search.dataclasses.solr.FacetEntry;
+import org.purl.wf4ever.rosrs.client.search.utils.SolrQueryBuilder;
 
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
@@ -96,7 +97,7 @@ public class SearchResultsPage extends BasePage {
      * Constructor.
      * 
      * @param searchKeywords
-     *            The keywords provided by the user
+     *            The keywords provided by the user, unescaped
      * @param selectedFacetValues
      *            The facet values selected and submitted by the user
      * @param sortOption
@@ -111,10 +112,11 @@ public class SearchResultsPage extends BasePage {
         if (selectedFacetValues != null) {
             this.selectedFacetValues = selectedFacetValues;
         }
+        boolean emptySearch = searchKeywords == null || searchKeywords.isEmpty();
         this.searchKeywords = searchKeywords;
-        add(new Label("searchKeywords", searchKeywords));
+        String header = emptySearch ? "All research objects" : "Search results for \"" + searchKeywords + "\"";
+        add(new Label("header", header));
         add(new Label("resultsCount", new PropertyModel<>(this, "resultsCount")));
-
         WebMarkupContainer searchResultsDiv = new WebMarkupContainer("searchResultsDiv");
         searchResultsDiv.setOutputMarkupId(true);
         add(searchResultsDiv);
@@ -124,8 +126,9 @@ public class SearchResultsPage extends BasePage {
         final MyFeedbackPanel feedbackPanel = new MyFeedbackPanel("feedbackPanel");
         feedbackPanel.setOutputMarkupId(true);
         add(feedbackPanel);
-
-        String query = buildQuery(searchKeywords, selectedFacetValues);
+        // don't let users make raw Solr queries
+        String query = emptySearch ? buildQuery("*:*", selectedFacetValues) : buildQuery(
+            SolrQueryBuilder.escapeString(searchKeywords), selectedFacetValues);
 
         if (searchServer.supportsPagination()) {
             LazySearchResultsView lazySearchResultsList = new LazySearchResultsView("searchResultsListView",
@@ -179,8 +182,8 @@ public class SearchResultsPage extends BasePage {
         List<SortOption> sortOptions = new ArrayList<>();
         for (final FacetEntry facet : facetsList) {
             if (facet.isSorteable()) {
-                sortOptions.add(new SortOption(facet, SortOrder.ASC));
                 sortOptions.add(new SortOption(facet, SortOrder.DESC));
+                sortOptions.add(new SortOption(facet, SortOrder.ASC));
             }
         }
         SortDropDownChoice dropDown = new SortDropDownChoice("sortListView", new PropertyModel<SortOption>(this,

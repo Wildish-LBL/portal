@@ -1,16 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wicket:extend xmlns:wicket="http://wicket.apache.org">
-
-	<div class="row">
-		<div class="span12">
-			<div class="inspan12">
-				<ul class="breadcrumb">
-					<li><a href="home">Home</a> <span class="divider">/</span></li>
-					<li><a href="#">Search results</a></li>
-				</ul>
-			</div>
-		</div>
-	</div>
 	<div class="row">
 		<div class="span12" wicket:id="feedbackPanel"></div>
 	</div>
@@ -39,10 +28,11 @@
 		<div class="span9">
 			<div class="row">
 				<div class="span9">
-					<h3>
-						Search results for keywords: <span wicket:id="searchKeywords"></span>
-						(<span wicket:id="resultsCount">Unknown number of</span> results)
-					</h3>
+					<h4 wicket:id="header"></h4>
+					<p>
+						Found <span wicket:id="resultsCount"></span> research
+						objects.
+					</p>
 
 					<form class="form-horizontal">
 						<div class="control-group">
@@ -59,8 +49,8 @@
 					<ol style="margin-right: 40px;" wicket:id="searchResultsDiv">
 						<li wicket:id="searchResultsListView" class="not_numbered_list"><span
 							wicket:id="index" style="margin-right: 15px;"></span> <a
-							wicket:id="link"><span wicket:id="researchObject.name">[uri]</span></a><br /> <span
-							style="font-size: x-small">Created on: <span
+							wicket:id="link"><span wicket:id="researchObject.name">[uri]</span></a><br />
+							<span style="font-size: x-small">Created on: <span
 								wicket:id="created"></span>&nbsp;|&nbsp;Created by: <span
 								wicket:id="creators"></span>&nbsp;<br /> Resources: <span
 								wicket:id="numberOfResources"></span>&nbsp;|&nbsp;Annotations: <span
