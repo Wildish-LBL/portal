@@ -58,22 +58,27 @@ var dcterms = {
 
 var rdfs = {
 	'rdfs:comment' : 'http://www.w3.org/2000/01/rdf-schema#comment'
-}
+};
+
+var rdf = {
+		'rdf:type' : 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'
+	};
 
 var roterms = {
 	'roterms:performsTask' : 'http://purl.org/wf4ever/roterms#performsTask',
 	'roterms:inputSelected' : 'http://purl.org/wf4ever/roterms#inputSelected',
 	'roterms:technicalContact' : 'http://purl.org/wf4ever/roterms#technicalContact'
-}
+};
 
-var properties = $.extend({}, dcterms, rdfs, roterms);
+var properties = $.extend({}, dcterms, rdfs, rdf, roterms);
 
 var source = function() {
-	return Object.keys(properties)
-}
+	return Object.keys(properties);
+};
+
 var updater = function(item) {
-	return properties[item]
-}
+	return properties[item];
+};
 
 var options = {
 	source : source,

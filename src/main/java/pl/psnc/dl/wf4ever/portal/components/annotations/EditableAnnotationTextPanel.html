@@ -33,13 +33,13 @@
 			</div></td>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="editSingle">
-		<script type="text/javascript">
+		<td colspan="2"><script type="text/javascript">
 			$(document).ready(function() {
 				$('.my-tooltip').tooltip();
 				$('.property-edit').typeahead(options);
 			})
 		</script>
-		<td colspan="2"><div class="edit-block">
+			<div class="edit-block">
 				<input class="property property-edit" autocomplete="off" type="text"
 					placeholder="property (type to see hints)"
 					wicket:id="property-name"></input> <input class="value" type="text"
