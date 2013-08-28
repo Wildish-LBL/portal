@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -76,7 +77,9 @@ public class SearchResultsPage extends BasePage {
     private List<FacetValue> selectedFacetValues = new ArrayList<FacetValue>();
 
     /** Currently selected sort option. */
-    private SortOption sortOption;
+    //FIXME this shouldn't be hardcoded here
+    private SortOption sortOption = new SortOption(new FacetEntry(new FacetField("created"), "Creation date"),
+            SortOrder.DESC);
 
     /** Number of results. */
     private long resultsCount;
