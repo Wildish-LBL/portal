@@ -23,9 +23,6 @@ public final class MyQueryFactory {
     /** resources count. */
     private static String resourcesCount = null;
 
-    /** get all ROs. */
-    private static String allROs;
-
 
     /**
      * Constructor.
@@ -50,22 +47,6 @@ public final class MyQueryFactory {
             xMostRecentROs = loadQuery("xMostRecentROs.sparql");
         }
         return String.format(xMostRecentROs, limit);
-    }
-
-
-    /**
-     * Load all ROs query.
-     * 
-     * @return SPARQL query
-     * @throws IOException
-     *             can't load the query file
-     */
-    public static String getAllROs()
-            throws IOException {
-        if (allROs == null) {
-            allROs = loadQuery("allROs.sparql");
-        }
-        return allROs;
     }
 
 

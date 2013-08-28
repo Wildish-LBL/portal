@@ -1,7 +1,10 @@
 package pl.psnc.dl.wf4ever.portal;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -23,11 +26,9 @@ import org.purl.wf4ever.rosrs.client.search.SolrSearchServer;
 import org.purl.wf4ever.rosrs.client.search.SparqlSearchServer;
 
 import pl.psnc.dl.wf4ever.portal.components.form.AbsoluteURIConverter;
-import pl.psnc.dl.wf4ever.portal.pages.AllRosPage;
-import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
+import pl.psnc.dl.wf4ever.portal.pages.AboutPage;
 import pl.psnc.dl.wf4ever.portal.pages.CreateROFromZipPage;
 import pl.psnc.dl.wf4ever.portal.pages.Error404Page;
-import pl.psnc.dl.wf4ever.portal.pages.HelpPage;
 import pl.psnc.dl.wf4ever.portal.pages.HomePage;
 import pl.psnc.dl.wf4ever.portal.pages.MyExpImportPage;
 import pl.psnc.dl.wf4ever.portal.pages.MyRosPage;
@@ -126,6 +127,9 @@ public class PortalApplication extends AuthenticatedWebApplication {
     /** Service for generating RSS feeds. */
     private RSSService rssService;
 
+    /** Selected featured ROs. */
+    private List<URI> featuredROs;
+
 
     @Override
     public Class<? extends WebPage> getHomePage() {
@@ -144,15 +148,13 @@ public class PortalApplication extends AuthenticatedWebApplication {
 
         mountPage("/home", HomePage.class);
         mountPage("/myros", MyRosPage.class);
-        mountPage("/allros", AllRosPage.class);
         mountPage("/ro", RoPage.class);
         mountPage("/sparql", SparqlEndpointPage.class);
         mountPage("/myexpimport", MyExpImportPage.class);
         mountPage("/oauth", OAuthPage.class);
         mountPage("/authenticate", AuthenticationPage.class);
         mountPage("/error404", Error404Page.class);
-        mountPage("/contact", ContactPage.class);
-        mountPage("/help", HelpPage.class);
+        mountPage("/about", AboutPage.class);
         mountPage("/profile", ProfilePage.class);
         mountPage("/tokens", AccessTokensPage.class);
         mountPage("/generate", GenerateAccessTokenPage.class);
@@ -228,6 +230,14 @@ public class PortalApplication extends AuthenticatedWebApplication {
             searchType = SearchType.valueOf(type.trim().toUpperCase());
             if (searchType == null) {
                 throw new Exception("Unrecognized search type: " + type);
+            }
+            featuredROs = new ArrayList<>();
+            for (String f : props.getProperty("ros.featured", "").split(",")) {
+                try {
+                    featuredROs.add(new URI(f.trim()));
+                } catch (URISyntaxException e) {
+                    LOG.error("Invalid featured RO URI: " + f, e);
+                }
             }
         } catch (Exception e) {
             LOG.error("Failed to load properties: " + e.getMessage());
@@ -379,6 +389,11 @@ public class PortalApplication extends AuthenticatedWebApplication {
 
     public SearchServer getSearchServer() {
         return searchServer;
+    }
+
+
+    public List<URI> getFeaturedROs() {
+        return featuredROs;
     }
 
 }

@@ -4,10 +4,8 @@ import org.apache.wicket.util.tester.WicketTester;
 import org.junit.Before;
 import org.junit.Test;
 
-import pl.psnc.dl.wf4ever.portal.pages.AllRosPage;
-import pl.psnc.dl.wf4ever.portal.pages.ContactPage;
+import pl.psnc.dl.wf4ever.portal.pages.AboutPage;
 import pl.psnc.dl.wf4ever.portal.pages.Error404Page;
-import pl.psnc.dl.wf4ever.portal.pages.HelpPage;
 import pl.psnc.dl.wf4ever.portal.pages.HomePage;
 import pl.psnc.dl.wf4ever.portal.pages.SparqlEndpointPage;
 import pl.psnc.dl.wf4ever.portal.pages.users.AuthenticationPage;
@@ -38,16 +36,6 @@ public class TestPages {
         tester.startPage(HomePage.class);
         //assert rendered page class
         tester.assertRenderedPage(HomePage.class);
-    }
-
-
-    /**
-     * Tests if the page loads.
-     */
-    @Test
-    public void allROsRendersSuccessfully() {
-        tester.startPage(AllRosPage.class);
-        tester.assertRenderedPage(AllRosPage.class);
     }
 
 
@@ -86,8 +74,8 @@ public class TestPages {
      */
     @Test
     public void contactPageRendersSuccessfully() {
-        tester.startPage(ContactPage.class);
-        tester.assertRenderedPage(ContactPage.class);
+        tester.startPage(AboutPage.class);
+        tester.assertRenderedPage(AboutPage.class);
     }
 
 
@@ -96,7 +84,7 @@ public class TestPages {
      */
     @Test
     public void helpRendersSuccessfully() {
-        tester.startPage(HelpPage.class);
-        tester.assertRenderedPage(HelpPage.class);
+        tester.startPage(AboutPage.class);
+        tester.assertRenderedPage(AboutPage.class);
     }
 }

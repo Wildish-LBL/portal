@@ -9,7 +9,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
  * @author Piotr Hołubowicz
  * 
  */
-public class HelpPage extends BasePage {
+public class AboutPage extends BasePage {
 
     /** id. */
     private static final long serialVersionUID = 2960549491810135112L;
@@ -21,7 +21,7 @@ public class HelpPage extends BasePage {
      * @param pageParameters
      *            page params
      */
-    public HelpPage(PageParameters pageParameters) {
+    public AboutPage(PageParameters pageParameters) {
         super(pageParameters);
     }
 
@@ -29,7 +29,7 @@ public class HelpPage extends BasePage {
     /**
      * Constructor.
      */
-    public HelpPage() {
+    public AboutPage() {
         this(new PageParameters());
     }
 

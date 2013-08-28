@@ -12,7 +12,7 @@
 <meta name="Publisher"
 	content="PSNC, Poznan Supercomputer and Networking Center" />
 <meta name="Copyright"
-	content="Copyright (C) 2003 - 2012 PSNC, Poznan Supercomputer and Networking Center" />
+	content="Copyright (C) 2003 - 2013 PSNC, Poznan Supercomputer and Networking Center" />
 <meta http-equiv="Reply-to" content="dlibra.at.man.poznan.pl" />
 
 <meta wicket:id="redirect" http-equiv="refresh" content="0; url=app" />
@@ -28,7 +28,8 @@
 	href="http://dlibra.psnc.pl/demo/style/dlibra/favicon.ico"
 	type="image/ico" />
 
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.min.js"></script>
+<script type="text/javascript"
+	src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.min.js"></script>
 <script type="text/javascript" src="js/jquery.wysiwyg.js"></script>
 <script type="text/javascript" src="js/bootstrap.min.js"></script>
 <script type="text/javascript" src="js/jquery.jsPlumb-1.4.1-all-min.js"></script>
@@ -53,9 +54,6 @@
 					</span>
 				</div>
 			</div>
-			<a id="mainBanerCoin" wicket:id="baner" title="RO Digital Library">
-				<img src="images/wf4ever_logo.png" alt="" />
-			</a>&nbsp;
 			<h1>
 				<a wicket:id="banerTitle" title="Research Object Digital Library">
 					Research Object Digital Library </a>
@@ -65,33 +63,49 @@
 	<div id="mainMenu">
 		<div id="listMainMenu">
 			<ul class="mainMenuListList">
-				<li class="mmlEmpty">&nbsp;</li>
 				<li class="mainMenuListItem"><a class="mainMenuOption" href="#"
-					accesskey="m" wicket:id="menu-home"> MAIN PAGE </a></li>
+					wicket:id="menu-home"> Home </a></li>
+				<li class="mainMenuListItem"><a class="mainMenuOption" href="#"
+					wicket:id="menu-browse"> Browse </a></li>
 				<li class="mainMenuListItem"><a
-					class="mainMenuOption mainMenuOptionIn" href="#" accesskey="s"
-					wicket:id="menu-myros"> MY RESEARCH OBJECTS </a></li>
+					class="mainMenuOption mainMenuOptionIn" href="#"
+					wicket:id="menu-myros"> My Research Objects </a></li>
 				<li class="mainMenuListItem"><a
-					class="mainMenuOption mainMenuOptionIn" href="#" accesskey="s"
-					wicket:id="menu-profile"> MY PROFILE </a></li>
-				<li class="mainMenuListItem"><a
-					class="mainMenuOption mainMenuOptionIn" href="#" accesskey="s"
-					wicket:id="menu-sparql"> SPARQL ENDPOINT </a></li>
-				<li class="mmlEmpty mmlEmptyRight">&nbsp;</li>
+					class="mainMenuOption mainMenuOptionIn" href="#"
+					wicket:id="menu-sparql"> SPARQL Endpoint </a></li>
+				<li class="mainMenuListItem"><a class="mainMenuOption" href="#" wicket:id="menu-about">
+						About </a></li>
 			</ul>
+			<div id="main-search" wicket:id='main-search'></div>
 		</div>
-		<span wicket:id='main-search'></span>
 	</div>
 	<div class="container">
 		<div class="content">
 			<wicket:child />
 
-			<div class="row footer">
-				<div class="span12">
-					This application has been developed by <a
-						href="http://www.man.poznan.pl">PSNC</a> as part of <a href="#">the
-						Wf4Ever project</a><br /> <span wicket:id="application.appName"></span>,
-					version <span wicket:id="application.version"></span>.
+			<div class="row">
+				<div class="span12 footer">
+					<div class="row">
+						<div class="span3">
+							<img src="images/wf4ever_logo.png" alt="">
+						</div>
+						<div class="span6">
+							<p>
+								This application has been developed by <a
+									href="http://www.man.poznan.pl/">PSNC</a> as part of <a
+									href="http://www.wf4ever-project.org">the Wf4Ever project</a><br> <span
+									wicket:id="application.appName">Research Object Digital
+									Library Portal</span>, version <span wicket:id="application.version">4.8.0</span>.
+							</p>
+							<p>
+								Icons by <a href="http://glyphicons.com/">Glyphicons</a> and <a
+									href="http://thenounproject.com">the Noun Project</a>.
+							</p>
+						</div>
+						<div class="span3">
+							<img src="images/psnc-logo.png" alt="">
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

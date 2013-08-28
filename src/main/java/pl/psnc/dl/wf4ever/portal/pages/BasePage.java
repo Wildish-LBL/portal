@@ -12,9 +12,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
-import pl.psnc.dl.wf4ever.portal.components.Login;
-import pl.psnc.dl.wf4ever.portal.components.Search;
-import pl.psnc.dl.wf4ever.portal.pages.users.ProfilePage;
+import pl.psnc.dl.wf4ever.portal.components.LoginLink;
+import pl.psnc.dl.wf4ever.portal.components.SearchInput;
+import pl.psnc.dl.wf4ever.portal.pages.search.SearchResultsPage;
 
 /**
  * The common base of all HTML pages.
@@ -55,15 +55,15 @@ public class BasePage extends WebPage {
         }
         add(redirect);
 
-        add(new BookmarkablePageLink<Void>("baner", HomePage.class));
         add(new BookmarkablePageLink<Void>("banerTitle", HomePage.class));
 
         add(new BookmarkablePageLink<Void>("menu-home", HomePage.class));
+        add(new BookmarkablePageLink<Void>("menu-browse", SearchResultsPage.class));
         add(new BookmarkablePageLink<Void>("menu-myros", MyRosPage.class));
         add(new BookmarkablePageLink<Void>("menu-sparql", SparqlEndpointPage.class));
-        add(new BookmarkablePageLink<Void>("menu-profile", ProfilePage.class));
-        add(new Login("login"));
-        add(new Search("main-search"));
+        add(new BookmarkablePageLink<Void>("menu-about", AboutPage.class));
+        add(new LoginLink("login"));
+        add(new SearchInput("main-search"));
         add(new Label("application.appName", ((PortalApplication) getApplication()).getAppName()));
         add(new Label("application.version", ((PortalApplication) getApplication()).getVersion()));
     }

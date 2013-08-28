@@ -15,14 +15,14 @@ import pl.psnc.dl.wf4ever.portal.pages.search.SearchResultsPage;
  * @author piotrekhol
  * 
  */
-public class Search extends Panel {
+public class SearchInput extends Panel {
 
     /** id. */
     private static final long serialVersionUID = 6045458615921445179L;
 
     /** Logger. */
     @SuppressWarnings("unused")
-    private static final Logger LOGGER = Logger.getLogger(Search.class);
+    private static final Logger LOGGER = Logger.getLogger(SearchInput.class);
 
     /** the string that user inputs. */
     private String searchKeywords;
@@ -34,7 +34,7 @@ public class Search extends Panel {
      * @param id
      *            wicket id
      */
-    public Search(String id) {
+    public SearchInput(String id) {
         super(id);
         Form<?> searchForm = new Form<Void>("searchFormBar") {
 

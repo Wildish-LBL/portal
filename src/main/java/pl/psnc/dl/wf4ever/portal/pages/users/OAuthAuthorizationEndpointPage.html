@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wicket:extend xmlns:wicket="http://wicket.apache.org">
-	<div class="post">
-		<h2 class="title">Authorize access</h2>
-		<div class="entry" wicket:id="entry" />
+	<div class="row">
+		<div class="span12">
+			<div class="padded justified">
+				<h2>Authorize access</h2>
+				<div wicket:id="entry" />
+			</div>
+		</div>
 	</div>
 	<wicket:fragment wicket:id="validRequest">
 		<form wicket:id="form">
 			<p>
 				Do you want to give access to your data to application <strong>"<span
-					wicket:id="name">[application name]]</span>"</strong>?
+					wicket:id="name">[application name]]</span>"
+				</strong>?
 			</p>
 			<p>
 				<input type="submit" wicket:id="authorize" value="Yes" /> <input

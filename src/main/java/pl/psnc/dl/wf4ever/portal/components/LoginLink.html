@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns:wicket>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+	<wicket:panel>
+		<div id="loginContainer" wicket:id="content"></div>
+		<wicket:fragment wicket:id="signed-in">Signed in as <span
+				wicket:id="user-name"></span> | <a wicket:id="profile" href="#">Your
+				profile</a> | <a wicket:id="sign-out" href="#">Sign out</a>
+		</wicket:fragment>
+		<wicket:fragment wicket:id="signed-out">
+			<a href="#" wicket:id="sign-in">Sign in</a>
+		</wicket:fragment>
+	</wicket:panel>
+</body>
+</html>

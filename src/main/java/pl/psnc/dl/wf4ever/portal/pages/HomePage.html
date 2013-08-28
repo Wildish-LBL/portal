@@ -3,135 +3,142 @@
 	<script type="text/javascript" src="js/HomePage.js"></script>
 
 	<div class="row">
+		<div class="span12" wicket:id="feedbackPanel"></div>
+	</div>
+	<div class="row">
 		<div class="span12">
-			<div class="inspan12">
-				<ul class="breadcrumb">
-					<li><a href="home">Home</a></li>
-				</ul>
+			<div class="padded">
+				<h2>Research Object Digital Library</h2>
+				<p class="lead">Create and preserve your Research Objects.</p>
 			</div>
 		</div>
 	</div>
 	<div class="row">
-		<div class="span3">
-			<section class="box small">
-				<h3 class="collapsible">
-					Information <img class="sh_button" src="images/l_open.gif" />
-				</h3>
-				<div class="boxDiv">
-					<ul>
-						<li><a href="http://www.wf4ever-project.org">Wf4Ever home
-								page</a></li>
-						<li><a wicket:id="faq">Frequently asked questions </a></li>
-						<li><a wicket:id="contact">Contact </a></li>
-					</ul>
-
-				</div>
-			</section>
-
-			<section class="box small">
-				<h3 class="collapsible">
-					Statistics <img class="sh_button" src="images/l_open.gif" />
-				</h3>
-				<div class="boxDiv">
-					<p>
-						Number of ROs: <b><span wicket:id="roCnt"></span></b>
-					</p>
-					<p>
-						Number of resources: <b><span wicket:id="resourceCnt"></span></b>
-					</p>
-					<p>
-						Number of annotations: <b><span wicket:id="annCnt"></span></b>
-					</p>
-
-					<p>
-						Readers online: <b><span wicket:id="usersOnlineCnt"></span></b>
-					</p>
-
-					<p></p>
-					<ul>
-						<li><a href="#">Mostly viewed </a></li>
-						<li><a href="#">Best rated </a></li>
-						<li><a href="#">More... </a></li>
-					</ul>
-					<p></p>
-				</div>
-			</section>
-
-			<section class="box small">
-				<h3 class="collapsible">
-					Atom feeds <img class="sh_button" src="images/l_open.gif" />
-				</h3>
-				<div class="boxDiv">
-					<p>
-						<a wicket:id="recentROsRSSFeed"><img alt="atom10"
-							src="images/atom-icon.svg" style="height: 15px;" /></a> 5 most
-						recent Research Objects <span class="label label-important">New!!</span>
-					</p>
-					<p>
-						<a href="http://en.wikipedia.org/wiki/Atom_(standard)">What is
-							an Atom feed?</a>
-					</p>
-				</div>
-			</section>
-			<section class="box small">
-				<h3 class="collapsible">
-					Extras <img class="sh_button" src="images/l_open.gif" />
-				</h3>
-				<div class="boxDiv">
-					<ul>
-						<li><a href="http://sandbox.wf4ever-project.org/robox">Dropbox
-								synchronization</a></li>
-						<li><a href="https://github.com/wf4ever/ro-manager">Command
-								line tools</a></li>
-						<li><a
-							href="http://www.wf4ever-project.org/wiki/display/docs/Collaboration+Spheres">Collaboration
-								spheres</a></li>
-					</ul>
-				</div>
-			</section>
-
-			<section class="box small">
-				<h3 class="collapsible">
-					Recommendations <img class="sh_button" src="images/l_open.gif" />
-				</h3>
-				<div class="boxDiv">
-					<form class="form" wicket:id="recommenderForm">
-						<fieldset>
-							<label class="control-label" for="myExpId">Your
-								myExperiment ID</label> <input id="myExperiment-input" type="text"
-								style="width: 155px;" wicket:id="myExpId" placeholder="Try out 2" />
-							<button class="btn" id="myExp-recommendation-search-button"
-								wicket:id="confirmMyExpId" type="submit">OK</button>
-						</fieldset>
-					</form>
-				</div>
-			</section>
+		<div class="span6">
+			<div class="padded justified">
+				<h4>What are Research Objects?</h4>
+				<p>Multidimensional digital objects that encapsulate essential
+					information about experiments and investigations to facilitate
+					their reusability, reproducibility and better understanding.</p>
+				<p>
+					They comprise scientific assets, including data used and produced,
+					methods employed (e.g., scientific workflows), provenance and
+					setting information, people involved and annotations about these
+					resources.  See also <a href="http://www.researchobject.org/">http://www.researchobject.org/</a>
+				</p>
+			</div>
 		</div>
-
-		<div class="span9">
-			<div class="row">
-				<div class="span9" wicket:id="feedbackPanel"></div>
-			</div>
-			<div class="tab-content">
-				<div class="row tab-pane active" id="mainView">
-					<div class="span8">
-						<h3>Most recent Research Objects</h3>
-						<ol>
-							<li wicket:id="10recentROsListView"><a wicket:id="link"><span
-									wicket:id="name">[uri]</span></a> <br /> <span
-								style="font-size: x-small">by <span wicket:id="creator"></span>,
-									<span wicket:id="createdFormatted"></span></span>
-								<hr class="listLine" /></li>
-						</ol>
-						<p class="more2" style="margin-top: 1em;">
-							<a wicket:id="allRos"> More... </a>
-						</p>
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="span8"></div>
+		<div class="span6">
+			<div class="padded">
+				<p>
+					<img title="ROs" alt="" src="images/RO-interlinked.jpg"
+						style="margin-top: -100px; margin-left: 45px;" />
+				</p>
 			</div>
 		</div>
 	</div>
+	<div class="row">
+		<div class="span10 offset1">
+			<hr class="section-separator">
+		</div>
+	</div>
+	<div class="row">
+		<div class="span6">
+			<div class="padded">
+				<h4>
+					<img src="images/time.png" style="margin-right: 5px;" /> Recent
+				</h4>
+				<ol>
+					<li wicket:id="recent-ros"><a href="#" wicket:id="link"><span
+							wicket:id="name"></span></a> by <span wicket:id="creator"></span>, <span
+						wicket:id="createdFormatted"></span>
+						<hr class="listLine" wicket:id="separator" /></li>
+				</ol>
+			</div>
+		</div>
+		<div class="span6">
+			<div class="padded">
+				<h4>
+					<img src="images/star.png" style="margin-right: 5px;" /> Featured
+				</h4>
+				<ol>
+					<li wicket:id="featured-ros"><a href="#" wicket:id="link"><span
+							wicket:id="name"></span></a> by <span wicket:id="creator"></span>, <span
+						wicket:id="createdFormatted"></span>
+						<hr class="listLine" wicket:id="separator" /></li>
+				</ol>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="span10 offset1">
+			<hr class="section-separator">
+		</div>
+	</div>
+	<div class="row">
+		<div class="span6 offset3">
+			<button class="btn" wicket:id="browse">Find other Research
+				Objects</button>
+			or
+			<button class="btn" wicket:id="sign-in">Sign in to create
+				your own</button>
+		</div>
+	</div>
+	<div class="row">
+		<div class="span10 offset1">
+			<hr class="section-separator">
+		</div>
+	</div>
+	<div class="row">
+		<div class="span12">
+			<div class="padded">
+				<h4>You can use RODL to:</h4>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="span6">
+			<div class="padded justified">
+				<ul>
+					<li>find and <strong>inspect</strong> Research Objects,
+					</li>
+					<li><strong>create</strong> and maintain them,</li>
+					<li>comment them and add predefined or custom <strong>metadata</strong>,
+					</li>
+					<li>create snapshots and observe their <strong>evolution</strong>,
+					</li>
+					<li>monitor their <strong>quality</strong> with the Wf4Ever
+						web services.
+					</li>
+				</ul>
+			</div>
+		</div>
+		<div class="span6">
+			<div class="padded justified">
+				<p>
+					The RODL stores <strong><span wicket:id="roCnt"></span>
+						Research Objects</strong>, with <span wicket:id="resourceCnt"></span>
+					resources and <span wicket:id="annCnt"></span> annotations.
+				</p>
+				<p>
+					Many research objects have been created from existing workflows in
+					<a href="http://www.myexperiment.org">myExperiment</a> or from new
+					experiments by scientists in the bioinformatic and astronomy domain
+					as part of the <a href="http://www.wf4ever-project.org">Wf4Ever
+						project</a>.
+				</p>
+			</div>
+		</div>
+	</div>
+
+	<!-- 	<p>
+		<a wicket:id="recentROsRSSFeed"><img alt="atom10"
+			src="images/atom-icon.svg" style="height: 15px;" /></a> 5 most recent
+		Research Objects
+	</p>
+	<p>
+		<a href="http://en.wikipedia.org/wiki/Atom_(standard)">What is an
+			Atom feed?</a>
+	</p>
+ -->
 </wicket:extend>
