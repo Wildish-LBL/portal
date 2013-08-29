@@ -15,6 +15,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
+import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
@@ -65,7 +66,8 @@ public class HomePage extends BasePage {
 
         //        add(new ExternalLink("recentROsRSSFeed", RSSService.RECENT_ROS_FILENAME));
 
-        List<ResearchObject> recentROs = RODLUtilities.getMostRecentROs(app.getSparqlEndpointURI(), rodlURI, 3);
+        List<ResearchObject> recentROs = RODLUtilities.getMostRecentROs(app.getSparqlEndpointURI(), MySession.get()
+                .getRosrs(), 3);
         ListView<ResearchObject> recentROList = new ROsListView("recent-ros", recentROs);
         recentROList.setReuseItems(true);
         add(recentROList);

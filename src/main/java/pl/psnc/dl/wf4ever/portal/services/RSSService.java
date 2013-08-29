@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.purl.wf4ever.rosrs.client.ROSRService;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
 import com.sun.syndication.feed.synd.SyndContent;
@@ -128,7 +129,9 @@ public class RSSService {
         @SuppressWarnings("unchecked")
         private SyndFeed generateRecentROsFeed()
                 throws IOException {
-            List<ResearchObject> ros = RODLUtilities.getMostRecentROs(getSparqlEndpoint(), getRodl(), 5);
+            //FIXME it shouldn't be hardcoded
+            ROSRService rosrs = new ROSRService(getRodl().resolve("ROs/"), null);
+            List<ResearchObject> ros = RODLUtilities.getMostRecentROs(getSparqlEndpoint(), rosrs, 5);
 
             SyndFeed feed = new SyndFeedImpl();
             feed.setFeedType("atom_1.0");
