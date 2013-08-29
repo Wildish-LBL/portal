@@ -77,7 +77,10 @@ public class HomePage extends BasePage {
         add(featuredROList);
 
         add(new BookmarkablePageLink<>("browse", SearchResultsPage.class));
-        add(new BookmarkablePageLink<>("sign-in", app.getSignInPageClass()));
+        WebMarkupContainer signInDiv = new WebMarkupContainer("sign-in-div");
+        signInDiv.setVisible(!MySession.get().isSignedIn());
+        add(signInDiv);
+        signInDiv.add(new BookmarkablePageLink<>("sign-in", app.getSignInPageClass()));
     }
 
 
