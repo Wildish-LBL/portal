@@ -66,8 +66,10 @@ public class RoSummaryPanel extends Panel {
         add(new Label("author", new PropertyModel<String>(model, "author.name")));
         add(new Label("createdFormatted", new PropertyModel<String>(model, "createdFormatted")));
         add(new Label("evoType.toString", new PropertyModel<String>(model, "evoType.toString")));
-        add(new Label("resources", new PropertyModel<Integer>(model, "resourcesWithoutFolders.size")));
-        add(new Label("annotations", new PropertyModel<Integer>(model, "annotations.size")));
+        // I don't know why the property model expression returns null
+        //        add(new Label("resources", new PropertyModel<Integer>(model, "resources.size")));
+        add(new Label("resources", model.getObject().getResources().size()));
+        add(new Label("annotations", new PropertyModel<Integer>(model, "allAnnotations.size")));
         add(descriptionPanel);
     }
 
