@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 
+import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.log4j.Logger;
 import org.apache.wicket.ConverterLocator;
 import org.apache.wicket.IConverterLocator;
@@ -26,6 +27,7 @@ import org.purl.wf4ever.rosrs.client.search.SolrSearchServer;
 import org.purl.wf4ever.rosrs.client.search.SparqlSearchServer;
 
 import pl.psnc.dl.wf4ever.portal.components.form.AbsoluteURIConverter;
+import pl.psnc.dl.wf4ever.portal.model.MinimModel;
 import pl.psnc.dl.wf4ever.portal.pages.AboutPage;
 import pl.psnc.dl.wf4ever.portal.pages.CreateROFromZipPage;
 import pl.psnc.dl.wf4ever.portal.pages.Error404Page;
@@ -109,6 +111,12 @@ public class PortalApplication extends AuthenticatedWebApplication {
     /** checklist service client. */
     private ChecklistEvaluationService checklistService;
 
+    /** List of all minim models and purposes. */
+    private List<MinimModel> minimModels;
+
+    /** The minim model to use in default RO evaluation. */
+    private MinimModel defaultMinimModel;
+
     /** RODL admin token. */
     private String adminToken;
 
@@ -163,6 +171,7 @@ public class PortalApplication extends AuthenticatedWebApplication {
         mountPage("/zip", CreateROFromZipPage.class);
 
         loadProperties("portal.properties");
+        loadChecklistProperties("checklist.properties");
         loadTokens("tokens.properties");
         loadAdminTokens("admintoken.properties");
 
@@ -206,41 +215,71 @@ public class PortalApplication extends AuthenticatedWebApplication {
      *            filename
      */
     private void loadProperties(String propertiesFile) {
-        Properties props = new Properties();
         try {
-            props.load(getClass().getClassLoader().getResourceAsStream(propertiesFile));
-            rodlURI = new URI(props.getProperty("rodlURL"));
-            sparqlEndpoint = new URI(props.getProperty("sparqlEndpointURL"));
-            searchEndpointURI = new URI(props.getProperty("searchEndpointURL"));
-            recommenderEndpointURL = new URL(props.getProperty("recommenderEndpointURL"));
-            stabilityEndpointURL = new URL(props.getProperty("stabilityEndpointURL"));
-            userAccessTokenEndpointURL = new URL(props.getProperty("userAccessTokenEndpointURL"));
-            userAuthorizationEndpointURL = new URL(props.getProperty("userAuthorizationEndpointURL"));
-            wf2ROService = new URI(props.getProperty("wf2ROService"));
-            name = props.getProperty("application.name");
-            version = props.getProperty("application.version");
-            URI checklistUri = new URI(props.getProperty("checklist.uri"));
-            URI minimUri = new URI(props.getProperty("checklist.minim.uri"));
-            try {
-                checklistService = new ChecklistEvaluationService(checklistUri, minimUri);
-            } catch (Exception e) {
-                LOG.error("Failed to initialize the checklist service", e);
-            }
-            String type = props.getProperty("search.type");
+            PropertiesConfiguration props = new PropertiesConfiguration(propertiesFile);
+            rodlURI = new URI(props.getString("rodlURL"));
+            sparqlEndpoint = new URI(props.getString("sparqlEndpointURL"));
+            searchEndpointURI = new URI(props.getString("searchEndpointURL"));
+            recommenderEndpointURL = new URL(props.getString("recommenderEndpointURL"));
+            stabilityEndpointURL = new URL(props.getString("stabilityEndpointURL"));
+            userAccessTokenEndpointURL = new URL(props.getString("userAccessTokenEndpointURL"));
+            userAuthorizationEndpointURL = new URL(props.getString("userAuthorizationEndpointURL"));
+            wf2ROService = new URI(props.getString("wf2ROService"));
+            name = props.getString("application.name");
+            version = props.getString("application.version");
+            String type = props.getString("search.type");
             searchType = SearchType.valueOf(type.trim().toUpperCase());
             if (searchType == null) {
                 throw new Exception("Unrecognized search type: " + type);
             }
             featuredROs = new ArrayList<>();
-            for (String f : props.getProperty("ros.featured", "").split(",")) {
+            for (Object f : props.getList("ros.featured")) {
                 try {
-                    featuredROs.add(new URI(f.trim()));
+                    featuredROs.add(new URI(f.toString().trim()));
                 } catch (URISyntaxException e) {
                     LOG.error("Invalid featured RO URI: " + f, e);
                 }
             }
         } catch (Exception e) {
             LOG.error("Failed to load properties: " + e.getMessage());
+        }
+    }
+
+
+    /**
+     * Load checklist properties file.
+     * 
+     * @param propertiesFile
+     *            filename
+     */
+    private void loadChecklistProperties(String propertiesFile) {
+        try {
+            PropertiesConfiguration props = new PropertiesConfiguration(propertiesFile);
+            URI checklistUri = new URI(props.getString("service.uri"));
+            try {
+                checklistService = new ChecklistEvaluationService(checklistUri);
+            } catch (Exception e) {
+                LOG.error("Failed to initialize the checklist service", e);
+            }
+            String defaultMinim = props.getString("minims.default");
+            minimModels = new ArrayList<>();
+            for (Object m : props.getList("minims")) {
+                try {
+                    URI uri = new URI(props.getString("minim." + m + ".uri"));
+                    String purpose = props.getString("minim." + m + ".purpose");
+                    String title = props.getString("minim." + m + ".title");
+                    String description = props.getString("minim." + m + ".description");
+                    MinimModel minim = new MinimModel(uri, purpose, title, description);
+                    minimModels.add(minim);
+                    if (m.equals(defaultMinim)) {
+                        defaultMinimModel = minim;
+                    }
+                } catch (Exception e) {
+                    LOG.error("Failed to load checklist minim model " + m + ": " + e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            LOG.error("Failed to load checklist properties: " + e.getMessage());
         }
     }
 
@@ -394,6 +433,16 @@ public class PortalApplication extends AuthenticatedWebApplication {
 
     public List<URI> getFeaturedROs() {
         return featuredROs;
+    }
+
+
+    public List<MinimModel> getMinimModels() {
+        return minimModels;
+    }
+
+
+    public MinimModel getDefaultMinimModel() {
+        return defaultMinimModel;
     }
 
 }

@@ -25,6 +25,7 @@ import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.behaviors.FutureUpdateBehavior;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.AggregationChangedEvent;
+import pl.psnc.dl.wf4ever.portal.model.MinimModel;
 
 /**
  * Health progress bar.
@@ -53,6 +54,9 @@ public class QualityBar extends Panel {
     /** RO model for quality calculation. */
     private IModel<ResearchObject> researchObjectModel;
 
+    /** the minim model to use. */
+    private MinimModel minim;
+
 
     /**
      * Constructor.
@@ -63,10 +67,14 @@ public class QualityBar extends Panel {
      *            RO health (0-100)
      * @param researchObjectModel
      *            RO model for quality calculation
+     * @param minimModel
+     *            the minim model to use
      */
-    public QualityBar(String id, IModel<EvaluationResult> model, IModel<ResearchObject> researchObjectModel) {
+    public QualityBar(String id, IModel<EvaluationResult> model, IModel<ResearchObject> researchObjectModel,
+            MinimModel minimModel) {
         super(id, model);
         this.researchObjectModel = researchObjectModel;
+        this.minim = minimModel;
         setOutputMarkupId(true);
         label = new WebMarkupContainer("initialLabel");
         add(label);
@@ -113,9 +121,9 @@ public class QualityBar extends Panel {
         for (ChecklistItem item : result.getChecklistItems()) {
             sb.append("<p>");
             if (item.isItemSatisfied()) {
-                sb.append("<img src='images/ok.png'> ");
+                sb.append("<img src='images/green_check_16.png'> ");
             } else {
-                sb.append("<img src='images/wrong.png'> ");
+                sb.append("<img src='images/red_cross_16.png'> ");
             }
             sb.append(item.getItemLabel());
             sb.append("</p>");
@@ -144,7 +152,7 @@ public class QualityBar extends Panel {
                     LOGGER.error("Checklist evaluation service is null");
                     return null;
                 }
-                return service.evaluate(model.getObject().getUri(), "ready-to-release");
+                return service.evaluate(model.getObject().getUri(), minim.getUri(), minim.getPurpose());
             }
         };
     }

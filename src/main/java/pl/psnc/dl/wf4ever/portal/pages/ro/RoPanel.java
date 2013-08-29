@@ -82,7 +82,7 @@ public class RoPanel extends Panel {
      */
     public RoPanel(String id, IModel<ResearchObject> researchObjectModel) {
         super(id, researchObjectModel);
-
+        PortalApplication app = (PortalApplication) getApplication();
         feedbackPanel = new MyFeedbackPanel("feedbackPanel");
         feedbackPanel.setOutputMarkupId(true);
         add(feedbackPanel);
@@ -98,8 +98,7 @@ public class RoPanel extends Panel {
             RoPage.LOG.error("Research object cannot be loaded", e);
         }
 
-        NotificationService notificationService = new NotificationService(
-                ((PortalApplication) getApplication()).getRodlURI(), null);
+        NotificationService notificationService = new NotificationService(app.getRodlURI(), null);
 
         IModel<ArrayList<Notification>> notificationsModel = new Model<ArrayList<Notification>>();
         IModel<EvaluationResult> qualityModel = new Model<EvaluationResult>();
@@ -111,7 +110,8 @@ public class RoPanel extends Panel {
         NotificationsIndicator notificationsIndicator = new NotificationsIndicator("notifications",
                 researchObjectModel, notificationsModel, rssLink, "notifications");
         add(notificationsIndicator);
-        QualityBar qualityBar = new QualityBar("health-progress-bar", qualityModel, researchObjectModel);
+        QualityBar qualityBar = new QualityBar("health-progress-bar", qualityModel, researchObjectModel,
+                app.getDefaultMinimModel());
         add(qualityBar);
         add(new RoCommentsPanel("comments", researchObjectModel));
         add(new AdvancedAnnotationsPanel("advanced-annotations", "ro-basic-view", researchObjectModel));
@@ -135,6 +135,8 @@ public class RoPanel extends Panel {
                 return new LoadingCircle(markupId, "Loading research object evolution metadata...");
             }
         });
+
+        add(new QualityPanel("quality-panel", researchObjectModel, app.getChecklistService(), app.getMinimModels()));
 
         IModel<Notification> selectedNotification = new Model<Notification>((Notification) null);
         NotificationsList notificationsList = new NotificationsList("notificationsList", notificationsModel,

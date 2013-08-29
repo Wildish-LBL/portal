@@ -1,0 +1,93 @@
+
+.main_result th {
+    padding: 0.5em 0.5em;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+.sub_result td {
+    /* background-color: #FFFFCC; */
+    border: 1px none #999999;
+    padding: 0.0em 0.5em;
+}
+
+.trafficlight {
+    text-align: center;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+tbody.result_detail tr .trafficlight {
+    text-align: center;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+th {
+    font-weight: bold;
+    text-align: left;
+}
+
+th p {
+    font-weight: normal;
+    text-align: left;
+}
+
+/*
+.trafficlight.large {
+    width: 64px;
+    height: 64px;
+}
+*/
+
+/*
+.trafficlight.small {
+    width: 32px;
+    height: 32px;
+}
+*/
+
+span.testresult {
+    font-style: italic;
+}
+
+span.testpurpose {
+    font-style: italic;
+}
+
+.trafficlight.large div {
+    width: 32px;
+    height: 32px;
+}
+
+.trafficlight.small div {
+    width: 16px;
+    height: 16px;
+}
+
+.trafficlight.large.pass {
+    background-image: url(images/green_check_32.png);
+}
+
+.trafficlight.small.pass {
+    background-image: url(images/green_check_16.png);
+}
+
+.trafficlight.large.fail.should {
+    background-image: url(images/amber_check_32.png);
+}
+
+.trafficlight.small.fail.should {
+    background-image: url(images/amber_cross_16.png);
+}
+
+.trafficlight.large.fail.must {
+    background-image: url(images/red_cross_32.png);
+}
+
+.trafficlight.small.fail.must {
+    background-image: url(images/red_cross_16.png);
+}
+
