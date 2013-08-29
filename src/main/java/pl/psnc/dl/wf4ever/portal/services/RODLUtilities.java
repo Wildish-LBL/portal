@@ -6,17 +6,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
-import org.joda.time.format.ISODateTimeFormat;
-import org.purl.wf4ever.rosrs.client.Person;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
+import org.purl.wf4ever.rosrs.client.exception.ROException;
+import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
-import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
+import pl.psnc.dl.wf4ever.portal.MySession;
+
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.rdf.model.Literal;
 
 /**
  * Various utility methods for RODL, not related directly to its REST APIs.
@@ -63,23 +62,13 @@ public final class RODLUtilities {
                 continue;
             }
             URI uri = URI.create(solution.getResource("ro").getURI());
-            Literal creators = solution.getLiteral("creators");
-            DateTime created = null;
-            Object date = solution.getLiteral("created").getValue();
-            if (date instanceof XSDDateTime) {
-                created = new DateTime(((XSDDateTime) date).asCalendar().getTimeInMillis());
-            } else {
-                try {
-                    created = new DateTime(ISODateTimeFormat.dateTime().parseDateTime(date.toString())
-                            .toGregorianCalendar().getTimeInMillis());
-                } catch (IllegalArgumentException e) {
-                    LOG.warn("Don't know how to parse date: " + date);
-                }
+            ResearchObject ro = new ResearchObject(uri, MySession.get().getRosrs());
+            try {
+                ro.load();
+                roHeaders.add(ro);
+            } catch (ROSRSException | ROException e) {
+                LOG.error("Can't load RO " + ro.getUri(), e);
             }
-            ResearchObject ro = new ResearchObject(uri, null);
-            ro.setCreated(created);
-            ro.setAuthor(new Person(null, creators != null ? creators.getString() : "Unknown"));
-            roHeaders.add(ro);
         }
         return roHeaders;
     }

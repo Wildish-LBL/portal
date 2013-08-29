@@ -1,8 +1,6 @@
 package pl.psnc.dl.wf4ever.portal.pages;
 
 import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -15,10 +13,8 @@ import org.apache.wicket.markup.html.list.PropertyListView;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.purl.wf4ever.rosrs.client.ROSRService;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
-import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
@@ -74,12 +70,7 @@ public class HomePage extends BasePage {
         recentROList.setReuseItems(true);
         add(recentROList);
 
-        List<ResearchObject> featuredROs = new ArrayList<>();
-        ROSRService rosrs = MySession.get().getRosrs();
-        for (URI uri : app.getFeaturedROs()) {
-            featuredROs.add(new ResearchObject(uri, rosrs));
-        }
-        ListView<ResearchObject> featuredROList = new ROsListView("featured-ros", featuredROs);
+        ListView<ResearchObject> featuredROList = new ROsListView("featured-ros", app.getFeaturedROs());
         featuredROList.setReuseItems(true);
         add(featuredROList);
 

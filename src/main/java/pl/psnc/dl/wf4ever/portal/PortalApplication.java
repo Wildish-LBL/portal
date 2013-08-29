@@ -1,7 +1,6 @@
 package pl.psnc.dl.wf4ever.portal;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +20,8 @@ import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
 import org.apache.wicket.settings.IRequestCycleSettings.RenderStrategy;
 import org.purl.wf4ever.checklist.client.ChecklistEvaluationService;
+import org.purl.wf4ever.rosrs.client.ROSRService;
+import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.search.OpenSearchSearchServer;
 import org.purl.wf4ever.rosrs.client.search.SearchServer;
 import org.purl.wf4ever.rosrs.client.search.SolrSearchServer;
@@ -136,7 +137,7 @@ public class PortalApplication extends AuthenticatedWebApplication {
     private RSSService rssService;
 
     /** Selected featured ROs. */
-    private List<URI> featuredROs;
+    private List<ResearchObject> featuredROs;
 
 
     @Override
@@ -233,11 +234,16 @@ public class PortalApplication extends AuthenticatedWebApplication {
                 throw new Exception("Unrecognized search type: " + type);
             }
             featuredROs = new ArrayList<>();
+            //FIXME ROs/ should not be hardcoded
+            ROSRService rosrs = new ROSRService(rodlURI.resolve("ROs/"), null);
             for (Object f : props.getList("ros.featured")) {
                 try {
-                    featuredROs.add(new URI(f.toString().trim()));
-                } catch (URISyntaxException e) {
-                    LOG.error("Invalid featured RO URI: " + f, e);
+                    URI uri = new URI(f.toString().trim());
+                    ResearchObject ro = new ResearchObject(uri, rosrs);
+                    ro.load();
+                    featuredROs.add(ro);
+                } catch (Exception e) {
+                    LOG.error("Can't load RO: " + f, e);
                 }
             }
         } catch (Exception e) {
@@ -431,7 +437,7 @@ public class PortalApplication extends AuthenticatedWebApplication {
     }
 
 
-    public List<URI> getFeaturedROs() {
+    public List<ResearchObject> getFeaturedROs() {
         return featuredROs;
     }
 
