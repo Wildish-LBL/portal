@@ -25,7 +25,7 @@ import pl.psnc.dl.wf4ever.portal.events.ResourceSelectedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AbstractAnnotationEditedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AddAnnotationClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.ImportAnnotationClickedEvent;
-import pl.psnc.dl.wf4ever.portal.model.AnnotationTripleModel;
+import pl.psnc.dl.wf4ever.portal.model.wicket.AnnotationTripleModel;
 
 /**
  * A panel aggregating action buttons for a folder - add a new folder or resource.

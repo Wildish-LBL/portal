@@ -16,10 +16,10 @@ import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationCancelledEvent;
 import pl.psnc.dl.wf4ever.portal.events.edit.ApplyEvent;
 import pl.psnc.dl.wf4ever.portal.events.edit.CancelEvent;
 import pl.psnc.dl.wf4ever.portal.events.edit.EditEvent;
-import pl.psnc.dl.wf4ever.portal.model.MergedCollectionModel;
-import pl.psnc.dl.wf4ever.portal.model.NotSetModel;
-import pl.psnc.dl.wf4ever.portal.model.ResourceTypeModel;
-import pl.psnc.dl.wf4ever.portal.model.SanitizedModel;
+import pl.psnc.dl.wf4ever.portal.model.wicket.MergedCollectionModel;
+import pl.psnc.dl.wf4ever.portal.model.wicket.NotSetModel;
+import pl.psnc.dl.wf4ever.portal.model.wicket.ResourceTypeModel;
+import pl.psnc.dl.wf4ever.portal.model.wicket.SanitizedModel;
 
 /**
  * A panel that allows to choose a resource type from a predefined list.

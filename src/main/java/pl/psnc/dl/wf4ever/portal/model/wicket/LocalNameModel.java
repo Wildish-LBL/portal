@@ -1,4 +1,4 @@
-package pl.psnc.dl.wf4ever.portal.model;
+package pl.psnc.dl.wf4ever.portal.model.wicket;
 
 import java.net.URI;
 

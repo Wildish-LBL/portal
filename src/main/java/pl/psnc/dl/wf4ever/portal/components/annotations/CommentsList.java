@@ -19,7 +19,7 @@ import pl.psnc.dl.wf4ever.portal.components.form.EditableTextPanel;
 import pl.psnc.dl.wf4ever.portal.events.ResourceSelectedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AbstractAnnotationEditedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.CommentAddClickedEvent;
-import pl.psnc.dl.wf4ever.portal.model.AnnotationTripleModel;
+import pl.psnc.dl.wf4ever.portal.model.wicket.AnnotationTripleModel;
 
 import com.hp.hpl.jena.vocabulary.RDFS;
 

@@ -1,4 +1,4 @@
-package pl.psnc.dl.wf4ever.portal.model;
+package pl.psnc.dl.wf4ever.portal.model.wicket;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -14,6 +14,8 @@ import org.purl.wf4ever.rosrs.client.AnnotationTriple;
 import org.purl.wf4ever.rosrs.client.Statement;
 import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
+
+import pl.psnc.dl.wf4ever.portal.model.ResourceType;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;

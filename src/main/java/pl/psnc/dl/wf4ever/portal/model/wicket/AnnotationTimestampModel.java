@@ -1,4 +1,4 @@
-package pl.psnc.dl.wf4ever.portal.model;
+package pl.psnc.dl.wf4ever.portal.model.wicket;
 
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;

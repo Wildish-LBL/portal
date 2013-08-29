@@ -30,7 +30,7 @@ import pl.psnc.dl.wf4ever.portal.events.WorkflowTransformClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.WorkflowTransformedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.AggregationChangedEvent;
 import pl.psnc.dl.wf4ever.portal.model.ResourceType;
-import pl.psnc.dl.wf4ever.portal.model.ResourceTypeModel;
+import pl.psnc.dl.wf4ever.portal.model.wicket.ResourceTypeModel;
 
 import com.sun.jersey.api.client.ClientResponse;
 

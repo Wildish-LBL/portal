@@ -45,8 +45,8 @@ import pl.psnc.dl.wf4ever.portal.modals.AddFolderModal;
 import pl.psnc.dl.wf4ever.portal.modals.MoveResourceModal;
 import pl.psnc.dl.wf4ever.portal.modals.UpdateResourceModal;
 import pl.psnc.dl.wf4ever.portal.modals.UploadResourceModal;
-import pl.psnc.dl.wf4ever.portal.model.FolderHierarchyModel;
-import pl.psnc.dl.wf4ever.portal.model.ResourceTypeModel;
+import pl.psnc.dl.wf4ever.portal.model.wicket.FolderHierarchyModel;
+import pl.psnc.dl.wf4ever.portal.model.wicket.ResourceTypeModel;
 import pl.psnc.dl.wf4ever.portal.services.CreateROThread;
 
 /**

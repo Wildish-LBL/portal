@@ -36,9 +36,9 @@ import pl.psnc.dl.wf4ever.portal.events.edit.ApplyEvent;
 import pl.psnc.dl.wf4ever.portal.events.edit.CancelEvent;
 import pl.psnc.dl.wf4ever.portal.events.edit.DeleteEvent;
 import pl.psnc.dl.wf4ever.portal.events.edit.EditEvent;
-import pl.psnc.dl.wf4ever.portal.model.AnnotationTimestampModel;
-import pl.psnc.dl.wf4ever.portal.model.AnnotationTripleModel;
-import pl.psnc.dl.wf4ever.portal.model.LocalNameModel;
+import pl.psnc.dl.wf4ever.portal.model.wicket.AnnotationTimestampModel;
+import pl.psnc.dl.wf4ever.portal.model.wicket.AnnotationTripleModel;
+import pl.psnc.dl.wf4ever.portal.model.wicket.LocalNameModel;
 
 /**
  * A panel for inline comments, show the annotation author and creation date.

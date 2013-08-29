@@ -8,8 +8,8 @@ import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Annotation;
 
 import pl.psnc.dl.wf4ever.portal.components.form.EditableTextPanel;
-import pl.psnc.dl.wf4ever.portal.model.AnnotationTimestampModel;
-import pl.psnc.dl.wf4ever.portal.model.AnnotationTripleModel;
+import pl.psnc.dl.wf4ever.portal.model.wicket.AnnotationTimestampModel;
+import pl.psnc.dl.wf4ever.portal.model.wicket.AnnotationTripleModel;
 
 /**
  * A panel for inline comments, show the annotation author and creation date.
