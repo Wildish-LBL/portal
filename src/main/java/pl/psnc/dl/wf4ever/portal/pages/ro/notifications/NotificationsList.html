@@ -6,26 +6,24 @@
 </head>
 <body>
 	<wicket:panel>
-		<table class="table table-striped">
-			<thead>
-				<tr>
-					<th>Notifications</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr wicket:id="list">
-					<td class="notificationHeader"><div class="source">
-							<p wicket:id="sourceName"></p>
-						</div>
-						<div class="published">
-							<p wicket:id="published"></p>
-						</div>
-						<div class="title">
-							<p wicket:id="title"></p>
-						</div></td>
-				</tr>
-			</tbody>
-		</table>
+		<h4>Notifications</h4>
+		<div style="height: 500px; overflow: scroll;">
+			<table class="table table-striped">
+				<tbody>
+					<tr wicket:id="list">
+						<td class="notificationHeader"><div class="source">
+								<p wicket:id="sourceName"></p>
+							</div>
+							<div class="published">
+								<p wicket:id="published"></p>
+							</div>
+							<div class="title">
+								<p wicket:id="title"></p>
+							</div></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
 	</wicket:panel>
 </body>
 </html>

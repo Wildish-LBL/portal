@@ -3,6 +3,7 @@ package pl.psnc.dl.wf4ever.portal.pages.ro;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
@@ -103,7 +104,10 @@ public class RoPage extends BasePage {
             @Override
             public ArrayList<Notification> call()
                     throws Exception {
-                return notificationService.getNotifications(model.getObject().getUri(), null, null);
+                ArrayList<Notification> notifications = notificationService.getNotifications(
+                    model.getObject().getUri(), null, null);
+                Collections.reverse(notifications);
+                return notifications;
             }
         };
     }
