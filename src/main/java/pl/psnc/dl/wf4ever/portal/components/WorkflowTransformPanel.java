@@ -118,7 +118,7 @@ public class WorkflowTransformPanel extends Panel {
 
     @Override
     protected void onConfigure() {
-        setVisible(ResourceType.WORKFLOW.equals(resourceTypeModel.getObject()));
+        setVisible(resourceTypeModel.getObject().contains(ResourceType.WORKFLOW));
     }
 
 
