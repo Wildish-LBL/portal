@@ -6,10 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.purl.wf4ever.rosrs.client.ROSRService;
-import org.purl.wf4ever.rosrs.client.ResearchObject;
-import org.purl.wf4ever.rosrs.client.exception.ROException;
-import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -25,6 +21,7 @@ import com.hp.hpl.jena.query.ResultSet;
 public final class RODLUtilities {
 
     /** Logger. */
+    @SuppressWarnings("unused")
     private static final Logger LOG = Logger.getLogger(RODLUtilities.class);
 
 
@@ -43,31 +40,22 @@ public final class RODLUtilities {
      *            number of ROs to get
      * @param sparqlEndpoint
      *            sparql endpoint URI
-     * @param rosrs
-     *            ROSRS for loading
      * @return list of research objects
      * @throws IOException
      *             when cannot connect to SPARQL endpoint
      */
-    public static List<ResearchObject> getMostRecentROs(URI sparqlEndpoint, ROSRService rosrs, int cnt)
+    public static List<URI> getMostRecentROs(URI sparqlEndpoint, int cnt)
             throws IOException {
         QueryExecution x = QueryExecutionFactory.sparqlService(sparqlEndpoint.toString(),
             MyQueryFactory.getxMostRecentROs(cnt));
         ResultSet results = x.execSelect();
-        List<ResearchObject> roHeaders = new ArrayList<>();
+        List<URI> roHeaders = new ArrayList<>();
         while (results.hasNext()) {
             QuerySolution solution = results.next();
             if (solution.getResource("ro") == null) {
                 continue;
             }
-            URI uri = URI.create(solution.getResource("ro").getURI());
-            ResearchObject ro = new ResearchObject(uri, rosrs);
-            try {
-                ro.load();
-                roHeaders.add(ro);
-            } catch (ROSRSException | ROException e) {
-                LOG.error("Can't load RO " + ro.getUri(), e);
-            }
+            roHeaders.add(URI.create(solution.getResource("ro").getURI()));
         }
         return roHeaders;
     }

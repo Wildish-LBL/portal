@@ -21,7 +21,6 @@ import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
 import pl.psnc.dl.wf4ever.portal.pages.search.SearchResultsPage;
 import pl.psnc.dl.wf4ever.portal.services.MyQueryFactory;
-import pl.psnc.dl.wf4ever.portal.services.RODLUtilities;
 
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QuerySolution;
@@ -66,8 +65,7 @@ public class HomePage extends BasePage {
 
         //        add(new ExternalLink("recentROsRSSFeed", RSSService.RECENT_ROS_FILENAME));
 
-        List<ResearchObject> recentROs = RODLUtilities.getMostRecentROs(app.getSparqlEndpointURI(), MySession.get()
-                .getRosrs(), 3);
+        List<ResearchObject> recentROs = app.getRecentROs(3);
         ListView<ResearchObject> recentROList = new ROsListView("recent-ros", recentROs);
         recentROList.setReuseItems(true);
         add(recentROList);

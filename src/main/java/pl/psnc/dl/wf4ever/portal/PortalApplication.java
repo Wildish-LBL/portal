@@ -1,10 +1,14 @@
 package pl.psnc.dl.wf4ever.portal;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -22,6 +26,8 @@ import org.apache.wicket.settings.IRequestCycleSettings.RenderStrategy;
 import org.purl.wf4ever.checklist.client.ChecklistEvaluationService;
 import org.purl.wf4ever.rosrs.client.ROSRService;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
+import org.purl.wf4ever.rosrs.client.exception.ROException;
+import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 import org.purl.wf4ever.rosrs.client.search.OpenSearchSearchServer;
 import org.purl.wf4ever.rosrs.client.search.SearchServer;
 import org.purl.wf4ever.rosrs.client.search.SolrSearchServer;
@@ -44,6 +50,7 @@ import pl.psnc.dl.wf4ever.portal.pages.users.AuthenticationPage;
 import pl.psnc.dl.wf4ever.portal.pages.users.GenerateAccessTokenPage;
 import pl.psnc.dl.wf4ever.portal.pages.users.OAuthAuthorizationEndpointPage;
 import pl.psnc.dl.wf4ever.portal.pages.users.ProfilePage;
+import pl.psnc.dl.wf4ever.portal.services.RODLUtilities;
 import pl.psnc.dl.wf4ever.portal.services.RSSService;
 
 /**
@@ -138,6 +145,9 @@ public class PortalApplication extends AuthenticatedWebApplication {
 
     /** Selected featured ROs. */
     private List<ResearchObject> featuredROs;
+
+    /** Most recent ROs,cache'd. */
+    private Map<URI, ResearchObject> recentROs = Collections.emptyMap();
 
 
     @Override
@@ -240,7 +250,9 @@ public class PortalApplication extends AuthenticatedWebApplication {
                 try {
                     URI uri = new URI(f.toString().trim());
                     ResearchObject ro = new ResearchObject(uri, rosrs);
-                    ro.load();
+                    LOG.debug("Loading featured RO manifest: " + ro.getUri());
+                    ro.loadManifest();
+                    LOG.debug("Loaded");
                     featuredROs.add(ro);
                 } catch (Exception e) {
                     LOG.error("Can't load RO: " + f, e);
@@ -439,6 +451,40 @@ public class PortalApplication extends AuthenticatedWebApplication {
 
     public List<ResearchObject> getFeaturedROs() {
         return featuredROs;
+    }
+
+
+    /**
+     * Return the most recent ROs, loading them from cache if possible.
+     * 
+     * @param cnt
+     *            the number of most recent ROs to return
+     * @return a list of ROs, starting with the most recently created
+     */
+    public List<ResearchObject> getRecentROs(int cnt) {
+        //FIXME ROs/ should not be hardcoded
+        ROSRService rosrs = new ROSRService(rodlURI.resolve("ROs/"), null);
+        try {
+            List<URI> uris = RODLUtilities.getMostRecentROs(sparqlEndpoint, cnt);
+            Map<URI, ResearchObject> newRecentROs = new LinkedHashMap<>();
+            for (URI uri : uris) {
+                if (this.recentROs.containsKey(uri)) {
+                    newRecentROs.put(uri, this.recentROs.get(uri));
+                } else {
+                    ResearchObject ro = new ResearchObject(uri, rosrs);
+                    try {
+                        ro.loadManifest();
+                        newRecentROs.put(uri, ro);
+                    } catch (ROSRSException | ROException e) {
+                        LOG.error("Can't load the RO manifest for " + ro.getUri(), e);
+                    }
+                }
+            }
+            this.recentROs = newRecentROs;
+        } catch (IOException e1) {
+            LOG.error("Can't load recent ROs from the SPARQL endpoint", e1);
+        }
+        return new ArrayList<>(recentROs.values());
     }
 
 

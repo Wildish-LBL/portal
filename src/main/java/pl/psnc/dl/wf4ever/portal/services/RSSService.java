@@ -10,6 +10,8 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.purl.wf4ever.rosrs.client.ROSRService;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
+import org.purl.wf4ever.rosrs.client.exception.ROException;
+import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
 import com.sun.syndication.feed.synd.SyndContent;
 import com.sun.syndication.feed.synd.SyndContentImpl;
@@ -131,14 +133,21 @@ public class RSSService {
                 throws IOException {
             //FIXME it shouldn't be hardcoded
             ROSRService rosrs = new ROSRService(getRodl().resolve("ROs/"), null);
-            List<ResearchObject> ros = RODLUtilities.getMostRecentROs(getSparqlEndpoint(), rosrs, 5);
+            List<URI> ros = RODLUtilities.getMostRecentROs(getSparqlEndpoint(), 5);
 
             SyndFeed feed = new SyndFeedImpl();
             feed.setFeedType("atom_1.0");
             feed.setTitle("5 most recent Research Objects in RODL");
             feed.setPublishedDate(new Date());
 
-            for (ResearchObject ro : ros) {
+            for (URI uri : ros) {
+                ResearchObject ro = new ResearchObject(uri, rosrs);
+                try {
+                    ro.loadManifest();
+                } catch (ROSRSException | ROException e) {
+                    LOG.error("Can't load RO " + uri, e);
+                    continue;
+                }
                 SyndEntry entry = new SyndEntryImpl();
                 entry.setTitle(ro.getName());
                 entry.setLink(ro.getUri().toString());
