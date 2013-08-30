@@ -363,7 +363,7 @@ public class CreateROThread extends Thread {
             while (path.getParent() != null && !parentExisted) {
                 if (!createdFolders.containsKey(path.getParent().toString())) {
                     Folder f = ro.createFolder(path.getParent().toString());
-                    f.load(false);
+                    f.load();
                     createdFolders.put(path.getParent().toString(), f);
                 } else {
                     parentExisted = true;

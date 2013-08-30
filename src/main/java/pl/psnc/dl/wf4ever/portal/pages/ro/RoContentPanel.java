@@ -321,7 +321,7 @@ public class RoContentPanel extends Panel {
             }
         }
         if (!event.getFolder().isLoaded()) {
-            event.getFolder().load(false);
+            event.getFolder().load();
         }
         event.getFolder().addEntry(currentResource, null);
         send(getPage(), Broadcast.BREADTH, new ResourceMovedEvent(event.getTarget()));

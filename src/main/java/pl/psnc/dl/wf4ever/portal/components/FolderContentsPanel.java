@@ -238,7 +238,7 @@ public class FolderContentsPanel extends Panel {
         super.onConfigure();
         try {
             if (this.getDefaultModelObject() != null) {
-                ((Folder) this.getDefaultModelObject()).load(false);
+                ((Folder) this.getDefaultModelObject()).load();
             }
         } catch (ROSRSException e) {
             LOG.error("Can't load folder: " + this.getDefaultModelObjectAsString(), e);

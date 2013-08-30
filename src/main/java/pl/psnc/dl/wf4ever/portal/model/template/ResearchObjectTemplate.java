@@ -158,7 +158,7 @@ public class ResearchObjectTemplate implements Serializable {
             folders.put(stub, ro.createFolder(stub.getPath()));
         }
         for (FolderStub stub : folderStubs) {
-            folders.get(stub).load(false);
+            folders.get(stub).load();
             for (FolderStub subfolder : stub.getSubfolders()) {
                 folders.get(stub).addEntry(folders.get(subfolder), null);
             }
