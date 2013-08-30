@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.wicket.ConverterLocator;
 import org.apache.wicket.IConverterLocator;
@@ -24,14 +26,19 @@ import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
 import org.apache.wicket.settings.IRequestCycleSettings.RenderStrategy;
 import org.purl.wf4ever.checklist.client.ChecklistEvaluationService;
+import org.purl.wf4ever.rosrs.client.Person;
 import org.purl.wf4ever.rosrs.client.ROSRService;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
+import org.purl.wf4ever.rosrs.client.exception.SearchException;
 import org.purl.wf4ever.rosrs.client.search.OpenSearchSearchServer;
 import org.purl.wf4ever.rosrs.client.search.SearchServer;
+import org.purl.wf4ever.rosrs.client.search.SearchServer.SortOrder;
 import org.purl.wf4ever.rosrs.client.search.SolrSearchServer;
 import org.purl.wf4ever.rosrs.client.search.SparqlSearchServer;
+import org.purl.wf4ever.rosrs.client.search.dataclasses.FoundRO;
+import org.purl.wf4ever.rosrs.client.search.dataclasses.SearchResult;
 
 import pl.psnc.dl.wf4ever.portal.components.form.AbsoluteURIConverter;
 import pl.psnc.dl.wf4ever.portal.model.MinimModel;
@@ -455,13 +462,45 @@ public class PortalApplication extends AuthenticatedWebApplication {
 
 
     /**
-     * Return the most recent ROs, loading them from cache if possible.
+     * Return the most recent ROs, using Solr if possible.
      * 
      * @param cnt
      *            the number of most recent ROs to return
      * @return a list of ROs, starting with the most recently created
      */
     public List<ResearchObject> getRecentROs(int cnt) {
+        if (searchServer instanceof SolrSearchServer) {
+            try {
+                Map<String, SearchServer.SortOrder> sortFields = new HashMap<>();
+                sortFields.put("created", SortOrder.DESC);
+                SearchResult result = searchServer.search("*:*", 0, cnt, sortFields);
+                List<ResearchObject> ros = new ArrayList<>();
+                for (FoundRO foundRO : result.getROsList()) {
+                    ResearchObject ro = foundRO.getResearchObject();
+                    String creator = foundRO.getCreators().isEmpty() ? "Unknown" : StringUtils.join(
+                        foundRO.getCreators(), ", ");
+                    ro.setAuthor(new Person(null, creator));
+                    ro.setCreated(foundRO.getCreated());
+                    ros.add(ro);
+                }
+                return ros;
+            } catch (SearchException e) {
+                LOG.error("Can't search for recent ROs using SOLR", e);
+            }
+        }
+        // Solr is not available or returned an error
+        return getRecentROsWithSparql(cnt);
+    }
+
+
+    /**
+     * Find the most recent ROs using SPARQL.
+     * 
+     * @param cnt
+     *            the number of most recent ROs to return
+     * @return a list of ROs, starting with the most recently created
+     */
+    private List<ResearchObject> getRecentROsWithSparql(int cnt) {
         //FIXME ROs/ should not be hardcoded
         ROSRService rosrs = new ROSRService(rodlURI.resolve("ROs/"), null);
         try {

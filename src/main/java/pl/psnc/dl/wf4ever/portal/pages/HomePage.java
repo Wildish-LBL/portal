@@ -1,6 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.pages;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -14,6 +15,11 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
+import org.purl.wf4ever.rosrs.client.exception.SearchException;
+import org.purl.wf4ever.rosrs.client.search.SearchServer;
+import org.purl.wf4ever.rosrs.client.search.SearchServer.SortOrder;
+import org.purl.wf4ever.rosrs.client.search.SolrSearchServer;
+import org.purl.wf4ever.rosrs.client.search.dataclasses.SearchResult;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
@@ -59,7 +65,7 @@ public class HomePage extends BasePage {
         feedbackPanel.setOutputMarkupId(true);
         add(feedbackPanel);
 
-        add(new Label("roCnt", getCount("ro:ResearchObject")));
+        add(new Label("roCnt", getResearchObjectCount()));
         add(new Label("resourceCnt", getCount("ro:Resource")));
         add(new Label("annCnt", getCount("ro:AggregatedAnnotation")));
 
@@ -79,6 +85,27 @@ public class HomePage extends BasePage {
         signInDiv.setVisible(!MySession.get().isSignedIn());
         add(signInDiv);
         signInDiv.add(new BookmarkablePageLink<>("sign-in", app.getSignInPageClass()));
+    }
+
+
+    /**
+     * Find the number of ROs using Solr, or SPARQL if Solr is not available.
+     * 
+     * @return the number of ROs in RODL.
+     */
+    private long getResearchObjectCount() {
+        SearchServer searchServer = ((PortalApplication) getApplication()).getSearchServer();
+        if (searchServer instanceof SolrSearchServer) {
+            try {
+                SearchResult result = searchServer.search("*:*", 0, 1, Collections.<String, SortOrder> emptyMap());
+                return result.getNumFound();
+            } catch (SearchException e) {
+                LOG.error("Can't search for recent ROs using SOLR", e);
+            }
+        }
+        // Solr is not available or returned an error
+        return getCount("ro:ResearchObject");
+
     }
 
 
