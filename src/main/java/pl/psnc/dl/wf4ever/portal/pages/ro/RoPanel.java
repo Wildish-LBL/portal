@@ -152,7 +152,7 @@ public class RoPanel extends Panel {
         Future<ArrayList<Notification>> notificationsFuture = executor.submit(RoPage.createNotificationsCallable(
             notificationService, researchObjectModel));
         add(new FutureUpdateBehavior<ArrayList<Notification>>(Duration.seconds(1),
-                session.addFuture(notificationsFuture), notificationsModel, notificationsIndicator, notificationsList));
+                session.storeObject(notificationsFuture), notificationsModel, notificationsIndicator, notificationsList));
     }
 
 

@@ -1,26 +1,29 @@
 package pl.psnc.dl.wf4ever.portal.pages;
 
 import java.io.InputStream;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.time.Duration;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
+import pl.psnc.dl.wf4ever.portal.behaviors.FutureUpdateBehavior;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
+import pl.psnc.dl.wf4ever.portal.model.CreateFromZipProgressModel;
 import pl.psnc.dl.wf4ever.portal.pages.ro.RoPage;
 import pl.psnc.dl.wf4ever.portal.services.CreateROThread;
-import pl.psnc.dl.wf4ever.portal.services.CreateROThread.ProgressModel;
-import pl.psnc.dl.wf4ever.portal.services.CreateROThread.State;
 
 /**
  * Page that displays the progress of creating a new RO from a ZIP archive of resources.
@@ -71,9 +74,6 @@ public class CreateROFromZipPage extends BasePage {
     /** feedback panel. */
     private MyFeedbackPanel feedbackPanel;
 
-    /** The progress of creating the RO. */
-    private ProgressModel progressModel;
-
 
     /**
      * Constructor.
@@ -90,8 +90,16 @@ public class CreateROFromZipPage extends BasePage {
         add(feedbackPanel);
         add(new Label("name", zipName));
 
-        CreateROThread create = new CreateROThread(zip, zipName, MySession.get().getRosrs());
-        progressModel = create.getProgressModel();
+        MySession session = MySession.get();
+
+        // here we create the object that will store the progress
+        CreateFromZipProgressModel progress = new CreateFromZipProgressModel();
+        // this object will be stored in session for the components in this page
+        final IModel<CreateFromZipProgressModel> progressModel = session.storeObject(progress);
+        ExecutorService executor = Executors.newFixedThreadPool(1);
+        // the background job can't connect to the session, so we pass it in a simple Model
+        Future<Object> createFromZipFuture = executor.submit(Executors.callable(new CreateROThread(zip, zipName,
+                MySession.get().getRosrs(), new Model<>(progress))));
 
         final Label completeLabel = new Label("complete", new QuestionMarkModel(new PropertyModel<String>(
                 progressModel, "complete")));
@@ -114,40 +122,35 @@ public class CreateROFromZipPage extends BasePage {
                 .setVisible(false);
         add(placeholder);
 
-        console.add(new AjaxSelfUpdatingTimerBehavior(Duration.milliseconds(500)) {
+        console.add(new FutureUpdateBehavior<Object>(Duration.milliseconds(500), session
+                .storeObject(createFromZipFuture), null, console, completeLabel, totalLabel, timeElapsed, timeRemaining) {
 
             /** id. */
-            private static final long serialVersionUID = 5987637208986630961L;
+            private static final long serialVersionUID = -5150258439912261910L;
 
 
             @Override
-            protected void onPostProcessTarget(AjaxRequestTarget target) {
-                super.onPostProcessTarget(target);
-                //                target.appendJavaScript("$(\"#progressbar\").progressbar(\"value\", " + model.getProgressInPercent()
-                //                        + ");");
-
-                target.add(completeLabel);
-                target.add(totalLabel);
-                target.add(timeElapsed);
-                target.add(timeRemaining);
+            protected void onTimer(AjaxRequestTarget target) {
+                super.onTimer(target);
+                target.add(components);
                 target.appendJavaScript("$('#console').scrollTop($('#console')[0].scrollHeight);");
-                if (progressModel.getThreadState() == State.TERMINATED) {
-                    stop(target);
-                    console.remove(this);
-                    if (progressModel.getRoUri() != null) {
-                        PageParameters params = new PageParameters();
-                        params.add("ro", progressModel.getRoUri());
-                        BookmarkablePageLink<String> link = new BookmarkablePageLink<>("go-to-ro", RoPage.class, params);
-                        placeholder.replaceWith(link);
-                        link.setOutputMarkupId(true);
-                        link.setVisible(true);
-                        target.add(link);
-                    }
+            }
+
+
+            @Override
+            protected void onPostSuccess(AjaxRequestTarget target) {
+                super.onPostSuccess(target);
+                if (progressModel.getObject().getRoUri() != null) {
+                    PageParameters params = new PageParameters();
+                    params.add("ro", progressModel.getObject().getRoUri());
+                    BookmarkablePageLink<String> link = new BookmarkablePageLink<>("go-to-ro", RoPage.class, params);
+                    placeholder.replaceWith(link);
+                    link.setOutputMarkupId(true);
+                    link.setVisible(true);
+                    target.add(link);
                 }
             }
         });
-
-        create.start();
     }
 
 }

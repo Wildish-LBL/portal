@@ -192,7 +192,7 @@ public class QualityBar extends Panel {
         Future<EvaluationResult> evaluateFuture = executor.submit(createChecklistEvaluationCallable(service,
             researchObjectModel));
         FutureUpdateBehavior<EvaluationResult> behavior = new FutureUpdateBehavior<EvaluationResult>(
-                Duration.seconds(1), MySession.get().addFuture(evaluateFuture),
+                Duration.seconds(1), MySession.get().storeObject(evaluateFuture),
                 (IModel<EvaluationResult>) getDefaultModel(), this);
         return behavior;
     }

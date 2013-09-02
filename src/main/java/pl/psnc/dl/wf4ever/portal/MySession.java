@@ -8,7 +8,6 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.Future;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.Session;
@@ -34,13 +33,13 @@ import org.scribe.model.Token;
 public class MySession extends AbstractAuthenticatedWebSession {
 
     /**
-     * A simple model that searches for the background job of a given key. The returned value will be the same even if
-     * the calling page is serialized/deserialized.
+     * A simple model that searches for the object with a given key. The returned value will be the same even if the
+     * calling page is serialized/deserialized.
      * 
      * @author piotrekhol
      * 
      */
-    private static class FutureModel<T> extends AbstractReadOnlyModel<Future<T>> {
+    private static class SessionStoreModel<T> extends AbstractReadOnlyModel<T> {
 
         /** id. */
         private static final long serialVersionUID = 8741109057544006402L;
@@ -55,15 +54,15 @@ public class MySession extends AbstractAuthenticatedWebSession {
          * @param key
          *            key
          */
-        public FutureModel(int key) {
+        public SessionStoreModel(int key) {
             this.key = key;
         }
 
 
         @SuppressWarnings("unchecked")
         @Override
-        public Future<T> getObject() {
-            return (Future<T>) MySession.get().getFuture(key);
+        public T getObject() {
+            return (T) MySession.get().getStoredObject(key);
         }
 
     }
@@ -121,7 +120,7 @@ public class MySession extends AbstractAuthenticatedWebSession {
     private Wf2ROService wf2ro;
 
     /** Keep futures here so that they are not dropped between subsequent page refreshes. */
-    private transient Map<Integer, SoftReference<Future<?>>> futures;
+    private transient Map<Integer, SoftReference<?>> storedObjects;
 
 
     /**
@@ -318,30 +317,30 @@ public class MySession extends AbstractAuthenticatedWebSession {
      * 
      * @return a map
      */
-    private synchronized Map<Integer, SoftReference<Future<?>>> getFutures() {
-        if (futures == null) {
-            futures = new HashMap<>();
+    private synchronized Map<Integer, SoftReference<?>> getStoredObjects() {
+        if (storedObjects == null) {
+            storedObjects = new HashMap<>();
         }
-        return futures;
+        return storedObjects;
     }
 
 
     /**
-     * Store a background job.
+     * Store an object such as background job.
      * 
-     * @param future
-     *            the job
+     * @param object
+     *            the object to store
      * @param <T>
-     *            type of job result
-     * @return a read only model to retrieve the job
+     *            type of the object
+     * @return a read only model to retrieve the object
      */
-    public <T> IModel<Future<T>> addFuture(Future<T> future) {
+    public <T> IModel<T> storeObject(T object) {
         int key;
         do {
             key = new Random().nextInt();
-        } while (getFutures().containsKey(key));
-        getFutures().put(key, new SoftReference<Future<?>>(future));
-        return new FutureModel<T>(key);
+        } while (getStoredObjects().containsKey(key));
+        getStoredObjects().put(key, new SoftReference<T>(object));
+        return new SessionStoreModel<T>(key);
     }
 
 
@@ -352,8 +351,8 @@ public class MySession extends AbstractAuthenticatedWebSession {
      *            key
      * @return value or null
      */
-    private Future<?> getFuture(int key) {
-        SoftReference<Future<?>> value = getFutures().get(key);
+    private Object getStoredObject(int key) {
+        SoftReference<?> value = getStoredObjects().get(key);
         return value != null ? value.get() : null;
     }
 }
