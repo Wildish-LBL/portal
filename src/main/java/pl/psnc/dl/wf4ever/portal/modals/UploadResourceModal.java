@@ -16,7 +16,6 @@ import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.util.lang.Bytes;
 
 import pl.psnc.dl.wf4ever.portal.components.annotations.ResourceTypeDropDownChoice;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceAddReadyEvent;
@@ -121,9 +120,8 @@ public class UploadResourceModal extends AbstractModal {
         radioGroup.add(new Radio<ResourceLocalRemote>("remote", new Model<ResourceLocalRemote>(
                 ResourceLocalRemote.REMOTE)));
 
-        // max upload size, 10k
-        form.setMaxSize(Bytes.megabytes(10));
         fileUpload = new FileUploadField("fileUpload");
+        fileUpload.setOutputMarkupId(true);
         fileDiv.add(fileUpload);
 
         fileDiv.add(new CheckBox("ro-bundle-checkbox", new PropertyModel<Boolean>(this, "roBundle")));
@@ -151,6 +149,13 @@ public class UploadResourceModal extends AbstractModal {
                 break;
         }
         target.add(feedbackPanel);
+    }
+
+
+    @Override
+    protected void onError(AjaxRequestTarget target) {
+        super.onError(target);
+        target.add(fileUpload);
     }
 
 

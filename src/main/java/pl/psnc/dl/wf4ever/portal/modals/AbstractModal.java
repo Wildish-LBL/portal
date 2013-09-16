@@ -16,6 +16,7 @@ import org.apache.wicket.model.IModel;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.CancelClickedEvent;
+import pl.psnc.dl.wf4ever.portal.events.ErrorEvent;
 import pl.psnc.dl.wf4ever.portal.events.OkClickedEvent;
 
 /**
@@ -105,6 +106,9 @@ public abstract class AbstractModal extends Panel {
         if (event.getPayload() instanceof CancelClickedEvent) {
             onCancel(((CancelClickedEvent) event.getPayload()).getTarget());
         }
+        if (event.getPayload() instanceof ErrorEvent) {
+            onError(((ErrorEvent) event.getPayload()).getTarget());
+        }
     }
 
 
@@ -125,6 +129,17 @@ public abstract class AbstractModal extends Panel {
      */
     protected void onCancel(AjaxRequestTarget target) {
         hide(target);
+    }
+
+
+    /**
+     * In case of error update the feedback panel.
+     * 
+     * @param target
+     *            AJAX target
+     */
+    protected void onError(AjaxRequestTarget target) {
+        target.add(feedbackPanel);
     }
 
 

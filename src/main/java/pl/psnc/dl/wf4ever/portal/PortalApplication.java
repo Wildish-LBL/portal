@@ -25,6 +25,7 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
 import org.apache.wicket.settings.IRequestCycleSettings.RenderStrategy;
+import org.apache.wicket.util.lang.Bytes;
 import org.purl.wf4ever.checklist.client.ChecklistEvaluationService;
 import org.purl.wf4ever.rosrs.client.Person;
 import org.purl.wf4ever.rosrs.client.ROSRService;
@@ -171,6 +172,7 @@ public class PortalApplication extends AuthenticatedWebApplication {
         getMarkupSettings().setDefaultBeforeDisabledLink(null);
         getMarkupSettings().setDefaultAfterDisabledLink(null);
         getRequestCycleSettings().setRenderStrategy(RenderStrategy.REDIRECT_TO_RENDER);
+        getApplicationSettings().setDefaultMaximumUploadSize(Bytes.megabytes(50));
 
         mountPage("/home", HomePage.class);
         mountPage("/myros", MyRosPage.class);

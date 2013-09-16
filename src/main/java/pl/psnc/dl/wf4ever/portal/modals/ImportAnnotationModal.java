@@ -6,7 +6,6 @@ import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.util.lang.Bytes;
 import org.purl.wf4ever.rosrs.client.Annotable;
 
 import pl.psnc.dl.wf4ever.portal.events.annotations.ImportAnnotationReadyEvent;
@@ -47,9 +46,8 @@ public class ImportAnnotationModal extends AbstractModal {
         // Enable multipart mode (need for uploads file)
         form.setMultiPart(true);
 
-        // max upload size, 10k
-        form.setMaxSize(Bytes.megabytes(10));
         fileUpload = new FileUploadField("fileUpload");
+        fileUpload.setOutputMarkupId(true);
         modal.add(withFocus(fileUpload));
     }
 
@@ -67,5 +65,12 @@ public class ImportAnnotationModal extends AbstractModal {
             }
         }
         target.add(feedbackPanel);
+    }
+
+
+    @Override
+    protected void onError(AjaxRequestTarget target) {
+        super.onError(target);
+        target.add(fileUpload);
     }
 }

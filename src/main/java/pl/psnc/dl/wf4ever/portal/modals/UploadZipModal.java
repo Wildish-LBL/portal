@@ -118,6 +118,7 @@ public class UploadZipModal extends AbstractModal {
                 return false;
             }
         };
+        fileUpload.setOutputMarkupId(true);
         fileDiv.add(fileUpload);
 
         resourceDiv.add(new RequiredTextField<URI>("resourceURI", new PropertyModel<URI>(this, "resourceURI")));
@@ -141,6 +142,13 @@ public class UploadZipModal extends AbstractModal {
                 break;
         }
         target.add(feedbackPanel);
+    }
+
+
+    @Override
+    protected void onError(AjaxRequestTarget target) {
+        super.onError(target);
+        target.add(fileUpload);
     }
 
 
