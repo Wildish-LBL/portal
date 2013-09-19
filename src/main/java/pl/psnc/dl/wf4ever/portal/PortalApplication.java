@@ -172,7 +172,7 @@ public class PortalApplication extends AuthenticatedWebApplication {
         getMarkupSettings().setDefaultBeforeDisabledLink(null);
         getMarkupSettings().setDefaultAfterDisabledLink(null);
         getRequestCycleSettings().setRenderStrategy(RenderStrategy.REDIRECT_TO_RENDER);
-        getApplicationSettings().setDefaultMaximumUploadSize(Bytes.megabytes(50));
+        getApplicationSettings().setDefaultMaximumUploadSize(Bytes.megabytes(100));
 
         mountPage("/home", HomePage.class);
         mountPage("/myros", MyRosPage.class);
