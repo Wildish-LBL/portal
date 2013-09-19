@@ -8,7 +8,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,6 +22,7 @@ import org.purl.wf4ever.rosrs.client.ROSRService;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
+import org.purl.wf4ever.wf2ro.JobStatus;
 import org.purl.wf4ever.wf2ro.ServiceException;
 import org.purl.wf4ever.wf2ro.Wf2ROService;
 import org.scribe.model.Response;
@@ -354,8 +354,24 @@ public final class MyExpImportService {
                 throws OAuthException, JAXBException, IOException, ServiceException {
             Workflow w = (Workflow) getResource(header, Workflow.class);
             model.setMessage(String.format("Transforming workflow %s", w.getResource()));
-            wf2ROService.transform(URI.create(w.getContentUri()), w.getContentType(), model.getResearchObject()
-                    .getUri());
+            JobStatus status = wf2ROService.transform(URI.create(w.getContentUri()), w.getContentType(), model
+                    .getResearchObject().getUri());
+            while (status.getState() == JobStatus.State.RUNNING) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    LOG.warn("Interrupted when waiting for the transformation job to finish", e);
+                }
+                status.refresh();
+                model.setMessage(String.format("Transforming workflow %s: %d resources created", w.getResource(),
+                    status.getAdded().size()));
+            }
+            if (status.getState() != JobStatus.State.DONE) {
+                String message = String.format("Incorrect workflow transformation status: %s %s", status.getState(),
+                    status.getReason());
+                LOG.error(message);
+                errors.add(message);
+            }
             incrementStepsComplete();
             return w;
         }
@@ -548,9 +564,11 @@ public final class MyExpImportService {
          *             when the resource URI cannot be created
          * @throws ROSRSException
          *             the annotation couldn't be created in ROSRS
+         * @throws ROException
+         *             when the manifest is incorrect
          */
         private void downloadResourceMetadata(BaseResource res)
-                throws OAuthException, URISyntaxException, ROSRSException {
+                throws OAuthException, URISyntaxException, ROSRSException, ROException {
             model.setMessage(String.format("Downloading metadata file %s", res.getResource()));
             Response response = OAuthHelpService.sendRequest(service, Verb.GET, res.getResource(), myExpToken,
                 "application/rdf+xml");
@@ -573,8 +591,7 @@ public final class MyExpImportService {
             model.setMessage(String.format("Uploading annotation body %s", bodyPath));
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             createAnnotationBody(annTarget.getUri(), rdf).write(out);
-            rosrs.addAnnotation(model.getResearchObject().getUri(), Collections.singleton(annTarget.getUri()),
-                bodyPath, new ByteArrayInputStream(out.toByteArray()), "application/rdf+xml");
+            annTarget.annotate(bodyPath, new ByteArrayInputStream(out.toByteArray()), "application/rdf+xml");
             incrementStepsComplete();
         }
 
