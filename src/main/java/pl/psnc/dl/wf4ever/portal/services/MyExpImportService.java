@@ -561,8 +561,8 @@ public final class MyExpImportService {
             if (res instanceof Pack) {
                 annTarget = model.getResearchObject();
             } else if (res instanceof File) {
-                annTarget = new org.purl.wf4ever.rosrs.client.Resource(model.getResearchObject(),
-                        ((File) res).getFilenameURI(), null, null, null);
+                annTarget = new org.purl.wf4ever.rosrs.client.Resource(model.getResearchObject(), model
+                        .getResearchObject().getUri().resolve(((File) res).getFilenameURI()), null, null, null);
             } else {
                 incrementStepsComplete();
                 return;
