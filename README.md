@@ -18,6 +18,7 @@ Exemplary use cases:
 
 *Hettne, K., et al. 2013. D6.3v3: Genome Wide Association Study workflows v3. Wf4Ever project Deliverable. Available at http://repo.wf4ever-project.org/publication/52*
 
+Roadmap and release plan: http://www.wf4ever-project.org/wiki/display/docs/RODL+and+RO+Portal+roadmap+and+release+plan
 
 Authors
 =======
