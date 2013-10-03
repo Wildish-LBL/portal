@@ -38,6 +38,9 @@ public class AnnotationTripleModel implements IModel<AnnotationTriple> {
     /** The model holding the object being annotated. */
     private IModel<? extends Annotable> annotableModel;
 
+    URI property;
+    boolean anyExisting;
+
 
     /**
      * Constructor.
@@ -63,6 +66,8 @@ public class AnnotationTripleModel implements IModel<AnnotationTriple> {
      */
     public AnnotationTripleModel(IModel<? extends Annotable> annotableModel, URI property, boolean anyExisting) {
         this.annotableModel = annotableModel;
+        this.property = property;
+        this.anyExisting = anyExisting;
         this.triple = new AnnotationTriple(null, annotableModel.getObject(), property, null, anyExisting);
     }
 
@@ -103,10 +108,12 @@ public class AnnotationTripleModel implements IModel<AnnotationTriple> {
      * Check if the annotable model object has not changed.
      */
     private void checkAnnotableModel() {
+        this.triple = new AnnotationTriple(null, annotableModel.getObject(), property, null, anyExisting);
         if (triple.getSubject() == null || !triple.getSubject().equals(annotableModel.getObject())) {
-            triple = new AnnotationTriple(triple.getAnnotation(), annotableModel.getObject(), triple.getProperty(),
-                    null, triple.isMerge());
+            triple = new AnnotationTriple(null, annotableModel.getObject(), triple.getProperty(), null,
+                    triple.isMerge());
         }
+
     }
 
 
