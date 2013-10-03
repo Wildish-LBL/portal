@@ -40,6 +40,7 @@ public class AnnotationTripleModel implements IModel<AnnotationTriple> {
 
     URI property;
     boolean anyExisting;
+    boolean refreshable = true;
 
 
     /**
@@ -82,6 +83,26 @@ public class AnnotationTripleModel implements IModel<AnnotationTriple> {
      * @param anyExisting
      *            should any existing value be searched
      */
+    public AnnotationTripleModel(IModel<? extends Annotable> annotableModel, URI property, boolean anyExisting,
+            boolean refreshable) {
+        this.annotableModel = annotableModel;
+        this.property = property;
+        this.anyExisting = anyExisting;
+        this.triple = new AnnotationTriple(null, annotableModel.getObject(), property, null, anyExisting);
+        this.refreshable = refreshable;
+    }
+
+
+    /**
+     * Constructor.
+     * 
+     * @param annotableModel
+     *            the annotated resource
+     * @param property
+     *            the immutable property
+     * @param anyExisting
+     *            should any existing value be searched
+     */
     public AnnotationTripleModel(IModel<? extends Annotable> annotableModel, Property property, boolean anyExisting) {
         this(annotableModel, URI.create(property.getURI()), anyExisting);
     }
@@ -108,7 +129,10 @@ public class AnnotationTripleModel implements IModel<AnnotationTriple> {
      * Check if the annotable model object has not changed.
      */
     private void checkAnnotableModel() {
-        this.triple = new AnnotationTriple(null, annotableModel.getObject(), property, null, anyExisting);
+        if (!refreshable) {
+            this.triple = new AnnotationTriple(null, annotableModel.getObject(), property, null, anyExisting);
+        }
+
         if (triple.getSubject() == null || !triple.getSubject().equals(annotableModel.getObject())) {
             triple = new AnnotationTriple(null, annotableModel.getObject(), triple.getProperty(), null,
                     triple.isMerge());

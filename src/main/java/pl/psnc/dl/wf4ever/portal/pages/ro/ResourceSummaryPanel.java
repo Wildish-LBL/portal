@@ -63,7 +63,7 @@ public class ResourceSummaryPanel extends Panel {
         add(new ExternalLink("uri", new PropertyModel<String>(model, "uri.toString"), new PropertyModel<URI>(model,
                 "uri")));
         add(new EditableTextPanel("titlePanel", new AnnotationTripleModel(model, URI.create(DCTerms.title.getURI()),
-                true), false).setCanDelete(false));
+                true, false), false).setCanDelete(false));
         ResourceTypeModel resourceTypeModel = new ResourceTypeModel(model);
         add(new ResourceTypePanel("resource-type", resourceTypeModel));
         add(new WorkflowTransformPanel("transform", model, resourceTypeModel, currentFolderModel));
@@ -71,7 +71,7 @@ public class ResourceSummaryPanel extends Panel {
         add(new Label("createdFormatted", new PropertyModel<String>(model, "createdFormatted")));
         add(new Label("annotations", new PropertyModel<Integer>(model, "annotations.size")));
         add(new EditableTextPanel("descriptionPanel", new AnnotationTripleModel(model, URI.create(DCTerms.description
-                .getURI()), true), true).setCanDelete(false));
+                .getURI()), true, false), true).setCanDelete(false));
     }
 
 
