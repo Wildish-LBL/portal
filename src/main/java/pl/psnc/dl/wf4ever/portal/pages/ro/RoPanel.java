@@ -116,7 +116,6 @@ public class RoPanel extends Panel {
         add(new RoCommentsPanel("comments", researchObjectModel));
         add(new AdvancedAnnotationsPanel("advanced-annotations", "ro-basic-view", researchObjectModel));
         add(new RoContentPanel("content", researchObjectModel));
-
         add(new AjaxLazyLoadPanel("ro-evo-box", researchObjectModel) {
 
             /** id. */
@@ -137,6 +136,7 @@ public class RoPanel extends Panel {
         });
 
         add(new QualityPanel("quality-panel", researchObjectModel, app.getChecklistService(), app.getMinimModels()));
+        add(new RelationsPanel("relations-panel"));
 
         IModel<Notification> selectedNotification = new Model<Notification>((Notification) null);
         NotificationsList notificationsList = new NotificationsList("notificationsList", notificationsModel,
