@@ -136,7 +136,7 @@ public class RoPanel extends Panel {
         });
 
         add(new QualityPanel("quality-panel", researchObjectModel, app.getChecklistService(), app.getMinimModels()));
-        add(new RelationsPanel("relations-panel"));
+        add(new RelationsPanel("relations-panel", researchObjectModel));
 
         IModel<Notification> selectedNotification = new Model<Notification>((Notification) null);
         NotificationsList notificationsList = new NotificationsList("notificationsList", notificationsModel,
