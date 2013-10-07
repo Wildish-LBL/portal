@@ -65,9 +65,9 @@ public class EditableRelationTextPanel extends Panel {
     /** The fragment that allows to edit the property and the value. */
     private EditFragment editFragment;
 
+    private URI newSubject;
     /** The property that the user can edit. */
     private URI newProperty;
-
     /** The value that the user can edit. */
     private String newValue;
 
@@ -85,10 +85,11 @@ public class EditableRelationTextPanel extends Panel {
     public EditableRelationTextPanel(String id, AnnotationTripleModel model, boolean editMode) {
         super(id, model);
         setOutputMarkupPlaceholderTag(true);
+        newSubject = model.getObject().getSubject().getUri();
         newProperty = model.getObject().getProperty();
         newValue = model.getObject().getValue();
         viewFragment = new ViewFragment("content", "view", this, model);
-        editFragment = new EditFragment("content", "editSingle", this, new PropertyModel<String>(this, "newValue"),
+        editFragment = new EditFragment("content", "editSingle", this, new PropertyModel<URI>(this, "newSubject"),
                 new PropertyModel<URI>(this, "newProperty"), new PropertyModel<String>(this, "newValue"));
         add(editMode ? editFragment : viewFragment).setOutputMarkupPlaceholderTag(true);
     }
@@ -252,8 +253,10 @@ public class EditableRelationTextPanel extends Panel {
             setOutputMarkupPlaceholderTag(true);
 
             WebMarkupContainer subjectColumn = new WebMarkupContainer("subject");
-            subjectColumn.add(AttributeAppender.replace("data-original-title", new PropertyModel<>(model, "property")));
-            subjectColumn.add(new Label("subject-name", new LocalNameModel(new PropertyModel<URI>(model, "property"))));
+            subjectColumn.add(AttributeAppender.replace("data-original-title",
+                new PropertyModel<>(model, "subject.uri")));
+            subjectColumn.add(new Label("subject-name",
+                    new LocalNameModel(new PropertyModel<URI>(model, "subject.uri"))));
             add(subjectColumn);
 
             WebMarkupContainer propColumn = new WebMarkupContainer("property");
@@ -322,14 +325,14 @@ public class EditableRelationTextPanel extends Panel {
          * @param valueModel
          *            the value to edit
          */
-        public EditFragment(String id, String markupId, MarkupContainer markupProvider, IModel<String> subjectModel,
+        public EditFragment(String id, String markupId, MarkupContainer markupProvider, IModel<URI> subjectModel,
                 IModel<URI> propertyModel, IModel<String> valueModel) {
             super(id, markupId, markupProvider);
             setOutputMarkupPlaceholderTag(true);
             controlGroup = new WebMarkupContainer("control-group");
             controlGroup.setOutputMarkupPlaceholderTag(true);
             add(controlGroup);
-            controlGroup.add(new TextField<>("subjectval", valueModel));
+            controlGroup.add(new RequiredTextField<URI>("subjectval", subjectModel));
             controlGroup.add(new RequiredTextField<URI>("property-name", propertyModel));
             controlGroup.add(new TextField<>("value", valueModel));
             controlGroup.add(new AuthenticatedAjaxEventButton("apply", null, EditableRelationTextPanel.this,

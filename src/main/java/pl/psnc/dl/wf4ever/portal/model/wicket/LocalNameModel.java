@@ -48,7 +48,16 @@ public class LocalNameModel extends AbstractReadOnlyModel<String> {
         if (uri.getFragment() != null && !uri.getFragment().isEmpty()) {
             return uri.getFragment();
         }
+
+        if (uri.getPath().endsWith("/")) {
+            String[] tmparray = uri.getPath().split("/");
+            if (tmparray.length == 0) {
+                return "/";
+            } else {
+                return tmparray[tmparray.length - 1];
+            }
+
+        }
         return uri.getPath().substring(uri.getPath().lastIndexOf('/') + 1);
     }
-
 }
