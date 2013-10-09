@@ -4,6 +4,7 @@ import java.net.URI;
 
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.PropertyModel;
 
 /**
  * This model returns a local name given a URI. This is either a fragment ID or the last path segment.
@@ -28,6 +29,11 @@ public class LocalNameModel extends AbstractReadOnlyModel<String> {
      */
     public LocalNameModel(IModel<URI> model) {
         this.model = model;
+    }
+
+
+    public LocalNameModel(PropertyModel<String> propertyModel) {
+        this.model = new PropertyModel<URI>(URI.create(propertyModel.getObject()), null);
     }
 
 

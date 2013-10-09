@@ -13,7 +13,6 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.RequiredTextField;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -22,9 +21,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.purl.wf4ever.rosrs.client.Annotable;
-import org.purl.wf4ever.rosrs.client.Annotation;
 import org.purl.wf4ever.rosrs.client.AnnotationTriple;
-import org.purl.wf4ever.rosrs.client.Utils;
 
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
@@ -36,7 +33,6 @@ import pl.psnc.dl.wf4ever.portal.events.edit.ApplyEvent;
 import pl.psnc.dl.wf4ever.portal.events.edit.CancelEvent;
 import pl.psnc.dl.wf4ever.portal.events.edit.DeleteEvent;
 import pl.psnc.dl.wf4ever.portal.events.edit.EditEvent;
-import pl.psnc.dl.wf4ever.portal.model.wicket.AnnotationTimestampModel;
 import pl.psnc.dl.wf4ever.portal.model.wicket.AnnotationTripleModel;
 import pl.psnc.dl.wf4ever.portal.model.wicket.LocalNameModel;
 
@@ -64,12 +60,12 @@ public class EditableRelationTextPanel extends Panel {
 
     /** The fragment that allows to edit the property and the value. */
     private EditFragment editFragment;
-
+    /** . */
     private URI newSubject;
     /** The property that the user can edit. */
     private URI newProperty;
     /** The value that the user can edit. */
-    private String newValue;
+    private URI newValue;
 
 
     /**
@@ -87,10 +83,10 @@ public class EditableRelationTextPanel extends Panel {
         setOutputMarkupPlaceholderTag(true);
         newSubject = model.getObject().getSubject().getUri();
         newProperty = model.getObject().getProperty();
-        newValue = model.getObject().getValue();
+        newValue = URI.create(model.getObject().getValue());
         viewFragment = new ViewFragment("content", "view", this, model);
         editFragment = new EditFragment("content", "editSingle", this, new PropertyModel<URI>(this, "newSubject"),
-                new PropertyModel<URI>(this, "newProperty"), new PropertyModel<String>(this, "newValue"));
+                new PropertyModel<URI>(this, "newProperty"), new PropertyModel<URI>(this, "newValue"));
         add(editMode ? editFragment : viewFragment).setOutputMarkupPlaceholderTag(true);
     }
 
@@ -172,7 +168,7 @@ public class EditableRelationTextPanel extends Panel {
         event.getTarget().appendJavaScript("$('.tooltip').remove();");
         event.getTarget().add(this);
         //the tripleCopy now holds the updated property and value
-        ((AnnotationTripleModel) this.getDefaultModel()).setPropertyAndValue(newProperty, newValue);
+        ((AnnotationTripleModel) this.getDefaultModel()).setPropertyAndValue(newProperty, newValue.toString());
         //post event
         IModel<? extends Annotable> annotable = ((AnnotationTripleModel) this.getDefaultModel()).getAnnotableModel();
         send(getPage(), Broadcast.BREADTH, new AnnotationAddedEvent(event.getTarget(), annotable));
@@ -265,21 +261,21 @@ public class EditableRelationTextPanel extends Panel {
             add(propColumn);
 
             WebMarkupContainer valueColumn = new WebMarkupContainer("value");
-            valueColumn.add(AttributeAppender.replace("data-original-title", new AnnotationTimestampModel(
-                    new PropertyModel<Annotation>(model, "annotation"))));
-            value = new Label("value", new PropertyModel<String>(model, "value"));
-            valueColumn.add(value);
-            valueColumn.add(new AuthenticatedAjaxEventButton("edit", null, EditableRelationTextPanel.this,
-                    EditEvent.class));
+            valueColumn.add(AttributeAppender.replace("data-original-title", new PropertyModel<>(model, "value")));
+            valueColumn.add(new Label("value-name", new LocalNameModel(new PropertyModel<String>(model, "value"))));
             valueColumn.add(new AuthenticatedAjaxEventButton("delete", null, EditableRelationTextPanel.this,
                     DeleteEvent.class));
             add(valueColumn);
+
+            //add(new AuthenticatedAjaxEventButton("edit", null, EditableRelationTextPanel.this, EditEvent.class));
+
         }
 
 
         @SuppressWarnings("unchecked")
         @Override
         protected void onConfigure() {
+            /*
             String text = value.getDefaultModelObjectAsString();
             Component replacementValue = null;
             if (Utils.isAbsoluteURI(text) && value instanceof Label) {
@@ -292,6 +288,7 @@ public class EditableRelationTextPanel extends Panel {
                 value = replacementValue;
             }
             super.onConfigure();
+            */
         }
     }
 
@@ -326,7 +323,7 @@ public class EditableRelationTextPanel extends Panel {
          *            the value to edit
          */
         public EditFragment(String id, String markupId, MarkupContainer markupProvider, IModel<URI> subjectModel,
-                IModel<URI> propertyModel, IModel<String> valueModel) {
+                IModel<URI> propertyModel, IModel<URI> valueModel) {
             super(id, markupId, markupProvider);
             setOutputMarkupPlaceholderTag(true);
             controlGroup = new WebMarkupContainer("control-group");
@@ -334,7 +331,7 @@ public class EditableRelationTextPanel extends Panel {
             add(controlGroup);
             controlGroup.add(new RequiredTextField<URI>("subjectval", subjectModel));
             controlGroup.add(new RequiredTextField<URI>("property-name", propertyModel));
-            controlGroup.add(new TextField<>("value", valueModel));
+            controlGroup.add(new RequiredTextField<URI>("valueval", valueModel));
             controlGroup.add(new AuthenticatedAjaxEventButton("apply", null, EditableRelationTextPanel.this,
                     ApplyEvent.class));
             controlGroup.add(new AuthenticatedAjaxEventButton("cancel", null, EditableRelationTextPanel.this,
