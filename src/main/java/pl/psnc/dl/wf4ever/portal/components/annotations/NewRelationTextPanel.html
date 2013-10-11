@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<wicket:panel xmlns:wicket="http://wicket.apache.org">
+	<div wicket:id="content"></div>
+	<wicket:fragment wicket:id="view">
+		<wicket:fragment wicket:id="link">
+			<a href="#" wicket:id="anchor"></a>
+		</wicket:fragment>
+		<script type="text/javascript">
+			$(document).ready(function() {
+				$('.my-tooltip').tooltip();
+			})
+		</script>
+		<!-- 
+		<td wicket:id="subject" data-original-title="" data-toggle="tooltip"
+			data-placement="left" class="property my-tooltip"
+			data-container="body"><span wicket:id="subject-name"></span></td>
+		-->
+		<td wicket:id="property" data-original-title="" data-toggle="tooltip"
+			data-placement="left" class="property my-tooltip"
+			data-container="body"><span wicket:id="property-name"></span></td>
+		<td wicket:id="value" class="annotation-triple-value my-tooltip"
+			data-original-title="" data-toggle="tooltip" data-placement="right"
+			data-container="body"><div class="buttons-hover-inside"
+				data-original-title="">
+				<span wicket:id="value"></span>
+				<div class="btn-group edit-btn-group">
+					<button data-original-title="edit" data-toggle="tooltip"
+						data-placement="top" class="btn btn-mini my-tooltip"
+						data-container="body" type="submit" wicket:id="edit">
+						<i class="icon-edit"></i>
+					</button>
+					<button data-original-title="delete" data-toggle="tooltip"
+						data-placement="top" class="btn btn-mini my-tooltip"
+						data-container="body" type="submit" wicket:id="delete">
+						<i class="icon-trash"></i>
+					</button>
+				</div>
+			</div></td>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="editSingle">
+		<td colspan="2"><script type="text/javascript">
+			$(document).ready(function() {
+				$('.my-tooltip').tooltip();
+				$('.property-edit').typeahead(options);
+			})
+		</script>
+			<div class="edit-block control-group" wicket:id="control-group">
+				<select wicket:id="subjectsList"></select>
+				<select wicket:id="objectsList"></select>
+				<div class="btn-group">
+					<button data-original-title="apply" data-toggle="tooltip"
+						data-placement="top" class="btn my-tooltip" data-container="body"
+						type="submit" wicket:id="apply">
+						<i class="icon-ok"></i>
+					</button>
+					<button data-original-title="cancel" data-toggle="tooltip"
+						data-placement="top" class="btn my-tooltip" data-container="body"
+						type="submit" wicket:id="cancel">
+						<i class="icon-remove"></i>
+					</button>
+				</div>
+				<span class="help-block" wicket:id="feedback">Please correct
+					the error</span>
+			</div>
+			</td>
+	</wicket:fragment>
+</wicket:panel>

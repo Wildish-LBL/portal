@@ -3,10 +3,12 @@ package pl.psnc.dl.wf4ever.portal.pages.ro;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.Component;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -20,6 +22,7 @@ import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.Resource;
 
 import pl.psnc.dl.wf4ever.portal.components.annotations.EditableRelationTextPanel;
+import pl.psnc.dl.wf4ever.portal.components.annotations.NewRelationTextPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AnnotationEditAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AddAnnotationClickedEvent;
 import pl.psnc.dl.wf4ever.portal.model.wicket.AnnotationTripleModel;
@@ -38,8 +41,9 @@ public class RelationsPanel extends Panel {
     @SuppressWarnings("unused")
     private static final Logger LOG = Logger.getLogger(RelationsPanel.class);
 
+    @SuppressWarnings("unused")
     private IModel<ResearchObject> roModel;
-    private Component addAnnotationPanel;
+    private Component addRelationPanel;
     RelationsDict relationsDict;
 
 
@@ -58,21 +62,6 @@ public class RelationsPanel extends Panel {
         for (Folder f : model.getObject().getFolders().values()) {
             annotationCollection.filterTriples(f.getAnnotationTriples());
         }
-        /*
-        Multimap<URI, Annotation> annotationMap = model.getObject().getAllAnnotations();
-        for (URI key : annotationMap.keys()) {
-            Collection<Annotation> annotations = annotationMap.get(key);
-            for (Annotation annotation : annotations) {
-                try {
-                    annotation.load();
-                } catch (ROSRSException e) {
-                    LOG.warn("Tha annotation " + annotation.getUri().toString() + " can't be loaded");
-                    return;
-                }
-                annotationCollection.filterStatements(annotation, annotation.getStatements());
-            }
-        }
-        */
 
         setOutputMarkupPlaceholderTag(true);
         Form<Void> form = new Form<Void>("form");
@@ -81,10 +70,33 @@ public class RelationsPanel extends Panel {
         form.add(new AnnotationTripleList("annotation-triple", new PropertyModel<List<AnnotationTriple>>(
                 annotationCollection, "list")));
 
-        addAnnotationPanel = new WebMarkupContainer("new-annotation");
-        addAnnotationPanel.setOutputMarkupPlaceholderTag(true);
-        addAnnotationPanel.setVisible(false);
-        form.add(addAnnotationPanel);
+        addRelationPanel = new WebMarkupContainer("new-annotation");
+        addRelationPanel.setOutputMarkupPlaceholderTag(true);
+        addRelationPanel.setVisible(false);
+        form.add(addRelationPanel);
+    }
+
+
+    @Override
+    public void onEvent(IEvent<?> event) {
+        super.onEvent(event);
+        if (event.getPayload() instanceof AddAnnotationClickedEvent) {
+            onAnnotateClicked((AddAnnotationClickedEvent) event.getPayload());
+        }
+    }
+
+
+    /**
+     * Show the new annotation panel.
+     * 
+     * @param event
+     *            the event that triggers this action
+     */
+    private void onAnnotateClicked(AddAnnotationClickedEvent event) {
+        NewRelationTextPanel panel = new NewRelationTextPanel("new-annotation", roModel.getObject());
+        addRelationPanel.replaceWith(panel);
+        addRelationPanel = panel;
+        event.getTarget().add(addRelationPanel);
     }
 
 
@@ -101,7 +113,7 @@ public class RelationsPanel extends Panel {
 
         public void filterTriples(List<AnnotationTriple> triples) {
             for (AnnotationTriple triple : triples) {
-                if (relationsDict.predefinedRelations.contains(triple.getProperty())) {
+                if (RelationsDict.predefinedRelations.contains(triple.getProperty())) {
                     list.add(triple);
                 }
             }
@@ -149,33 +161,18 @@ public class RelationsPanel extends Panel {
     }
 
 
-    final class RelationsDict implements Serializable {
+    final static class RelationsDict implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
-        List<URI> predefinedRelations = new ArrayList<URI>();
+        public static final List<URI> predefinedRelations = Arrays.asList(new URI[] {
+                URI.create(PROV.wasDerivedFrom.getURI()), URI.create(PROV.wasRevisionOf.getURI()),
+                URI.create(PROV.wasQuotedFrom.getURI()), URI.create(PROV.hadOriginalSource.getURI()),
+                URI.create(WFPROV.usedInput.getURI()), URI.create(WFPROV.wasOutputFrom.getURI()),
+                URI.create(WFPROV.describedByWorkflow.getURI()), URI.create(ROTERMS.inputSelected.getURI()),
+                URI.create(WFDESC.hasInput.getURI()), URI.create(WFDESC.hasOutput.getURI()),
+                URI.create(WFDESC.hasSubWorkflow.getURI()), URI.create(WF4EVER.rootURI.getURI()) });
 
-
-        public RelationsDict() {
-            //PROV
-            predefinedRelations.add(URI.create(PROV.wasDerivedFrom.getURI()));
-            predefinedRelations.add(URI.create(PROV.wasRevisionOf.getURI()));
-            predefinedRelations.add(URI.create(PROV.wasQuotedFrom.getURI()));
-            predefinedRelations.add(URI.create(PROV.hadOriginalSource.getURI()));
-            predefinedRelations.add(URI.create(WFPROV.usedInput.getURI()));
-            predefinedRelations.add(URI.create(WFPROV.wasOutputFrom.getURI()));
-            predefinedRelations.add(URI.create(WFPROV.describedByWorkflow.getURI()));
-            predefinedRelations.add(URI.create(ROTERMS.inputSelected.getURI()));
-            predefinedRelations.add(URI.create(WFDESC.hasInput.getURI()));
-            predefinedRelations.add(URI.create(WFDESC.hasOutput.getURI()));
-            predefinedRelations.add(URI.create(WFDESC.hasSubWorkflow.getURI()));
-            predefinedRelations.add(URI.create(WF4EVER.rootURI.getURI()));
-        }
-
-
-        public List<URI> getPredefinedRelations() {
-            return predefinedRelations;
-        }
     }
 
 }

@@ -110,7 +110,6 @@ public class AdvancedAnnotationsPanel extends Panel {
         form.add(new AnnotationEditAjaxEventButton("import-annotations", form, model, null,
                 ImportAnnotationClickedEvent.class));
         form.add(new AnnotationEditAjaxEventButton("annotate", form, model, this, AddAnnotationClickedEvent.class));
-
         form.add(new AnnotationTripleList("annotation-triple", new PropertyModel<List<AnnotationTriple>>(model,
                 "annotationTriples")));
 
