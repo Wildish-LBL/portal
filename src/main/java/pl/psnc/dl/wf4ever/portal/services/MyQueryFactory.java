@@ -9,6 +9,7 @@ import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.Syntax;
 
+
 /**
  * A utility class for loading SPARQL queries.
  * 
@@ -22,6 +23,9 @@ public final class MyQueryFactory {
 
     /** resources count. */
     private static String resourcesCount = null;
+    
+    /** resources count. */
+    private static String getSketch = null;
 
 
     /**
@@ -81,6 +85,22 @@ public final class MyQueryFactory {
             throws IOException {
         InputStream is = MyQueryFactory.class.getClassLoader().getResourceAsStream("sparql/" + file);
         return IOUtils.toString(is, "UTF-8");
+    }
+    
+    /**
+     * Load the getSketch query.
+     * 
+     * 
+     * @return SPARQL query
+     * @throws IOException
+     *             can't load the query file
+     */
+    public static String getROSketchQuery(String ro)
+            throws IOException {
+        if (getSketch == null) {
+        	getSketch = loadQuery("getSketch.sparql");
+        }
+        return String.format(getSketch,ro);
     }
 
 }

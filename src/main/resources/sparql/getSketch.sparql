@@ -1,0 +1,8 @@
+PREFIX ore: <http://www.openarchives.org/ore/terms/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX roterm: <http://purl.org/wf4ever/roterms#>
+SELECT ?resource 
+WHERE {
+<%s> ore:aggregates ?resource .
+?resource rdf:type roterm:Sketch .
+}

@@ -59,4 +59,24 @@ public final class RODLUtilities {
         }
         return roHeaders;
     }
+    
+    public static String getROSketch(URI sparqlEndpoint, String ro)
+    {
+    	String sketchURI="N/A";
+    	QueryExecution x;
+		try {
+			x = QueryExecutionFactory.sparqlService(sparqlEndpoint.toString(),
+			        MyQueryFactory.getROSketchQuery(ro));
+	    	ResultSet results = x.execSelect();
+	    	if (results.hasNext()) {
+	    		sketchURI=results.next().getResource("resource").getURI().toString();
+	    	}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}    	        
+    	return (sketchURI);
+    	
+    }
+    
 }

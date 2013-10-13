@@ -1,5 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.pages.ro;
 
+
+
 import java.net.URI;
 
 import org.apache.log4j.Logger;
@@ -8,11 +10,17 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
+import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.components.form.EditableTextPanel;
+
 import pl.psnc.dl.wf4ever.portal.model.wicket.AnnotationTripleModel;
+import pl.psnc.dl.wf4ever.portal.services.RODLUtilities;
+import pl.psnc.dl.wf4ever.portal.utils.StaticImage;
 
 import com.hp.hpl.jena.vocabulary.DCTerms;
 
@@ -71,6 +79,16 @@ public class RoSummaryPanel extends Panel {
         add(new Label("resources", model.getObject().getResources().size()));
         add(new Label("annotations", new PropertyModel<Integer>(model, "allAnnotations.size")));
         add(descriptionPanel);
+                       
+		String sketch=RODLUtilities.getROSketch(((PortalApplication) getApplication()).getSparqlEndpointURI(),  
+					model.getObject().getUri().toString());
+		if (sketch != "N/A") sketch=StaticImage.checkIsImage(sketch);
+		ExternalLink link = new ExternalLink("linksketch", sketch=="N/A" ? "#" : sketch);
+		StaticImage image = new StaticImage( "sketch", 
+                new Model<String>( sketch=="N/A" ? "images/N-A.png" : sketch ) );
+		
+        link.add(image);
+        add (link);
     }
 
 
@@ -81,5 +99,5 @@ public class RoSummaryPanel extends Panel {
                 && ((ResearchObject) getDefaultModelObject()).getAggregatingRO() != null);
 
     }
-
-}
+    
+ }
