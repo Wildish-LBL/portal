@@ -69,7 +69,7 @@ public class EditableRelationTextPanel extends Panel {
 
 
     /**
-     * Constructor.
+     * Constructor.z
      * 
      * @param id
      *            wicket id

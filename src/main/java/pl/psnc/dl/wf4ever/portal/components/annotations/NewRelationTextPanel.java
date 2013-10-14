@@ -7,14 +7,16 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.DropDownChoice;
-import org.apache.wicket.markup.html.link.ExternalLink;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
@@ -22,9 +24,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.purl.wf4ever.rosrs.client.Annotable;
-import org.purl.wf4ever.rosrs.client.Annotation;
-import org.purl.wf4ever.rosrs.client.AnnotationTriple;
-import org.purl.wf4ever.rosrs.client.Utils;
 
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
@@ -33,11 +32,8 @@ import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationAddedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationCancelledEvent;
 import pl.psnc.dl.wf4ever.portal.events.edit.ApplyEvent;
 import pl.psnc.dl.wf4ever.portal.events.edit.CancelEvent;
-import pl.psnc.dl.wf4ever.portal.events.edit.DeleteEvent;
 import pl.psnc.dl.wf4ever.portal.events.edit.EditEvent;
-import pl.psnc.dl.wf4ever.portal.model.wicket.AnnotationTimestampModel;
 import pl.psnc.dl.wf4ever.portal.model.wicket.AnnotationTripleModel;
-import pl.psnc.dl.wf4ever.portal.model.wicket.LocalNameModel;
 
 /**
  * A panel for inline comments, show the annotation author and creation date.
@@ -72,6 +68,9 @@ public class NewRelationTextPanel extends Panel {
 
     private URI selectedSubject;
     private URI selectedObject;
+    private URI selectedRelation;
+    private boolean checkBoxState = true;
+    private String newValueFromHand;
 
 
     /**
@@ -86,26 +85,37 @@ public class NewRelationTextPanel extends Panel {
      */
     public NewRelationTextPanel(String id, AnnotationTripleModel model, boolean editMode) {
         super(id, model);
-
+        newValueFromHand = "";
+        setOutputMarkupPlaceholderTag(true);
         List<URI> subjectsList = Arrays.asList(new URI[] { URI.create("l_option1"), URI.create("l_option2"),
                 URI.create("l_option3") });
-        List<URI> objectList = Arrays.asList(new URI[] { URI.create("r_option1"), URI.create("r_option2"),
+        List<URI> objectsList = Arrays.asList(new URI[] { URI.create("r_option1"), URI.create("r_option2"),
                 URI.create("r_option3") });
+        List<URI> relationsList = Arrays.asList(new URI[] { URI.create("r_option1"), URI.create("r_option2"),
+                URI.create("r_option3") });
+
         selectedSubject = URI.create("l_option1");
         selectedObject = URI.create("r_option1");
+        selectedRelation = URI.create("r_option1");
 
         DropDownChoice<URI> dropDownSubjects = new DropDownChoice<URI>("subjectsList", new PropertyModel<URI>(this,
-                "selectedSubject"), subjectsList);
+                "selectedObject"), subjectsList);
         DropDownChoice<URI> dropDownObjects = new DropDownChoice<URI>("objectsList", new PropertyModel<URI>(this,
-                "selectedSubject"), subjectsList);
+                "selectedSubject"), objectsList);
+        DropDownChoice<URI> dropDownRelations = new DropDownChoice<URI>("relationsList", new PropertyModel<URI>(this,
+                "selectedRelation"), relationsList);
+        TextField<String> vlaueFromHand = new TextField<String>("value-from-hand", new PropertyModel<String>(this,
+                "newValueFromHand"));
 
         setOutputMarkupPlaceholderTag(true);
         newProperty = model.getObject().getProperty();
         newValue = model.getObject().getValue();
-        viewFragment = new ViewFragment("content", "view", this, model);
-        editFragment = new EditFragment("content", "editSingle", this, dropDownSubjects, dropDownObjects);
+        viewFragment = new ViewFragment("content", "view", this);
+        editFragment = new EditFragment("content", "editSingle", this, dropDownSubjects, dropDownObjects,
+                dropDownRelations, vlaueFromHand);
 
         add(editMode ? editFragment : viewFragment).setOutputMarkupPlaceholderTag(true);
+
     }
 
 
@@ -197,33 +207,6 @@ public class NewRelationTextPanel extends Panel {
      */
     protected class ViewFragment extends Fragment {
 
-        /**
-         * External link for values that are URIs.
-         * 
-         * @author piotrekhol
-         * 
-         */
-        private class LinkFragment extends Fragment {
-
-            /** id. */
-            private static final long serialVersionUID = -7246837915674720631L;
-
-
-            /**
-             * Constructor.
-             * 
-             * @param id
-             *            wicket id where to place this fragment
-             * @param model
-             *            String model of the value/href
-             */
-            public LinkFragment(String id, IModel<String> model) {
-                super(id, "link", ViewFragment.this, model);
-                add(new ExternalLink("anchor", model, model));
-            }
-        }
-
-
         /** id. */
         private static final long serialVersionUID = -4169842101720666349L;
 
@@ -243,42 +226,9 @@ public class NewRelationTextPanel extends Panel {
          * @param model
          *            value model
          */
-        public ViewFragment(String id, String markupId, MarkupContainer markupProvider, IModel<AnnotationTriple> model) {
-            super(id, markupId, markupProvider, model);
+        public ViewFragment(String id, String markupId, MarkupContainer markupProvider) {
+            super(id, markupId, markupProvider);
             setOutputMarkupPlaceholderTag(true);
-
-            WebMarkupContainer propColumn = new WebMarkupContainer("property");
-            propColumn.add(AttributeAppender.replace("data-original-title", new PropertyModel<>(model, "property")));
-            propColumn.add(new Label("property-name", new LocalNameModel(new PropertyModel<URI>(model, "property"))));
-            add(propColumn);
-
-            WebMarkupContainer valueColumn = new WebMarkupContainer("value");
-            valueColumn.add(AttributeAppender.replace("data-original-title", new AnnotationTimestampModel(
-                    new PropertyModel<Annotation>(model, "annotation"))));
-            value = new Label("value", new PropertyModel<String>(model, "value"));
-            valueColumn.add(value);
-            valueColumn.add(new AuthenticatedAjaxEventButton("edit", null, NewRelationTextPanel.this, EditEvent.class));
-            valueColumn.add(new AuthenticatedAjaxEventButton("delete", null, NewRelationTextPanel.this,
-                    DeleteEvent.class));
-            add(valueColumn);
-        }
-
-
-        @SuppressWarnings("unchecked")
-        @Override
-        protected void onConfigure() {
-            String text = value.getDefaultModelObjectAsString();
-            Component replacementValue = null;
-            if (Utils.isAbsoluteURI(text) && value instanceof Label) {
-                replacementValue = new LinkFragment(value.getId(), (IModel<String>) value.getDefaultModel());
-            } else if (value instanceof LinkFragment) {
-                replacementValue = new Label(value.getId(), value.getDefaultModel());
-            }
-            if (replacementValue != null) {
-                value.replaceWith(replacementValue);
-                value = replacementValue;
-            }
-            super.onConfigure();
         }
     }
 
@@ -296,6 +246,8 @@ public class NewRelationTextPanel extends Panel {
 
         /** A div that contains all components. */
         private WebMarkupContainer controlGroup;
+        boolean checkBoxState = true;
+        private EditFragment fragmet = this;
 
 
         /**
@@ -307,19 +259,36 @@ public class NewRelationTextPanel extends Panel {
          *            fragment wicket id
          * @param markupProvider
          *            container defining the fragment
+         * @param valueFromHand
          * @param propertyModel
          *            the property to edit
          * @param valueModel
          *            the value to edit
          */
         public EditFragment(String id, String markupId, MarkupContainer markupProvider,
-                DropDownChoice<URI> dropDownSubjects, DropDownChoice<URI> dropDownObjects) {
+                DropDownChoice<URI> dropDownSubjects, final DropDownChoice<URI> dropDownObjects,
+                DropDownChoice<URI> dropDownProperties, final TextField<String> valueFromHand) {
             super(id, markupId, markupProvider);
             setOutputMarkupPlaceholderTag(true);
             controlGroup = new WebMarkupContainer("control-group");
             controlGroup.setOutputMarkupPlaceholderTag(true);
             controlGroup.add(dropDownSubjects);
             controlGroup.add(dropDownObjects);
+            controlGroup.add(dropDownProperties);
+            controlGroup.add(valueFromHand);
+            valueFromHand.setVisible(false);
+            final CheckBox checkBoxInnerObjectRelation = new AjaxCheckBox("checkbox-inner-object-relation",
+                    new PropertyModel<Boolean>(this, "checkBoxState")) {
+
+                @Override
+                protected void onUpdate(AjaxRequestTarget target) {
+                    valueFromHand.setVisible(!checkBoxState);
+                    dropDownObjects.setVisible(checkBoxState);
+                    target.add(controlGroup);
+                }
+            };
+
+            controlGroup.add(checkBoxInnerObjectRelation);
             add(controlGroup);
 
             controlGroup.add(new AuthenticatedAjaxEventButton("apply", null, NewRelationTextPanel.this,
