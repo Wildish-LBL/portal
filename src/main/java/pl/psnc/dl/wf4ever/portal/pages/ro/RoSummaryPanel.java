@@ -79,25 +79,38 @@ public class RoSummaryPanel extends Panel {
         add(new Label("resources", model.getObject().getResources().size()));
         add(new Label("annotations", new PropertyModel<Integer>(model, "allAnnotations.size")));
         add(descriptionPanel);
-                       
-		String sketch=RODLUtilities.getROSketch(((PortalApplication) getApplication()).getSparqlEndpointURI(),  
-					model.getObject().getUri().toString());
-		if (sketch != "N/A") sketch=StaticImage.checkIsImage(sketch);
-		ExternalLink link = new ExternalLink("linksketch", sketch=="N/A" ? "#" : sketch);
-		StaticImage image = new StaticImage( "sketch", 
-                new Model<String>( sketch=="N/A" ? "images/N-A.png" : sketch ) );
-		
-        link.add(image);
+        
+        ExternalLink link=sketchGet(model);
         add (link);
     }
 
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     protected void onConfigure() {
         super.onConfigure();
+        refreshPanel((IModel<ResearchObject>) getDefaultModel());
         nestedRO.setVisible(getDefaultModelObject() != null
                 && ((ResearchObject) getDefaultModelObject()).getAggregatingRO() != null);
 
+    }
+    
+    private void refreshPanel(IModel<ResearchObject> model) {
+    	setOutputMarkupId(true);
+    	this.remove("linksketch");
+    	ExternalLink link=sketchGet(model);
+        add (link);
+    }
+    
+    private ExternalLink sketchGet(IModel<ResearchObject> model){
+    	String sketch=RODLUtilities.getROSketch(((PortalApplication) getApplication()).getSparqlEndpointURI(),  
+				model.getObject().getUri().toString());
+    	if (sketch != "N/A") sketch=StaticImage.checkIsImage(sketch);
+    	ExternalLink link = new ExternalLink("linksketch", sketch=="N/A" ? "#" : sketch);
+    	StaticImage image = new StaticImage( "sketch", 
+            new Model<String>( sketch=="N/A" ? "images/N-A.png" : sketch ) );
+    	link.add(image);
+    	return link;
     }
     
  }

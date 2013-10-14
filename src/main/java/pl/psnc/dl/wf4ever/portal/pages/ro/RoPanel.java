@@ -43,6 +43,7 @@ import pl.psnc.dl.wf4ever.portal.events.evo.ReleaseCreateEvent;
 import pl.psnc.dl.wf4ever.portal.events.evo.ReleaseCreatedEvent;
 import pl.psnc.dl.wf4ever.portal.events.evo.SnapshotCreateEvent;
 import pl.psnc.dl.wf4ever.portal.events.evo.SnapshotCreatedEvent;
+import pl.psnc.dl.wf4ever.portal.events.ros.SketchEvent;
 import pl.psnc.dl.wf4ever.portal.modals.DownloadMetadataModal;
 import pl.psnc.dl.wf4ever.portal.modals.ImportAnnotationModal;
 import pl.psnc.dl.wf4ever.portal.pages.ro.evo.RoEvoBox;
@@ -180,6 +181,9 @@ public class RoPanel extends Panel {
         if (event.getPayload() instanceof ErrorEvent) {
             onError((ErrorEvent) event.getPayload());
         }
+        if (event.getPayload() instanceof SketchEvent) {
+            onSketchEvent((SketchEvent) event.getPayload());
+        }
     }
 
 
@@ -240,6 +244,11 @@ public class RoPanel extends Panel {
         ResearchObject researchObject = (ResearchObject) getDefaultModelObject();
         researchObject.loadEvolutionInformation();
         send(getPage(), Broadcast.BREADTH, new RoEvolutionLoadedEvent(event.getTarget()));
+    }
+    
+    private void onSketchEvent(SketchEvent event) {
+    	event.getTarget().add(this.get("ro-summary"));
+    	this.get("ro-summary").configure();
     }
 
 

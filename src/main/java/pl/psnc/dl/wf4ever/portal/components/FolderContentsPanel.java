@@ -185,7 +185,12 @@ public class FolderContentsPanel extends Panel {
                 };
                 item.add(link);
                 link.add(new Label("name", new PropertyModel<String>(folder, "name")));
-                item.add(new Label("comments-cnt", "" + folder.getPropertyValues(RDFS.comment, false).size()));
+                int cmts=folder.getPropertyValues(RDFS.comment, false).size();
+                String sizeOut= folder.isLoaded() ? String.valueOf(folder.getFolderEntries().size()) : "0";
+                //item.add(new Label("comments-cnt", "" + cmts));
+                //item.add(new Label("entries-cnt", "" + folder.getFolderEntries().size()));
+                if (cmts>0) item.add(new Label("details-info", "" + sizeOut + " entries ("+ String.valueOf(cmts)+" cmnts)"));
+                else item.add(new Label("details-info", "" + sizeOut + " entries"));
                 item.add(new ResourceClickedBehaviour(folder, "onclick"));
                 item.add(new ResourceSelectedBehaviour(folder));
             }
@@ -216,8 +221,13 @@ public class FolderContentsPanel extends Panel {
             @Override
             protected void populateItem(ListItem<Resource> item) {
                 Resource resource = item.getModelObject();
-                item.add(new Label("name", new PropertyModel<String>(resource, "name")));
-                item.add(new Label("comments-cnt", "" + resource.getPropertyValues(RDFS.comment, false).size()));
+                item.add(new Label("name", new PropertyModel<String>(resource, "name")));               
+                int cmts=resource.getPropertyValues(RDFS.comment, false).size();
+                String sizeOut= resource.getSizeFormatted()!=null ?  resource.getSizeFormatted() : "";
+                if (cmts>0) item.add(new Label("details-info", "" + sizeOut + " ("+ String.valueOf(cmts)+" cmnts)"));
+                else item.add(new Label("details-info", "" + sizeOut));
+                //item.add(new Label("comments-cnt", "" + cmts));
+                //item.add(new Label("entries-cnt", "" + resource.getSizeFormatted()));
                 item.add(new ResourceClickedBehaviour(resource, "onclick"));
                 item.add(new ResourceSelectedBehaviour(resource));
             }

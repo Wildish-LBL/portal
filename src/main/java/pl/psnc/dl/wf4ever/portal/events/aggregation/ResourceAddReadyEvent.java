@@ -28,6 +28,8 @@ public class ResourceAddReadyEvent extends AbstractAjaxEvent {
 
     /** Custom MIME type. */
     private String mimeType;
+    
+
 
 
     /**

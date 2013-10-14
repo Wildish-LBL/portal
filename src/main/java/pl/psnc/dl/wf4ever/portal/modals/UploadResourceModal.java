@@ -3,7 +3,6 @@ package pl.psnc.dl.wf4ever.portal.modals;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormChoiceComponentUpdatingBehavior;
 import org.apache.wicket.event.Broadcast;
@@ -16,12 +15,11 @@ import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
-
 import pl.psnc.dl.wf4ever.portal.components.annotations.ResourceTypeDropDownChoice;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceAddReadyEvent;
 import pl.psnc.dl.wf4ever.portal.model.ResourceLocalRemote;
 import pl.psnc.dl.wf4ever.portal.model.ResourceType;
-
+//import org.apache.log4j.Logger;
 /**
  * A modal for adding resources to the RO.
  * 
@@ -57,6 +55,8 @@ public class UploadResourceModal extends AbstractModal {
     /** Is the uploaded file an RO bundle? */
     private boolean roBundle;
 
+    /** Logger. */
+    //private static final Logger LOG = Logger.getLogger(UploadResourceModal.class);
 
     /**
      * Constructor.
@@ -138,6 +138,7 @@ public class UploadResourceModal extends AbstractModal {
                 final FileUpload uploadedFile = fileUpload.getFileUpload();
                 if (uploadedFile != null) {
                     String mimeType = roBundle ? "application/vnd.wf4ever.robundle+zip" : null;
+                    //LOG.debug("page: "+getPage().toString() + " target: "+target.getPage().toString() + " upFile: "+uploadedFile.toString()+ " size: "+uploadedFile.getSize() );
                     send(getPage(), Broadcast.BREADTH, new ResourceAddReadyEvent(target, uploadedFile, resourceTypes,
                             mimeType));
                     hide(target);

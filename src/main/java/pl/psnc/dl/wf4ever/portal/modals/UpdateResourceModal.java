@@ -1,9 +1,11 @@
 package pl.psnc.dl.wf4ever.portal.modals;
 
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
+
 
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceUpdateReadyEvent;
 
@@ -19,7 +21,7 @@ public class UpdateResourceModal extends AbstractModal {
     private static final long serialVersionUID = -7754788822535330561L;
 
     /** Component for the uploaded file. */
-    private FileUploadField fileUpload;
+    private FileUploadField fileUpload; 
 
 
     /**

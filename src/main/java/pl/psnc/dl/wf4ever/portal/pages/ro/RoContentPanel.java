@@ -3,19 +3,23 @@ package pl.psnc.dl.wf4ever.portal.pages.ro;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
+
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+import org.purl.wf4ever.rosrs.client.AnnotationTriple;
 import org.purl.wf4ever.rosrs.client.Folder;
 import org.purl.wf4ever.rosrs.client.FolderEntry;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
@@ -23,10 +27,14 @@ import org.purl.wf4ever.rosrs.client.Resource;
 import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
+import com.hp.hpl.jena.vocabulary.RDF;
+
+
 import pl.psnc.dl.wf4ever.portal.components.FolderBreadcrumbsPanel;
 import pl.psnc.dl.wf4ever.portal.components.FolderContentsPanel;
 import pl.psnc.dl.wf4ever.portal.components.annotations.AdvancedAnnotationsPanel;
 import pl.psnc.dl.wf4ever.portal.components.annotations.CommentsList;
+import pl.psnc.dl.wf4ever.portal.events.AbstractAjaxEvent;
 import pl.psnc.dl.wf4ever.portal.events.FolderChangeEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddReadyEvent;
@@ -41,10 +49,14 @@ import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceMoveEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceMovedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceUpdateReadyEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.UpdateClickedEvent;
+
+
+import pl.psnc.dl.wf4ever.portal.events.ros.SketchEvent;
 import pl.psnc.dl.wf4ever.portal.modals.AddFolderModal;
 import pl.psnc.dl.wf4ever.portal.modals.MoveResourceModal;
 import pl.psnc.dl.wf4ever.portal.modals.UpdateResourceModal;
 import pl.psnc.dl.wf4ever.portal.modals.UploadResourceModal;
+import pl.psnc.dl.wf4ever.portal.model.ResourceType;
 import pl.psnc.dl.wf4ever.portal.model.wicket.FolderHierarchyModel;
 import pl.psnc.dl.wf4ever.portal.model.wicket.ResourceTypeModel;
 import pl.psnc.dl.wf4ever.portal.services.CreateROThread;
@@ -279,6 +291,7 @@ public class RoContentPanel extends Panel {
     private void onDeleteResourceClicked(ResourceDeleteClickedEvent event)
             throws ROSRSException {
         if (currentResource != null) {
+        	boolean isSketch=updateSketch(event);
             currentResource.delete();
             if (currentResource != currentFolder) {
                 currentResource = currentFolder;
@@ -291,6 +304,8 @@ public class RoContentPanel extends Panel {
                     changeFolder(list.get(list.size() - 1), event.getTarget());
                 }
             }
+            if (isSketch) 
+            	send(getPage(), Broadcast.BREADTH, new SketchEvent(event.getTarget()));
         }
         send(getPage(), Broadcast.BREADTH, new ResourceDeletedEvent(event.getTarget()));
     }
@@ -353,8 +368,10 @@ public class RoContentPanel extends Panel {
             if (contentType == null || MediaType.APPLICATION_OCTET_STREAM.equals(contentType)) {
                 contentType = mfm.getContentType(event.getUploadedFile().getClientFileName());
             }
+            long sizeRes=-1;
+            if (event.getUploadedFile().getSize()>0)  sizeRes=event.getUploadedFile().getSize();
             resource = researchObject.aggregate(event.getUploadedFile().getClientFileName(), event.getUploadedFile()
-                    .getInputStream(), contentType);
+                    .getInputStream(), contentType,sizeRes);
         } else {
             URI absoluteResourceURI = researchObject.getUri().resolve(event.getResourceUri());
             resource = researchObject.aggregate(absoluteResourceURI);
@@ -366,6 +383,9 @@ public class RoContentPanel extends Panel {
         if (event.getResourceTypes() != null && !event.getResourceTypes().isEmpty()) {
             ResourceTypeModel resourceTypeModel = new ResourceTypeModel(new Model<Resource>(resource));
             resourceTypeModel.setObject(event.getResourceTypes());
+            if (event.getResourceTypes().contains(ResourceType.SKETCH)) //LOG.debug("es sketch  "+this.getParent() + " and "+this.getParent().get("ro-summary") + " and page "+getPage() +" and target: "+event.getTarget());
+            	send(getPage(), Broadcast.BREADTH, new SketchEvent(event.getTarget()));
+            	
         }
         if (currentFolder != null) {
             currentFolder.addEntry(resource, null);
@@ -375,7 +395,7 @@ public class RoContentPanel extends Panel {
 
 
     /**
-     * Aggregate a resource.
+     * Update a resource.
      * 
      * @param event
      *            AJAX event
@@ -390,7 +410,12 @@ public class RoContentPanel extends Panel {
     private void onResourceUpdate(ResourceUpdateReadyEvent event)
             throws ROSRSException, IOException, ROException {
         if (event.getUploadedFile() != null) {
-            currentResource.update(event.getUploadedFile().getInputStream(), event.getUploadedFile().getContentType());
+        	long sizeRes=-1;
+            if (event.getUploadedFile().getSize()>0)  sizeRes=event.getUploadedFile().getSize();
+            currentResource.update(event.getUploadedFile().getInputStream(), event.getUploadedFile().getContentType(),sizeRes);
+            boolean isSketch=updateSketch(event);
+            if (isSketch) 
+            	send(getPage(), Broadcast.BREADTH, new SketchEvent(event.getTarget()));
         }
         send(getPage(), Broadcast.BREADTH, new ResourceAddedEvent(event.getTarget()));
     }
@@ -449,6 +474,25 @@ public class RoContentPanel extends Panel {
 
     public void setCurrentResource(Resource currentResource) {
         this.currentResource = currentResource;
+    }
+    
+    private boolean updateSketch(AbstractAjaxEvent event){
+    	boolean isSketch=false;
+        List<AnnotationTriple> typeTriples = currentResource.getPropertyValues(RDF.type, false);
+        for (AnnotationTriple triple : typeTriples) {
+            try {
+                URI typeUri = new URI(triple.getValue());
+                if (typeUri.equals(ResourceType.SKETCH.getUri())){
+                      isSketch=true;
+                      break;
+                }
+            } catch (URISyntaxException e) {
+                LOG.warn("A type is not a URI: " + e.getMessage());
+            }
+        }
+        //LOG.debug("resource: "+currentResource.getUri()+" is sketch: "+isSketch);
+        return isSketch;
+        
     }
 
 }
