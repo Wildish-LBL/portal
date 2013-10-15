@@ -89,7 +89,9 @@ public class RoSummaryPanel extends Panel {
 	@Override
     protected void onConfigure() {
         super.onConfigure();
-        refreshPanel((IModel<ResearchObject>) getDefaultModel());
+        //LOG.debug("WE ARE IN ONCONFIGURE WE ARE IN ONCONFIGURE!!!!!!!!!!!! rendered "+this.hasBeenRendered());
+        if (this.hasBeenRendered())
+        	refreshPanel((IModel<ResearchObject>) getDefaultModel());
         nestedRO.setVisible(getDefaultModelObject() != null
                 && ((ResearchObject) getDefaultModelObject()).getAggregatingRO() != null);
 
