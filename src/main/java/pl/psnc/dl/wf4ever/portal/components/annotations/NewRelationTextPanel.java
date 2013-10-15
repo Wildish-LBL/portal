@@ -19,6 +19,7 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.purl.wf4ever.rosrs.client.Annotable;
@@ -87,6 +88,7 @@ public class NewRelationTextPanel extends Panel {
     public NewRelationTextPanel(String id, IModel<ResearchObject> model, boolean editMode, List<URI> subjectsList,
             List<URI> relationsList) {
         super(id, model);
+        roModel = model;
         newValueFromHand = "";
         setOutputMarkupPlaceholderTag(true);
 
@@ -165,7 +167,23 @@ public class NewRelationTextPanel extends Panel {
         //((AnnotationTripleModel) this.getDefaultModel()).setPropertyAndValue(newProperty, newValue);
         //post event
         // IModel<? extends Annotable> annotable = ((AnnotationTripleModel) this.getDefaultModel()).getAnnotableModel();
-        send(getPage(), Broadcast.BREADTH, new AnnotationAddedEvent(event.getTarget(), roModel));
+
+        Annotable annotable;
+        if (selectedObject.equals(roModel.getObject().getUri())) {
+            annotable = roModel.getObject();
+        } else {
+            annotable = roModel.getObject().getResource(selectedSubject);
+        }
+        AnnotationTripleModel triple = new AnnotationTripleModel(new Model(annotable), selectedRelation, false);
+        String value = "";
+        if (editFragment.getCheckBoxState()) {
+            value = selectedObject.toString();
+        } else {
+            value = newValueFromHand;
+        }
+
+        triple.setPropertyAndValue(selectedRelation, value);
+        send(getPage(), Broadcast.BREADTH, new AnnotationAddedEvent(event.getTarget(), new Model(annotable)));
     }
 
 
