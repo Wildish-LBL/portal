@@ -24,8 +24,8 @@ import org.purl.wf4ever.rosrs.client.Resource;
 import pl.psnc.dl.wf4ever.portal.components.annotations.EditableRelationTextPanel;
 import pl.psnc.dl.wf4ever.portal.components.annotations.NewRelationTextPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AnnotationEditAjaxEventButton;
+import pl.psnc.dl.wf4ever.portal.events.annotations.AbstractAnnotationEditedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AddAnnotationClickedEvent;
-import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationDeletedEvent;
 import pl.psnc.dl.wf4ever.portal.model.wicket.AnnotationTripleModel;
 import pl.psnc.dl.wf4ever.vocabulary.PROV;
 import pl.psnc.dl.wf4ever.vocabulary.ROTERMS;
@@ -42,12 +42,10 @@ public class RelationsPanel extends Panel {
     @SuppressWarnings("unused")
     private static final Logger LOG = Logger.getLogger(RelationsPanel.class);
 
-    @SuppressWarnings("unused")
     private IModel<ResearchObject> roModel;
     private Component addRelationPanel;
     RelationsDict relationsDict;
     List<URI> subjectsList;
-
     AnnotationCollection annotationCollection;
 
 
@@ -89,8 +87,8 @@ public class RelationsPanel extends Panel {
         if (event.getPayload() instanceof AddAnnotationClickedEvent) {
             onAnnotateClicked((AddAnnotationClickedEvent) event.getPayload());
         }
-        if (event.getPayload() instanceof AnnotationDeletedEvent) {
-            onAnnotationEdited((AnnotationDeletedEvent) event.getPayload());
+        if (event.getPayload() instanceof AbstractAnnotationEditedEvent) {
+            onAnnotationEdited((AbstractAnnotationEditedEvent) event.getPayload());
         }
     }
 
@@ -101,9 +99,16 @@ public class RelationsPanel extends Panel {
      * @param event
      *            AJAX event
      */
-    private void onAnnotationEdited(AnnotationDeletedEvent event) {
+    private void onAnnotationEdited(AbstractAnnotationEditedEvent event) {
+        annotationCollection.clear();
+        annotationCollection.filterTriples((roModel.getObject().getAnnotationTriples()));
+        for (Resource r : roModel.getObject().getResources().values()) {
+            annotationCollection.filterTriples(r.getAnnotationTriples());
+        }
 
-        annotationCollection.filterTriples(roModel.getObject().getAnnotationTriples());
+        for (Folder f : roModel.getObject().getFolders().values()) {
+            annotationCollection.filterTriples(f.getAnnotationTriples());
+        }
         event.getTarget().add(this);
     }
 
@@ -115,11 +120,12 @@ public class RelationsPanel extends Panel {
      *            the event that triggers this action
      */
     private void onAnnotateClicked(AddAnnotationClickedEvent event) {
-        NewRelationTextPanel newRelationPanel = new NewRelationTextPanel("new-annotation", roModel.getObject(),
-                subjectsList, RelationsDict.predefinedRelations);
+        NewRelationTextPanel newRelationPanel = new NewRelationTextPanel("new-annotation", roModel, true, subjectsList,
+                RelationsDict.predefinedRelations);
         addRelationPanel.replaceWith(newRelationPanel);
         addRelationPanel = newRelationPanel;
         event.getTarget().add(addRelationPanel);
+
     }
 
 
@@ -181,13 +187,13 @@ public class RelationsPanel extends Panel {
 
         @Override
         protected void populateItem(ListItem<AnnotationTriple> item) {
-            if (item.getModelObject().getValue() != null) {
-                item.add(new EditableRelationTextPanel("editable-annotation-triple", new AnnotationTripleModel(item
-                        .getModelObject()), false));
-                item.setRenderBodyOnly(true);
+            if (item.getModelObject().getValue() == null) {
+                item.setVisible(false);
             }
+            item.add(new EditableRelationTextPanel("editable-annotation-triple", new AnnotationTripleModel(item
+                    .getModelObject()), false));
+            item.setRenderBodyOnly(true);
         }
-
     }
 
 

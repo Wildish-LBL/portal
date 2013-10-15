@@ -14,16 +14,15 @@ import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.purl.wf4ever.rosrs.client.Annotable;
+import org.purl.wf4ever.rosrs.client.ResearchObject;
 
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
@@ -69,8 +68,10 @@ public class NewRelationTextPanel extends Panel {
     private URI selectedSubject;
     private URI selectedObject;
     private URI selectedRelation;
-    private boolean checkBoxState = true;
     private String newValueFromHand;
+
+    public Component checkBoxInnerObjectRelation;
+    public IModel<ResearchObject> roModel;
 
 
     /**
@@ -83,18 +84,16 @@ public class NewRelationTextPanel extends Panel {
      * @param editMode
      *            should the field start in an edit mode
      */
-    public NewRelationTextPanel(String id, AnnotationTripleModel model, boolean editMode, List<URI> subjectsList,
+    public NewRelationTextPanel(String id, IModel<ResearchObject> model, boolean editMode, List<URI> subjectsList,
             List<URI> relationsList) {
         super(id, model);
         newValueFromHand = "";
         setOutputMarkupPlaceholderTag(true);
 
         List<URI> objectsList = new ArrayList<>(subjectsList);
-
         selectedSubject = subjectsList.get(0);
         selectedObject = objectsList.get(0);
         selectedRelation = relationsList.get(0);
-
         DropDownChoice<URI> dropDownSubjects = new DropDownChoice<URI>("subjectsList", new PropertyModel<URI>(this,
                 "selectedObject"), subjectsList);
         DropDownChoice<URI> dropDownObjects = new DropDownChoice<URI>("objectsList", new PropertyModel<URI>(this,
@@ -105,28 +104,12 @@ public class NewRelationTextPanel extends Panel {
                 "newValueFromHand"));
 
         setOutputMarkupPlaceholderTag(true);
-        newProperty = model.getObject().getProperty();
-        newValue = model.getObject().getValue();
         viewFragment = new ViewFragment("content", "view", this);
         editFragment = new EditFragment("content", "editSingle", this, dropDownSubjects, dropDownObjects,
                 dropDownRelations, vlaueFromHand);
 
         add(editMode ? editFragment : viewFragment).setOutputMarkupPlaceholderTag(true);
 
-    }
-
-
-    /**
-     * Constructor for a version that is not associated with any particular annotation triple (for adding new ones).
-     * 
-     * @param id
-     *            wicket id
-     * @param annotable
-     *            the resource that will be annotated
-     */
-    public NewRelationTextPanel(String id, Annotable annotable, List<URI> subjectsList, List<URI> relationsList) {
-        this(id, new AnnotationTripleModel(new Model<>(annotable), (URI) null, false), true, subjectsList,
-                relationsList);
     }
 
 
@@ -175,10 +158,14 @@ public class NewRelationTextPanel extends Panel {
         event.getTarget().appendJavaScript("$('.tooltip').remove();");
         event.getTarget().add(this);
         //the tripleCopy now holds the updated property and value
-        ((AnnotationTripleModel) this.getDefaultModel()).setPropertyAndValue(newProperty, newValue);
+        //, new AnnotationTripleModel(new Model<>(annotable), (URI) null, false), true);
+        //((AnnotationTripleModel) this.getDefaultModel()).setObject(new AnnotationTriple(n, subject, property, value, merge))
+        //getAnnotable
+
+        //((AnnotationTripleModel) this.getDefaultModel()).setPropertyAndValue(newProperty, newValue);
         //post event
-        IModel<? extends Annotable> annotable = ((AnnotationTripleModel) this.getDefaultModel()).getAnnotableModel();
-        send(getPage(), Broadcast.BREADTH, new AnnotationAddedEvent(event.getTarget(), annotable));
+        // IModel<? extends Annotable> annotable = ((AnnotationTripleModel) this.getDefaultModel()).getAnnotableModel();
+        send(getPage(), Broadcast.BREADTH, new AnnotationAddedEvent(event.getTarget(), roModel));
     }
 
 
@@ -275,7 +262,7 @@ public class NewRelationTextPanel extends Panel {
             controlGroup.add(dropDownProperties);
             controlGroup.add(valueFromHand);
             valueFromHand.setVisible(false);
-            final CheckBox checkBoxInnerObjectRelation = new AjaxCheckBox("checkbox-inner-object-relation",
+            checkBoxInnerObjectRelation = new AjaxCheckBox("checkbox-inner-object-relation",
                     new PropertyModel<Boolean>(this, "checkBoxState")) {
 
                 @Override
@@ -285,7 +272,6 @@ public class NewRelationTextPanel extends Panel {
                     target.add(controlGroup);
                 }
             };
-
             controlGroup.add(checkBoxInnerObjectRelation);
             add(controlGroup);
 
@@ -294,6 +280,11 @@ public class NewRelationTextPanel extends Panel {
             controlGroup.add(new AuthenticatedAjaxEventButton("cancel", null, NewRelationTextPanel.this,
                     CancelEvent.class).setDefaultFormProcessing(false));
             controlGroup.add(new MyFeedbackPanel("feedback").setOutputMarkupPlaceholderTag(true));
+        }
+
+
+        public boolean getCheckBoxState() {
+            return checkBoxState;
         }
 
 
