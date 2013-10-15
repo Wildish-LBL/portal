@@ -8,17 +8,17 @@
 	
 	
 	<wicket:fragment wicket:id="editSingle">
-		<td colspan="2"><script type="text/javascript">
+		<td colspan="3"><script type="text/javascript">
 			$(document).ready(function() {
 				$('.my-tooltip').tooltip();
 				$('.property-edit').typeahead(options);
 			})
 		</script>
 			<div class="" wicket:id="control-group">
-				<select wicket:id="subjectsList" style="width:27%;"></select>
-				<select wicket:id="relationsList" style="width:27;"></select>
-				<select wicket:id="objectsList" style="width:27%;"></select>
-				<input class="value" type="text" style="width:27%;" placeholder="value" wicket:id="value-from-hand" />
+				<select wicket:id="subjectsList" style="width:20%; height:27%;"></select>
+				<select wicket:id="relationsList" style="width:20; height:27%;"></select>
+				<select wicket:id="objectsList" style="width:20%; height:27%;"></select>
+				<input class="value" type="text" style="width:20%; height:27%;" placeholder="value" wicket:id="value-from-hand" />
 				<label>Only inner relations</label> 
 				<input type="checkbox" wicket:id="checkbox-inner-object-relation" />
 				<div class="btn-group">

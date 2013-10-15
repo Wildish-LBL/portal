@@ -1,7 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.components.annotations;
 
 import java.net.URI;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -83,20 +83,17 @@ public class NewRelationTextPanel extends Panel {
      * @param editMode
      *            should the field start in an edit mode
      */
-    public NewRelationTextPanel(String id, AnnotationTripleModel model, boolean editMode) {
+    public NewRelationTextPanel(String id, AnnotationTripleModel model, boolean editMode, List<URI> subjectsList,
+            List<URI> relationsList) {
         super(id, model);
         newValueFromHand = "";
         setOutputMarkupPlaceholderTag(true);
-        List<URI> subjectsList = Arrays.asList(new URI[] { URI.create("l_option1"), URI.create("l_option2"),
-                URI.create("l_option3") });
-        List<URI> objectsList = Arrays.asList(new URI[] { URI.create("r_option1"), URI.create("r_option2"),
-                URI.create("r_option3") });
-        List<URI> relationsList = Arrays.asList(new URI[] { URI.create("r_option1"), URI.create("r_option2"),
-                URI.create("r_option3") });
 
-        selectedSubject = URI.create("l_option1");
-        selectedObject = URI.create("r_option1");
-        selectedRelation = URI.create("r_option1");
+        List<URI> objectsList = new ArrayList<>(subjectsList);
+
+        selectedSubject = subjectsList.get(0);
+        selectedObject = objectsList.get(0);
+        selectedRelation = relationsList.get(0);
 
         DropDownChoice<URI> dropDownSubjects = new DropDownChoice<URI>("subjectsList", new PropertyModel<URI>(this,
                 "selectedObject"), subjectsList);
@@ -127,8 +124,9 @@ public class NewRelationTextPanel extends Panel {
      * @param annotable
      *            the resource that will be annotated
      */
-    public NewRelationTextPanel(String id, Annotable annotable) {
-        this(id, new AnnotationTripleModel(new Model<>(annotable), (URI) null, false), true);
+    public NewRelationTextPanel(String id, Annotable annotable, List<URI> subjectsList, List<URI> relationsList) {
+        this(id, new AnnotationTripleModel(new Model<>(annotable), (URI) null, false), true, subjectsList,
+                relationsList);
     }
 
 

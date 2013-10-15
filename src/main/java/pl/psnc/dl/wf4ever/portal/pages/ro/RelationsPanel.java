@@ -25,6 +25,7 @@ import pl.psnc.dl.wf4ever.portal.components.annotations.EditableRelationTextPane
 import pl.psnc.dl.wf4ever.portal.components.annotations.NewRelationTextPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AnnotationEditAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AddAnnotationClickedEvent;
+import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationDeletedEvent;
 import pl.psnc.dl.wf4ever.portal.model.wicket.AnnotationTripleModel;
 import pl.psnc.dl.wf4ever.vocabulary.PROV;
 import pl.psnc.dl.wf4ever.vocabulary.ROTERMS;
@@ -45,24 +46,29 @@ public class RelationsPanel extends Panel {
     private IModel<ResearchObject> roModel;
     private Component addRelationPanel;
     RelationsDict relationsDict;
+    List<URI> subjectsList;
+
+    AnnotationCollection annotationCollection;
 
 
     public RelationsPanel(String id, IModel<ResearchObject> model) {
         super(id);
         relationsDict = new RelationsDict();
         roModel = model;
-
-        AnnotationCollection annotationCollection = new AnnotationCollection();
+        subjectsList = new ArrayList<URI>();
+        subjectsList.add(model.getObject().getUri());
+        annotationCollection = new AnnotationCollection();
         annotationCollection.filterTriples((model.getObject().getAnnotationTriples()));
 
         for (Resource r : model.getObject().getResources().values()) {
             annotationCollection.filterTriples(r.getAnnotationTriples());
+            subjectsList.add(r.getUri());
         }
 
         for (Folder f : model.getObject().getFolders().values()) {
             annotationCollection.filterTriples(f.getAnnotationTriples());
+            subjectsList.add(f.getUri());
         }
-
         setOutputMarkupPlaceholderTag(true);
         Form<Void> form = new Form<Void>("form");
         add(form);
@@ -83,6 +89,22 @@ public class RelationsPanel extends Panel {
         if (event.getPayload() instanceof AddAnnotationClickedEvent) {
             onAnnotateClicked((AddAnnotationClickedEvent) event.getPayload());
         }
+        if (event.getPayload() instanceof AnnotationDeletedEvent) {
+            onAnnotationEdited((AnnotationDeletedEvent) event.getPayload());
+        }
+    }
+
+
+    /**
+     * Refresh the panel when an annotation changes.
+     * 
+     * @param event
+     *            AJAX event
+     */
+    private void onAnnotationEdited(AnnotationDeletedEvent event) {
+
+        annotationCollection.filterTriples(roModel.getObject().getAnnotationTriples());
+        event.getTarget().add(this);
     }
 
 
@@ -93,9 +115,10 @@ public class RelationsPanel extends Panel {
      *            the event that triggers this action
      */
     private void onAnnotateClicked(AddAnnotationClickedEvent event) {
-        NewRelationTextPanel panel = new NewRelationTextPanel("new-annotation", roModel.getObject());
-        addRelationPanel.replaceWith(panel);
-        addRelationPanel = panel;
+        NewRelationTextPanel newRelationPanel = new NewRelationTextPanel("new-annotation", roModel.getObject(),
+                subjectsList, RelationsDict.predefinedRelations);
+        addRelationPanel.replaceWith(newRelationPanel);
+        addRelationPanel = newRelationPanel;
         event.getTarget().add(addRelationPanel);
     }
 
@@ -108,6 +131,11 @@ public class RelationsPanel extends Panel {
 
         public AnnotationCollection() {
             list = new ArrayList<AnnotationTriple>();
+        }
+
+
+        public void clear() {
+            list.clear();
         }
 
 
@@ -153,9 +181,11 @@ public class RelationsPanel extends Panel {
 
         @Override
         protected void populateItem(ListItem<AnnotationTriple> item) {
-            item.add(new EditableRelationTextPanel("editable-annotation-triple", new AnnotationTripleModel(item
-                    .getModelObject()), false));
-            item.setRenderBodyOnly(true);
+            if (item.getModelObject().getValue() != null) {
+                item.add(new EditableRelationTextPanel("editable-annotation-triple", new AnnotationTripleModel(item
+                        .getModelObject()), false));
+                item.setRenderBodyOnly(true);
+            }
         }
 
     }
