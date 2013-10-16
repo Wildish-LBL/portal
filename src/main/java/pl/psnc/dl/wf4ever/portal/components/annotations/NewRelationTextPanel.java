@@ -69,6 +69,7 @@ public class NewRelationTextPanel extends Panel {
     private URI selectedSubject;
     private URI selectedObject;
     private URI selectedRelation;
+
     private String newValueFromHand;
 
     public Component checkBoxInnerObjectRelation;
@@ -203,7 +204,7 @@ public class NewRelationTextPanel extends Panel {
         editFragment.replaceWith(viewFragment);
         event.getTarget().appendJavaScript("$('.tooltip').remove();");
         event.getTarget().add(this);
-        IModel<? extends Annotable> annotable = ((AnnotationTripleModel) this.getDefaultModel()).getAnnotableModel();
+        IModel<? extends Annotable> annotable = roModel;
         send(getPage(), Broadcast.BREADTH, new AnnotationCancelledEvent(event.getTarget(), annotable));
     }
 
@@ -281,11 +282,16 @@ public class NewRelationTextPanel extends Panel {
             setOutputMarkupPlaceholderTag(true);
             controlGroup = new WebMarkupContainer("control-group");
             controlGroup.setOutputMarkupPlaceholderTag(true);
+
+            dropDownObjects.setOutputMarkupPlaceholderTag(true);
+            valueFromHand.setOutputMarkupPlaceholderTag(true);
+
             controlGroup.add(dropDownSubjects);
             controlGroup.add(dropDownObjects);
             controlGroup.add(dropDownProperties);
             controlGroup.add(valueFromHand);
             valueFromHand.setVisible(false);
+
             checkBoxInnerObjectRelation = new AjaxCheckBox("checkbox-inner-object-relation",
                     new PropertyModel<Boolean>(this, "checkBoxState")) {
 
@@ -293,7 +299,8 @@ public class NewRelationTextPanel extends Panel {
                 protected void onUpdate(AjaxRequestTarget target) {
                     valueFromHand.setVisible(!checkBoxState);
                     dropDownObjects.setVisible(checkBoxState);
-                    target.add(controlGroup);
+                    target.add(valueFromHand);
+                    target.add(dropDownObjects);
                 }
             };
             controlGroup.add(checkBoxInnerObjectRelation);
