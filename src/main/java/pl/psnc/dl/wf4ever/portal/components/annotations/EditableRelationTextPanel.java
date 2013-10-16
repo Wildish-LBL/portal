@@ -66,7 +66,7 @@ public class EditableRelationTextPanel extends Panel {
     /** The property that the user can edit. */
     private URI newProperty;
     /** The value that the user can edit. */
-    private URI newValue;
+    private String newValue;
 
 
     /**
@@ -84,10 +84,10 @@ public class EditableRelationTextPanel extends Panel {
         setOutputMarkupPlaceholderTag(true);
         newSubject = model.getObject().getSubject().getUri();
         newProperty = model.getObject().getProperty();
-        newValue = URI.create(model.getObject().getValue());
+        newValue = model.getObject().getValue();
         viewFragment = new ViewFragment("content", "view", this, model);
         editFragment = new EditFragment("content", "editSingle", this, new PropertyModel<URI>(this, "newSubject"),
-                new PropertyModel<URI>(this, "newProperty"), new PropertyModel<URI>(this, "newValue"));
+                new PropertyModel<URI>(this, "newProperty"), new PropertyModel<String>(this, "newValue"));
         add(editMode ? editFragment : viewFragment).setOutputMarkupPlaceholderTag(true);
     }
 
@@ -324,7 +324,7 @@ public class EditableRelationTextPanel extends Panel {
          *            the value to edit
          */
         public EditFragment(String id, String markupId, MarkupContainer markupProvider, IModel<URI> subjectModel,
-                IModel<URI> propertyModel, IModel<URI> valueModel) {
+                IModel<URI> propertyModel, IModel<String> valueModel) {
             super(id, markupId, markupProvider);
             setOutputMarkupPlaceholderTag(true);
             controlGroup = new WebMarkupContainer("control-group");
@@ -332,7 +332,7 @@ public class EditableRelationTextPanel extends Panel {
             add(controlGroup);
             controlGroup.add(new RequiredTextField<URI>("subjectval", subjectModel));
             controlGroup.add(new RequiredTextField<URI>("property-name", propertyModel));
-            controlGroup.add(new RequiredTextField<URI>("valueval", valueModel));
+            controlGroup.add(new RequiredTextField<String>("valueval", valueModel));
             controlGroup.add(new AuthenticatedAjaxEventButton("apply", null, EditableRelationTextPanel.this,
                     ApplyEvent.class));
             controlGroup.add(new AuthenticatedAjaxEventButton("cancel", null, EditableRelationTextPanel.this,

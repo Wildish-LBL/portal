@@ -20,6 +20,8 @@ public class LocalNameModel extends AbstractReadOnlyModel<String> {
     /** URI model. */
     private IModel<URI> model;
 
+    private String notUri;
+
 
     /**
      * Constructor.
@@ -33,13 +35,22 @@ public class LocalNameModel extends AbstractReadOnlyModel<String> {
 
 
     public LocalNameModel(PropertyModel<String> propertyModel) {
-        this.model = new PropertyModel<URI>(URI.create(propertyModel.getObject()), null);
+        try {
+            this.model = new PropertyModel<URI>(URI.create(propertyModel.getObject()), null);
+        } catch (IllegalArgumentException e) {
+            model = null;
+            notUri = propertyModel.getObject();
+        }
     }
 
 
     @Override
     public String getObject() {
-        return model.getObject() != null ? localName(model.getObject()) : null;
+        if (model != null) {
+            return model.getObject() != null ? localName(model.getObject()) : null;
+        } else {
+            return notUri;
+        }
     }
 
 
@@ -51,6 +62,10 @@ public class LocalNameModel extends AbstractReadOnlyModel<String> {
      * @return fragment or last segment
      */
     private String localName(URI uri) {
+        if (model == null) {
+            return notUri;
+        }
+
         if (uri.getFragment() != null && !uri.getFragment().isEmpty()) {
             return uri.getFragment();
         }

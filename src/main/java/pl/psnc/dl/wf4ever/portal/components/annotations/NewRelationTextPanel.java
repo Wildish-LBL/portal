@@ -96,9 +96,9 @@ public class NewRelationTextPanel extends Panel {
         selectedObject = objectsList.get(0);
         selectedRelation = relationsList.get(0);
         DropDownChoice<URI> dropDownSubjects = new DropDownChoice<URI>("subjectsList", new PropertyModel<URI>(this,
-                "selectedObject"), subjectsList);
+                "selectedSubject"), subjectsList);
         DropDownChoice<URI> dropDownObjects = new DropDownChoice<URI>("objectsList", new PropertyModel<URI>(this,
-                "selectedSubject"), objectsList);
+                "selectedObject"), objectsList);
         DropDownChoice<URI> dropDownRelations = new DropDownChoice<URI>("relationsList", new PropertyModel<URI>(this,
                 "selectedRelation"), relationsList);
         TextField<String> vlaueFromHand = new TextField<String>("value-from-hand", new PropertyModel<String>(this,

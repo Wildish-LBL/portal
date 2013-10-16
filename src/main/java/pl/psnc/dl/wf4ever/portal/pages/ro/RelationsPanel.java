@@ -214,6 +214,7 @@ public class RelationsPanel extends Panel {
         subjectsList.clear();
         objectsList.clear();
         subjectsList.add(roModel.getObject().getUri());
+        objectsList.add(roModel.getObject().getUri());
 
         annotationCollection.filterTriples((roModel.getObject().getAnnotationTriples()));
         for (Resource r : roModel.getObject().getResources().values()) {
