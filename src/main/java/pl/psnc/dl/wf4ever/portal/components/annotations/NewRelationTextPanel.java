@@ -254,7 +254,7 @@ public class NewRelationTextPanel extends Panel {
 
         /** A div that contains all components. */
         private WebMarkupContainer controlGroup;
-        boolean checkBoxState = true;
+        boolean checkBoxState = false;
         private EditFragment fragmet = this;
 
 
@@ -295,8 +295,8 @@ public class NewRelationTextPanel extends Panel {
 
                 @Override
                 protected void onUpdate(AjaxRequestTarget target) {
-                    valueFromHand.setVisible(!checkBoxState);
-                    dropDownObjects.setVisible(checkBoxState);
+                    valueFromHand.setVisible(checkBoxState);
+                    dropDownObjects.setVisible(!checkBoxState);
                     target.add(valueFromHand);
                     target.add(dropDownObjects);
                 }
