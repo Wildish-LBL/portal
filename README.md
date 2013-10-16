@@ -23,7 +23,7 @@ Roadmap and release plan: http://www.wf4ever-project.org/wiki/display/docs/RODL+
 Authors
 =======
 
-Raúl Palma, Piotr Hołubowicz, Filip Wiśniewski
+Raúl Palma, Piotr Hołubowicz
 
 Poznań Supercomputing and Networking Center, http://www.psnc.pl
 

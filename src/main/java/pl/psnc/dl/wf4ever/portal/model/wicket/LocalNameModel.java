@@ -4,6 +4,7 @@ import java.net.URI;
 
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.PropertyModel;
 
 /**
  * This model returns a local name given a URI. This is either a fragment ID or the last path segment.
@@ -31,6 +32,11 @@ public class LocalNameModel extends AbstractReadOnlyModel<String> {
     }
 
 
+    public LocalNameModel(PropertyModel<String> propertyModel) {
+        this.model = new PropertyModel<URI>(URI.create(propertyModel.getObject()), null);
+    }
+
+
     @Override
     public String getObject() {
         return model.getObject() != null ? localName(model.getObject()) : null;
@@ -48,7 +54,16 @@ public class LocalNameModel extends AbstractReadOnlyModel<String> {
         if (uri.getFragment() != null && !uri.getFragment().isEmpty()) {
             return uri.getFragment();
         }
+
+        if (uri.getPath().endsWith("/")) {
+            String[] tmparray = uri.getPath().split("/");
+            if (tmparray.length == 0) {
+                return "/";
+            } else {
+                return tmparray[tmparray.length - 1];
+            }
+
+        }
         return uri.getPath().substring(uri.getPath().lastIndexOf('/') + 1);
     }
-
 }

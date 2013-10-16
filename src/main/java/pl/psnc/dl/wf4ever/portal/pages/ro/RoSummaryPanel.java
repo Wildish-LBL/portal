@@ -54,7 +54,6 @@ public class RoSummaryPanel extends Panel {
     public RoSummaryPanel(String id, IModel<ResearchObject> model) {
         super(id, model);
         setOutputMarkupId(true);
-
         nestedRO = new WebMarkupContainer("nested-ro");
         nestedRO.setOutputMarkupPlaceholderTag(true);
         nestedRO.add(new ExternalLink("aggregating-ro", new PropertyModel<String>(model, "aggregatingRO.toString"),

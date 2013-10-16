@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<wicket:panel xmlns:wicket="http://wicket.apache.org">
+	<div wicket:id="content" ></div>
+	
+	<wicket:fragment wicket:id="view">
+	</wicket:fragment>
+	
+	
+	
+	<wicket:fragment wicket:id="editSingle">
+		<td colspan="3"><script type="text/javascript">
+			$(document).ready(function() {
+				$('.my-tooltip').tooltip();
+				$('.property-edit').typeahead(options);
+			})
+		</script>
+			<div class="" wicket:id="control-group">
+				<select wicket:id="subjectsList" style="width:20%; height:27%;"></select>
+				<select wicket:id="relationsList" style="width:20; height:27%;"></select>
+				<select wicket:id="objectsList" style="width:20%; height:27%;"></select>
+				<input class="value" type="text" style="width:20%; height:27%;" placeholder="value" wicket:id="value-from-hand" />
+				<label>Only inner relations</label> 
+				<input type="checkbox" wicket:id="checkbox-inner-object-relation" />
+				<div class="btn-group">
+					<button data-original-title="apply" data-toggle="tooltip"
+						data-placement="top" class="btn my-tooltip" data-container="body"
+						type="submit" wicket:id="apply">
+						<i class="icon-ok"></i>
+					</button>
+					<button data-original-title="cancel" data-toggle="tooltip"
+						data-placement="top" class="btn my-tooltip" data-container="body"
+						type="submit" wicket:id="cancel">
+						<i class="icon-remove"></i>
+					</button>
+				</div>
+				<span class="help-block" wicket:id="feedback">Please correct
+					the error</span>
+			</div>
+			</td>
+	</wicket:fragment>
+</wicket:panel>
