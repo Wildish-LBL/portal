@@ -1,7 +1,6 @@
 package pl.psnc.dl.wf4ever.portal.components.annotations;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -87,13 +86,12 @@ public class NewRelationTextPanel extends Panel {
      *            should the field start in an edit mode
      */
     public NewRelationTextPanel(String id, IModel<ResearchObject> model, boolean editMode, List<URI> subjectsList,
-            List<URI> relationsList) {
+            List<URI> relationsList, List<URI> objectsList) {
         super(id, model);
         roModel = model;
         newValueFromHand = "";
         setOutputMarkupPlaceholderTag(true);
 
-        List<URI> objectsList = new ArrayList<>(subjectsList);
         selectedSubject = subjectsList.get(0);
         selectedObject = objectsList.get(0);
         selectedRelation = relationsList.get(0);
