@@ -169,10 +169,16 @@ public class NewRelationTextPanel extends Panel {
         // IModel<? extends Annotable> annotable = ((AnnotationTripleModel) this.getDefaultModel()).getAnnotableModel();
 
         Annotable annotable;
-        if (selectedObject.equals(roModel.getObject().getUri())) {
+        if (selectedSubject.equals(roModel.getObject().getUri())) {
             annotable = roModel.getObject();
-        } else {
+        }
+        //else try to get resource
+        else {
             annotable = roModel.getObject().getResource(selectedSubject);
+        }
+        // and if it not resource try to get folder
+        if (annotable == null) {
+            annotable = roModel.getObject().getFolder(selectedSubject);
         }
         AnnotationTripleModel triple = new AnnotationTripleModel(new Model(annotable), selectedRelation, false);
         String value = "";

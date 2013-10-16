@@ -22,6 +22,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.purl.wf4ever.rosrs.client.Annotable;
 import org.purl.wf4ever.rosrs.client.AnnotationTriple;
+import org.purl.wf4ever.rosrs.client.Utils;
 
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
@@ -262,7 +263,8 @@ public class EditableRelationTextPanel extends Panel {
 
             WebMarkupContainer valueColumn = new WebMarkupContainer("value");
             valueColumn.add(AttributeAppender.replace("data-original-title", new PropertyModel<>(model, "value")));
-            valueColumn.add(new Label("value-name", new LocalNameModel(new PropertyModel<String>(model, "value"))));
+            value = new Label("value-name", new LocalNameModel(new PropertyModel<String>(model, "value")));
+            valueColumn.add(value);
             valueColumn.add(new AuthenticatedAjaxEventButton("delete", null, EditableRelationTextPanel.this,
                     DeleteEvent.class));
             add(valueColumn);
@@ -275,7 +277,6 @@ public class EditableRelationTextPanel extends Panel {
         @SuppressWarnings("unchecked")
         @Override
         protected void onConfigure() {
-            /*
             String text = value.getDefaultModelObjectAsString();
             Component replacementValue = null;
             if (Utils.isAbsoluteURI(text) && value instanceof Label) {
@@ -288,7 +289,7 @@ public class EditableRelationTextPanel extends Panel {
                 value = replacementValue;
             }
             super.onConfigure();
-            */
+
         }
     }
 
