@@ -11,6 +11,7 @@ import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -89,6 +90,10 @@ public class QualityPanel extends Panel {
         evaluationPanel = new WebMarkupContainer("evaluation-panel");
         evaluationPanel.setOutputMarkupId(true);
         add(evaluationPanel);
+        String decayLink = "http://sandbox.wf4ever-project.org/decayMonitoring/visual.html?RO="
+                + model.getObject().getUri().toString();
+
+        add(new ExternalLink("decayMonitoring", decayLink, "See quality history with RO Monitoring Tool"));
     }
 
 
