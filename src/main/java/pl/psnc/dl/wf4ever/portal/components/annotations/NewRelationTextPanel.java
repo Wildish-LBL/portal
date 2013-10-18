@@ -182,9 +182,9 @@ public class NewRelationTextPanel extends Panel {
         AnnotationTripleModel triple = new AnnotationTripleModel(new Model(annotable), selectedRelation, false);
         String value = "";
         if (editFragment.getCheckBoxState()) {
-            value = selectedObject.toString();
-        } else {
             value = newValueFromHand;
+        } else {
+            value = selectedObject.toString();
         }
 
         triple.setPropertyAndValue(selectedRelation, value);
