@@ -1,6 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.components.annotations;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -91,6 +92,14 @@ public class NewRelationTextPanel extends Panel {
         roModel = model;
         newValueFromHand = "";
         setOutputMarkupPlaceholderTag(true);
+        
+        try {
+			if (!subjectsList.contains(new URI("Choose-RO-Resource"))) subjectsList.add(0, new URI("Choose-RO-Resource"));
+			if (!objectsList.contains(new URI("Choose-RO-Resource"))) objectsList.add(0, new URI("Choose-RO-Resource"));
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
         selectedSubject = subjectsList.get(0);
         selectedObject = objectsList.get(0);
@@ -155,6 +164,8 @@ public class NewRelationTextPanel extends Panel {
      *            click event
      */
     private void onApply(ApplyEvent event) {
+    	boolean objectSelected=!editFragment.getCheckBoxState() ? selectedObject.toString()!="Choose-RO-Resource" : (newValueFromHand!=null && newValueFromHand!="");
+    	if (selectedSubject.toString()!="Choose-RO-Resource" && selectedRelation.toString()!="Choose-Relation" && objectSelected){
         editFragment.replaceWith(viewFragment);
         event.getTarget().appendJavaScript("$('.tooltip').remove();");
         event.getTarget().add(this);
@@ -189,6 +200,7 @@ public class NewRelationTextPanel extends Panel {
 
         triple.setPropertyAndValue(selectedRelation, value);
         send(getPage(), Broadcast.BREADTH, new AnnotationAddedEvent(event.getTarget(), new Model(annotable)));
+    	}
     }
 
 

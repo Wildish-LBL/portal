@@ -321,6 +321,7 @@ public class RelationsPanel extends Panel {
         private static final long serialVersionUID = 1L;
 
         public static final List<URI> predefinedRelations = Arrays.asList(new URI[] {
+        		URI.create("Choose-Relation"),
                 URI.create(PROV.wasDerivedFrom.getURI()), URI.create(PROV.wasRevisionOf.getURI()),
                 URI.create(PROV.wasQuotedFrom.getURI()), URI.create(PROV.hadOriginalSource.getURI()),
                 URI.create(WFPROV.usedInput.getURI()), URI.create(WFPROV.wasOutputFrom.getURI()),
