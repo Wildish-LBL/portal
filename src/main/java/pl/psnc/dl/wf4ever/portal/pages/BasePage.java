@@ -55,7 +55,7 @@ public class BasePage extends WebPage {
         }
         add(redirect);
 
-        add(new BookmarkablePageLink<Void>("banerTitle", HomePage.class));
+        //add(new BookmarkablePageLink<Void>("banerTitle", HomePage.class));
 
         add(new BookmarkablePageLink<Void>("menu-home", HomePage.class));
         add(new BookmarkablePageLink<Void>("menu-browse", SearchResultsPage.class));
