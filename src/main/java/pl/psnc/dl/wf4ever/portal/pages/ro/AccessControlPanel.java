@@ -13,7 +13,6 @@ import org.purl.wf4ever.rosrs.client.users.UserManagementService;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
-
 public class AccessControlPanel extends Panel {
 
 	/** id. */

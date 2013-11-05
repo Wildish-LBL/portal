@@ -177,8 +177,7 @@ public class RoPanel extends Panel {
 	public void onEvent(IEvent<?> event) {
 		super.onEvent(event);
 		if (event.getPayload() instanceof ImportAnnotationClickedEvent) {
-			onImportAnnotationsClicked((ImportAnnotationClickedEvent) event.getPayload());
-		}
+			onImportAnnotationsClicked((ImportAnnotationClickedEvent) event.getPayload());}
 		if (event.getPayload() instanceof SnapshotCreateEvent) {
 			createSnapshot((SnapshotCreateEvent) event.getPayload());
 		}
@@ -258,7 +257,7 @@ public class RoPanel extends Panel {
 		ResearchObject researchObject = (ResearchObject) getDefaultModelObject();
 		researchObject.loadEvolutionInformation();
 		send(getPage(), Broadcast.BREADTH, new RoEvolutionLoadedEvent(event.getTarget()));
-	}
+}
 
 	private void onSketchEvent(SketchEvent event) {
 		event.getTarget().add(this.get("ro-summary"));
@@ -274,7 +273,7 @@ public class RoPanel extends Panel {
 	private void onMetadataDownload(MetadataDownloadEvent event) {
 		event.getTarget().appendJavaScript(
 				"window.location.href='" + getROMetadataLink(event.getFormat()) + "'");
-	}
+		}
 
 	/**
 	 * Called when an annotation body has been uploaded.
