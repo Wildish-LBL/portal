@@ -98,13 +98,12 @@ public class RoPanel extends Panel {
 			error("Research object cannot be loaded: " + e.getMessage());
 			RoPage.LOG.error("Research object cannot be loaded", e);
 		}
-
 		NotificationService notificationService = new NotificationService(app.getRodlURI(), null);
 
 		IModel<ArrayList<Notification>> notificationsModel = new Model<ArrayList<Notification>>();
 		IModel<EvaluationResult> qualityModel = new Model<EvaluationResult>();
 		String rssLink = notificationService.getNotificationsUri(
-				researchObjectModel.getObject().getUri(), null, null).toString();
+		researchObjectModel.getObject().getUri(), null, null).toString();
 
 		add(new RoSummaryPanel("ro-summary", researchObjectModel));
 		add(new RoActionsPanel("ro-actions", researchObjectModel));
@@ -276,7 +275,7 @@ public class RoPanel extends Panel {
 	 *            AJAX event
 	 */
 	private void onAnnotationImport(ImportAnnotationReadyEvent event) {
-		String contentType = RDFFormat.forFileName(event.getUploadedFile().getClientFileName(),
+String contentType = RDFFormat.forFileName(event.getUploadedFile().getClientFileName(),
 				RDFFormat.RDFXML).getDefaultMIMEType();
 		Annotable annotable = event.getAnnotableModel().getObject();
 		try {
