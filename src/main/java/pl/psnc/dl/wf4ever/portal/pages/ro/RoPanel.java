@@ -24,6 +24,7 @@ import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 import org.purl.wf4ever.rosrs.client.notifications.Notification;
 import org.purl.wf4ever.rosrs.client.notifications.NotificationService;
+import org.purl.wf4ever.rosrs.client.users.User;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
@@ -82,7 +83,6 @@ public class RoPanel extends Panel {
 	 */
 	public RoPanel(String id, IModel<ResearchObject> researchObjectModel) {
 		super(id, researchObjectModel);
-		long startTime = System.nanoTime();
 		PortalApplication app = (PortalApplication) getApplication();
 		feedbackPanel = new MyFeedbackPanel("feedbackPanel");
 		feedbackPanel.setOutputMarkupId(true);
@@ -138,6 +138,17 @@ public class RoPanel extends Panel {
 				app.getMinimModels()));
 		add(new RelationsPanel("relations-panel", researchObjectModel));
 
+		final User user = session.getUser();
+		Panel accessControlPanel = null;
+		// should be if user is an owner... is't difficult to check I think
+		if (user != null) {
+			accessControlPanel = new AccessControlPanel("accesscontrol-panel", researchObjectModel);
+		} else {
+			accessControlPanel = new IvisibleAccessControlPanel("accesscontrol-panel",
+					researchObjectModel);
+			accessControlPanel.setVisible(false);
+		}
+		add(accessControlPanel);
 		IModel<Notification> selectedNotification = new Model<Notification>((Notification) null);
 		NotificationsList notificationsList = new NotificationsList("notificationsList",
 				notificationsModel, selectedNotification);
@@ -155,10 +166,7 @@ public class RoPanel extends Panel {
 		add(new FutureUpdateBehavior<ArrayList<Notification>>(Duration.seconds(1),
 				session.storeObject(notificationsFuture), notificationsModel,
 				notificationsIndicator, notificationsList));
-		long endTime = System.nanoTime();
-		long duration = endTime - startTime;
-		int a = 2;
-	}
+		}
 
 	@Override
 	protected void onAfterRender() {
@@ -275,7 +283,7 @@ public class RoPanel extends Panel {
 	 *            AJAX event
 	 */
 	private void onAnnotationImport(ImportAnnotationReadyEvent event) {
-String contentType = RDFFormat.forFileName(event.getUploadedFile().getClientFileName(),
+		String contentType = RDFFormat.forFileName(event.getUploadedFile().getClientFileName(),
 				RDFFormat.RDFXML).getDefaultMIMEType();
 		Annotable annotable = event.getAnnotableModel().getObject();
 		try {
