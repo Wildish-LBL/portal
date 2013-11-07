@@ -24,6 +24,7 @@ import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 import org.purl.wf4ever.rosrs.client.notifications.Notification;
 import org.purl.wf4ever.rosrs.client.notifications.NotificationService;
+import org.purl.wf4ever.rosrs.client.users.User;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
@@ -98,27 +99,24 @@ public class RoPanel extends Panel {
 			RoPage.LOG.error("Research object cannot be loaded", e);
 		}
 
-		NotificationService notificationService = new NotificationService(
-				app.getRodlURI(), null);
+		NotificationService notificationService = new NotificationService(app.getRodlURI(), null);
 
 		IModel<ArrayList<Notification>> notificationsModel = new Model<ArrayList<Notification>>();
 		IModel<EvaluationResult> qualityModel = new Model<EvaluationResult>();
 		String rssLink = notificationService.getNotificationsUri(
-				researchObjectModel.getObject().getUri(), null, null)
-				.toString();
+				researchObjectModel.getObject().getUri(), null, null).toString();
 
 		add(new RoSummaryPanel("ro-summary", researchObjectModel));
 		add(new RoActionsPanel("ro-actions", researchObjectModel));
-		NotificationsIndicator notificationsIndicator = new NotificationsIndicator(
-				"notifications", researchObjectModel, notificationsModel,
-				rssLink, "notifications");
+		NotificationsIndicator notificationsIndicator = new NotificationsIndicator("notifications",
+				researchObjectModel, notificationsModel, rssLink, "notifications");
 		add(notificationsIndicator);
-		QualityBar qualityBar = new QualityBar("health-progress-bar",
-				qualityModel, researchObjectModel, app.getDefaultMinimModel());
+		QualityBar qualityBar = new QualityBar("health-progress-bar", qualityModel,
+				researchObjectModel, app.getDefaultMinimModel());
 		add(qualityBar);
 		add(new RoCommentsPanel("comments", researchObjectModel));
-		add(new AdvancedAnnotationsPanel("advanced-annotations",
-				"ro-basic-view", researchObjectModel));
+		add(new AdvancedAnnotationsPanel("advanced-annotations", "ro-basic-view",
+				researchObjectModel));
 		add(new RoContentPanel("content", researchObjectModel));
 		add(new AjaxLazyLoadPanel("ro-evo-box", researchObjectModel) {
 
@@ -128,50 +126,53 @@ public class RoPanel extends Panel {
 			@SuppressWarnings("unchecked")
 			@Override
 			public Component getLazyLoadComponent(String markupId) {
-				return new RoEvoBox(markupId,
-						(IModel<ResearchObject>) getDefaultModel());
+				return new RoEvoBox(markupId, (IModel<ResearchObject>) getDefaultModel());
 			}
 
 			@Override
 			public Component getLoadingComponent(String markupId) {
-				return new LoadingCircle(markupId,
-						"Loading research object evolution metadata...");
+				return new LoadingCircle(markupId, "Loading research object evolution metadata...");
 			}
 		});
 
-		add(new QualityPanel("quality-panel", researchObjectModel,
-				app.getChecklistService(), app.getMinimModels()));
+		add(new QualityPanel("quality-panel", researchObjectModel, app.getChecklistService(),
+				app.getMinimModels()));
 		add(new RelationsPanel("relations-panel", researchObjectModel));
-		add(new AccessControlPanel("accesscontrol-panel", researchObjectModel));
-
-		IModel<Notification> selectedNotification = new Model<Notification>(
-				(Notification) null);
-		NotificationsList notificationsList = new NotificationsList(
-				"notificationsList", notificationsModel, selectedNotification);
+		final User user = session.getUser();
+		Panel accessControlPanel = null;
+		// should be if user is an owner... is't difficult to check I think
+		if (user != null) {
+			accessControlPanel = new AccessControlPanel("accesscontrol-panel", researchObjectModel);
+		} else {
+			accessControlPanel = new IvisibleAccessControlPanel("accesscontrol-panel",
+					researchObjectModel);
+			accessControlPanel.setVisible(false);
+		}
+		add(accessControlPanel);
+		IModel<Notification> selectedNotification = new Model<Notification>((Notification) null);
+		NotificationsList notificationsList = new NotificationsList("notificationsList",
+				notificationsModel, selectedNotification);
 		add(notificationsList);
-		add(new NotificationPreviewPanel("notificationPanel",
-				selectedNotification));
+		add(new NotificationPreviewPanel("notificationPanel", selectedNotification));
 
 		add(new DownloadMetadataModal("download-metadata-modal"));
-		importAnnotationsModal = new ImportAnnotationModal(
-				"import-annotation-modal", researchObjectModel);
+		importAnnotationsModal = new ImportAnnotationModal("import-annotation-modal",
+				researchObjectModel);
 		add(importAnnotationsModal);
 
 		ExecutorService executor = Executors.newFixedThreadPool(10);
-		Future<ArrayList<Notification>> notificationsFuture = executor
-				.submit(RoPage.createNotificationsCallable(notificationService,
-						researchObjectModel));
-		add(new FutureUpdateBehavior<ArrayList<Notification>>(
-				Duration.seconds(1), session.storeObject(notificationsFuture),
-				notificationsModel, notificationsIndicator, notificationsList));
+		Future<ArrayList<Notification>> notificationsFuture = executor.submit(RoPage
+				.createNotificationsCallable(notificationService, researchObjectModel));
+		add(new FutureUpdateBehavior<ArrayList<Notification>>(Duration.seconds(1),
+				session.storeObject(notificationsFuture), notificationsModel,
+				notificationsIndicator, notificationsList));
 	}
 
 	@Override
 	public void onEvent(IEvent<?> event) {
 		super.onEvent(event);
 		if (event.getPayload() instanceof ImportAnnotationClickedEvent) {
-			onImportAnnotationsClicked((ImportAnnotationClickedEvent) event
-					.getPayload());
+			onImportAnnotationsClicked((ImportAnnotationClickedEvent) event.getPayload());
 		}
 		if (event.getPayload() instanceof SnapshotCreateEvent) {
 			createSnapshot((SnapshotCreateEvent) event.getPayload());
@@ -218,8 +219,8 @@ public class RoPanel extends Panel {
 	 */
 	private void createSnapshot(SnapshotCreateEvent event) {
 		ResearchObject researchObject = (ResearchObject) getDefaultModelObject();
-		final JobStatus status = researchObject.snapshot(researchObject
-				.getName().substring(0, researchObject.getName().length() - 1)
+		final JobStatus status = researchObject.snapshot(researchObject.getName().substring(0,
+				researchObject.getName().length() - 1)
 				+ "-snapshot");
 		feedbackPanel.add(new JobStatusUpdatingBehaviour(status, "snapshot",
 				SnapshotCreatedEvent.class));
@@ -234,8 +235,8 @@ public class RoPanel extends Panel {
 	 */
 	private void createArchive(ReleaseCreateEvent event) {
 		ResearchObject researchObject = (ResearchObject) getDefaultModelObject();
-		final JobStatus status = researchObject.archive(researchObject
-				.getName().substring(0, researchObject.getName().length() - 1)
+		final JobStatus status = researchObject.archive(researchObject.getName().substring(0,
+				researchObject.getName().length() - 1)
 				+ "-release");
 		feedbackPanel.add(new JobStatusUpdatingBehaviour(status, "release",
 				ReleaseCreatedEvent.class));
@@ -251,8 +252,7 @@ public class RoPanel extends Panel {
 	private void onJobFinished(JobFinishedEvent event) {
 		ResearchObject researchObject = (ResearchObject) getDefaultModelObject();
 		researchObject.loadEvolutionInformation();
-		send(getPage(), Broadcast.BREADTH,
-				new RoEvolutionLoadedEvent(event.getTarget()));
+		send(getPage(), Broadcast.BREADTH, new RoEvolutionLoadedEvent(event.getTarget()));
 	}
 
 	private void onSketchEvent(SketchEvent event) {
@@ -268,8 +268,7 @@ public class RoPanel extends Panel {
 	 */
 	private void onMetadataDownload(MetadataDownloadEvent event) {
 		event.getTarget().appendJavaScript(
-				"window.location.href='" + getROMetadataLink(event.getFormat())
-						+ "'");
+				"window.location.href='" + getROMetadataLink(event.getFormat()) + "'");
 	}
 
 	/**
@@ -279,21 +278,18 @@ public class RoPanel extends Panel {
 	 *            AJAX event
 	 */
 	private void onAnnotationImport(ImportAnnotationReadyEvent event) {
-		String contentType = RDFFormat.forFileName(
-				event.getUploadedFile().getClientFileName(), RDFFormat.RDFXML)
-				.getDefaultMIMEType();
+		String contentType = RDFFormat.forFileName(event.getUploadedFile().getClientFileName(),
+				RDFFormat.RDFXML).getDefaultMIMEType();
 		Annotable annotable = event.getAnnotableModel().getObject();
 		try {
-			annotable.annotate(event.getUploadedFile().getClientFileName(),
-					event.getUploadedFile().getInputStream(), contentType);
+			annotable.annotate(event.getUploadedFile().getClientFileName(), event.getUploadedFile()
+					.getInputStream(), contentType);
 		} catch (ROSRSException | ROException | IOException e) {
 			error(e.getMessage());
 			LOG.error("Can't import annotations", e);
 		}
-		send(getPage(),
-				Broadcast.BREADTH,
-				new AnnotationAddedEvent(event.getTarget(), event
-						.getAnnotableModel()));
+		send(getPage(), Broadcast.BREADTH,
+				new AnnotationAddedEvent(event.getTarget(), event.getAnnotableModel()));
 	}
 
 	/**
@@ -303,8 +299,7 @@ public class RoPanel extends Panel {
 	 */
 	public String getROZipLink() {
 		ResearchObject researchObject = (ResearchObject) getDefaultModelObject();
-		return researchObject.getUri().toString()
-				.replaceFirst("/ROs/", "/zippedROs/");
+		return researchObject.getUri().toString().replaceFirst("/ROs/", "/zippedROs/");
 	}
 
 	/**
