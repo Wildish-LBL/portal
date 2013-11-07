@@ -98,6 +98,7 @@ public class RoPanel extends Panel {
 			error("Research object cannot be loaded: " + e.getMessage());
 			RoPage.LOG.error("Research object cannot be loaded", e);
 		}
+
 		NotificationService notificationService = new NotificationService(app.getRodlURI(), null);
 
 		IModel<ArrayList<Notification>> notificationsModel = new Model<ArrayList<Notification>>();
@@ -166,18 +167,15 @@ public class RoPanel extends Panel {
 		add(new FutureUpdateBehavior<ArrayList<Notification>>(Duration.seconds(1),
 				session.storeObject(notificationsFuture), notificationsModel,
 				notificationsIndicator, notificationsList));
-		}
 
-	@Override
-	protected void onAfterRender() {
-		super.onAfterRender();
 	}
 
 	@Override
 	public void onEvent(IEvent<?> event) {
 		super.onEvent(event);
 		if (event.getPayload() instanceof ImportAnnotationClickedEvent) {
-			onImportAnnotationsClicked((ImportAnnotationClickedEvent) event.getPayload());}
+			onImportAnnotationsClicked((ImportAnnotationClickedEvent) event.getPayload());
+		}
 		if (event.getPayload() instanceof SnapshotCreateEvent) {
 			createSnapshot((SnapshotCreateEvent) event.getPayload());
 		}
@@ -257,7 +255,8 @@ public class RoPanel extends Panel {
 		ResearchObject researchObject = (ResearchObject) getDefaultModelObject();
 		researchObject.loadEvolutionInformation();
 		send(getPage(), Broadcast.BREADTH, new RoEvolutionLoadedEvent(event.getTarget()));
-}
+	}
+
 
 	private void onSketchEvent(SketchEvent event) {
 		event.getTarget().add(this.get("ro-summary"));
@@ -273,7 +272,7 @@ public class RoPanel extends Panel {
 	private void onMetadataDownload(MetadataDownloadEvent event) {
 		event.getTarget().appendJavaScript(
 				"window.location.href='" + getROMetadataLink(event.getFormat()) + "'");
-		}
+	}
 
 	/**
 	 * Called when an annotation body has been uploaded.
