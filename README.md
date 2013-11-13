@@ -14,7 +14,7 @@ A detailed user guide of RO portal is in:
 
 Exemplary use cases:
 
-*Hettne, K., et al. 2013. Structuring research methods and data with the Research Object model: genomics workflows as a case study in submission to Journal of Biomedical Semantics*
+*Hettne, K., et al. 2013. Structuring research methods and data with the Research Object model: genomics workflows as a case study in submission to Journal of Biomedical Semantics* Preprint at http://arxiv.org/abs/1311.2789
 
 *Hettne, K., et al. 2013. D6.3v3: Genome Wide Association Study workflows v3. Wf4Ever project Deliverable. Available at http://repo.wf4ever-project.org/publication/52*
 
