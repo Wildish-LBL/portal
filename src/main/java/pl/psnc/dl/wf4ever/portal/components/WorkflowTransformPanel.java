@@ -131,6 +131,7 @@ public class WorkflowTransformPanel extends Panel {
     public void onEvent(IEvent<?> event) {
         if (event.getPayload() instanceof WorkflowTransformClickedEvent) {
             onWorkflowTransformClicked((WorkflowTransformClickedEvent) event.getPayload());
+            // TODO:  Pop up the modal to ask for folders
         }
         if (event.getPayload() instanceof WorkflowTransformedEvent) {
             onWorkflowTransformed((WorkflowTransformedEvent) event.getPayload());
@@ -154,7 +155,8 @@ public class WorkflowTransformPanel extends Panel {
             Wf2ROService service = MySession.get().getWf2ROService();
             try {
                 // TODO: Find the correct folders in allFolders
-                //allFolders.getObject().get(0).get
+                // TODO: Do this rather from a second button in the Modal dialogue and use
+                // the user-selected folders (or null if --do not extract-- was selected)
                 JobStatus status = service.transform(resource.getUri(), contentType.toString(), resource
                         .getResearchObject().getUri(), folder.getUri(), folder.getUri(), folder.getUri(), folder.getUri());
                 add(new WorkflowTransformationJobStatusUpdatingBehaviour(status));
