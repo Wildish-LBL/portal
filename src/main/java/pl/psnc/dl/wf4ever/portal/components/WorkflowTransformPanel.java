@@ -1,6 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.components;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.core.MediaType;
@@ -90,6 +91,8 @@ public class WorkflowTransformPanel extends Panel {
     /** Current folder when the button is pressed. */
     private Folder folder;
 
+    private IModel<List<Folder>> allFolders;
+
 
     /**
      * Constructor.
@@ -102,12 +105,14 @@ public class WorkflowTransformPanel extends Panel {
      *            resource type model
      * @param folderModel
      *            current folder model
+     * @param allFolders 
      */
     public WorkflowTransformPanel(String id, IModel<Resource> model, ResourceTypeModel resourceTypeModel,
-            IModel<Folder> folderModel) {
+            IModel<Folder> folderModel, IModel<List<Folder>> allFolders) {
         super(id, model);
         this.resourceTypeModel = resourceTypeModel;
         this.folderModel = folderModel;
+        this.allFolders = allFolders;
         setOutputMarkupPlaceholderTag(true);
 
         Form<?> form = new Form<Void>("form");
@@ -148,8 +153,10 @@ public class WorkflowTransformPanel extends Panel {
             MediaType contentType = response.getType();
             Wf2ROService service = MySession.get().getWf2ROService();
             try {
+                // TODO: Find the correct folders in allFolders
+                //allFolders.getObject().get(0).get
                 JobStatus status = service.transform(resource.getUri(), contentType.toString(), resource
-                        .getResearchObject().getUri());
+                        .getResearchObject().getUri(), folder.getUri(), folder.getUri(), folder.getUri(), folder.getUri());
                 add(new WorkflowTransformationJobStatusUpdatingBehaviour(status));
                 event.getTarget().add(this);
             } catch (ServiceException e) {
@@ -175,11 +182,12 @@ public class WorkflowTransformPanel extends Panel {
             researchObject.load();
             Set<Resource> newResources = new HashSet<>(researchObject.getResources().values());
             newResources.removeAll(oldResources);
-            if (folder != null) {
-                for (Resource resource : newResources) {
-                    folder.addEntry(resource, null);
-                }
-            }
+            // This is now done by wf-ro
+//            if (folder != null) {
+//                for (Resource resource : newResources) {
+//                    folder.addEntry(resource, null);
+//                }
+//            }
             send(getPage(), Broadcast.BREADTH, new AggregationChangedEvent(event.getTarget()));
         } catch (ROSRSException | ROException e) {
             LOGGER.error("Error when reloading the RO after workflow transformation", e);

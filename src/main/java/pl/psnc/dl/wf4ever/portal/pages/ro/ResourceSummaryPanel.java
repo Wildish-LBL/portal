@@ -1,6 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.pages.ro;
 
 import java.net.URI;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.event.IEvent;
@@ -41,6 +42,8 @@ public class ResourceSummaryPanel extends Panel {
     /** Information that the resource is a nested RO. */
     private WebMarkupContainer nestedRO;
 
+    private IModel<List<Folder>> allFolders;
+
 
     /**
      * Constructor.
@@ -51,8 +54,9 @@ public class ResourceSummaryPanel extends Panel {
      *            selected resource model
      * @param currentFolderModel
      *            current folder model
+     * @param allFolders 
      */
-    public ResourceSummaryPanel(String id, IModel<Resource> model, IModel<Folder> currentFolderModel) {
+    public ResourceSummaryPanel(String id, IModel<Resource> model, IModel<Folder> currentFolderModel, IModel<List<Folder>> allFolders) {
         super(id, model);
         setOutputMarkupPlaceholderTag(true);
 
@@ -66,7 +70,7 @@ public class ResourceSummaryPanel extends Panel {
                 true, false), false).setCanDelete(false));
         ResourceTypeModel resourceTypeModel = new ResourceTypeModel(model);
         add(new ResourceTypePanel("resource-type", resourceTypeModel));
-        add(new WorkflowTransformPanel("transform", model, resourceTypeModel, currentFolderModel));
+        add(new WorkflowTransformPanel("transform", model, resourceTypeModel, currentFolderModel, allFolders));
         add(new Label("author", new PropertyModel<String>(model, "author.name")));
         add(new Label("createdFormatted", new PropertyModel<String>(model, "createdFormatted")));
         add(new Label("annotations", new PropertyModel<Integer>(model, "annotations.size")));

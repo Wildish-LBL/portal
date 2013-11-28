@@ -131,7 +131,7 @@ public class RoContentPanel extends Panel {
         add(new FolderActionsPanel("folder-actions", folderModel));
         add(new FolderContentsPanel("folder-contents", folderModel, resourceModel, rootFolders, unrootedResourcesModel));
         add(new ResourceActionsPanel("resource-actions", resourceModel));
-        add(new ResourceSummaryPanel("resource-summary", resourceModel, folderModel));
+        add(new ResourceSummaryPanel("resource-summary", resourceModel, folderModel, allFolders));
         add(new CommentsList("resource-comments", resourceModel));
         add(new AdvancedAnnotationsPanel("advanced-annotations", "resource-basic-view", resourceModel));
 
