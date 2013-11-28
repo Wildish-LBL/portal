@@ -67,10 +67,20 @@ var rdf = {
 var roterms = {
 	'roterms:performsTask' : 'http://purl.org/wf4ever/roterms#performsTask',
 	'roterms:inputSelected' : 'http://purl.org/wf4ever/roterms#inputSelected',
-	'roterms:technicalContact' : 'http://purl.org/wf4ever/roterms#technicalContact'
+	'roterms:technicalContact' : 'http://purl.org/wf4ever/roterms#technicalContact',
+	'roterms:requiresHardware': 'http://purl.org/wf4ever/roterms#requiresHardware',
+	'roterms:requiresSoftware': 'http://purl.org/wf4ever/roterms#requiresSoftware', 
+	'roterms:requiresDataset': 'http://purl.org/wf4ever/roterms#requiresDataset',
+	'roterms:sampleSize': 'http://purl.org/wf4ever/roterms#sampleSize',
+	'roterms:previousWorkflow': 'http://purl.org/wf4ever/roterms#previousWorkflow',
+	'roterms:subsequentWorkflow': 'http://purl.org/wf4ever/roterms#subsequentWorkflow'
 };
 
-var properties = $.extend({}, dcterms, rdfs, rdf, roterms);
+var wfprov = {
+	'wfprov:durationInSeconds' : 'http://purl.org/wf4ever/wfdesc#durationInSeconds',
+};
+
+var properties = $.extend({}, dcterms, rdfs, rdf, roterms, wfprov);
 
 var source = function() {
 	return Object.keys(properties);
