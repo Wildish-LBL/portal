@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<wicket:extend xmlns:wicket="http://wicket.apache.org">
+	<fieldset>
+		<p>
+			Generate wfbundle into: 
+			<select wicket:id="extractToFoldersList"></select>
+			
+		</p>
+		<p>
+			<input type="checkbox" wicket:id="checkBoxScripts" />
+			Extract scripts into: 
+			<select wicket:id="scriptsToFoldersList"></select>
+		</p>
+		<p>
+			<input type="checkbox" wicket:id="checkBoxNestedWf" />
+			Generate nested wf into: 
+			<select wicket:id="nestedWfToFoldersList"></select>
+			
+		</p>
+		<p>
+			<input type="checkbox" wicket:id="checkBoxWebsServices" />
+			Extract webservices into: 
+			<select wicket:id="webservicesToFoldersList"></select>
+			
+		</p>	
+	</fieldset>
+</wicket:extend>
