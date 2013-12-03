@@ -10,9 +10,10 @@ import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
+import org.purl.wf4ever.rosrs.client.Folder;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
-import pl.psnc.dl.wf4ever.portal.events.WorkflowTransformClickedEvent;
+import pl.psnc.dl.wf4ever.portal.events.WorkflowTransormRequestEvent;
 
 /**
  * A modal for adding resources to the RO.
@@ -38,11 +39,12 @@ public class TransformROModal extends AbstractModal {
 	private String selectedScriptsTo;
 	private String selectedNestedWfTo;
 	private String selectedWebservicesTo;
-	private static final String CHOOSE = "Choose folder";
+	private static final String ROOT_FOLDER = "/";
 	private DropDownChoice<String> dropDownChoiceExtractTo;
 	private DropDownChoice<String> dropDownChoiceScriptsTo;
 	private DropDownChoice<String> dropDownChoiceNestedWfTo;
 	private DropDownChoice<String> dropDownChoiceWebservicesTo;
+	IModel<Folder> folderModel;
 
 	/**
 	 * Constructor.
@@ -52,46 +54,47 @@ public class TransformROModal extends AbstractModal {
 	 * @param toDelete
 	 *            ROs to delete
 	 */
-	public TransformROModal(String id, IModel<ResearchObject> researchObjectModel) {
+	public TransformROModal(String id, IModel<ResearchObject> researchObjectModel,
+			IModel<Folder> folderModel) {
 		super(id, "delete-ro-modal", "Annotate & Transform");
 		extractToFoldersList = new ArrayList<String>();
 		scriptsToFoldersList = new ArrayList<String>();
 		nestedWfToFoldersList = new ArrayList<String>();
 		webservicesToFoldersList = new ArrayList<String>();
-
+		this.resarchObjectModel = researchObjectModel;
+		this.folderModel = folderModel;
 		for (URI key : researchObjectModel.getObject().getFolders().keySet()) {
 			String path = researchObjectModel.getObject().getFolder(key).getPath().toString();
 			extractToFoldersList.add(path);
 			scriptsToFoldersList.add(path);
 			nestedWfToFoldersList.add(path);
 			webservicesToFoldersList.add(path);
-			if (path.equals("content/")) {
-				selectedExractTo = path;
-			} else if (path.equals("config/scripts/")) {
+			if (path.equals("config/scripts/")) {
 				selectedScriptsTo = path;
-			} else if (path.equals("wf/nested/")) {
+			} else if (path.equals("workflows/nested/")) {
 				selectedNestedWfTo = path;
-			} else if (path.equals("config/services")) {
+			} else if (path.equals("config/web services/")) {
 				selectedWebservicesTo = path;
 			}
-
 		}
+		extractToFoldersList.add(0, ROOT_FOLDER);
+		scriptsToFoldersList.add(0, ROOT_FOLDER);
+		nestedWfToFoldersList.add(0, ROOT_FOLDER);
+		webservicesToFoldersList.add(0, ROOT_FOLDER);
 
-		if (selectedExractTo == null) {
-			selectedExractTo = CHOOSE;
-			extractToFoldersList.add(0, CHOOSE);
+		if (folderModel.getObject() != null) {
+			selectedExractTo = folderModel.getObject().getPath();
+		} else {
+			selectedExractTo = ROOT_FOLDER;
 		}
 		if (selectedScriptsTo == null) {
-			selectedScriptsTo = CHOOSE;
-			scriptsToFoldersList.add(0, CHOOSE);
+			selectedScriptsTo = ROOT_FOLDER;
 		}
 		if (selectedNestedWfTo == null) {
-			selectedNestedWfTo = CHOOSE;
-			nestedWfToFoldersList.add(0, CHOOSE);
+			selectedNestedWfTo = ROOT_FOLDER;
 		}
 		if (selectedWebservicesTo == null) {
-			selectedWebservicesTo = CHOOSE;
-			webservicesToFoldersList.add(0, CHOOSE);
+			selectedWebservicesTo = ROOT_FOLDER;
 		}
 
 		this.resarchObjectModel = researchObjectModel;
@@ -126,8 +129,7 @@ public class TransformROModal extends AbstractModal {
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				int a = 3;
-				int b = a;
+
 			}
 		};
 
@@ -153,7 +155,9 @@ public class TransformROModal extends AbstractModal {
 
 	@Override
 	public void onOk(AjaxRequestTarget target) {
-		send(getPage(), Broadcast.BREADTH, new WorkflowTransformClickedEvent(target));
+		send(getPage(), Broadcast.BREADTH, new WorkflowTransormRequestEvent(target,
+				getFolder(selectedExractTo), getFolder(selectedScriptsTo),
+				getFolder(selectedNestedWfTo), getFolder(selectedWebservicesTo)));
 		hide(target);
 	}
 
@@ -181,4 +185,13 @@ public class TransformROModal extends AbstractModal {
 		this.webservicesCheckboxState = webservicesCheckboxState;
 	}
 
+	private Folder getFolder(String path) {
+		for (URI uri : resarchObjectModel.getObject().getFolders().keySet()) {
+			Folder folder = resarchObjectModel.getObject().getFolder(uri);
+			if (folder.getPath().equals(path)) {
+				return folder;
+			}
+		}
+		return null;
+	}
 }

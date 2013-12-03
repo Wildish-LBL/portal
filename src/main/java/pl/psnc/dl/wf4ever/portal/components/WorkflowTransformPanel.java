@@ -1,7 +1,8 @@
 package pl.psnc.dl.wf4ever.portal.components;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.net.URI;
+
+import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.authorization.Action;
@@ -15,16 +16,23 @@ import org.apache.wicket.model.IModel;
 import org.purl.wf4ever.rosrs.client.Folder;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.Resource;
-import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
+import org.purl.wf4ever.wf2ro.JobStatus;
+import org.purl.wf4ever.wf2ro.ServiceException;
+import org.purl.wf4ever.wf2ro.Wf2ROService;
 
+import pl.psnc.dl.wf4ever.portal.MySession;
+import pl.psnc.dl.wf4ever.portal.behaviors.WorkflowTransformationJobStatusUpdatingBehaviour;
 import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.WorkflowTransformClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.WorkflowTransformedEvent;
+import pl.psnc.dl.wf4ever.portal.events.WorkflowTransormRequestEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.AggregationChangedEvent;
 import pl.psnc.dl.wf4ever.portal.modals.TransformROModal;
 import pl.psnc.dl.wf4ever.portal.model.ResourceType;
 import pl.psnc.dl.wf4ever.portal.model.wicket.ResourceTypeModel;
+
+import com.sun.jersey.api.client.ClientResponse;
 
 /**
  * A panel that allows to transform a workflow. It is visible only if provided
@@ -100,7 +108,7 @@ public class WorkflowTransformPanel extends Panel {
 		this.resourceTypeModel = resourceTypeModel;
 		this.folderModel = folderModel;
 		setOutputMarkupPlaceholderTag(true);
-		transformROModal = new TransformROModal("transform-modal", roModel);
+		transformROModal = new TransformROModal("transform-modal", roModel, folderModel);
 		add(transformROModal);
 		Form<?> form = new Form<Void>("form");
 		add(form);
@@ -120,6 +128,9 @@ public class WorkflowTransformPanel extends Panel {
 		if (event.getPayload() instanceof WorkflowTransformedEvent) {
 			onWorkflowTransformed((WorkflowTransformedEvent) event.getPayload());
 		}
+		if (event.getPayload() instanceof WorkflowTransormRequestEvent) {
+			onWorkflowTransformRequest((WorkflowTransormRequestEvent) event.getPayload());
+		}
 	}
 
 	/**
@@ -129,30 +140,60 @@ public class WorkflowTransformPanel extends Panel {
 	 *            AJAX event
 	 */
 	private void onWorkflowTransformClicked(WorkflowTransformClickedEvent event) {
-		TransformROModal transformROModal2 = new TransformROModal("transform-modal", roModel);
+		TransformROModal transformROModal2 = new TransformROModal("transform-modal", roModel,
+				folderModel);
 		transformROModal.replaceWith(transformROModal2);
 		transformROModal = transformROModal2;
 		transformROModal.show(event.getTarget());
-		/*
-		 * Resource resource = (Resource)
-		 * WorkflowTransformPanel.this.getDefaultModelObject(); researchObject =
-		 * resource.getResearchObject(); folder = folderModel.getObject(); try {
-		 * ClientResponse response = resource.getHead(); MediaType contentType =
-		 * response.getType(); Wf2ROService service =
-		 * MySession.get().getWf2ROService(); try { JobStatus status =
-		 * service.transform(resource.getUri(), contentType.toString(), resource
-		 * .getResearchObject().getUri()); add(new
-		 * WorkflowTransformationJobStatusUpdatingBehaviour(status));
-		 * event.getTarget().add(this); } catch (ServiceException e) {
-		 * error("Creating the transformation job returned an incorrect status. "
-		 * + e.getMessage()); LOGGER.error(
-		 * "Creating the transformation job returned an incorrect status. ", e);
-		 * } } catch (ROSRSException e) {
-		 * error("Accessing the resource returned an incorrect status. " +
-		 * e.getMessage());
-		 * LOGGER.error("Accessing the resource returned an incorrect status. ",
-		 * e); }
-		 */
+	}
+
+	private void onWorkflowTransformRequest(WorkflowTransormRequestEvent event) {
+		URI extractToFolderUri = null;
+		URI nestedRoToFolderUri = null;
+		URI webservicesToFolderUri = null;
+		URI scriptsToFolderUri = null;
+		if (event.getExtractToFolder() != null) {
+			extractToFolderUri = event.getExtractToFolder().getUri();
+		}
+		if (event.getNestedRoToFolder() != null) {
+			nestedRoToFolderUri = event.getNestedRoToFolder().getUri();
+		}
+		if (event.getWebservicesToFolder() != null) {
+			webservicesToFolderUri = event.getWebservicesToFolder().getUri();
+		}
+		if (event.getScriptsToFolder() != null) {
+			scriptsToFolderUri = event.getScriptsToFolder().getUri();
+		}
+		Resource resource = (Resource) WorkflowTransformPanel.this.getDefaultModelObject();
+		researchObject = resource.getResearchObject();
+
+		try {
+			ClientResponse response = resource.getHead();
+			MediaType contentType = response.getType();
+			Wf2ROService service = MySession.get().getWf2ROService();
+			System.out.println(extractToFolderUri);
+			System.out.println(nestedRoToFolderUri);
+			System.out.println(webservicesToFolderUri);
+			System.out.println(scriptsToFolderUri);
+
+			try {
+				JobStatus status = service.transform(resource.getUri(), contentType.toString(),
+						resource.getResearchObject().getUri(), extractToFolderUri,
+						nestedRoToFolderUri, scriptsToFolderUri, webservicesToFolderUri
+
+				);
+				add(new WorkflowTransformationJobStatusUpdatingBehaviour(status));
+				event.getTarget().add(this);
+			} catch (ServiceException e) {
+				error("Creating the transformation job returned an incorrect status. "
+						+ e.getMessage());
+				LOGGER.error("Creating the transformation job returned an incorrect status. ", e);
+			}
+		} catch (ROSRSException e) {
+			error("Accessing the resource returned an incorrect status. " + e.getMessage());
+			LOGGER.error("Accessing the resource returned an incorrect status. ", e);
+		}
+
 	}
 
 	/**
@@ -162,20 +203,22 @@ public class WorkflowTransformPanel extends Panel {
 	 *            AJAX event
 	 */
 	private void onWorkflowTransformed(WorkflowTransformedEvent event) {
-		try {
-			Set<Resource> oldResources = new HashSet<>(researchObject.getResources().values());
-			researchObject.load();
-			Set<Resource> newResources = new HashSet<>(researchObject.getResources().values());
-			newResources.removeAll(oldResources);
-			if (folder != null) {
-				for (Resource resource : newResources) {
-					folder.addEntry(resource, null);
-				}
-			}
-			send(getPage(), Broadcast.BREADTH, new AggregationChangedEvent(event.getTarget()));
-		} catch (ROSRSException | ROException e) {
-			LOGGER.error("Error when reloading the RO after workflow transformation", e);
-			error("Error when reloading the RO after workflow transformation: " + e.getMessage());
-		}
+		/*
+		 * try { Set<Resource> oldResources = new
+		 * HashSet<>(researchObject.getResources().values());
+		 * researchObject.load(); Set<Resource> newResources = new
+		 * HashSet<>(researchObject.getResources().values());
+		 * newResources.removeAll(oldResources); if (folder != null) { for
+		 * (Resource resource : newResources) { folder.addEntry(resource, null);
+		 * } }
+		 */
+		send(getPage(), Broadcast.BREADTH, new AggregationChangedEvent(event.getTarget()));
+		/*
+		 * } catch (ROSRSException | ROException e) {
+		 * LOGGER.error("Error when reloading the RO after workflow transformation"
+		 * , e);
+		 * error("Error when reloading the RO after workflow transformation: " +
+		 * e.getMessage()); }
+		 */
 	}
 }
