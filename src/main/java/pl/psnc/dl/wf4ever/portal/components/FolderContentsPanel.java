@@ -28,6 +28,8 @@ import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 import pl.psnc.dl.wf4ever.portal.events.FolderChangeEvent;
 import pl.psnc.dl.wf4ever.portal.events.ResourceSelectedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.AggregationChangedEvent;
+import pl.psnc.dl.wf4ever.portal.events.ros.AggregatedResourcesChangedEvent;
+
 
 import com.hp.hpl.jena.vocabulary.RDFS;
 
@@ -248,7 +250,8 @@ public class FolderContentsPanel extends Panel {
         super.onConfigure();
         try {
             if (this.getDefaultModelObject() != null) {
-                ((Folder) this.getDefaultModelObject()).load();
+            	//System.out.println("el folder que va actualizar es: "+((Folder) this.getDefaultModelObject()).getUri() + " resources: "+((Folder) this.getDefaultModelObject()).getResources());
+                ((Folder) this.getDefaultModelObject()).load();                
             }
         } catch (ROSRSException e) {
             LOG.error("Can't load folder: " + this.getDefaultModelObjectAsString(), e);
@@ -287,5 +290,6 @@ public class FolderContentsPanel extends Panel {
      */
     private void onAggregationChanged(AggregationChangedEvent event) {
         event.getTarget().add(this);
+        send(getPage(), Broadcast.BREADTH, new AggregatedResourcesChangedEvent(event.getTarget()));
     }
 }

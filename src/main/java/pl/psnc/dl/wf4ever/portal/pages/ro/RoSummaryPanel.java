@@ -5,6 +5,7 @@ package pl.psnc.dl.wf4ever.portal.pages.ro;
 import java.net.URI;
 
 import org.apache.log4j.Logger;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.ExternalLink;
@@ -17,6 +18,7 @@ import org.purl.wf4ever.rosrs.client.ResearchObject;
 
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.components.form.EditableTextPanel;
+import pl.psnc.dl.wf4ever.portal.events.ros.AggregatedResourcesChangedEvent;
 
 import pl.psnc.dl.wf4ever.portal.model.wicket.AnnotationTripleModel;
 import pl.psnc.dl.wf4ever.portal.services.RODLUtilities;
@@ -95,7 +97,7 @@ public class RoSummaryPanel extends Panel {
                 && ((ResearchObject) getDefaultModelObject()).getAggregatingRO() != null);
 
     }
-    
+     
     private void refreshPanel(IModel<ResearchObject> model) {
     	setOutputMarkupId(true);
     	this.remove("linksketch");
@@ -114,4 +116,24 @@ public class RoSummaryPanel extends Panel {
     	return link;
     }
     
+    @Override
+    public void onEvent(IEvent<?> event) {
+        super.onEvent(event);
+        if (event.getPayload() instanceof AggregatedResourcesChangedEvent) {
+        	onAggregatedResourcesChanged ((AggregatedResourcesChangedEvent) event.getPayload());
+        }
+    }
+    /**
+     * Called when the contents of the folder have changed.
+     * 
+     * @param event
+     *            AJAX event
+     */
+    @SuppressWarnings("unchecked")
+    private void onAggregatedResourcesChanged(AggregatedResourcesChangedEvent event) {
+        event.getTarget().add(this);
+        this.remove("resources");        
+		IModel<ResearchObject> iModel = (IModel<ResearchObject>) getDefaultModel();
+		this.add(new Label("resources", iModel.getObject().getResources().size()));
+    }
  }

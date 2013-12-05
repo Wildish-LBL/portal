@@ -1,9 +1,7 @@
 package pl.psnc.dl.wf4ever.portal.components;
 
 import java.net.URI;
-
 import javax.ws.rs.core.MediaType;
-
 import org.apache.log4j.Logger;
 import org.apache.wicket.authorization.Action;
 import org.apache.wicket.authroles.authorization.strategies.role.Roles;
@@ -14,6 +12,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.purl.wf4ever.rosrs.client.Folder;
+import org.purl.wf4ever.rosrs.client.FolderEntry;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.Resource;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
@@ -41,7 +40,11 @@ import com.sun.jersey.api.client.ClientResponse;
  * 
  */
 public class WorkflowTransformPanel extends Panel {
-
+	Folder extractToFolder;
+	Folder extractToScript;
+	Folder extractToNested;
+	Folder extractToWS;
+	
 	/** Logger. */
 	private static final Logger LOGGER = Logger.getLogger(WorkflowTransformPanel.class);
 
@@ -82,7 +85,7 @@ public class WorkflowTransformPanel extends Panel {
 	private ResearchObject researchObject;
 
 	/** Current folder when the button is pressed. */
-	private Folder folder;
+	//private Folder folder;
 	TransformROModal transformROModal;
 	IModel<Resource> model;
 	IModel<ResearchObject> roModel;
@@ -172,9 +175,13 @@ public class WorkflowTransformPanel extends Panel {
 			MediaType contentType = response.getType();
 			Wf2ROService service = MySession.get().getWf2ROService();
 			System.out.println(extractToFolderUri);
+			extractToFolder=event.getExtractToFolder();
 			System.out.println(nestedRoToFolderUri);
+			extractToNested=event.getNestedRoToFolder();
 			System.out.println(webservicesToFolderUri);
+			extractToWS=event.getWebservicesToFolder();
 			System.out.println(scriptsToFolderUri);
+			extractToScript=event.getScriptsToFolder();
 
 			try {
 				JobStatus status = service.transform(resource.getUri(), contentType.toString(),
@@ -212,7 +219,38 @@ public class WorkflowTransformPanel extends Panel {
 		 * (Resource resource : newResources) { folder.addEntry(resource, null);
 		 * } }
 		 */
-		send(getPage(), Broadcast.BREADTH, new AggregationChangedEvent(event.getTarget()));
+		try {
+			researchObject.load(); 
+			if (extractToFolder!=null) {
+				extractToFolder.load();
+				for (FolderEntry entry : extractToFolder.getFolderEntries().values()){
+					researchObject.addFolderEntry(entry);
+				}
+			}
+			if (extractToNested!=null) {
+				extractToNested.load();
+				for (FolderEntry entry : extractToNested.getFolderEntries().values()){
+					researchObject.addFolderEntry(entry);
+				}
+			}
+			if (extractToWS!=null) {
+				extractToWS.load();
+				for (FolderEntry entry : extractToWS.getFolderEntries().values()){
+					researchObject.addFolderEntry(entry);
+				}
+			}
+			if (extractToScript!=null) {
+				extractToScript.load();
+				for (FolderEntry entry : extractToScript.getFolderEntries().values()){
+					researchObject.addFolderEntry(entry);
+				}
+			}
+			send(getPage(), Broadcast.BREADTH, new AggregationChangedEvent(event.getTarget()));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		/*
 		 * } catch (ROSRSException | ROException e) {
 		 * LOGGER.error("Error when reloading the RO after workflow transformation"
