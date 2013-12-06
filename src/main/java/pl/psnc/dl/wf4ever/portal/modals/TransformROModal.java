@@ -155,9 +155,14 @@ public class TransformROModal extends AbstractModal {
 
 	@Override
 	public void onOk(AjaxRequestTarget target) {
+		URI sendScrtipsToUri = scriptsCheckBoxState ? getFolderUri(selectedScriptsTo) : null;
+		URI sendNestedWfToUri = nestedWfCheckboxState ? getFolderUri(selectedNestedWfTo) : null;
+		URI sendWebSerbicvesTo = webservicesCheckboxState ? getFolderUri(selectedWebservicesTo)
+				: null;
+
 		send(getPage(), Broadcast.BREADTH, new WorkflowTransormRequestEvent(target,
-				getFolder(selectedExractTo), getFolder(selectedScriptsTo),
-				getFolder(selectedNestedWfTo), getFolder(selectedWebservicesTo)));
+				getFolderUri(selectedExractTo), sendScrtipsToUri, sendNestedWfToUri,
+				sendWebSerbicvesTo));
 		hide(target);
 	}
 
@@ -185,11 +190,14 @@ public class TransformROModal extends AbstractModal {
 		this.webservicesCheckboxState = webservicesCheckboxState;
 	}
 
-	private Folder getFolder(String path) {
+	private URI getFolderUri(String path) {
+		if (path.equals(ROOT_FOLDER)) {
+			return resarchObjectModel.getObject().getUri();
+		}
 		for (URI uri : resarchObjectModel.getObject().getFolders().keySet()) {
 			Folder folder = resarchObjectModel.getObject().getFolder(uri);
 			if (folder.getPath().equals(path)) {
-				return folder;
+				return folder.getUri();
 			}
 		}
 		return null;

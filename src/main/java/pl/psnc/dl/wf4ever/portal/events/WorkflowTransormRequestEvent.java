@@ -1,7 +1,8 @@
 package pl.psnc.dl.wf4ever.portal.events;
 
+import java.net.URI;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.purl.wf4ever.rosrs.client.Folder;
 
 /**
  * User clicked Transform.
@@ -11,10 +12,10 @@ import org.purl.wf4ever.rosrs.client.Folder;
 public class WorkflowTransormRequestEvent extends AbstractAjaxEvent implements
 		AbstractClickAjaxEvent {
 
-	private Folder extractToFolder;
-	private Folder scriptsToFolder;
-	private Folder nestedRoToFolder;
-	private Folder webservicesToFolder;
+	private URI extractToFolderUri;
+	private URI scriptsToFolderUri;
+	private URI nestedRoToFolderUri;
+	private URI webservicesToFolderUri;
 
 	/**
 	 * Constructor.
@@ -22,44 +23,45 @@ public class WorkflowTransormRequestEvent extends AbstractAjaxEvent implements
 	 * @param target
 	 *            AJAX request target
 	 */
-	public WorkflowTransormRequestEvent(AjaxRequestTarget target, Folder extractToFolder,
-			Folder scriptsToFolder, Folder nestedRoToFolder, Folder webservicesToFolder) {
+	public WorkflowTransormRequestEvent(AjaxRequestTarget target, URI extractToFolder,
+			URI scriptsToFolder, URI nestedRoToFolder, URI webservicesToFolder) {
 		super(target);
-		this.setExtractToFolder(extractToFolder);
-		this.setScriptsToFolder(scriptsToFolder);
-		this.setNestedRoToFolder(nestedRoToFolder);
-		this.setWebservicesToFolder(webservicesToFolder);
+		this.setExtractToFolderUri(extractToFolder);
+		this.setScriptsToFolderUri(scriptsToFolder);
+		this.setNestedRoToFolderUri(nestedRoToFolder);
+		this.setWebservicesToFolderUri(webservicesToFolder);
 	}
 
-	public Folder getNestedRoToFolder() {
-		return nestedRoToFolder;
+	public URI getExtractToFolderUri() {
+		return extractToFolderUri;
 	}
 
-	public void setNestedRoToFolder(Folder nestedRoToFolder) {
-		this.nestedRoToFolder = nestedRoToFolder;
+	public void setExtractToFolderUri(URI extractToFolderUri) {
+		this.extractToFolderUri = extractToFolderUri;
 	}
 
-	public Folder getWebservicesToFolder() {
-		return webservicesToFolder;
+	public URI getScriptsToFolderUri() {
+		return scriptsToFolderUri;
 	}
 
-	public void setWebservicesToFolder(Folder webservicesToFolder) {
-		this.webservicesToFolder = webservicesToFolder;
+	public void setScriptsToFolderUri(URI scriptsToFolderUri) {
+		this.scriptsToFolderUri = scriptsToFolderUri;
 	}
 
-	public Folder getScriptsToFolder() {
-		return scriptsToFolder;
+	public URI getNestedRoToFolderUri() {
+		return nestedRoToFolderUri;
 	}
 
-	public void setScriptsToFolder(Folder scriptsToFolder) {
-		this.scriptsToFolder = scriptsToFolder;
+	public void setNestedRoToFolderUri(URI nestedRoToFolderUri) {
+		this.nestedRoToFolderUri = nestedRoToFolderUri;
 	}
 
-	public Folder getExtractToFolder() {
-		return extractToFolder;
+	public URI getWebservicesToFolderUri() {
+		return webservicesToFolderUri;
 	}
 
-	public void setExtractToFolder(Folder extractToFolder) {
-		this.extractToFolder = extractToFolder;
+	public void setWebservicesToFolderUri(URI webservicesToFolderUri) {
+		this.webservicesToFolderUri = webservicesToFolderUri;
 	}
+
 }

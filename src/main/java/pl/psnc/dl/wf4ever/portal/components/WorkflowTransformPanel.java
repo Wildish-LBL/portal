@@ -1,7 +1,9 @@
 package pl.psnc.dl.wf4ever.portal.components;
 
 import java.net.URI;
+
 import javax.ws.rs.core.MediaType;
+
 import org.apache.log4j.Logger;
 import org.apache.wicket.authorization.Action;
 import org.apache.wicket.authroles.authorization.strategies.role.Roles;
@@ -44,7 +46,7 @@ public class WorkflowTransformPanel extends Panel {
 	Folder extractToScript;
 	Folder extractToNested;
 	Folder extractToWS;
-	
+
 	/** Logger. */
 	private static final Logger LOGGER = Logger.getLogger(WorkflowTransformPanel.class);
 
@@ -85,7 +87,7 @@ public class WorkflowTransformPanel extends Panel {
 	private ResearchObject researchObject;
 
 	/** Current folder when the button is pressed. */
-	//private Folder folder;
+	// private Folder folder;
 	TransformROModal transformROModal;
 	IModel<Resource> model;
 	IModel<ResearchObject> roModel;
@@ -151,22 +153,12 @@ public class WorkflowTransformPanel extends Panel {
 	}
 
 	private void onWorkflowTransformRequest(WorkflowTransormRequestEvent event) {
-		URI extractToFolderUri = null;
-		URI nestedRoToFolderUri = null;
-		URI webservicesToFolderUri = null;
-		URI scriptsToFolderUri = null;
-		if (event.getExtractToFolder() != null) {
-			extractToFolderUri = event.getExtractToFolder().getUri();
-		}
-		if (event.getNestedRoToFolder() != null) {
-			nestedRoToFolderUri = event.getNestedRoToFolder().getUri();
-		}
-		if (event.getWebservicesToFolder() != null) {
-			webservicesToFolderUri = event.getWebservicesToFolder().getUri();
-		}
-		if (event.getScriptsToFolder() != null) {
-			scriptsToFolderUri = event.getScriptsToFolder().getUri();
-		}
+
+		URI extractToFolderUri = event.getExtractToFolderUri();
+		URI nestedRoToFolderUri = event.getNestedRoToFolderUri();
+		URI webservicesToFolderUri = event.getWebservicesToFolderUri();
+		URI scriptsToFolderUri = event.getScriptsToFolderUri();
+
 		Resource resource = (Resource) WorkflowTransformPanel.this.getDefaultModelObject();
 		researchObject = resource.getResearchObject();
 
@@ -174,14 +166,10 @@ public class WorkflowTransformPanel extends Panel {
 			ClientResponse response = resource.getHead();
 			MediaType contentType = response.getType();
 			Wf2ROService service = MySession.get().getWf2ROService();
-			System.out.println(extractToFolderUri);
-			extractToFolder=event.getExtractToFolder();
-			System.out.println(nestedRoToFolderUri);
-			extractToNested=event.getNestedRoToFolder();
-			System.out.println(webservicesToFolderUri);
-			extractToWS=event.getWebservicesToFolder();
-			System.out.println(scriptsToFolderUri);
-			extractToScript=event.getScriptsToFolder();
+			extractToFolder = researchObject.getFolder(event.getExtractToFolderUri());
+			extractToNested = researchObject.getFolder(event.getNestedRoToFolderUri());
+			extractToWS = researchObject.getFolder(event.getWebservicesToFolderUri());
+			extractToScript = researchObject.getFolder(event.getScriptsToFolderUri());
 
 			try {
 				JobStatus status = service.transform(resource.getUri(), contentType.toString(),
@@ -210,53 +198,37 @@ public class WorkflowTransformPanel extends Panel {
 	 *            AJAX event
 	 */
 	private void onWorkflowTransformed(WorkflowTransformedEvent event) {
-		/*
-		 * try { Set<Resource> oldResources = new
-		 * HashSet<>(researchObject.getResources().values());
-		 * researchObject.load(); Set<Resource> newResources = new
-		 * HashSet<>(researchObject.getResources().values());
-		 * newResources.removeAll(oldResources); if (folder != null) { for
-		 * (Resource resource : newResources) { folder.addEntry(resource, null);
-		 * } }
-		 */
 		try {
-			researchObject.load(); 
-			if (extractToFolder!=null) {
+			researchObject.load();
+			if (extractToFolder != null) {
 				extractToFolder.load();
-				for (FolderEntry entry : extractToFolder.getFolderEntries().values()){
+				for (FolderEntry entry : extractToFolder.getFolderEntries().values()) {
 					researchObject.addFolderEntry(entry);
 				}
 			}
-			if (extractToNested!=null) {
+			if (extractToNested != null) {
 				extractToNested.load();
-				for (FolderEntry entry : extractToNested.getFolderEntries().values()){
+				for (FolderEntry entry : extractToNested.getFolderEntries().values()) {
 					researchObject.addFolderEntry(entry);
 				}
 			}
-			if (extractToWS!=null) {
+			if (extractToWS != null) {
 				extractToWS.load();
-				for (FolderEntry entry : extractToWS.getFolderEntries().values()){
+				for (FolderEntry entry : extractToWS.getFolderEntries().values()) {
 					researchObject.addFolderEntry(entry);
 				}
 			}
-			if (extractToScript!=null) {
+			if (extractToScript != null) {
 				extractToScript.load();
-				for (FolderEntry entry : extractToScript.getFolderEntries().values()){
+				for (FolderEntry entry : extractToScript.getFolderEntries().values()) {
 					researchObject.addFolderEntry(entry);
 				}
 			}
+
 			send(getPage(), Broadcast.BREADTH, new AggregationChangedEvent(event.getTarget()));
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
+
+		} catch (Exception e) { // TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		/*
-		 * } catch (ROSRSException | ROException e) {
-		 * LOGGER.error("Error when reloading the RO after workflow transformation"
-		 * , e);
-		 * error("Error when reloading the RO after workflow transformation: " +
-		 * e.getMessage()); }
-		 */
 	}
 }
