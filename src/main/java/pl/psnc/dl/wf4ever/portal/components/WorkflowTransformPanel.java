@@ -91,6 +91,7 @@ public class WorkflowTransformPanel extends Panel {
 	TransformROModal transformROModal;
 	IModel<Resource> model;
 	IModel<ResearchObject> roModel;
+	boolean transformable;
 
 	/**
 	 * Constructor.
@@ -113,7 +114,9 @@ public class WorkflowTransformPanel extends Panel {
 		this.resourceTypeModel = resourceTypeModel;
 		this.folderModel = folderModel;
 		setOutputMarkupPlaceholderTag(true);
-		transformROModal = new TransformROModal("transform-modal", roModel, folderModel);
+		ClientResponse response;
+
+		transformROModal = new TransformROModal("transform-modal", roModel, folderModel, model);
 		add(transformROModal);
 		Form<?> form = new Form<Void>("form");
 		add(form);
@@ -146,7 +149,7 @@ public class WorkflowTransformPanel extends Panel {
 	 */
 	private void onWorkflowTransformClicked(WorkflowTransformClickedEvent event) {
 		TransformROModal transformROModal2 = new TransformROModal("transform-modal", roModel,
-				folderModel);
+				folderModel, model);
 		transformROModal.replaceWith(transformROModal2);
 		transformROModal = transformROModal2;
 		transformROModal.show(event.getTarget());

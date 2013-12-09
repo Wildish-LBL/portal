@@ -4,16 +4,23 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.MediaType;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
 import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Folder;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
+import org.purl.wf4ever.rosrs.client.Resource;
+import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 
 import pl.psnc.dl.wf4ever.portal.events.WorkflowTransormRequestEvent;
+
+import com.sun.jersey.api.client.ClientResponse;
 
 /**
  * A modal for adding resources to the RO.
@@ -45,6 +52,10 @@ public class TransformROModal extends AbstractModal {
 	private DropDownChoice<String> dropDownChoiceNestedWfTo;
 	private DropDownChoice<String> dropDownChoiceWebservicesTo;
 	IModel<Folder> folderModel;
+	WebMarkupContainer infoPanel;
+	WebMarkupContainer actionPanel;
+	boolean transformable;
+	IModel<Resource> resourceModel;
 
 	/**
 	 * Constructor.
@@ -55,14 +66,31 @@ public class TransformROModal extends AbstractModal {
 	 *            ROs to delete
 	 */
 	public TransformROModal(String id, IModel<ResearchObject> researchObjectModel,
-			IModel<Folder> folderModel) {
+			IModel<Folder> folderModel, IModel<Resource> resourceModel) {
 		super(id, "delete-ro-modal", "Annotate & Transform");
+		infoPanel = new WebMarkupContainer("info-panel");
+		actionPanel = new WebMarkupContainer("action-panel");
 		extractToFoldersList = new ArrayList<String>();
 		scriptsToFoldersList = new ArrayList<String>();
 		nestedWfToFoldersList = new ArrayList<String>();
 		webservicesToFoldersList = new ArrayList<String>();
 		this.resarchObjectModel = researchObjectModel;
 		this.folderModel = folderModel;
+		this.resourceModel = resourceModel;
+		this.transformable = false;
+
+		try {
+			if (resourceModel.getObject() != null) {
+				ClientResponse response = resourceModel.getObject().getHead();
+				MediaType contentType = response.getType();
+				if (contentType.toString().equals("application/vnd.taverna.t2flow+xml")) {
+					transformable = true;
+				}
+			}
+		} catch (ROSRSException e) {
+			e.printStackTrace();
+		}
+
 		for (URI key : researchObjectModel.getObject().getFolders().keySet()) {
 			String path = researchObjectModel.getObject().getFolder(key).getPath().toString();
 			extractToFoldersList.add(path);
@@ -106,7 +134,7 @@ public class TransformROModal extends AbstractModal {
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				// nth special
+				dropDownChoiceScriptsTo.setEnabled(scriptsCheckBoxState);
 			}
 		};
 
@@ -117,8 +145,7 @@ public class TransformROModal extends AbstractModal {
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				// nth special
-
+				dropDownChoiceNestedWfTo.setEnabled(nestedWfCheckboxState);
 			}
 		};
 
@@ -129,13 +156,13 @@ public class TransformROModal extends AbstractModal {
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-
+				dropDownChoiceWebservicesTo.setEnabled(webservicesCheckboxState);
 			}
 		};
 
-		modal.add(checkBoxScripts);
-		modal.add(checkBoxNestedWf);
-		modal.add(checkBoxWebsServices);
+		actionPanel.add(checkBoxScripts);
+		actionPanel.add(checkBoxNestedWf);
+		actionPanel.add(checkBoxWebsServices);
 
 		dropDownChoiceExtractTo = new DropDownChoice<String>("extractToFoldersList",
 				new PropertyModel<String>(this, "selectedExractTo"), extractToFoldersList);
@@ -146,11 +173,14 @@ public class TransformROModal extends AbstractModal {
 		dropDownChoiceWebservicesTo = new DropDownChoice<String>("webservicesToFoldersList",
 				new PropertyModel<String>(this, "selectedWebservicesTo"), webservicesToFoldersList);
 
-		modal.add(dropDownChoiceExtractTo);
-		modal.add(dropDownChoiceScriptsTo);
-		modal.add(dropDownChoiceNestedWfTo);
-		modal.add(dropDownChoiceWebservicesTo);
-
+		actionPanel.add(dropDownChoiceExtractTo);
+		actionPanel.add(dropDownChoiceScriptsTo);
+		actionPanel.add(dropDownChoiceNestedWfTo);
+		actionPanel.add(dropDownChoiceWebservicesTo);
+		modal.add(actionPanel);
+		modal.add(infoPanel);
+		actionPanel.setVisible(transformable);
+		infoPanel.setVisible(!transformable);
 	}
 
 	@Override
