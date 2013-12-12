@@ -114,7 +114,7 @@ public class WorkflowTransformPanel extends Panel {
 		this.resourceTypeModel = resourceTypeModel;
 		this.folderModel = folderModel;
 		setOutputMarkupPlaceholderTag(true);
-		ClientResponse response;
+		//ClientResponse response;
 
 		transformROModal = new TransformROModal("transform-modal", roModel, folderModel, model);
 		add(transformROModal);
@@ -161,6 +161,13 @@ public class WorkflowTransformPanel extends Panel {
 		URI nestedRoToFolderUri = event.getNestedRoToFolderUri();
 		URI webservicesToFolderUri = event.getWebservicesToFolderUri();
 		URI scriptsToFolderUri = event.getScriptsToFolderUri();
+		
+		System.out.println(extractToFolderUri!=null ? extractToFolderUri.toString() : "null");
+		System.out.println(nestedRoToFolderUri!=null ? nestedRoToFolderUri.toString() : "null");
+		System.out.println(webservicesToFolderUri!=null? webservicesToFolderUri.toString() : "null");
+		System.out.println(scriptsToFolderUri!=null ? scriptsToFolderUri.toString() : "null");
+		
+		
 
 		Resource resource = (Resource) WorkflowTransformPanel.this.getDefaultModelObject();
 		researchObject = resource.getResearchObject();

@@ -185,6 +185,7 @@ public class TransformROModal extends AbstractModal {
 
 	@Override
 	public void onOk(AjaxRequestTarget target) {
+		if (!this.transformable) {hide(target);return;}
 		URI sendScrtipsToUri = scriptsCheckBoxState ? getFolderUri(selectedScriptsTo) : null;
 		URI sendNestedWfToUri = nestedWfCheckboxState ? getFolderUri(selectedNestedWfTo) : null;
 		URI sendWebSerbicvesTo = webservicesCheckboxState ? getFolderUri(selectedWebservicesTo)
