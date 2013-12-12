@@ -162,13 +162,11 @@ public class WorkflowTransformPanel extends Panel {
 		URI webservicesToFolderUri = event.getWebservicesToFolderUri();
 		URI scriptsToFolderUri = event.getScriptsToFolderUri();
 		
-		System.out.println(extractToFolderUri!=null ? extractToFolderUri.toString() : "null");
-		System.out.println(nestedRoToFolderUri!=null ? nestedRoToFolderUri.toString() : "null");
-		System.out.println(webservicesToFolderUri!=null? webservicesToFolderUri.toString() : "null");
-		System.out.println(scriptsToFolderUri!=null ? scriptsToFolderUri.toString() : "null");
+		//System.out.println(extractToFolderUri!=null ? extractToFolderUri.toString() : "null");
+		//System.out.println(nestedRoToFolderUri!=null ? nestedRoToFolderUri.toString() : "null");
+		//System.out.println(webservicesToFolderUri!=null? webservicesToFolderUri.toString() : "null");
+		//System.out.println(scriptsToFolderUri!=null ? scriptsToFolderUri.toString() : "null");
 		
-		
-
 		Resource resource = (Resource) WorkflowTransformPanel.this.getDefaultModelObject();
 		researchObject = resource.getResearchObject();
 
