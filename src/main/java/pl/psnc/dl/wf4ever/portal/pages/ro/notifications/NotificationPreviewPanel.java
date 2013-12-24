@@ -40,7 +40,7 @@ public class NotificationPreviewPanel extends Panel {
         setOutputMarkupId(true);
         add(new Label("title"));
         add(new Label("published", new PublishedDateModel()));
-        add(new Label("sourceName"));
+        //add(new Label("sourceName"));
         add(new Label("content").setEscapeModelStrings(false));
     }
 
