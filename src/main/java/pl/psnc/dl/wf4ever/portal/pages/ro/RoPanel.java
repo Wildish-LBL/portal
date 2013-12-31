@@ -138,7 +138,7 @@ public class RoPanel extends Panel {
 		add(new QualityPanel("quality-panel", researchObjectModel, app.getChecklistService(),
 				app.getMinimModels()));
 		add(new RelationsPanel("relations-panel", researchObjectModel));
-
+		
 		final User user = session.getUser();
 		Panel accessControlPanel = null;
 		// should be if user is an owner... is't difficult to check I think
@@ -167,7 +167,6 @@ public class RoPanel extends Panel {
 		add(new FutureUpdateBehavior<ArrayList<Notification>>(Duration.seconds(1),
 				session.storeObject(notificationsFuture), notificationsModel,
 				notificationsIndicator, notificationsList));
-
 	}
 
 	@Override
@@ -256,8 +255,7 @@ public class RoPanel extends Panel {
 		researchObject.loadEvolutionInformation();
 		send(getPage(), Broadcast.BREADTH, new RoEvolutionLoadedEvent(event.getTarget()));
 	}
-
-
+	
 	private void onSketchEvent(SketchEvent event) {
 		event.getTarget().add(this.get("ro-summary"));
 		this.get("ro-summary").configure();
