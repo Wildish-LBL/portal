@@ -3,4 +3,22 @@
 	<script>
 		$("#accesscontrolbookmark").css('visibility', 'visible');
 	</script>
+	
+	<form class="form-inline" wicket:id="form">
+		<div class="btn-toolbar">
+			<button data-original-title="create a custom annotation"
+				data-toggle="tooltip" data-placement="top" data-container="body"
+				class=" btn btn-small my-tooltip" type="submit"
+				wicket:id="grant-priviliage">
+				<i class="icon-tag"></i> Grand Privilege
+			</button>
+			</div>
+			<table class="table table-striped buttons-hover advanced-annotations">
+				<tbody>
+					<!-- the spans below will not be rendered in the final HTML -->
+				</tbody>
+			</table>
+		</form>
+	
+	
 	</wicket:panel>

@@ -6,6 +6,7 @@ package pl.psnc.dl.wf4ever.portal;
 import java.lang.ref.SoftReference;
 import java.net.URI;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -15,11 +16,16 @@ import org.apache.wicket.authroles.authentication.AbstractAuthenticatedWebSessio
 import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.Request;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.cookies.CookieUtils;
+import org.apache.wicket.util.string.StringValue;
 import org.openid4java.discovery.DiscoveryInformation;
 import org.purl.wf4ever.rosrs.client.ROSRService;
 import org.purl.wf4ever.rosrs.client.accesscontrol.AccessControlService;
+import org.purl.wf4ever.rosrs.client.accesscontrol.Permission;
+import org.purl.wf4ever.rosrs.client.accesscontrol.Role;
 import org.purl.wf4ever.rosrs.client.users.User;
 import org.purl.wf4ever.rosrs.client.users.UserManagementService;
 import org.purl.wf4ever.wf2ro.Wf2ROService;
@@ -120,7 +126,7 @@ public class MySession extends AbstractAuthenticatedWebSession {
 
 	/** Wf-RO transformation service. */
 	private Wf2ROService wf2ro;
-
+	
 	/**
 	 * Keep futures here so that they are not dropped between subsequent page
 	 * refreshes.
@@ -137,8 +143,8 @@ public class MySession extends AbstractAuthenticatedWebSession {
 		super(request);
 		PortalApplication app = (PortalApplication) getApplication();
 		this.rosrs = new ROSRService(app.getRodlURI().resolve("ROs/"), null);
-		this.accessControlService = new org.purl.wf4ever.rosrs.client.accesscontrol.AccessControlService(
-				app.getRodlURI(), null);
+		accessControlService = (new org.purl.wf4ever.rosrs.client.accesscontrol.AccessControlService(
+				app.getRodlURI(), null));
 		this.ums = new UserManagementService(app.getRodlURI(), app.getAdminToken());
 		if (new CookieUtils().load(DLIBRA_KEY) != null) {
 			signIn(new CookieUtils().load(DLIBRA_KEY));
@@ -169,7 +175,7 @@ public class MySession extends AbstractAuthenticatedWebSession {
 		try {
 			PortalApplication app = (PortalApplication) getApplication();
 			this.rosrs = new ROSRService(app.getRodlURI().resolve("ROs/"), userToken);
-			this.accessControlService = new AccessControlService(app.getRodlURI(), userToken);
+			accessControlService = (new AccessControlService(app.getRodlURI(), userToken));
 			this.user = getUms().getWhoAmi(userToken);
 			this.wf2ro = new Wf2ROService(app.getWf2ROService(), userToken);
 		} catch (Exception e) {
@@ -219,7 +225,25 @@ public class MySession extends AbstractAuthenticatedWebSession {
 
 	@Override
 	public Roles getRoles() {
-		return isSignedIn() ? new Roles(Roles.USER) : new Roles();
+		//if anonymous
+		if (!isSignedIn()) {
+			return new Roles();
+		}
+		//check if there is there is an ro in context
+		Request req = RequestCycle.get().getRequest();
+		IRequestParameters params = req.getRequestParameters();
+		StringValue roContext = params.getParameterValue("ro");
+		if(roContext.isEmpty()){
+			return isSignedIn() ? new Roles(Roles.USER) : new Roles();
+		} else {
+			List<Permission> permissions = accessControlService.getPermissions(URI.create(roContext.toString()));
+			for(Permission p : permissions) {
+				if(p.getRole().equals(Role.OWNER) || p.getRole().equals(Role.EDITOR)) {
+					return new Roles(Roles.USER + "," + "editor");
+				}
+			}	
+		}
+		return new Roles(Roles.USER);
 	}
 
 	@Override
@@ -341,4 +365,9 @@ public class MySession extends AbstractAuthenticatedWebSession {
 		SoftReference<?> value = getStoredObjects().get(key);
 		return value != null ? value.get() : null;
 	}
+
+	public AccessControlService getAccessControlService() {
+		return accessControlService;
+	}
+
 }

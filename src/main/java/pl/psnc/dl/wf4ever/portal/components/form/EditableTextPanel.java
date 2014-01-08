@@ -233,8 +233,8 @@ public class EditableTextPanel extends Panel {
             add(form);
             form.add(new Label("text", new SanitizedModel(new NotSetModel(model.getValueModel())))
                     .setEscapeModelStrings(false));
-            form.add(new AuthenticatedAjaxEventButton("edit", form, EditableTextPanel.this, EditEvent.class));
-            deleteButton = new AuthenticatedAjaxEventButton("delete", form, EditableTextPanel.this, DeleteEvent.class);
+            form.add(new ProtectedAjaxEventButton("edit", form, EditableTextPanel.this, EditEvent.class));
+            deleteButton = new ProtectedAjaxEventButton("delete", form, EditableTextPanel.this, DeleteEvent.class);
             form.add(deleteButton);
         }
 
@@ -282,8 +282,8 @@ public class EditableTextPanel extends Panel {
             add(form);
             form.add(multipleLines ? new TextArea<>("text", model.getValueModel()) : new TextField<>("text", model
                     .getValueModel()));
-            form.add(new AuthenticatedAjaxEventButton("apply", form, EditableTextPanel.this, ApplyEvent.class));
-            form.add(new AuthenticatedAjaxEventButton("cancel", form, EditableTextPanel.this, CancelEvent.class)
+            form.add(new ProtectedAjaxEventButton("apply", form, EditableTextPanel.this, ApplyEvent.class));
+            form.add(new ProtectedAjaxEventButton("cancel", form, EditableTextPanel.this, CancelEvent.class)
                     .setDefaultFormProcessing(false));
         }
 

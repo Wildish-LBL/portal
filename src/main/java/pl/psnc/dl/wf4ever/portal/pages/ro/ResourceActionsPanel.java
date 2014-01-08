@@ -11,8 +11,8 @@ import org.apache.wicket.model.PropertyModel;
 import org.purl.wf4ever.rosrs.client.Folder;
 import org.purl.wf4ever.rosrs.client.Resource;
 
-import pl.psnc.dl.wf4ever.portal.components.form.AnnotationEditAjaxEventButton;
-import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
+import pl.psnc.dl.wf4ever.portal.components.form.ProtectedAjaxEventButton;
+import pl.psnc.dl.wf4ever.portal.components.form.ProtectedEditAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.ResourceSelectedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceDeleteClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceMoveClickedEvent;
@@ -38,7 +38,7 @@ public class ResourceActionsPanel extends Panel {
     private Form<Void> form;
 
     /** Button for updating resources. */
-    private AuthenticatedAjaxEventButton updateButton;
+    private ProtectedAjaxEventButton updateButton;
 
 
     /**
@@ -56,11 +56,11 @@ public class ResourceActionsPanel extends Panel {
         form = new Form<Void>("form");
         add(form);
         form.add(new ExternalLink("download", new PropertyModel<String>(model, "uri")));
-        updateButton = new AuthenticatedAjaxEventButton("update", form, null, UpdateClickedEvent.class);
+        updateButton = new ProtectedAjaxEventButton("update", form, null, UpdateClickedEvent.class);
         form.add(updateButton);
-        form.add(new AuthenticatedAjaxEventButton("delete", form, null, ResourceDeleteClickedEvent.class));
-        form.add(new AuthenticatedAjaxEventButton("move", form, null, ResourceMoveClickedEvent.class));
-        form.add(new AnnotationEditAjaxEventButton("add-comment", form, model, null, CommentAddClickedEvent.class));
+        form.add(new ProtectedAjaxEventButton("delete", form, null, ResourceDeleteClickedEvent.class));
+        form.add(new ProtectedAjaxEventButton("move", form, null, ResourceMoveClickedEvent.class));
+        form.add(new ProtectedEditAjaxEventButton("add-comment", form, model, null, CommentAddClickedEvent.class));
         form.add(new Button("show-all"));
     }
 

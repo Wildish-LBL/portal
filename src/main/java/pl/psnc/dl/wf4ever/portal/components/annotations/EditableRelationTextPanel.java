@@ -25,7 +25,7 @@ import org.purl.wf4ever.rosrs.client.AnnotationTriple;
 import org.purl.wf4ever.rosrs.client.Utils;
 
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
-import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
+import pl.psnc.dl.wf4ever.portal.components.form.ProtectedAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.ErrorEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationAddedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationCancelledEvent;
@@ -265,7 +265,7 @@ public class EditableRelationTextPanel extends Panel {
             valueColumn.add(AttributeAppender.replace("data-original-title", new PropertyModel<>(model, "value")));
             value = new Label("value-name", new LocalNameModel(new PropertyModel<String>(model, "value")));
             valueColumn.add(value);
-            valueColumn.add(new AuthenticatedAjaxEventButton("delete", null, EditableRelationTextPanel.this,
+            valueColumn.add(new ProtectedAjaxEventButton("delete", null, EditableRelationTextPanel.this,
                     DeleteEvent.class));
             add(valueColumn);
 
@@ -333,9 +333,9 @@ public class EditableRelationTextPanel extends Panel {
             controlGroup.add(new RequiredTextField<URI>("subjectval", subjectModel));
             controlGroup.add(new RequiredTextField<URI>("property-name", propertyModel));
             controlGroup.add(new RequiredTextField<String>("valueval", valueModel));
-            controlGroup.add(new AuthenticatedAjaxEventButton("apply", null, EditableRelationTextPanel.this,
+            controlGroup.add(new ProtectedAjaxEventButton("apply", null, EditableRelationTextPanel.this,
                     ApplyEvent.class));
-            controlGroup.add(new AuthenticatedAjaxEventButton("cancel", null, EditableRelationTextPanel.this,
+            controlGroup.add(new ProtectedAjaxEventButton("cancel", null, EditableRelationTextPanel.this,
                     CancelEvent.class).setDefaultFormProcessing(false));
             controlGroup.add(new MyFeedbackPanel("feedback").setOutputMarkupPlaceholderTag(true));
         }

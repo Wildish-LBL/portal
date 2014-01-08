@@ -7,7 +7,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.purl.wf4ever.rosrs.client.Folder;
 
-import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
+import pl.psnc.dl.wf4ever.portal.components.form.ProtectedAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.FolderChangeEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.FolderAddClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.aggregation.ResourceAddClickedEvent;
@@ -45,8 +45,8 @@ public class FolderActionsPanel extends Panel {
         setOutputMarkupId(true);
         form = new Form<Void>("form");
         add(form);
-        form.add(new AuthenticatedAjaxEventButton("add-resource", form, null, ResourceAddClickedEvent.class));
-        form.add(new AuthenticatedAjaxEventButton("add-folder", form, null, FolderAddClickedEvent.class));
+        form.add(new ProtectedAjaxEventButton("add-resource", form, null, ResourceAddClickedEvent.class));
+        form.add(new ProtectedAjaxEventButton("add-folder", form, null, FolderAddClickedEvent.class));
     }
 
 

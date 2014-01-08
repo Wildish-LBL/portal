@@ -26,7 +26,7 @@ import org.purl.wf4ever.rosrs.client.Annotable;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
-import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
+import pl.psnc.dl.wf4ever.portal.components.form.ProtectedAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.ErrorEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationAddedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationCancelledEvent;
@@ -316,9 +316,9 @@ public class NewRelationTextPanel extends Panel {
             controlGroup.add(checkBoxInnerObjectRelation);
             add(controlGroup);
 
-            controlGroup.add(new AuthenticatedAjaxEventButton("apply", null, NewRelationTextPanel.this,
+            controlGroup.add(new ProtectedAjaxEventButton("apply", null, NewRelationTextPanel.this,
                     ApplyEvent.class));
-            controlGroup.add(new AuthenticatedAjaxEventButton("cancel", null, NewRelationTextPanel.this,
+            controlGroup.add(new ProtectedAjaxEventButton("cancel", null, NewRelationTextPanel.this,
                     CancelEvent.class).setDefaultFormProcessing(false));
             controlGroup.add(new MyFeedbackPanel("feedback").setOutputMarkupPlaceholderTag(true));
         }
