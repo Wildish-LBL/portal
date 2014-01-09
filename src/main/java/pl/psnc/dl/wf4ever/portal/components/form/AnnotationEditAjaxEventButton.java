@@ -5,7 +5,6 @@ import java.lang.reflect.InvocationTargetException;
 import org.apache.log4j.Logger;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.authorization.Action;
-import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeAction;
 import org.apache.wicket.event.IEventSink;
 import org.apache.wicket.markup.html.form.Form;
@@ -21,7 +20,7 @@ import pl.psnc.dl.wf4ever.portal.events.AbstractClickAjaxEvent;
  * @author piotrekhol
  * 
  */
-@AuthorizeAction(action = Action.ENABLE, roles = { Roles.USER })
+@AuthorizeAction(action = Action.ENABLE, roles = { "editor" })
 public class AnnotationEditAjaxEventButton extends AjaxEventButton {
 
     /** id. */
