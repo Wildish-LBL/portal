@@ -142,7 +142,7 @@ public class RoPanel extends Panel {
 		final User user = session.getUser();
 		Panel accessControlPanel = null;
 		// should be if user is an owner... is't difficult to check I think
-		if (session.getRoles().contains("editor")) {
+		if (session.getRoles().contains("owner")) {
 			accessControlPanel = new AccessControlPanel("accesscontrol-panel", researchObjectModel);
 		} else {
 			accessControlPanel = new IvisibleAccessControlPanel("accesscontrol-panel",

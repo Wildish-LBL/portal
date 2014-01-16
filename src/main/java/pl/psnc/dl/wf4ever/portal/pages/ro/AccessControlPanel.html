@@ -5,17 +5,72 @@
 	</script>
 	
 	<form class="form-inline" wicket:id="form">
+	<div wicket:id="permissionsfeedbackPanel"></div>
+		<input type="checkbox" wicket:id="private" /> Private
+			
 		<div class="btn-toolbar">
-			<button data-original-title="create a custom annotation"
+			<button 
 				data-toggle="tooltip" data-placement="top" data-container="body"
 				class=" btn btn-small my-tooltip" type="submit"
 				wicket:id="grant-priviliage">
 				<i class="icon-tag"></i> Grand Privilege
 			</button>
+		</div>
+		<div wicket:id="add-new-privilaga-container">
+			<input class="value" type="text"
+				placeholder="user uri" wicket:id="useruri" />
+			<select class="value"  wicket:id="choices" />
+			<div class="btn-group">
+				<button  data-toggle="tooltip"
+					data-placement="top" class="btn my-tooltip" data-container="body"
+					type="submit" wicket:id="apply">
+					<i class="icon-ok"></i>
+				</button>
+				<button  data-toggle="tooltip"
+					data-placement="top" class="btn my-tooltip" data-container="body"
+					type="submit" wicket:id="cancel">
+					<i class="icon-remove"></i>
+				</button>
 			</div>
+		</div>
+		
+			<!--
+			the web page built on tables? are we back in the 80s or sth? 
+			 -->
 			<table class="table table-striped buttons-hover advanced-annotations">
 				<tbody>
-					<!-- the spans below will not be rendered in the final HTML -->
+					<p>
+						<b>
+							Editors:
+						</b>
+					</p>
+					<span wicket:id="editors-list">
+						<form wicket:id="delete-form"> 
+					    	<span wicket:id="editor-name">label</span>
+					  		<button data-original-title="delete" data-toggle="tooltip"
+							data-placement="top" class="btn btn-mini my-tooltip"
+							data-container="body" type="submit" wicket:id="delete">
+							<i class="icon-trash"></i>
+							</button>
+						</form>
+						<br/>
+					</span>			
+					<p>
+						<b>
+							Readers:
+						</b>
+					</p>
+					<span wicket:id="readers-list">
+						<form wicket:id="delete-form"> 
+					    	<span wicket:id="reader-name">label</span>
+					  		<button data-original-title="delete" data-toggle="tooltip"
+							data-placement="top" class="btn btn-mini my-tooltip"
+							data-container="body" type="submit" wicket:id="delete">
+							<i class="icon-trash"></i>
+							</button>
+						</form>
+					   <br/>
+					  </span>
 				</tbody>
 			</table>
 		</form>

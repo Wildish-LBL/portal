@@ -238,8 +238,13 @@ public class MySession extends AbstractAuthenticatedWebSession {
 		} else {
 			List<Permission> permissions = accessControlService.getPermissions(URI.create(roContext.toString()));
 			for(Permission p : permissions) {
-				if(p.getRole().equals(Role.OWNER) || p.getRole().equals(Role.EDITOR)) {
-					return new Roles(Roles.USER + "," + "editor");
+				if(p.getUserLogin().equals(user.getURI().toString())) {
+					if(p.getRole().equals(Role.OWNER) || p.getRole().equals(Role.EDITOR)) {
+						if(p.getRole().equals(Role.OWNER)){
+							return new Roles(Roles.USER + "," + "editor" + "," + "owner");
+						}
+						return new Roles(Roles.USER + "," + "editor");
+					}
 				}
 			}	
 		}

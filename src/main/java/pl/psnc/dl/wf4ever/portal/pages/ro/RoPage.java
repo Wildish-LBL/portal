@@ -19,6 +19,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.Utils;
+import org.purl.wf4ever.rosrs.client.exception.ROException;
+import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 import org.purl.wf4ever.rosrs.client.notifications.Notification;
 import org.purl.wf4ever.rosrs.client.notifications.NotificationService;
 
@@ -64,6 +66,13 @@ public class RoPage extends BasePage {
 		URI roURI = new URI(parameters.get("ro").toString());
 		Model<ResearchObject> researchObjectModel = new Model<ResearchObject>(new ResearchObject(
 				roURI, MySession.get().getRosrs()));
+		try {
+			researchObjectModel.getObject().load();
+		} catch (ROSRSException | ROException e) {
+			throw new RestartResponseException(Error404Page.class, new PageParameters().add(
+					"message", "The RO " + researchObjectModel.getObject().getUri() + " appears to be incorrect."));
+			
+		}
 		this.setDefaultModel(researchObjectModel);
 		add(new AjaxLazyLoadPanel("lazy", researchObjectModel) {
 
