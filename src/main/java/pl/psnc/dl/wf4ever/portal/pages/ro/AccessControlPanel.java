@@ -36,6 +36,8 @@ import pl.psnc.dl.wf4ever.portal.events.permissions.PermissionApplyClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.permissions.PermissionCancelClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.permissions.PermissionDeletedClickedEvent;
 
+import com.sun.jersey.api.client.ClientResponse;
+
 public class AccessControlPanel extends Panel {
 
         private static final long serialVersionUID = -3775797988389365540L;
@@ -206,10 +208,12 @@ public class AccessControlPanel extends Panel {
         		p.setRo(roModel.getObject().getUri().toString());
         		p.setUserLogin(useruri.getInput().trim());
         		p.setRole(roles.get(Integer.parseInt(choices.getInput())));
-        		int status = accessControlService.grantPermission(p).getStatus();
+        		ClientResponse response = accessControlService.grantPermission(p);
+        		int status = response.getStatus();
         		formContainer.setVisible(false);
         		if(status != 201) {
         			feedbackPanel.error("Permission cannot be granted");
+        			feedbackPanel.error(response.getEntity(String.class));
         		}
         		g.getTarget().add(this);
         	}
