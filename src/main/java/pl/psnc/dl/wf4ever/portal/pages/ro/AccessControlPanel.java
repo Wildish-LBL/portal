@@ -28,7 +28,6 @@ import org.purl.wf4ever.rosrs.client.users.User;
 import org.purl.wf4ever.rosrs.client.users.UserManagementService;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
-import pl.psnc.dl.wf4ever.portal.PortalApplication;
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
 import pl.psnc.dl.wf4ever.portal.components.form.ProtectedAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.permissions.GrantPermissionClickedEvent;
@@ -46,7 +45,6 @@ public class AccessControlPanel extends Panel {
         private static final Logger LOG = Logger.getLogger(AccessControlPanel.class);
 
         private IModel<ResearchObject> roModel;
-        PortalApplication app;
         final User user;
         final UserManagementService ums;
         final MySession session;
@@ -70,7 +68,6 @@ public class AccessControlPanel extends Panel {
         public AccessControlPanel(String id, IModel<ResearchObject> model) {
                 super(id);
                 this.roModel = model;
-                app = (PortalApplication) getApplication();
                 session = (MySession) getSession();
                 user = session.getUser();
                 ums = session.getUms();
