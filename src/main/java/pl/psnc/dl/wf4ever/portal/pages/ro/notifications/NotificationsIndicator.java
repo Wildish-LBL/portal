@@ -23,7 +23,6 @@ import org.purl.wf4ever.rosrs.client.notifications.Notification;
 /**
  * An indicator of a number of notifications for this RO.
  * 
- * @author pejot
  * 
  */
 public class NotificationsIndicator extends Panel {

@@ -12,7 +12,7 @@ import org.purl.wf4ever.rosrs.client.ResearchObject;
 import org.purl.wf4ever.rosrs.client.evo.EvoType;
 
 import pl.psnc.dl.wf4ever.portal.components.form.AjaxEventButton;
-import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
+import pl.psnc.dl.wf4ever.portal.components.form.ProtectedAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.MetadataDownloadClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.evo.ReleaseClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.evo.ReleaseCreateEvent;
@@ -59,9 +59,9 @@ public class RoActionsPanel extends Panel {
         add(form);
         form.add(new ExternalLink("downloadROZipped", new PropertyModel<String>(this, "ROZipLink")));
         form.add(new AjaxEventButton("downloadMetadata", form, null, MetadataDownloadClickedEvent.class));
-        snapshotButton = new AuthenticatedAjaxEventButton("snapshot-ro-button", form, this, SnapshotClickedEvent.class);
+        snapshotButton = new ProtectedAjaxEventButton("snapshot-ro-button", form, this, SnapshotClickedEvent.class);
         form.add(snapshotButton);
-        releaseButton = new AuthenticatedAjaxEventButton("release-ro-button", form, this, ReleaseClickedEvent.class);
+        releaseButton = new ProtectedAjaxEventButton("release-ro-button", form, this, ReleaseClickedEvent.class);
         form.add(releaseButton);
     }
 

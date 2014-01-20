@@ -24,6 +24,7 @@ import org.purl.wf4ever.rosrs.client.exception.ROException;
 import org.purl.wf4ever.rosrs.client.exception.ROSRSException;
 import org.purl.wf4ever.rosrs.client.notifications.Notification;
 import org.purl.wf4ever.rosrs.client.notifications.NotificationService;
+import org.purl.wf4ever.rosrs.client.users.User;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.PortalApplication;
@@ -82,7 +83,6 @@ public class RoPanel extends Panel {
 	 */
 	public RoPanel(String id, IModel<ResearchObject> researchObjectModel) {
 		super(id, researchObjectModel);
-		long startTime = System.nanoTime();
 		PortalApplication app = (PortalApplication) getApplication();
 		feedbackPanel = new MyFeedbackPanel("feedbackPanel");
 		feedbackPanel.setOutputMarkupId(true);
@@ -104,7 +104,7 @@ public class RoPanel extends Panel {
 		IModel<ArrayList<Notification>> notificationsModel = new Model<ArrayList<Notification>>();
 		IModel<EvaluationResult> qualityModel = new Model<EvaluationResult>();
 		String rssLink = notificationService.getNotificationsUri(
-				researchObjectModel.getObject().getUri(), null, null).toString();
+		researchObjectModel.getObject().getUri(), null, null).toString();
 
 		add(new RoSummaryPanel("ro-summary", researchObjectModel));
 		add(new RoActionsPanel("ro-actions", researchObjectModel));
@@ -138,7 +138,18 @@ public class RoPanel extends Panel {
 		add(new QualityPanel("quality-panel", researchObjectModel, app.getChecklistService(),
 				app.getMinimModels()));
 		add(new RelationsPanel("relations-panel", researchObjectModel));
-
+		
+		final User user = session.getUser();
+		Panel accessControlPanel = null;
+		// should be if user is an owner... is't difficult to check I think
+		if (session.getRoles().contains("owner")) {
+			accessControlPanel = new AccessControlPanel("accesscontrol-panel", researchObjectModel);
+		} else {
+			accessControlPanel = new IvisibleAccessControlPanel("accesscontrol-panel",
+					researchObjectModel);
+			accessControlPanel.setVisible(false);
+		}
+		add(accessControlPanel);
 		IModel<Notification> selectedNotification = new Model<Notification>((Notification) null);
 		NotificationsList notificationsList = new NotificationsList("notificationsList",
 				notificationsModel, selectedNotification);
@@ -156,14 +167,6 @@ public class RoPanel extends Panel {
 		add(new FutureUpdateBehavior<ArrayList<Notification>>(Duration.seconds(1),
 				session.storeObject(notificationsFuture), notificationsModel,
 				notificationsIndicator, notificationsList));
-		long endTime = System.nanoTime();
-		long duration = endTime - startTime;
-		int a = 2;
-	}
-
-	@Override
-	protected void onAfterRender() {
-		super.onAfterRender();
 	}
 
 	@Override
@@ -252,7 +255,7 @@ public class RoPanel extends Panel {
 		researchObject.loadEvolutionInformation();
 		send(getPage(), Broadcast.BREADTH, new RoEvolutionLoadedEvent(event.getTarget()));
 	}
-
+	
 	private void onSketchEvent(SketchEvent event) {
 		event.getTarget().add(this.get("ro-summary"));
 		this.get("ro-summary").configure();

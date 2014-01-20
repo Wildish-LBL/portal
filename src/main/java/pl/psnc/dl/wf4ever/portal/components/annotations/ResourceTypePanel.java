@@ -10,7 +10,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.purl.wf4ever.rosrs.client.Annotable;
 
-import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
+import pl.psnc.dl.wf4ever.portal.components.form.ProtectedAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationAddedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationCancelledEvent;
 import pl.psnc.dl.wf4ever.portal.events.edit.ApplyEvent;
@@ -59,7 +59,7 @@ public class ResourceTypePanel extends Panel {
             add(form);
             form.add(new Label("text", new SanitizedModel(new NotSetModel(new MergedCollectionModel(model))))
                     .setEscapeModelStrings(false));
-            form.add(new AuthenticatedAjaxEventButton("edit", form, ResourceTypePanel.this, EditEvent.class));
+            form.add(new ProtectedAjaxEventButton("edit", form, ResourceTypePanel.this, EditEvent.class));
         }
     }
 
@@ -94,8 +94,8 @@ public class ResourceTypePanel extends Panel {
             Form<?> form = new Form<Void>("form");
             add(form);
             form.add(new ResourceTypeDropDownChoice("typeList", model));
-            form.add(new AuthenticatedAjaxEventButton("apply", form, ResourceTypePanel.this, ApplyEvent.class));
-            form.add(new AuthenticatedAjaxEventButton("cancel", form, ResourceTypePanel.this, CancelEvent.class)
+            form.add(new ProtectedAjaxEventButton("apply", form, ResourceTypePanel.this, ApplyEvent.class));
+            form.add(new ProtectedAjaxEventButton("cancel", form, ResourceTypePanel.this, CancelEvent.class)
                     .setDefaultFormProcessing(false));
         }
 

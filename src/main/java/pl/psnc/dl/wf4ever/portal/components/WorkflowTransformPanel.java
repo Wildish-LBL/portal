@@ -6,7 +6,6 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.authorization.Action;
-import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeAction;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
@@ -24,7 +23,7 @@ import org.purl.wf4ever.wf2ro.Wf2ROService;
 
 import pl.psnc.dl.wf4ever.portal.MySession;
 import pl.psnc.dl.wf4ever.portal.behaviors.WorkflowTransformationJobStatusUpdatingBehaviour;
-import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
+import pl.psnc.dl.wf4ever.portal.components.form.ProtectedAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.WorkflowTransformClickedEvent;
 import pl.psnc.dl.wf4ever.portal.events.WorkflowTransformedEvent;
 import pl.psnc.dl.wf4ever.portal.events.WorkflowTransormRequestEvent;
@@ -53,8 +52,8 @@ public class WorkflowTransformPanel extends Panel {
 	/**
 	 * The button.
 	 */
-	@AuthorizeAction(action = Action.RENDER, roles = { Roles.USER })
-	private final class TransformButton extends AuthenticatedAjaxEventButton {
+	@AuthorizeAction(action = Action.RENDER, roles = { "editor" })
+	private final class TransformButton extends ProtectedAjaxEventButton {
 
 		/** id. */
 		private static final long serialVersionUID = -993018287446638943L;

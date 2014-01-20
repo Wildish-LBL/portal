@@ -27,7 +27,7 @@ import org.purl.wf4ever.rosrs.client.AnnotationTriple;
 import org.purl.wf4ever.rosrs.client.Utils;
 
 import pl.psnc.dl.wf4ever.portal.components.feedback.MyFeedbackPanel;
-import pl.psnc.dl.wf4ever.portal.components.form.AuthenticatedAjaxEventButton;
+import pl.psnc.dl.wf4ever.portal.components.form.ProtectedAjaxEventButton;
 import pl.psnc.dl.wf4ever.portal.events.ErrorEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationAddedEvent;
 import pl.psnc.dl.wf4ever.portal.events.annotations.AnnotationCancelledEvent;
@@ -261,9 +261,9 @@ public class EditableAnnotationTextPanel extends Panel {
                     new PropertyModel<Annotation>(model, "annotation"))));
             value = new Label("value", new PropertyModel<String>(model, "value"));
             valueColumn.add(value);
-            valueColumn.add(new AuthenticatedAjaxEventButton("edit", null, EditableAnnotationTextPanel.this,
+            valueColumn.add(new ProtectedAjaxEventButton("edit", null, EditableAnnotationTextPanel.this,
                     EditEvent.class));
-            valueColumn.add(new AuthenticatedAjaxEventButton("delete", null, EditableAnnotationTextPanel.this,
+            valueColumn.add(new ProtectedAjaxEventButton("delete", null, EditableAnnotationTextPanel.this,
                     DeleteEvent.class));
             add(valueColumn);
         }
@@ -326,9 +326,9 @@ public class EditableAnnotationTextPanel extends Panel {
             add(controlGroup);
             controlGroup.add(new RequiredTextField<URI>("property-name", propertyModel));
             controlGroup.add(new TextField<>("value", valueModel));
-            controlGroup.add(new AuthenticatedAjaxEventButton("apply", null, EditableAnnotationTextPanel.this,
+            controlGroup.add(new ProtectedAjaxEventButton("apply", null, EditableAnnotationTextPanel.this,
                     ApplyEvent.class));
-            controlGroup.add(new AuthenticatedAjaxEventButton("cancel", null, EditableAnnotationTextPanel.this,
+            controlGroup.add(new ProtectedAjaxEventButton("cancel", null, EditableAnnotationTextPanel.this,
                     CancelEvent.class).setDefaultFormProcessing(false));
             controlGroup.add(new MyFeedbackPanel("feedback").setOutputMarkupPlaceholderTag(true));
         }
