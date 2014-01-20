@@ -24,14 +24,19 @@ public class EvaluationPanel extends Panel {
             IModel<MinimModel> minimModel) {
         super(id, researchObjectModel);
         MinimModel minim = minimModel.getObject();
-        String html = service
-                .evaluateHtml(researchObjectModel.getObject().getUri(), minim.getUri(), minim.getPurpose());
-        // skip the headers, titles, etc
-        Pattern bodyPattern = Pattern.compile(".*<div class=\"body\">(.*?)</div>.*", Pattern.DOTALL);
-        Matcher m = bodyPattern.matcher(html);
-        m.find();
-        html = m.group(1);
-        add(new Label("result", html).setEscapeModelStrings(false));
+        	try {
+	        String html = service
+	                .evaluateHtml(researchObjectModel.getObject().getUri(), minim.getUri(), minim.getPurpose());
+	        // skip the headers, titles, etc
+	        Pattern bodyPattern = Pattern.compile(".*<div class=\"body\">(.*?)</div>.*", Pattern.DOTALL);
+	        Matcher m = bodyPattern.matcher(html);
+	        m.find();
+	        html = m.group(1);
+	        add(new Label("result", html).setEscapeModelStrings(false));
+        	} catch (NullPointerException e ) {
+    	        add(new Label("result", "Could't connect checklist or calcualte quality. Please, conntact administrator.").setEscapeModelStrings(false));
+
+        }
     }
 
 
