@@ -24,12 +24,16 @@ import org.apache.wicket.util.string.StringValue;
 import org.openid4java.discovery.DiscoveryInformation;
 import org.purl.wf4ever.rosrs.client.ROSRService;
 import org.purl.wf4ever.rosrs.client.accesscontrol.AccessControlService;
+import org.purl.wf4ever.rosrs.client.accesscontrol.AccessMode;
+import org.purl.wf4ever.rosrs.client.accesscontrol.Mode;
 import org.purl.wf4ever.rosrs.client.accesscontrol.Permission;
 import org.purl.wf4ever.rosrs.client.accesscontrol.Role;
 import org.purl.wf4ever.rosrs.client.users.User;
 import org.purl.wf4ever.rosrs.client.users.UserManagementService;
 import org.purl.wf4ever.wf2ro.Wf2ROService;
 import org.scribe.model.Token;
+
+import com.sun.jersey.api.client.UniformInterfaceException;
 
 /**
  * Custom app session.
@@ -236,6 +240,9 @@ public class MySession extends AbstractAuthenticatedWebSession {
 		if(roContext.isEmpty()){
 			return isSignedIn() ? new Roles(Roles.USER) : new Roles();
 		} else {
+			
+			//check mode if mode is open it meand there are full permission to edit.			try {
+			
 			List<Permission> permissions = accessControlService.getPermissions(URI.create(roContext.toString()));
 			for(Permission p : permissions) {
 				if(p.getUserLogin().equals(user.getURI().toString())) {
@@ -248,6 +255,16 @@ public class MySession extends AbstractAuthenticatedWebSession {
 				}
 			}	
 		}
+		//chech if it perhaps isn't open
+		try {
+			AccessMode mode  = accessControlService.getMode(URI.create(roContext.toString()));
+			if(mode != null && mode.getMode().equals(Mode.OPEN)) {
+				return new Roles(Roles.USER + "," + "editor" );
+			}
+		} catch (UniformInterfaceException e) {
+			; //it just say the mode isn't open
+		}
+		
 		return new Roles(Roles.USER);
 	}
 

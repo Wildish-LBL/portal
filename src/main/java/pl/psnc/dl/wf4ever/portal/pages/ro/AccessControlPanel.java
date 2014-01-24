@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -56,12 +56,15 @@ public class AccessControlPanel extends Panel {
         Permission toBeDeleted;
         ListView<Permission> editorsListView;
         ListView<Permission> readersListView;
+      
         private Role selected;
         WebMarkupContainer formContainer;
         RequiredTextField<URI> useruri;
-        boolean isPrivate;
         DropDownChoice<Role> choices;
+        DropDownChoice<Mode> modesChoice;
+        private Mode selectedMode;
         List<Role> roles;
+        List<Mode> modes;
         /** Feedback panel. */
         private MyFeedbackPanel feedbackPanel;
 
@@ -73,7 +76,6 @@ public class AccessControlPanel extends Panel {
                 ums = session.getUms();
                 accessControlService = session.getAccessControlService();
                 AccessMode mode = accessControlService.getMode(roModel.getObject().getUri());
-                isPrivate = mode.getMode() == Mode.PRIVATE;
                 permissions = accessControlService.getPermissions(model.getObject().getUri());
                 editors = new ArrayList<>();
                 readers = new ArrayList<>();
@@ -82,7 +84,9 @@ public class AccessControlPanel extends Panel {
         		add(form);
         		getPriviligiesLists();
         		roles = getRoles();
+        		modes = getModes();
         		selected = roles.get(0);
+        		selectedMode = modes.get(mode.getMode().ordinal());
         		
         		editorsListView = new ListView<Permission>("editors-list", new PropertyModel<List<Permission>>(this, "editorsList")) {
         		    /**
@@ -145,7 +149,8 @@ public class AccessControlPanel extends Panel {
         				GrantPermissionClickedEvent.class));
         		
         		choices = new DropDownChoice<Role>("choices", new PropertyModel<Role>(this, "selected"), roles);
-   
+        		modesChoice = new DropDownChoice<>("modes", new PropertyModel<Mode>(this, "selectedMode"), modes);
+        		
         		formContainer = new WebMarkupContainer("add-new-privilaga-container");
         		formContainer.setOutputMarkupId(true);
         		useruri = (new RequiredTextField<URI>("useruri"));
@@ -155,26 +160,23 @@ public class AccessControlPanel extends Panel {
         		formContainer.add(new ProtectedAjaxEventButton("cancel", form, AccessControlPanel.this,
         				PermissionCancelClickedEvent.class).setDefaultFormProcessing(false));
         		formContainer.add(choices);
-        		formContainer.setVisible(false);
-        		
-        		AjaxCheckBox cb = new AjaxCheckBox("private", new PropertyModel<Boolean>(this, "isPrivate")) {
-			
-					private static final long serialVersionUID = 1L;
-
+        		modesChoice.add(new AjaxFormComponentUpdatingBehavior("onchange") {
+					
 					@Override
 					protected void onUpdate(AjaxRequestTarget target) {
 						AccessMode mode = new AccessMode();
-						if(isPrivate) {
-							mode.setMode(Mode.PRIVATE);
-						} else {
-							mode.setMode(Mode.PUBLIC);
-						}
 						mode.setRo(roModel.getObject().getUri().toString());
+						mode.setMode(selectedMode);
 						accessControlService.setMode(mode);
+						feedbackPanel.info("Access mode was updated");
+						target.add(feedbackPanel);
 					}
-				};
-     
-        		form.add(cb);
+				});
+        		form.add(modesChoice);
+        		
+        		formContainer.setVisible(false);
+        		
+        		
         		form.add(formContainer);
         }
         
@@ -238,6 +240,14 @@ public class AccessControlPanel extends Panel {
             readers = new ArrayList<Permission>();
             getPriviligiesLists();
         	return readers;
+        }
+        
+        public List<Mode> getModes() {
+        	List<Mode> modes = new ArrayList<Mode>();
+        	modes.add(Mode.PUBLIC);
+        	modes.add(Mode.PRIVATE);
+        	modes.add(Mode.OPEN);
+    		return modes;
         }
         
         public List<Role> getRoles() {
