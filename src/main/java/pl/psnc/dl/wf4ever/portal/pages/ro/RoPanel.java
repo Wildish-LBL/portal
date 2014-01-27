@@ -88,6 +88,7 @@ public class RoPanel extends Panel {
 		feedbackPanel.setOutputMarkupId(true);
 		add(feedbackPanel);
 		MySession session = MySession.get();
+		session.clearAccessControlCache();
 		if (!MySession.get().getRoles().contains(Roles.USER)) {
 			info("<b>Sign in</b> to edit this research object.");
 		}

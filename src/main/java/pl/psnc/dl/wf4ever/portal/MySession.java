@@ -131,6 +131,11 @@ public class MySession extends AbstractAuthenticatedWebSession {
 	/** Wf-RO transformation service. */
 	private Wf2ROService wf2ro;
 	
+	/** Last visited ro .*/
+	private String lastVisitedRO = "";
+	
+	/** Last given roles. */
+	private Roles lastRoles;
 	/**
 	 * Keep futures here so that they are not dropped between subsequent page
 	 * refreshes.
@@ -233,6 +238,7 @@ public class MySession extends AbstractAuthenticatedWebSession {
 		if (!isSignedIn()) {
 			return new Roles();
 		}
+		
 		//check if there is there is an ro in context
 		Request req = RequestCycle.get().getRequest();
 		IRequestParameters params = req.getRequestParameters();
@@ -240,32 +246,38 @@ public class MySession extends AbstractAuthenticatedWebSession {
 		if(roContext.isEmpty()){
 			return isSignedIn() ? new Roles(Roles.USER) : new Roles();
 		} else {
-			
-			//check mode if mode is open it meand there are full permission to edit.			try {
-			
+			if (roContext.toString().equals(lastVisitedRO)){
+				return lastRoles;
+			}	
+			lastVisitedRO = roContext.toString();
 			List<Permission> permissions = accessControlService.getPermissions(URI.create(roContext.toString()));
 			for(Permission p : permissions) {
 				if(p.getUserLogin().equals(user.getURI().toString())) {
 					if(p.getRole().equals(Role.OWNER) || p.getRole().equals(Role.EDITOR)) {
 						if(p.getRole().equals(Role.OWNER)){
-							return new Roles(Roles.USER + "," + "editor" + "," + "owner");
+							lastRoles = new Roles(Roles.USER + "," + "editor" + "," + "owner");
+							return lastRoles;
 						}
-						return new Roles(Roles.USER + "," + "editor");
+						lastRoles = new Roles(Roles.USER + "," + "editor");
+						return lastRoles;
 					}
 				}
-			}	
-		}
-		//chech if it perhaps isn't open
-		try {
-			AccessMode mode  = accessControlService.getMode(URI.create(roContext.toString()));
-			if(mode != null && mode.getMode().equals(Mode.OPEN)) {
-				return new Roles(Roles.USER + "," + "editor" );
 			}
-		} catch (UniformInterfaceException e) {
-			; //it just say the mode isn't open
+			//check if it perhaps isn't open
+			try {
+				AccessMode mode  = accessControlService.getMode(URI.create(roContext.toString()));
+				if(mode != null && mode.getMode().equals(Mode.OPEN)) {
+					lastRoles = new Roles(Roles.USER + "," + "editor" );
+					return lastRoles;
+
+				}
+			} catch (UniformInterfaceException e) {
+				; //it just say the mode isn't open
+			}
+			
 		}
-		
-		return new Roles(Roles.USER);
+		lastRoles = new Roles(Roles.USER);
+		return lastRoles;
 	}
 
 	@Override
@@ -392,4 +404,8 @@ public class MySession extends AbstractAuthenticatedWebSession {
 		return accessControlService;
 	}
 
+	public void clearAccessControlCache(){
+		lastRoles = null;
+		lastVisitedRO = "";
+	}
 }
